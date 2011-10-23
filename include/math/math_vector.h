@@ -10,6 +10,7 @@ namespace vts
 	namespace math
 	{
 		typedef __m128 vector_float4;
+		
 
 		enum component
 		{
@@ -84,24 +85,24 @@ namespace vts
 			return reinterpret_cast< __m128*> (&v)[0];
 		}
 
-		inline vector_float4 load1(float* const __restrict address)
+		inline vector_float4 load1(const float* const __restrict address)
 		{
 			return _mm_load_ss(address);
 		}
 
-		inline vector_float4 load2(float* const address)
+		inline vector_float4 load2(const float* const address)
 		{
 			__m128i v = _mm_loadl_epi64( (const __m128i * ) address );
 			return reinterpret_cast<__m128 *>(&v)[0];
 		}
 
-		inline vector_float4 load3(float* __restrict const address)
+		inline vector_float4 load3(const float* __restrict const address)
 		{
 			vector_float4 v = set_uint32(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0);
 			return _mm_and_ps(v, _mm_load_ps(address) );
 		}
 
-		inline vector_float4 load4(float* __restrict const address)
+		inline vector_float4 load4(const float* __restrict const address)
 		{
 			return _mm_load_ps(address);
 		}
