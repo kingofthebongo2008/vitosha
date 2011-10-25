@@ -358,14 +358,109 @@ namespace vts
 			return matrix44_view(eye_position, v2, up_direction);
 		}
 
-		inline matrix_float44 matrix44_look_at_rh(vector_float4 eye_position, vector_float4 look_at_position, vector_float4 up_direction)
+		inline matrix_float44 matrix44_perspective_lh(float view_width, float view_height, float z_near, float z_far)
 		{
-			vector_float4 v1 = sub( eye_position, look_at_position );
-			vector_float4 v2 = normalize3(v1);
-			return matrix44_view(eye_position, v2, up_direction);
+			static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+			static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+			static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
+
+			float a = 2 * z_near;
+
+			float r = z_far / (z_far - z_near);
+
+			vector_float4 v1 = set( a / view_width, a / view_height, r, -r * z_near );
+			vector_float4 ze = zero();
+
+			matrix_float44 m;
+
+			vector_float4 v2 = shuffle<x,y,x,y>(v1, ze);
+			m.r[0] = and(v2, reinterpret_cast< const vector_float4*> (&mask_x)[0] );
+
+			vector_float4 v3 = and(v1, reinterpret_cast< const vector_float4*> (&mask_yzw)[0] );
+			
+
+			m.r[1] = swizzle<x,y,x,x>(v1);
+
+			vector_float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
+
+			m.r[2] = swizzle<z,z,x,w>(v4);
+			m.r[3] = swizzle<z,z,y,z>(v4);
+
+			return m;
 		}
 
+
+		inline matrix_float44 matrix44_perspective_lh(float fov, float aspect_ratio, float view_height, float z_near, float z_far)
+		{
+			static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+			static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+			static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
+
+			float a = 2 * z_near;
+
+			float r = z_far / (z_far - z_near);
+
+			float sin = sinf(fov);
+			float cos = cosf(fov);
+			float height = cos / sin;
+
+			vector_float4 v1 = set( height / aspect_ratio, height, r, -r * z_near );
+			vector_float4 ze = zero();
+
+			matrix_float44 m;
+
+			vector_float4 v2 = shuffle<x,y,x,y>(v1, ze);
+			m.r[0] = and(v2, reinterpret_cast< const vector_float4*> (&mask_x)[0] );
+
+			vector_float4 v3 = and(v1, reinterpret_cast< const vector_float4*> (&mask_yzw)[0] );
+
+			m.r[1] = swizzle<x,y,x,x>(v1);
+
+			vector_float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
+
+			m.r[2] = swizzle<z,z,x,w>(v4);
+			m.r[3] = swizzle<z,z,y,z>(v4);
+
+			return m;
+		}
+
+		inline matrix_float44 matrix44_orthographic_lh(float view_width, float view_height, float z_near, float z_far)
+		{
+			static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+			static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+			static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
+
+			float a = 2;
+
+			float r = 1.0f / (z_far - z_near);
+
+			vector_float4 v1 = set( a / view_width, a / view_height, r, -r * z_near );
+			vector_float4 ze = zero();
+
+			matrix_float44 m;
+
+			vector_float4 v2 = shuffle<x,y,x,y>(v1, ze);
+			m.r[0] = and(v2, reinterpret_cast< const vector_float4*> (&mask_x)[0] );
+
+			vector_float4 v3 = and(v1, reinterpret_cast< const vector_float4*> (&mask_yzw)[0] );
+
+			m.r[1] = swizzle<x,y,x,x>(v1);
+
+			vector_float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
+
+			m.r[2] = swizzle<z,z,x,w>(v4);
+			m.r[3] = swizzle<z,z,y,z>(v4);
+
+			return m;
+		}
+
+
+		
 		//view frustum from view matrix
+
+		//determinant
+
+		//inverse 
 
 	}
 }
