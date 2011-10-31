@@ -109,6 +109,123 @@ namespace vts
 			return m1;
 		}
 
+		inline matrix_float44 matrix44_inverse(matrix_float44 m)
+		{
+			vector_float4 tmp;
+			vector_float4 det;
+			vector_float4 minor0; 
+			vector_float4 minor1; 
+			vector_float4 minor2; 
+			vector_float4 minor3;
+			vector_float4 row0;
+			vector_float4 row1;
+			vector_float4 row2;
+			vector_float4 row3;
+
+			//------ Transposition
+			matrix_float44 m1 = matrix44_transpose(m);
+
+			row0 = m1.r[0];
+			row1 = m1.r[1];
+			row2 = m1.r[2];
+			row3 = m1.r[3];
+
+			//------ 
+			tmp = mul( row2, row3);
+			tmp = swizzle<y,x,w,z>(tmp); //b1
+
+			minor0 = mul(row1, tmp);
+			minor1 = mul(row0, tmp);
+
+			tmp = swizzle<z,w,x,y>(tmp);
+
+			minor0 = sub(mul(row1, tmp), minor0);
+			minor1 = sub(mul(row0, tmp), minor1);
+
+			minor1 = swizzle<z,w,x,y>(minor1); //4e
+			
+			//------ 
+			tmp = mul(row1, row2);
+			tmp = swizzle<y,x,w,z>(tmp);
+
+			minor0 = add( mul(row3, tmp), minor0 );
+			minor3 = mul(row0, tmp);
+
+			tmp = swizzle<z,w,x,y>(tmp);
+
+			minor0 = sub(minor0, mul(row3, tmp));
+			minor3 = sub(mul(row0,tmp), minor3);
+			minor3 = swizzle<z,w,x,y>(minor3);
+
+			//------ 
+			tmp = mul( swizzle<z,w,x,y>(row1), row3);
+			tmp = swizzle<y,x,w,z>(tmp);
+			row2 = swizzle<z,w,x,y>(row2);
+
+			minor0 = add(mul(row2,tmp), minor0);
+			minor2 = mul(row0, tmp);
+
+			tmp = swizzle<z,w,x,y>(tmp);
+
+			minor0 = sub(minor0, mul(row2, tmp));
+			minor2 = sub(mul(row0, tmp), minor2);
+			minor2 = swizzle<z,w,x,y>(minor2);
+
+			//------ 
+
+			tmp = mul(row0, row1);
+			tmp = swizzle<y,x,w,z>(tmp);
+
+			minor2 = add(mul(row3, tmp), minor2);
+			minor3 = sub(mul(row2, tmp), minor3);
+
+			tmp = swizzle<z,w,x,y>(tmp);
+			minor2 = sub( mul(row3, tmp), minor2);
+			minor3 = sub(minor3, mul(row2, tmp));
+
+			//------ 
+
+			tmp = mul(row0, row3);
+			tmp = swizzle<y,x,w,z>(tmp);
+
+			minor1 = sub(minor1, mul(row2, tmp));
+			minor2 = add(mul(row1, tmp), minor2 );
+
+			tmp = swizzle<z,w,x,y>(tmp);
+			minor1 = add( mul(row2, tmp), minor1 );
+			minor2 = sub(minor2, mul(row1, tmp) );
+
+			//------ 
+			tmp = mul(row0, row2);
+			tmp = swizzle<y,x,z,w>(tmp);
+
+			minor1 = add( mul(row3, tmp), minor1);
+			minor3 = sub( minor3, mul(row1, tmp));
+
+			tmp = swizzle<z,w,x,y>(tmp);
+			minor1 = sub(minor1, mul(row3, tmp));
+			minor3 = add( mul(row1, tmp), minor3);
+			//------ 
+
+			det = mul(row0, minor0);
+			det = add( swizzle<z,w,x,y>(det), det );
+			det = _mm_add_ss(swizzle<y,x,z,w>(det),det);
+			tmp = _mm_rcp_ss(det);
+
+			det = _mm_sub_ss(_mm_add_ss(tmp, tmp), _mm_mul_ss(det, _mm_mul_ss(tmp, tmp)));
+			det = swizzle<x,x,x,x>(det);
+
+			matrix_float44 m2;
+			
+			m2.r[0] = mul(det, minor0);
+			m2.r[1] = mul(det, minor1);
+			m2.r[2] = mul(det, minor2);
+			m2.r[3] = mul(det, minor3);
+
+			return m2;
+
+		}
+
 		inline vector_float4 matrix44_mul(vector_float4 v, matrix_float44 m )
 		{
 			vector_float4  v1 = swizzle<x,x,x,x>(v);
@@ -454,9 +571,50 @@ namespace vts
 			return m;
 		}
 
+	
+		inline void matrix44_extract_view_frustum(matrix_float44 m, float frustum[])
+		{
+			vector_float4 v1;
+			vector_float4 v2;
+			vector_float4 v3;
+			vector_float4 v4;
+			vector_float4 v5;
+			vector_float4 v6;
 
-		
-		//view frustum from view matrix
+			matrix_float44 m1;
+
+			m1 = matrix44_transpose(m);
+
+			v1 = add(m.r[3], m1.r[0]);	//left
+			v2 = sub(m.r[3], m1.r[0]);	//right
+			v3 = sub(m.r[3], m1.r[1]);	//top
+			v4 = add(m.r[3], m1.r[0]);	//bottom
+				
+			v5 = m1.r[2];				//near
+			v6 = sub(m.r[3],m1.r[2]);	//far
+
+			v1 = normalize_plane(v1);
+			v2 = normalize_plane(v2);
+			v3 = normalize_plane(v3);
+			v4 = normalize_plane(v4);
+			v5 = normalize_plane(v5);
+			v6 = normalize_plane(v6);
+
+			v1 = negate(v1);
+			v2 = negate(v2);
+			v3 = negate(v3);
+			v4 = negate(v4);
+			v5 = negate(v5);
+			v6 = negate(v6);
+
+			store4( &frustum[0], v1);
+			store4( &frustum[4], v2);
+			store4( &frustum[8], v3);
+			store4( &frustum[12], v4);
+			store4( &frustum[16], v5);
+			store4( &frustum[20], v6);
+
+		}
 
 		//determinant
 

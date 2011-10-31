@@ -41,7 +41,8 @@ namespace vts
 
 		template <uint32_t v1, uint32_t v2, uint32_t v3, uint32_t v4> inline vector_float4 shuffle(vector_float4 value1, vector_float4 value2)
 		{
-			return _mm_shuffle_ps( value1, value2, _MM_SHUFFLE(v4, v3, v2, v1) );
+			const uint32_t shuffle_k = _MM_SHUFFLE(v4, v3, v2, v1);
+			return _mm_shuffle_ps( value1, value2, shuffle_k);
 		}
 
 		template <uint32_t v1, uint32_t v2, uint32_t v3, uint32_t v4> inline vector_float4 swizzle(vector_float4 value)
@@ -404,6 +405,14 @@ namespace vts
 		inline vector_float4 normalize4(vector_float4 v)
 		{
 			vector_float4 l = length4(v);
+			vector_float4 l_r = rsqrt(l);
+			vector_float4 n = mul(v, l_r);
+			return n;
+		}
+
+		inline vector_float4 normalize_plane(vector_float4 v)
+		{
+			vector_float4 l = length3(v);
 			vector_float4 l_r = rsqrt(l);
 			vector_float4 n = mul(v, l_r);
 			return n;
