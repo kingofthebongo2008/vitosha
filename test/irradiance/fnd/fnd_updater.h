@@ -1,13 +1,13 @@
-#ifndef __FND_WORLD_H__
-#define __FND_WORLD_H__
+#ifndef __FND_UPDATER_H__
+#define __FND_UPDATER_H__
 
 namespace fnd
 {
-	class world
+	class updater
 	{
 		public:
 
-		virtual ~world()
+		virtual ~updater()
 		{
 
 		}
@@ -27,3 +27,4 @@ namespace fnd
 }
 
 #endif
+
