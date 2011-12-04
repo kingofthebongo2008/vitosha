@@ -10,11 +10,11 @@
 namespace sys
 {
 	template <typename std::uint32_t size>
-	class __declspec( align(64) )  spsc_queue
+	class __declspec( align(64) )  fast_forward_spsc_queue
 	{
 		public:
 
-		spsc_queue() : m_read_ptr(0), m_write_ptr(0), m_queue()
+		fast_forward_spsc_queue() : m_read_ptr(0), m_write_ptr(0), m_queue()
 		{
 		}
 
@@ -47,6 +47,11 @@ namespace sys
 			{
 				return false;
 			}
+		}
+
+		inline bool flush()
+		{
+			return true;
 		}
 
 		template <typename T> bool dequeue(T** data)
@@ -83,11 +88,11 @@ namespace sys
 
 
 	template <typename std::uint32_t size, std::uint32_t local_buffer_size>
-	class __declspec( align(64) )  mpush_spsc_queue
+	class __declspec( align(64) )  mpush_fast_forward_spsc_queue
 	{
 		public:
 
-		mpush_spsc_queue() : m_read_ptr(0), m_write_ptr(0), m_local_queue_ptr(0), m_local_queue(), m_queue()
+		mpush_fast_forward_spsc_queue() : m_read_ptr(0), m_write_ptr(0), m_local_queue_ptr(0), m_local_queue(), m_queue()
 		{
 
 		}
@@ -97,7 +102,7 @@ namespace sys
 			//2. if the buffer was full, the consumer inserted into the local queue and now tries to flush
 			if (m_local_queue_ptr == local_buffer_size)
 			{
-				return flush_local_queue();
+				return flush_local_queue(local_buffer_size);
 			}
 
 			m_local_queue[ m_local_queue_ptr++] = data;
@@ -105,7 +110,7 @@ namespace sys
 			//1. if the buffer is full, this will return false and the producer will retry
 			if (m_local_queue_ptr == local_buffer_size)
 			{
-				return flush_local_queue();
+				return flush_local_queue(local_buffer_size);
 			}
 
 			return true;
@@ -130,6 +135,19 @@ namespace sys
 		template <typename T> bool dequeue(T** data)
 		{
 			return dequeue( reinterpret_cast<void**> (data) );
+		}
+
+		inline bool flush()
+		{
+			compiler_read_memory_barrier();
+			if (m_local_queue_ptr != 0)
+			{
+				return flush_local_queue(m_local_queue_ptr);
+			}
+			else
+			{
+				return true;
+			}
 		}
 
 		private:
@@ -158,10 +176,8 @@ namespace sys
 			return (m_queue[m_write_ptr] != nullptr);
 		}
 
-		inline bool flush_local_queue()
+		inline bool flush_local_queue(uint32_t len)
 		{
-			uint32_t len = local_buffer_size ;
-
 			uint32_t last = m_write_ptr + ( (m_write_ptr + --len < size) ? len : (len - size) );
 
 			uint32_t r = len - (last + 1);
@@ -182,7 +198,7 @@ namespace sys
 
 					for (auto i = size - 1; i >= m_write_ptr;--i,--r)
 					{
-						m_queue[r] = m_local_queue[r];
+						m_queue[i] = m_local_queue[r];
 					}
 				}
 				else
@@ -203,6 +219,121 @@ namespace sys
 			}
 		}
 
+	};
+
+	template <typename std::uint32_t size, std::uint32_t write_buffer_size, std::uint32_t read_buffer_size >
+	class __declspec( align(64) )  mc_ring_buffer
+	{
+		public:
+
+		mc_ring_buffer() : m_read_ptr(0)
+			, m_write_ptr(0)
+			, m_local_write_ptr(0)
+			, m_next_read_ptr(0)
+			, m_read_batch(0)
+			, m_local_read_ptr(0)
+			, m_next_write_ptr(0)
+			, m_write_batch(0)
+			, m_queue()
+		{
+
+		}
+
+		inline bool enqueue(void* const data)
+		{
+			uint32_t next_write = next(m_next_write_ptr);
+
+			//If we are about to write where we read
+			if (next_write == m_local_read_ptr)
+			{
+				//We are full, should wait
+				if (next_write == m_read_ptr)
+				{
+					return false;
+				}
+				
+				//Update the cached copy of the read pointer
+				m_local_read_ptr = m_read_ptr;
+			}
+
+			m_queue[m_next_write_ptr] = data;
+			m_next_write_ptr = next_write;
+
+			m_write_batch++;
+
+			//Update shared copy after several iterations
+			if (m_write_batch >= write_buffer_size)
+			{
+				m_write_ptr = m_next_write_ptr;
+				m_write_batch = 0;
+			}
+
+			return true;
+		}
+
+		inline bool dequeue(void** data)
+		{
+			//If we are about to read from a place, where we are writing
+			if ( m_next_read_ptr == m_local_write_ptr)
+			{
+				if (m_next_read_ptr == m_write_ptr)
+				{
+					return false;
+				}
+
+				m_local_write_ptr = m_write_ptr;
+			}
+
+			*data = m_queue[m_next_read_ptr];
+			m_next_read_ptr = next(m_next_read_ptr);
+			m_read_batch++;
+
+			if (m_read_batch >= read_buffer_size)
+			{
+				m_read_ptr = m_next_read_ptr;
+				m_read_batch = 0;
+			}
+	
+			return true;
+		}
+
+		template <typename T> bool dequeue(T** data)
+		{
+			return dequeue( reinterpret_cast<void**> (data) );
+		}
+
+		inline bool flush()
+		{
+			return true;
+		}
+
+		private:
+		static const uint32_t		cache_line_size = 64;
+
+		//control variables
+		volatile uint32_t			m_read_ptr;		
+		volatile uint32_t			m_write_ptr;
+		uint8_t						m_padding0[ cache_line_size - 2  * sizeof(uint32_t) ];
+
+		//consumer
+		uint32_t					m_local_write_ptr;
+		uint32_t					m_next_read_ptr;
+		uint32_t					m_read_batch;
+		uint8_t						m_padding1[ cache_line_size - 3  * sizeof(uint32_t) ];
+
+		//producer
+		uint32_t					m_local_read_ptr;
+		uint32_t					m_next_write_ptr;
+		uint32_t					m_write_batch;
+		uint8_t						m_padding2[ cache_line_size - 3  * sizeof(uint32_t) ];
+
+		std::tr1::array<void*,size>	m_queue;
+
+		static inline uint32_t next(uint32_t value)
+		{
+			uint32_t next_value = ++value;
+			return next_value < size ? next_value : 0 ;
+		}
 	};
 }
 
