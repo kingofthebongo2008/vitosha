@@ -242,7 +242,7 @@ namespace vts
 			vector_float4  v10 = add(v7, v8);
 			vector_float4  v11 = add(v9, v10);
 
-			return v10;
+			return v11;
 		}
 
 		inline matrix_float44 matrix44_mul(matrix_float44 m1, matrix_float44 m2)
@@ -463,7 +463,6 @@ namespace vts
 			m1.r[2] = or( v2, d2 ); 
 			m1.r[3] = identity_r3;
 
-
 			m2 = matrix44_transpose(m1);
 			return m2;
 		}
@@ -572,7 +571,7 @@ namespace vts
 		}
 
 	
-		inline void matrix44_extract_view_frustum(matrix_float44 m, float frustum[])
+		inline void matrix44_extract_view_frustum(matrix_float44 m, float frustum[24])
 		{
 			vector_float4 v1;
 			vector_float4 v2;
@@ -613,7 +612,6 @@ namespace vts
 			store4( &frustum[12], v4);
 			store4( &frustum[16], v5);
 			store4( &frustum[20], v6);
-
 		}
 
 		//determinant

@@ -21,7 +21,7 @@ namespace fnd
 
 		virtual void on_update(float dt)
 		{
-
+			dt;
 		}
 	};
 }

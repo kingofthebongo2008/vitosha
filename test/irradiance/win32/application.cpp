@@ -33,7 +33,8 @@ namespace wnd
 
 		if (wnd != end(m_windows))
 		{
-			std::swap(wnd,end(m_windows)-1);
+			auto _end = end(m_windows)-1;
+			std::swap(wnd, _end);
 			m_windows.pop_back();
 		}
 	}

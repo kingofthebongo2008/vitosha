@@ -1,6 +1,7 @@
 #ifndef __dx11_RENDER_CONTEXT_H__
 #define __dx11_RENDER_CONTEXT_H__
 
+#include <memory>
 #include <vector>
 #include <cstdint>
 #include <boost/noncopyable.hpp>
