@@ -95,7 +95,7 @@ namespace sys
 		{
 			m_read_ptr = 0;
 			m_write_ptr = 0;
-			std::memset(&m_queue[0],0,sizeof(m_queue));
+			std::fill(begin(m_queue), end(m_queue), nullptr);
 		}
 
 		template <typename T> bool dequeue(T** data) throw()
@@ -201,23 +201,6 @@ namespace sys
 			}
 		}
 
-		
-		private:
-		static const uint32_t cache_line_size = 64;
-		static const uint32_t cache_line_padding = cache_line_size / sizeof(uint32_t) ;
-
-		alignas(64) uint32_t m_read_ptr;
-		alignas(64)	uint32_t m_write_ptr;
-		alignas(64) uint32_t m_local_queue_ptr;
-		
-		alignas(64) std::tr1::array<void*,local_buffer_size>	m_local_queue;
-		alignas(64) std::tr1::array<void*,size>					m_queue;
-
-		inline void compiler_read_memory_barrier() throw()
-		{
-			_ReadBarrier();
-		}
-
 		inline bool empty() const throw()
 		{
 			return (m_queue[m_read_ptr] == nullptr);
@@ -226,6 +209,32 @@ namespace sys
 		inline bool full() const throw()
 		{
 			return (m_queue[m_write_ptr] != nullptr);
+		}
+
+		inline void reset() throw()
+		{
+			m_read_ptr = 0;
+			m_write_ptr = 0;
+			m_local_queue_ptr = 0;
+
+			std::fill(std::begin(m_queue), std::end(m_queue), nullptr);
+			std::fill(std::begin(m_local_queue), std::end(m_local_queue), nullptr);
+		}
+
+		private:
+		static const uint32_t cache_line_size = 64;
+		static const uint32_t cache_line_padding = cache_line_size / sizeof(uint32_t) ;
+
+		volatile alignas(64) uint32_t m_read_ptr;
+		volatile alignas(64) uint32_t m_write_ptr;
+		alignas(64) uint32_t m_local_queue_ptr;
+		
+		alignas(64) std::tr1::array<void*,local_buffer_size>	m_local_queue;
+		alignas(64) std::tr1::array<void*,size>					m_queue;
+
+		inline void compiler_read_memory_barrier() throw()
+		{
+			_ReadBarrier();
 		}
 
 		inline bool flush_local_queue(uint32_t len) throw()
@@ -423,7 +432,7 @@ namespace sys
 			m_next_write_ptr = 0;
 			m_write_batch = 0;
 
-			std::memset(&m_queue[0],0,sizeof(m_queue));
+			std::fill(begin(m_queue), end(m_queue), nullptr);
 		}
 
 		private:
@@ -571,7 +580,7 @@ namespace sys
 
 		public:
 
-		spsc_dynamic_buffer(  )
+		spsc_dynamic_buffer(  ) : m_head(nullptr), m_tail(nullptr)
 		{
 			initialize();
 		}
@@ -583,7 +592,7 @@ namespace sys
 
 		~spsc_dynamic_buffer(  )
 		{
-			while (m_head->m_next)
+			while (m_head && m_head->m_next)
 			{
 				node* n = const_cast<node*> (m_head);
 				m_head = m_head->m_next;
@@ -693,7 +702,7 @@ namespace sys
 
 		}
 
-		buffer_pool( const allocator_type& alloc) : m_allocator(allocator)
+		buffer_pool( const allocator_type& alloc) : m_allocator(allocator), m_used(m_allocator)
 		{
 		
 
@@ -747,33 +756,26 @@ namespace sys
 	{
 		public:
 		typedef spsc_buffer_t										spsc_buffer; 
-		private:
-
-		static const uint32_t cache_line_size = 64;
 		typedef typename allocator<spsc_buffer>						allocator_type;
-
-		spsc_buffer*												m_buffer_read;
-		uint8_t														m_pad0[cache_line_size - sizeof(void*)];
-		spsc_buffer*												m_buffer_write;
-		uint8_t														m_pad1[cache_line_size - sizeof(void*)];
-		buffer_pool<spsc_buffer, size, size,  allocator>			m_buffer_pool;
-		allocator_type												m_allocator;
 
 		public:
 
 		unbounded_spsc_queue() : m_buffer_read(0), m_buffer_write(0)
 		{
-			m_buffer_read = m_allocator.allocate(1);
-			::new (m_buffer_read) spsc_buffer();
-			m_buffer_write = m_buffer_read;
+			initialize();
 		}
 
+		unbounded_spsc_queue(const allocator_type& alloc) : m_buffer_read(0), m_buffer_write(0), m_buffer_pool(alloc), m_allocator(alloc)
+		{
+			initialize();
+		}
+		
 		~unbounded_spsc_queue()
 		{
 			if (m_buffer_read)
 			{
-				m_allocator.destroy(m_buffer_read);
-				m_allocator.deallocate(m_buffer_read,1);
+				m_allocator.destroy((spsc_buffer*)m_buffer_read);
+				m_allocator.deallocate((spsc_buffer*) m_buffer_read,1);
 			}
 		}
 
@@ -858,6 +860,26 @@ namespace sys
 				f();
 			}
 		}
+
+		private:
+		static const uint32_t cache_line_size = 64;
+		
+
+		spsc_buffer*												m_buffer_read;
+		uint8_t														m_pad0[cache_line_size - sizeof(void*)];
+		spsc_buffer*												m_buffer_write;
+		uint8_t														m_pad1[cache_line_size - sizeof(void*)];
+		buffer_pool<spsc_buffer, size, size,  allocator>			m_buffer_pool;
+		allocator_type												m_allocator;
+
+		inline void initialize()
+		{
+			spsc_buffer* buffer = 
+			buffer = m_allocator.allocate(1);
+			::new (buffer) spsc_buffer();
+			m_buffer_read = m_buffer_write = buffer;
+		}
+
 	};
 }
 
