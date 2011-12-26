@@ -1,13 +1,8 @@
 #ifndef __SYS_SPSC_QUEUE_H__
 #define __SYS_SPSC_QUEUE_H__
 
-#include <intrin.h>
-
 #include <cstdint>
 #include <array>
-#include <utility>
-
-#include <intrin.h>
 
 namespace sys
 {
@@ -61,7 +56,6 @@ namespace sys
 
 			inline bool enqueue(void* const data) throw()
 			{
-				compiler_read_memory_barrier();
 				if ( !full() )
 				{
 					m_queue[ m_write_ptr ] = data;
@@ -76,7 +70,6 @@ namespace sys
 
 			inline bool dequeue(void** data) throw()
 			{
-				compiler_read_memory_barrier();
 				if (!empty())
 				{
 					*data = m_queue[ m_read_ptr ];
@@ -121,17 +114,12 @@ namespace sys
 			private:
 			static const uint32_t cache_line_size = 64;
 
-			alignas(64) uint32_t m_read_ptr;
-			uint8_t		pad0[cache_line_size - sizeof(uint32_t)];
-			alignas(64) uint32_t m_write_ptr;
-			uint8_t		pad1[cache_line_size - sizeof(uint32_t)];
+			volatile alignas(64) uint32_t			m_read_ptr;
+			uint8_t									pad0[cache_line_size - sizeof(uint32_t)];
+			volatile alignas(64) uint32_t			m_write_ptr;
+			uint8_t									pad1[cache_line_size - sizeof(uint32_t)];
 
 			alignas(64) std::tr1::array<void*,size>	m_queue;		
-
-			inline void compiler_read_memory_barrier() throw()
-			{
-				_ReadBarrier();
-			}
 		};
 
 		template <typename std::uint32_t size, std::uint32_t local_buffer_size>
@@ -239,11 +227,6 @@ namespace sys
 			alignas(64) std::tr1::array<void*,local_buffer_size>	m_local_queue;
 			alignas(64) std::tr1::array<void*,size>					m_queue;
 
-			inline void compiler_read_memory_barrier() throw()
-			{
-				_ReadBarrier();
-			}
-
 			inline bool flush_local_queue(uint32_t len) throw()
 			{
 				uint32_t last = m_write_ptr + ( (m_write_ptr + --len < size) ? len : (len - size) );
@@ -252,8 +235,6 @@ namespace sys
 			
 				uint32_t l = last;
 
-
-				compiler_read_memory_barrier();
 				//if the queue is not full
 				if ( m_queue[last] == nullptr)
 				{
@@ -914,7 +895,7 @@ namespace sys
 	//typedef mpush_fast_forward_spsc_queue<size,16>				spsc_buffer;
 	//mc_ring_buffer<size,32,32>
 	template <typename std::uint32_t size, template<typename t> class allocator = std::allocator>
-	class alignas(64) unbounded_spsc_queue : public details::unbounded_spsc_queue<size,  mc_ring_buffer<size,16,16>, allocator>
+	class alignas(64) unbounded_spsc_queue : public details::unbounded_spsc_queue<size,  mc_ring_buffer<size,32,32>, allocator>
 	{
 		private:
 		typedef details::unbounded_spsc_queue<size,  mc_ring_buffer<size,32,32>, allocator> base;
