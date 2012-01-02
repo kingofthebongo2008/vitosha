@@ -13,20 +13,29 @@ namespace mem
 		return size + (alignment - 1)  & ~(alignment - 1);
 	}
 
+    template <typename t, typename h > inline t* allocate(h* heap)
+    {
+        return reinterpret_cast<t*> (heap->allocate(sizeof(t)));
+    }
+
+    template <typename t, typename h > inline t* allocate(h& heap)
+    {
+        return reinterpret_cast<t*> (heap.allocate(sizeof(t)));
+    }
+    
+
 	class virtual_alloc_heap
 	{
 		public:
 
-		void* allocate(std::size_t size, std::size_t alignment) __restrict
+		void* allocate(std::size_t size) throw()
 		{
-			alignment;
-			return ::VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE | MEM_TOP_DOWN , PAGE_READWRITE);
+			return ::VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 		}
 
-		void free(void* __restrict pointer, std::size_t size, std::size_t alignment) __restrict
+		void free(void* pointer) throw()
 		{
-			alignment;
-			::VirtualFree(pointer, size, MEM_RELEASE);
+			::VirtualFree(pointer, 0, MEM_RELEASE);
 		}
 	};
 
@@ -34,16 +43,14 @@ namespace mem
 	{
 		public:
 
-		void* allocate(std::size_t size, std::size_t alignment) __restrict
+		void* allocate(std::size_t size) throw()
 		{
-			alignment;
-			return ::VirtualAlloc(0, size, MEM_LARGE_PAGES | MEM_COMMIT | MEM_RESERVE | MEM_TOP_DOWN , PAGE_READWRITE);
+			return ::VirtualAlloc(0, size, MEM_LARGE_PAGES | MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 		}
 
-		void free(void* __restrict pointer, std::size_t size, std::size_t alignment) __restrict
+		void free(void* pointer)  throw()
 		{
-			alignment;
-			::VirtualFree(pointer, size, MEM_RELEASE);
+			::VirtualFree(pointer, 0, MEM_RELEASE);
 		}
 	};
 
@@ -53,12 +60,12 @@ namespace mem
         typedef typename super_heap super;
 
     public:
-        explicit free_list_heap(super_heap* __restrict super_heap)  : m_super_heap(super_heap), m_list(nullptr)
+        explicit free_list_heap(super_heap* super_heap)  : m_super_heap(super_heap), m_list(nullptr)
         {
 
         }
 
-		~free_list_heap() __restrict
+		~free_list_heap()
         {
             auto pointer = m_list;
 
@@ -70,7 +77,7 @@ namespace mem
             }
         }
 
-		void* allocate(std::size_t size, std::size_t alignment) __restrict throw()
+		void* allocate(std::size_t size) throw()
         {
 			auto data = m_list;
 
@@ -86,9 +93,9 @@ namespace mem
             }
         }
 
-        void free(void* __restrict pointer, std::size_t size, std::size_t alignment) __restrict throw()
+        void free(void* pointer) throw()
         {
-			internal_free(pointer, size, alignment);
+			internal_free(pointer);
         }
 
     private:
@@ -97,20 +104,16 @@ namespace mem
 
         struct free_object
         {
-            free_list_heap* __restrict m_next;
-			std::size_t m_size;
-			std::size_t m_alignment;
+            free_list_heap* m_next;
         };
 
-		super_heap*		__restrict	m_superHeap;
-        free_object*	__restrict	m_list;
+		super_heap*		m_superHeap;
+        free_object*	m_list;
 
-		inline void internal_free(void* __restrict pointer, std::size_t size, std::size_t alignment) __restrict throw()
+		inline void internal_free(void* pointer) throw()
 		{
 			//super heap must allocate minimum sizeof(free_object)
-			auto ptr = reinterpret_cast<free_object* __restrict> (pointer);
-			ptr->m_size = size;
-			ptr->m_alignment = alignment;
+			auto ptr = reinterpret_cast<free_object*> (pointer);
 			ptr->m_next = m_list;
 			m_list = ptr;
 		}
@@ -120,70 +123,70 @@ namespace mem
 	template <uint32_t chunk_size, class super_heap> class chunk_heap
     {
 		public:
-		explicit chunk_heap(super_heap* __restrict super_heap)  : m_super_heap(super_heap), m_list(nullptr)
+		explicit chunk_heap(super_heap* super_heap)  : 
+            m_super_heap(super_heap)
+            , m_chunk_ptr( (uintptr_t)(  (uintptr_t) 0L - (uintptr_t) (chunk_size))  )
+            , m_free_objects(nullptr)
         {
 
         }
 
-		~chunk_heap() __restrict
+		~chunk_heap()
         {
-            auto pointer = m_list;
+            auto pointer = m_free_objects;
 
             while (pointer != nullptr)
             {
                 auto old_pointer = pointer;
                 pointer = pointer->m_next;
-                m_super_heap->free(old_pointer, chunk_size, old_pointer->m_alignment);
+                m_super_heap->free(old_pointer);
             }
         }
 
-		void* allocate(std::size_t size, std::size_t alignment) __restrict throw()
+		void* allocate(std::size_t size) throw()
 		{
-			alignment;
+            uintptr_t size_to_allocate = size;
 
-			size_t size_to_allocate = align(size, align);
-
-			if ( chunk_ptr + size_to_allocate < chunk_size)
+			if ( m_chunk_ptr + size_to_allocate < m_chunk_ptr + chunk_size)
 			{
-				chunk_ptr +=size_to_allocate;
-				return chunk_ptr;
+				m_chunk_ptr +=size_to_allocate;
+				return reinterpret_cast<void*> (m_chunk_ptr);
 			}
 			else
 			{
-				size_t size_to_allocate = align(chunk_size + sizeof(free_object), align);
-				m_chunk = m_superHeap->allocate(size_to_allocate, alignment);
+                uint32_t alignment = 4;
+				size_t size_to_allocate = align(chunk_size + sizeof(free_object), alignment);
+				void* chunk = m_super_heap->allocate(size_to_allocate);
 
-				free_object* object = reinterpret_cast<free_object*> (m_chunk);
-				object->m_next = m_list;
-				m_list = m_chunk;
+				free_object* object = reinterpret_cast<free_object*> (chunk);
+				object->m_next = m_free_objects;
+				m_free_objects = object;
 
-				m_chunk_ptr = reintrepret_cast<uintptr_t> (m_chunk);
-				m_chunk_ptr = align(m_chunk_ptr, align);
-				return m_chunk_ptr;
+				m_chunk_ptr = reinterpret_cast<uintptr_t> (chunk);
+				m_chunk_ptr = align(m_chunk_ptr + sizeof(free_object), alignment);
+				return reinterpret_cast<void*> (m_chunk_ptr);
 			}
 		}
 
-		void free(void* __restrict pointer, std::size_t size, std::size_t alignment) __restrict throw()
+		void free(void* pointer) throw()
 		{
-			pointer;
-			size;
-			alignment;
+
 		}
 
 		private:
+        chunk_heap(const chunk_heap&);
+        const chunk_heap& operator=(const chunk_heap&);
 
 		struct free_object
         {
-            uint8_t* __restrict m_next;
+            free_object* m_next;
         };
 
-		super_heap*		__restrict	m_superHeap;
-		uint8_t*					m_chunk;
+		super_heap*                 m_super_heap;
 		uintptr_t					m_chunk_ptr;
-		free_object					m_free_objects;
+		free_object*                m_free_objects;
 	};
 
-	typedef chunk_heap< 4096 - 8, virtual_alloc_heap> chunk_heap_1;
 }
 
 

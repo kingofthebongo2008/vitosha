@@ -6,28 +6,28 @@
 
 #include <windows.h>
 
+#include <mem/mem_alloc.h>
+
 namespace mem
 {
 	namespace streamflow
 	{
-		const uint32_t page_size = 4096;
-		const uint32_t page_bits = 12;
 		const uint32_t size_classes = 512;
-
+      
 
 		template <typename T>
 		class list
 		{
 			public:
 
-			list() : 
+			list() throw() : 
 				  m_head(nullptr)
 				, m_tail(nullptr)
 			{
 
 			}
 
-			void push_front(T* block)
+			void push_front(T* block) throw()
 			{
 				block->set_next(m_head);
 
@@ -44,7 +44,7 @@ namespace mem
 				}
 			}
 
-			void pop_front()
+			void pop_front() throw()
 			{
 				if (m_head)
 				{
@@ -58,7 +58,7 @@ namespace mem
 				}
 			}
 
-			void push_back(T* block)
+			void push_back(T* block) throw()
 			{
 				if (m_tail != nullptr)
 				{
@@ -74,7 +74,7 @@ namespace mem
 				}
 			}
 
-			void pop_back()
+			void pop_back() throw()
 			{
 				if (m_tail)
 				{
@@ -87,27 +87,27 @@ namespace mem
 				}
 			}
 
-			T* front()
+			T* front() throw()
 			{
 				return m_head;
 			}
 
-			const T* front() const
+			const T* front() const throw()
 			{
 				return m_head;
 			}
 
-			T* back()
+			T* back() throw()
 			{
 				return m_tail;
 			}
 
-			const T* back() const
+			const T* back() const throw()
 			{
 				return m_tail;
 			}
 
-			void remove(T* block)
+			void remove(T* block) throw()
 			{
 				if (block->get_previous())
 				{
@@ -131,7 +131,7 @@ namespace mem
 
 			}
 			
-			bool empty() const
+			bool empty() const throw()
 			{
 				return (m_head == nullptr && m_head == m_tail);
 			}
@@ -146,60 +146,177 @@ namespace mem
 			super_page* m_previous;
 			super_page* m_next;
 			void*		m_sp_base;
-			uint32_t	m_sp_size;
 			uint32_t	m_largest_free_order;
-			
-			
-			uint8_t		m_bitmap[4096];
+
+            uint8_t		m_bitmap[256];
 
 			public:
-			super_page() :
+			super_page(void* sp_base) throw() :
 				m_previous(nullptr)
 				, m_next(nullptr)
-				, m_sp_base(nullptr)
-				, m_sp_size(0)
+				, m_sp_base(sp_base)
 				, m_largest_free_order(0)
 			{
 
 			}
 
-			inline super_page* get_next()
+			inline super_page* get_next() throw()
 			{
 				return m_next;
 			}
 
-			inline const super_page* get_next() const
+			inline const super_page* get_next() const throw()
 			{
 				return m_next;
 			}
 
-			inline void set_next(super_page* next)
+			inline void set_next(super_page* next) throw()
 			{
 				m_next = next;
 			}
 
-			inline super_page* get_previous()
+			inline super_page* get_previous() throw()
 			{
 				return m_previous;
 			}
 
-			inline const super_page* get_previous() const
+			inline const super_page* get_previous() const throw()
 			{
 				return m_previous;
 			}
 
-			inline void set_previous(super_page* previous)
+			inline void set_previous(super_page* previous) throw()
 			{
 				m_previous = previous;
 			}
 		};
 
+
+        class super_page_header_allocator
+        {
+            static const uint32_t chunk_size = 4096 - 8; // 8 is the size of the internal headers of chunk heap
+            typedef chunk_heap< 4096 - 8,  virtual_alloc_heap > super_page_headers;
+
+            public:
+            explicit super_page_header_allocator(virtual_alloc_heap* virtual_alloc_heap) : 
+                m_virtual_alloc_heap(virtual_alloc_heap)
+                , m_chunk_heap(m_virtual_alloc_heap)
+                , m_memory(0)
+                , m_unallocated_offset(0)
+                , m_free(0)
+                , m_free_objects(0)
+            {
+
+            }
+
+            super_page* allocate() throw()
+            {
+                super_page* result = nullptr;
+
+                if (m_free !=0 )
+                {
+                    result = reinterpret_cast<super_page*> ( m_free ) ;
+
+                    uintptr_t* free_content = reinterpret_cast<uintptr_t*>(m_free);
+					m_free = *free_content ;
+					--m_free_objects;
+                }
+                else
+                {
+                        if (m_free_objects == 0 || m_memory == 0)
+                        {
+                            m_memory = reinterpret_cast<uintptr_t> ( m_chunk_heap.allocate(chunk_size) );
+
+                            if (m_memory != 0)
+                            {
+                                const uint16_t super_page_size = static_cast<uint16_t>(sizeof(super_page));
+                                m_unallocated_offset = 0;
+                                m_free_objects +=  chunk_size  / super_page_size;
+                            }
+                        }
+
+                        if (m_memory != 0)
+                        {
+                            result = reinterpret_cast<super_page*> ( m_memory + m_unallocated_offset  ) ;
+                            m_unallocated_offset += sizeof(super_page);
+                            --m_free_objects;
+                        }
+                }
+
+                return result;
+            }
+
+            void free(super_page* page) throw()
+            {
+                uintptr_t* free_content = reinterpret_cast<uintptr_t*>(page);
+                *free_content = m_free;
+                m_free = reinterpret_cast<uintptr_t>(page);
+                ++m_free_objects;
+            }
+
+            private:
+            virtual_alloc_heap*     m_virtual_alloc_heap;   
+            super_page_headers      m_chunk_heap;           
+
+            uintptr_t               m_free;			        
+            uintptr_t               m_memory;               
+                
+            uint32_t                m_free_objects;         
+            uint32_t                m_unallocated_offset;	
+		
+        };
+
 		class page_manager
 		{
-			typedef list<super_page> super_page_list;
+            static const uint32_t page_size = 4096;
+            static const uint32_t super_page_size = 4 * 1024 * 1024;
+            static const uint32_t pages_per_super_page = super_page_size / page_size;
 
-			private:
-			super_page_list		m_super_page_headers;
+
+			typedef list<super_page>                            super_page_list;
+            
+
+            public:
+            page_manager() throw()
+            {
+
+            }
+
+            super_page* allocate() throw()
+            {
+                //1. allocate memory for the header
+                void* page_memory = 0;//mem::allocate<super_page>(m_super_page_headers);
+
+                if (page_memory)
+                {
+                    //2. allocate memory for the pages
+                    void* sp_base = m_virtual_alloc_heap.allocate(super_page_size);
+
+                    if (sp_base)
+                    {
+                        super_page* page = new (page_memory) super_page(sp_base);
+
+                        return page;
+                    }
+                    else
+                    {
+                        return nullptr;
+                    }
+                }
+                else
+                {
+                    return nullptr;
+                }
+            }
+
+
+            void free(super_page* pointer) throw()
+            {
+
+            }
+
+            private:
+            virtual_alloc_heap  m_virtual_alloc_heap;
 		};
 
 		class bibop_table
@@ -212,6 +329,7 @@ namespace mem
 
 			bibop_object decode(const void* ptr) const
 			{
+                const uint32_t page_size = 4096;
 				std::uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
 				return m_pages[ ( p & (page_size - 1) ) / page_size]; 
 			}
@@ -225,7 +343,7 @@ namespace mem
 			typedef uint16_t object_offset;
 
 			public:
-			page_block() : 
+			page_block() throw() : 
 				m_previous(nullptr)
 				, m_next(nullptr)
 				, m_memory(0)
@@ -240,52 +358,52 @@ namespace mem
 
 			}
 
-			inline void set_size_class(uint32_t size_class)
+			inline void set_size_class(uint32_t size_class) throw()
 			{
 					m_size_class = size_class;
 			}
 
-			inline page_block* get_next()
+			inline page_block* get_next() throw()
 			{
 				return m_next;
 			}
 
-			inline const page_block* get_next() const
+			inline const page_block* get_next() const throw()
 			{
 				return m_next;
 			}
 
-			inline void set_next(page_block* next)
+			inline void set_next(page_block* next) throw()
 			{
 				m_next = next;
 			}
 
-			inline page_block* get_previous()
+			inline page_block* get_previous() throw()
 			{
 				return m_previous;
 			}
 
-			inline const page_block* get_previous() const
+			inline const page_block* get_previous() const throw()
 			{
 				return m_previous;
 			}
 
-			inline void set_previous(page_block* previous)
+			inline void set_previous(page_block* previous) throw()
 			{
 				m_previous = previous;
 			}
 
-			inline bool full() const
+			inline bool full() const throw()
 			{
 				return m_free_objects == 0;
 			}
 
-			inline bool empty() const
+			inline bool empty() const throw()
 			{
 				return m_free_objects == convert_to_object_offset(m_memory_size);
 			}
 
-			void* allocate()
+			void* allocate() throw()
 			{
 				void* result = nullptr;
 
@@ -317,14 +435,14 @@ namespace mem
 				return result;
 			}
 
-			void free(void* pointer)
+			void free(void* pointer) throw()
 			{
 				uintptr_t pointer_a = m_memory;
 				uintptr_t pointer_b = reinterpret_cast<uintptr_t> (pointer);
 				uintptr_t offset = pointer_b - pointer_a;
 
 				* reinterpret_cast<object_offset*>(pointer) = m_free_offset;
-				m_free_offset = static_cast<uint16_t> (offset);
+				m_free_offset = convert_to_object_offset(offset);
 				++m_free_objects;
 			}
 
@@ -345,12 +463,12 @@ namespace mem
 			uint32_t		m_thread_id;
 			uint32_t		m_lifo_list;
 
-			inline uint32_t convert_to_bytes(object_offset blocks) const
+			inline uint32_t convert_to_bytes(object_offset blocks) const throw()
 			{
 				return blocks * m_size_class;
 			}
 			
-			inline object_offset convert_to_object_offset(uint32_t bytes) const
+			inline object_offset convert_to_object_offset(uint32_t bytes) const throw()
 			{
 				return static_cast<object_offset> ( bytes /  m_size_class );
 			}
@@ -364,7 +482,7 @@ namespace mem
 
 			public:
 
-			void* allocate(size_t size, uint32_t size_class)
+			void* allocate(size_t size, uint32_t size_class) throw()
 			{
 				page_block_list* list = &m_page_blocks[size_class];
 
@@ -391,7 +509,7 @@ namespace mem
 				return nullptr;
 			}
 
-			void local_free(void* pointer, page_block* page_block, uint32_t size_class)
+			void local_free(void* pointer, page_block* page_block, uint32_t size_class) throw()
 			{
 				page_block_list* list = &m_page_blocks[size_class];
 				
