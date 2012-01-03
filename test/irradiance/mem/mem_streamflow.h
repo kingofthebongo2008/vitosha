@@ -529,6 +529,16 @@ namespace mem
 				}
 			}
 		};
+
+        namespace detail
+        {
+            uint32_t log2(uint32_t value)
+            {
+                unsigned long result = 0;
+                _BitScanForward(&result, value);
+                return static_cast<uint32_t>(result);
+            }
+        }
 	}
 }
 
