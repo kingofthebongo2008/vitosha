@@ -154,7 +154,7 @@ namespace mem
 			}
 			else
 			{
-                uint32_t alignment = 4;
+                uint32_t alignment = 8;
 				size_t size_to_allocate = align(chunk_size + sizeof(free_object), alignment);
 				void* chunk = m_super_heap->allocate(size_to_allocate);
 

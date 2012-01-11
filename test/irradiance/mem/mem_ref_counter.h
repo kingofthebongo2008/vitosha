@@ -6,20 +6,20 @@
 namespace mem
 {
 
-    template <class Derived>
+    template <class derived>
     class ref_counter
     {
         private:
-        typedef ref_counter<Derived> this_type;
+        typedef ref_counter<derived> this_type;
 
     public:
 
-        friend void intrusive_ptr_add_ref(const Derived* pointer)
+        friend void intrusive_ptr_add_ref(const derived* pointer)
         {
             ++(( const this_type* ) pointer)->counter_;
         }
 
-        friend void intrusive_ptr_release(const Derived* pointer)
+        friend void intrusive_ptr_release(const derived* pointer)
         {
             if (--(( const this_type*) pointer)->counter_ == 0)
             {
