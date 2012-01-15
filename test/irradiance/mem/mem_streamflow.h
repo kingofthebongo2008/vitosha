@@ -2,10 +2,8 @@
 #define __MEM_STREAMFLOW_H__
 
 #include <cstdint>
-#include <cstddef>
 #include <intrin.h>
 
-#include <windows.h>
 #include <mem/mem_alloc.h>
 
 namespace mem
@@ -21,6 +19,21 @@ namespace mem
                 _BitScanForward(&result, value);
                 return static_cast<uint32_t>(result);
             }
+
+            template<uint32_t x> struct log2_c
+            {
+                static const uint32_t value = 1 + log2_c< x / 2>::value;
+            };
+
+            template<> struct log2_c<1>
+            {
+                static const uint32_t value = 0;
+            };
+
+            template<> struct log2_c<0>
+            {
+
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -205,12 +218,12 @@ namespace mem
         };
 
         //---------------------------------------------------------------------------------------
-        class page_block : public list_element<page_block>
+        class alignas(64) page_block : public list_element<page_block>
         {
         public:
-            page_block() throw() : 
-              m_memory(0)
-                  , m_memory_size(0)
+            page_block(uintptr_t memory, uint32_t memory_size) throw() : 
+              m_memory(memory)
+                  , m_memory_size(memory_size)
                   , m_unallocated_offset(0)
                   , m_free_offset(0)
                   , m_free_objects(0)
@@ -234,6 +247,11 @@ namespace mem
               inline bool empty() const throw()
               {
                   return m_free_objects == convert_to_object_offset(m_memory_size);
+              }
+
+              inline uint32_t get_memory_size() const throw()
+              {
+                  return static_cast<uint32_t> (m_memory_size);
               }
 
               void* allocate() throw()
@@ -281,8 +299,14 @@ namespace mem
 
         private:
 
+            page_block();
+            page_block(const page_block&);
+            const page_block operator=(const page_block&);
+
             uintptr_t		m_memory;
-            uint32_t		m_memory_size;			//memory size in bytes
+            uintptr_t		m_memory_size;			//memory size in bytes
+
+            uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory
 
             uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
             uint16_t	    m_free_offset;			
@@ -310,91 +334,147 @@ namespace mem
             static const uint32_t page_size = 4096;
             static const uint32_t super_page_size = 4 * 1024 * 1024;
             static const uint32_t page_count = super_page_size / page_size;
-            static const uint32_t buddy_max_order = 11;
-
-        public:
-            template <uint32_t order> struct buddy_bitmap_size
-            {
-                static const uint32_t min_size_bytes = sizeof(unsigned long);
-                static const uint32_t bytes  = page_count / ( (1 << order) * 8) ;
-                static const uint32_t value = (bytes < min_size_bytes ? min_size_bytes : bytes) + buddy_bitmap_size<order-1>::value;
-            };
-
-            template <> struct buddy_bitmap_size<0>
-            {
-                static const uint32_t min_size_bytes = sizeof(unsigned long);
-                static const uint32_t bytes  = page_count / ( (1 << 0) * 8 );
-                static const uint32_t value = (bytes < min_size_bytes ? min_size_bytes : bytes);
-            };
-
+            static const uint32_t buddy_max_order = detail::log2_c<page_count>::value;
+          
+            public:
             super_page(void* sp_base) throw() :
-            m_sp_base(sp_base)
-                , m_largest_free_order( buddy_max_order - 1 )
+            m_sp_base(reinterpret_cast<uintptr_t> (sp_base) )
             {
-                //mark all blocks as free
-                std::fill(&m_buddies_bitmap[0], &m_buddies_bitmap[0] + sizeof(m_buddies_bitmap), 0);
-
-
-                //set up pointer for tags
-                uint32_t address = 0;
-                for(uint32_t i=0; i < buddy_max_order; ++i)
-                {
-                    m_buddies[i].m_buddy_bitmap = reinterpret_cast<unsigned long*> (&m_buddies_bitmap[address]);
-
-                    const uint32_t bits = page_count / ( (1 << i) * 8);
-                    const uint32_t value = (bits <  sizeof(unsigned long) ?  sizeof(unsigned long) : bits);
-                    address += value;
-                }
-
                 //make the memory as one big block
-                buddy_element* block = new (m_sp_base) buddy_element();
-                m_buddies[buddy_max_order - 1 ].m_buddy_elements.push_front(block);
-                tag_buddy_as_used( sp_base, m_largest_free_order);
+                buddy_element* block = new (m_sp_base) buddy_element(buddy_max_order);
+                m_buddies[ buddy_max_order ].m_buddy_elements.push_front(block);
             }
 
             page_block* alllocate(std::size_t size) throw()
             {
-                uint32_t order = detail::log2( size / page_size );
+                uint32_t        size_in_pages   =   static_cast<uint32_t> ( size / page_size) ;
+                uint32_t        order           =   detail::log2( size_in_pages );
+                buddy_element*  buddy           =   nullptr;
+                uint32_t        k;
 
-                buddy_element* buddy = nullptr;
-
-                for(uint32_t i = order; i < buddy_max_order; ++i )
+                for(k = order; k < buddy_max_order + 1 ; ++k )
                 {
-                    buddy_block_list* buddies = &m_buddies[i].m_buddy_elements;
+                    buddy_block_list* buddies = &m_buddies[k].m_buddy_elements;
 
                     if ( !buddies->empty() )
                     {
                         buddy = buddies->front();
-                        tag_buddy_as_used( buddy, i);
                         buddies->pop_front();
+                        buddy->set_tag();
+                        break;
                     }
                 }
 
                 if (buddy != nullptr)
                 {
-                    //to do
+                    while ( k > order)
+                    {
+                        --k;
 
+                        uintptr_t  buddy_address        =   reinterpret_cast<uintptr_t>(buddy);     
+                        uintptr_t  right_half_address   =   buddy_address + ( page_size * ( 1 << k ) ) ;
+                        buddy_element* right_half       =   new (right_half_address) buddy_element(k);
+                        buddy_block_list* buddies       =   &m_buddies[k].m_buddy_elements;
+
+                        buddies->push_front(right_half);
+                        right_half->set_tag();
+                    }
+
+
+                    //the page_block is a meta information before the memory base
+                    uintptr_t memory_base = reinterpret_cast<uintptr_t> (buddy) + sizeof(page_block);
+                    uint32_t  memory_size = static_cast<uint32_t> ( size - sizeof(page_block) );
+
+                    //convert the buddy to page_block
+                    return new (buddy) page_block(memory_base, memory_size);
                 }
-
-                //buddy allocation scheme
-                return nullptr;
+                else
+                {
+                    return nullptr;
+                }
             }
 
             void free(page_block* block) throw()
             {
-                //to do
+                uintptr_t       block_address   = reinterpret_cast<uintptr_t>(block); 
+                uint32_t        block_size      = block->get_memory_size() + sizeof(page_block);
+                uint32_t        size_in_pages   = block_size / page_size;
+                uint32_t        k               = detail::log2(size_in_pages);
+                uintptr_t       buddy_address   = buddy(block_address, k, m_sp_base );
+                buddy_element*  p               = reinterpret_cast<buddy_element*>(buddy_address);
+
+                //The order of these checks is important, since p can point to invalid memory
+                while ( 
+                        !
+                        (
+                            ( k == buddy_max_order || p->get_tag() ) ||
+                            ( !p->get_tag() && p->get_order() != k )
+                        )
+                      )
+                {
+                    buddy_block_list*   buddies     = &m_buddies[k].m_buddy_elements;
+                    buddies->remove(p);
+
+                    ++k;
+
+                    if ( buddy_address < block_address )
+                    {
+                        block_address = buddy_address;
+                    }
+
+                    buddy_address   = buddy(block_address, k, m_sp_base);
+                    p               = reinterpret_cast<buddy_element*>(buddy_address);
+                }
+
+                buddy_block_list*   buddies = &m_buddies[k].m_buddy_elements;
+                buddy_element*      element = new (block_address) buddy_element(k);
+                buddies->push_front(element);
+                element->clear_tag();
             }
 
-            void*   get_sp_base()
-            {
-                return m_sp_base;
-            }
 
         private:
 
             struct buddy_element : public list_element<buddy_element>
             {
+                explicit buddy_element(uint32_t order) : m_order(order)
+                {
 
+                }
+
+                inline uint32_t get_order() const throw()
+                {
+                    return m_order;
+                }
+
+                inline uint32_t get_tag() const throw()
+                {
+                   return _bittest( (long*)&m_order, 31);
+                }
+
+                inline void set_tag() throw()
+                {
+                    _bittestandset( (long*) &m_order, 31);
+                }
+
+                inline void clear_tag() throw()
+                {
+                    _bittestandreset( (long*) &m_order, 31);
+                }
+
+                static void* operator new(size_t size, uintptr_t where)
+                {
+                    return reinterpret_cast<void*> (where);
+                }
+
+                static void operator delete(void* memory, uintptr_t where)
+                {
+
+                }
+
+                private:
+                buddy_element();
+                uint32_t    m_order;
             };
 
             typedef list<buddy_element>     buddy_block_list;
@@ -402,98 +482,26 @@ namespace mem
             struct buddy
             {
                 buddy_block_list    m_buddy_elements;
-                unsigned long*      m_buddy_bitmap;
             };
 
-            void*		    m_sp_base;
-            uint32_t	    m_largest_free_order;
+            uintptr_t       m_sp_base;
 
             //buddy system allocation is described by Knuth in The Art of Computer Programming vol 1.
-
-            buddy           m_buddies[buddy_max_order];             
-            uint8_t         m_buddies_bitmap[ buddy_bitmap_size<buddy_max_order>::value ];
+            buddy           m_buddies[buddy_max_order + 1];             
 
             public:
 
-            static inline uint32_t buddy_absolute_index(uintptr_t buddy, uint32_t order, uintptr_t memory_base)
-            {
-                uintptr_t offset = buddy - memory_base;
-                uintptr_t page_index = offset / ( page_size * (1 << order) );
-                return static_cast<uint32_t> (page_index);
-            }
-
-            static inline uint32_t buddy_index_page(uint32_t buddy_absolute_index)
-            {
-                return buddy_absolute_index / 32;
-            }
-            
-            static inline uint32_t buddy_index_offset(uint32_t buddy_absolute_index)
-            {
-                return buddy_absolute_index % 32;
-            }
-
-            inline void tag_buddy_as_used(uintptr_t buddy, uint32_t order, uintptr_t memory_base)
-            {
-                uint32_t absolute_index = buddy_absolute_index(buddy, order, memory_base);
-                uint32_t index_page = buddy_index_page(absolute_index);
-                uint32_t index_offset = buddy_index_offset(absolute_index);
-
-                set_bit( &m_buddies[order].m_buddy_bitmap[index_page], index_offset );
-            }
-
-            inline void tag_buddy_as_used(void* buddy, uint32_t order, void* memory_base)
-            {
-                tag_buddy_as_used( reinterpret_cast<uintptr_t>(buddy), order, reinterpret_cast<uintptr_t> (memory_base) );
-            }
-
-            inline void tag_buddy_as_used(void* buddy, uint32_t order)
-            {
-                tag_buddy_as_used( reinterpret_cast<uintptr_t>(buddy), order, reinterpret_cast<uintptr_t> (m_sp_base) );
-            }
-
-            inline void tag_buddy_as_free(uintptr_t buddy, uint32_t order, uintptr_t memory_base)
-            {
-                uint32_t absolute_index = buddy_absolute_index(buddy, order, memory_base);
-                uint32_t index_page = buddy_index_page(absolute_index);
-                uint32_t index_offset = buddy_index_offset(absolute_index);
-
-                clear_bit( &m_buddies[order].m_buddy_bitmap[index_page], index_offset );
-            }
-
-            inline void tag_buddy_as_free(void* buddy, uint32_t order, void* memory_base)
-            {
-                tag_buddy_as_free( reinterpret_cast<uintptr_t>(buddy), order, reinterpret_cast<uintptr_t> (memory_base) );
-            }
-
-            inline void tag_buddy_as_free(void* buddy, uint32_t order)
-            {
-                tag_buddy_as_free( reinterpret_cast<uintptr_t>(buddy), order, reinterpret_cast<uintptr_t> (m_sp_base) );
-            }
-
-            static inline uintptr_t buddy(uintptr_t pointer, uint32_t order)
+            static inline uintptr_t buddy(uintptr_t pointer, uint32_t order, uintptr_t base)
             {
                 // x + 2^k if x mod 2^(k+1) == 0
                 // x - 2^k if x mod 2^(k+1) == 2^k
                 //if we are at the even buddy, this code returns the odd buddy and vice versa
+                //note the calculations are in bytes, that is why we need the page_size
 
-                const uintptr_t value_1 = 1 << order;
-                const uintptr_t value_2 = pointer ^ value_1;
-                return value_2;
-            }
-
-            inline void clear_bit(unsigned long* address, uint32_t bit)
-            {
-                _bittestandreset( (long*) address, bit);
-            }
-
-            inline void set_bit(unsigned long* address, uint32_t bit)
-            {
-                _bittestandset( (long*) address, bit);
-            }
-
-            inline uint32_t test_bit(unsigned long* address, uint32_t bit)
-            {
-                return _bittest( (long*)address, bit);
+                uintptr_t pointer_1 = pointer - base;
+                const uintptr_t value_1 = page_size * ( 1 << (order) );
+                const uintptr_t value_2 = pointer_1 ^ value_1;
+                return value_2 + base;
             }
         };
 
@@ -615,7 +623,6 @@ namespace mem
 
             void free(super_page* pointer) throw()
             {
-                void* sp_base = pointer->get_sp_base();
                 m_virtual_alloc_heap.free(pointer);
                 m_header_allocator.free(pointer);
             }
