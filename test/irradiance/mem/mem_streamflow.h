@@ -303,10 +303,10 @@ namespace mem
             page_block(const page_block&);
             const page_block operator=(const page_block&);
 
+            uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory, not used in page_block
+
             uintptr_t		m_memory;
             uintptr_t		m_memory_size;			//memory size in bytes
-
-            uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory
 
             uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
             uint16_t	    m_free_offset;			
@@ -343,6 +343,7 @@ namespace mem
                 //make the memory as one big block
                 buddy_element* block = new (m_sp_base) buddy_element(buddy_max_order);
                 m_buddies[ buddy_max_order ].m_buddy_elements.push_front(block);
+                block->set_tag();
             }
 
             page_block* alllocate(std::size_t size) throw()
@@ -360,7 +361,7 @@ namespace mem
                     {
                         buddy = buddies->front();
                         buddies->pop_front();
-                        buddy->set_tag();
+                        buddy->clear_tag();
                         break;
                     }
                 }
@@ -407,8 +408,8 @@ namespace mem
                 while ( 
                         !
                         (
-                            ( k == buddy_max_order || p->get_tag() ) ||
-                            ( !p->get_tag() && p->get_order() != k )
+                            ( k == buddy_max_order || p->get_tag() == 0 ) ||
+                            ( p->get_tag() == 1 && p->get_order() != k )
                         )
                       )
                 {
@@ -429,7 +430,7 @@ namespace mem
                 buddy_block_list*   buddies = &m_buddies[k].m_buddy_elements;
                 buddy_element*      element = new (block_address) buddy_element(k);
                 buddies->push_front(element);
-                element->clear_tag();
+                element->set_tag();
             }
 
 
@@ -444,7 +445,7 @@ namespace mem
 
                 inline uint32_t get_order() const throw()
                 {
-                    return m_order;
+                    return m_order & 0x7FFFFFFF;
                 }
 
                 inline uint32_t get_tag() const throw()
