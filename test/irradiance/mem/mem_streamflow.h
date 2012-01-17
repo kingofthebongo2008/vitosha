@@ -13,10 +13,10 @@ namespace mem
         //---------------------------------------------------------------------------------------
         namespace detail
         {
-            inline uint32_t log2(uint32_t value)
+            inline uint32_t log2(uint32_t x)
             {
                 unsigned long result;
-                _BitScanForward(&result, value);
+                _BitScanForward(&result, x);
                 return static_cast<uint32_t>(result);
             }
 
@@ -329,6 +329,9 @@ namespace mem
         };
 
         //---------------------------------------------------------------------------------------
+        // super_page manages blocks of pages between 16kb and 256kb
+        // it uses buddy allocation scheme, which splits 2^k blocks in half on allocation and merges them back on free
+        // the overhead is 1 bit per allocated block. we pack it in the allocated data as a header.
         class super_page : public list_element<super_page>
         {
             static const uint32_t page_size = 4096;
@@ -340,7 +343,7 @@ namespace mem
             super_page(void* sp_base) throw() :
             m_sp_base(reinterpret_cast<uintptr_t> (sp_base) )
             {
-                //make the memory as one big block
+                //make the memory as one big block and mark it as free
                 buddy_element* block = new (m_sp_base) buddy_element(buddy_max_order);
                 m_buddies[ buddy_max_order ].m_buddy_elements.push_front(block);
                 block->set_tag();
@@ -353,6 +356,7 @@ namespace mem
                 buddy_element*  buddy           =   nullptr;
                 uint32_t        k;
 
+                //find block
                 for(k = order; k < buddy_max_order + 1 ; ++k )
                 {
                     buddy_block_list* buddies = &m_buddies[k].m_buddy_elements;
@@ -368,6 +372,7 @@ namespace mem
 
                 if (buddy != nullptr)
                 {
+                    //split the block in pieces until we get the correct size
                     while ( k > order)
                     {
                         --k;
@@ -404,6 +409,7 @@ namespace mem
                 uintptr_t       buddy_address   = buddy(block_address, k, m_sp_base );
                 buddy_element*  p               = reinterpret_cast<buddy_element*>(buddy_address);
 
+                //find buddy and merge the blocks if needed
                 //The order of these checks is important, since p can point to invalid memory
                 while ( 
                         !
@@ -475,7 +481,7 @@ namespace mem
 
                 private:
                 buddy_element();
-                uint32_t    m_order;
+                uint32_t    m_order;    //1 bit for tag
             };
 
             typedef list<buddy_element>     buddy_block_list;
@@ -492,6 +498,7 @@ namespace mem
 
             public:
 
+            //get the buddy of a member address with given order.
             static inline uintptr_t buddy(uintptr_t pointer, uint32_t order, uintptr_t base)
             {
                 // x + 2^k if x mod 2^(k+1) == 0
@@ -507,6 +514,9 @@ namespace mem
         };
 
         //---------------------------------------------------------------------------------------
+        //super pages have meta information for the memory they manage. this allocator manages the memory for them
+        //it uses chunk allocator which allocates chunks of memory. they are never freed back
+        //the freed headers form a queue in the freed memory and can be taken back.
         class super_page_header_allocator
         {
             static const uint32_t chunk_size = 4096 - 8; // 8 is the size of the internal headers of the chunk heap
