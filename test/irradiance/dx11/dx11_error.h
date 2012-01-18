@@ -5,13 +5,13 @@
 
 namespace dx11
 {
-	template < typename Exception > void throw_if_failed(HRESULT hr)
-	{
-		if (hr != S_OK)
-		{
-			throw Exception();
-		}
-	}
+    template < typename Exception > void throw_if_failed(HRESULT hr)
+    {
+        if (hr != S_OK)
+        {
+            throw Exception();
+        }
+    }
 
 }
 

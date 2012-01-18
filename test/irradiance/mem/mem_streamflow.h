@@ -338,10 +338,14 @@ namespace mem
             static const uint32_t super_page_size = 4 * 1024 * 1024;
             static const uint32_t page_count = super_page_size / page_size;
             static const uint32_t buddy_max_order = detail::log2_c<page_count>::value;
-          
+
+            typedef void (*free_super_page_callback)(super_page*, uintptr_t, void*);
+
             public:
-            super_page(void* sp_base) throw() :
-            m_sp_base(reinterpret_cast<uintptr_t> (sp_base) )
+            super_page(void* sp_base, free_super_page_callback free_callback, void* callback_parameter) throw() :
+                m_sp_base(reinterpret_cast<uintptr_t> (sp_base) )
+                , m_free_callback(free_callback)
+                , m_callback_parameter(callback_parameter)
             {
                 //make the memory as one big block and mark it as free
                 buddy_element* block = new (m_sp_base) buddy_element(buddy_max_order);
@@ -409,6 +413,9 @@ namespace mem
                 uintptr_t       buddy_address   = buddy(block_address, k, m_sp_base );
                 buddy_element*  p               = reinterpret_cast<buddy_element*>(buddy_address);
 
+
+                block->~page_block();
+
                 //find buddy and merge the blocks if needed
                 //The order of these checks is important, since p can point to invalid memory
                 while ( 
@@ -437,6 +444,13 @@ namespace mem
                 buddy_element*      element = new (block_address) buddy_element(k);
                 buddies->push_front(element);
                 element->set_tag();
+
+                //if all pages are freed return this super_page to the os
+                buddy_block_list*   buddies_max_order = &m_buddies[buddy_max_order].m_buddy_elements;
+                if ( !buddies_max_order->empty())
+                {
+                    m_free_callback(this, m_sp_base, m_callback_parameter);
+                }
             }
 
 
@@ -491,12 +505,12 @@ namespace mem
                 buddy_block_list    m_buddy_elements;
             };
 
-            uintptr_t       m_sp_base;
+            uintptr_t                   m_sp_base;
+            free_super_page_callback    m_free_callback;
+            void*                       m_callback_parameter;
 
             //buddy system allocation is described by Knuth in The Art of Computer Programming vol 1.
-            buddy           m_buddies[buddy_max_order + 1];             
-
-            public:
+            buddy                       m_buddies[buddy_max_order + 1];             
 
             //get the buddy of a member address with given order.
             static inline uintptr_t buddy(uintptr_t pointer, uint32_t order, uintptr_t base)
@@ -616,7 +630,7 @@ namespace mem
 
                     if (sp_base)
                     {
-                        super_page* page = new (super_page_memory) super_page(sp_base);
+                        super_page* page = new (super_page_memory) super_page(sp_base, free_super_page_callback, this);
                         m_super_pages.push_front(page);
 
                         return page;
@@ -632,16 +646,25 @@ namespace mem
                 }
             }
 
-            void free(super_page* pointer) throw()
+            void free(super_page* header, void* super_page_base) throw()
             {
-                m_virtual_alloc_heap.free(pointer);
-                m_header_allocator.free(pointer);
+                header->~super_page();
+                m_virtual_alloc_heap.free(super_page_base);
+                m_header_allocator.free(header);
             }
 
         private:
             virtual_alloc_heap              m_virtual_alloc_heap;
             super_page_header_allocator     m_header_allocator;
             super_page_list                 m_super_pages;
+
+
+            inline static void free_super_page_callback(super_page* header, uintptr_t super_page_base, void* callback_parameter)
+            {
+                super_page_manager* page_manager    = reinterpret_cast<super_page_manager*> (callback_parameter);
+                void*               base            = reinterpret_cast<void*> (super_page_base);
+                page_manager->free(header, base);
+            }
         };
 
         //---------------------------------------------------------------------------------------
