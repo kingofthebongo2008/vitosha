@@ -606,10 +606,108 @@ namespace mem
         };
 
         //---------------------------------------------------------------------------------------
+        class bibop_table
+        {
+            public:
+
+            struct bibop_object
+            {
+                typedef enum _type
+                {
+                    tiny = 0x0,
+                    large = 0x1
+                } type;
+
+                type get_type() const
+                {
+                    return static_cast<type> (m_value >> 7 & 0x01);
+                }
+
+                uint8_t get_disposition() const
+                {
+                    return m_value & 0x7f;
+                }
+
+                void set_value(uint8_t value)
+                {
+                    m_value = value;
+                }
+
+                private:
+                // in 1 bit encodes the type of the memory in a page and in 7 bits encodes offset to the page block header
+                uint8_t m_value;
+            };
+
+            bibop_table()
+            {
+
+            }
+
+            void register_tiny_pages(uintptr_t start_page, uint32_t page_count, uintptr_t page_block)
+            {
+                const uint32_t  page_size   = 4096;
+                uintptr_t       address     = start_page;
+                uint32_t        start_index = get_index(start_page);
+                uintptr_t       offset      = ( start_page - page_block ) / page_size; //result should be [0;127]
+
+                for(uint32_t i = start_index; i < start_index + page_count; ++i, ++offset )
+                {
+                    m_pages[i].set_value( static_cast<uint8_t> (offset) ) ;
+                }
+            }
+
+            void register_large_pages(uintptr_t start_page, uint32_t page_count)
+            {
+                uint32_t start_index = get_index(start_page);
+
+                //mark all pages in this range as large pages;
+                uint8_t* t = reinterpret_cast<uint8_t*>(&m_pages[start_index]);
+                std::fill_n( t , page_count, 0x80 );
+            }
+
+            page_block* decode(const void* pointer) const
+            {
+                bibop_object obj = decode_pointer(pointer);
+                return decode(pointer, obj);
+            }
+
+            static page_block* decode(const void* pointer, bibop_object obj)
+            {
+                const uint32_t  page_size   = 4096;
+                uintptr_t   p               = reinterpret_cast<uintptr_t>(pointer);
+                uintptr_t   p_              = ( p - obj.get_disposition() ) * page_size;
+                return reinterpret_cast<page_block*> (p_);
+            }
+
+            bibop_object decode_pointer(const void* pointer) const
+            {
+                uint32_t index = get_index(pointer);
+                return m_pages[ index ]; 
+            }
+
+            private:
+            
+            bibop_object m_pages[ 1024*1024 ];  // suitable for 4gb address space and page size 4096
+
+            static inline uint32_t get_index(uintptr_t address)
+            {
+                const uint32_t page_size = 4096;
+                return ( address & (page_size - 1) )  >> detail::log2_c<page_size>::value;
+            }
+
+            static inline uint32_t get_index(const void* pointer)
+            {
+                return get_index( reinterpret_cast<uintptr_t>(pointer) );
+            }
+
+        };
+
+
+        //---------------------------------------------------------------------------------------
         class super_page_manager
         {
-            static const uint32_t super_page_size = 4 * 1024 * 1024;
-            typedef list<super_page> super_page_list;
+            static const uint32_t       super_page_size   =   4 * 1024 * 1024;
+            typedef list<super_page>    super_page_list;
 
 
         public:
@@ -648,7 +746,9 @@ namespace mem
 
             void free(super_page* header, void* super_page_base) throw()
             {
+                m_super_pages.remove(header);
                 header->~super_page();
+
                 m_virtual_alloc_heap.free(super_page_base);
                 m_header_allocator.free(header);
             }
@@ -657,6 +757,7 @@ namespace mem
             virtual_alloc_heap              m_virtual_alloc_heap;
             super_page_header_allocator     m_header_allocator;
             super_page_list                 m_super_pages;
+            bibop_table                     m_bibop;
 
 
             inline static void free_super_page_callback(super_page* header, uintptr_t super_page_base, void* callback_parameter)
@@ -667,31 +768,11 @@ namespace mem
             }
         };
 
-        //---------------------------------------------------------------------------------------
-        class bibop_table
-        {
-            struct bibop_object
-            {
-                uint8_t m_type : 1;
-                uint8_t m_disposition : 7;
-            };
-
-            bibop_object decode(const void* ptr) const
-            {
-                const uint32_t page_size = 4096;
-                std::uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
-                return m_pages[ ( p & (page_size - 1) ) / page_size]; 
-            }
-
-            bibop_object m_pages[ 1024*1024 ];
-        };
-
-
-
-        const uint32_t size_classes = 512;
+        
         //---------------------------------------------------------------------------------------
         class heap
         {
+            const uint32_t size_classes = 512;
             typedef list<page_block>	page_block_list;
             page_block_list				m_page_blocks[ size_classes ];
 
