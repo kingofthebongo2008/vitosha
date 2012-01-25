@@ -217,12 +217,17 @@ namespace mem
             T* m_tail;
         };
 
+
+        class super_page;
+
         //---------------------------------------------------------------------------------------
+        //page_block are the basic elements for allocations
         class alignas(64) page_block : public list_element<page_block>
         {
         public:
-            page_block(uintptr_t memory, uint32_t memory_size) throw() : 
-              m_memory(memory)
+            page_block(super_page* super_page, uintptr_t memory, uint32_t memory_size) throw() : 
+                    m_super_page(super_page)
+                  , m_memory(memory)
                   , m_memory_size(memory_size)
                   , m_unallocated_offset(0)
                   , m_free_offset(0)
@@ -297,6 +302,11 @@ namespace mem
                   ++m_free_objects;
               }
 
+              super_page*     get_super_page() const
+              {
+                  return m_super_page;
+              }
+
         private:
 
             page_block();
@@ -305,6 +315,7 @@ namespace mem
 
             uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory, not used in page_block
 
+            super_page*     m_super_page;
             uintptr_t		m_memory;
             uintptr_t		m_memory_size;			//memory size in bytes
 
@@ -346,6 +357,7 @@ namespace mem
                 m_sp_base(reinterpret_cast<uintptr_t> (sp_base) )
                 , m_free_callback(free_callback)
                 , m_callback_parameter(callback_parameter)
+                , m_largest_free_order( static_cast<uint32_t> (buddy_max_order) )
             {
                 //make the memory as one big block and mark it as free
                 buddy_element* block = new (m_sp_base) buddy_element(buddy_max_order);
@@ -395,8 +407,10 @@ namespace mem
                     uintptr_t memory_base = reinterpret_cast<uintptr_t> (buddy) + sizeof(page_block);
                     uint32_t  memory_size = static_cast<uint32_t> ( size - sizeof(page_block) );
 
+                    update_largest_free_order();
+
                     //convert the buddy to page_block
-                    return new (buddy) page_block(memory_base, memory_size);
+                    return new (buddy) page_block(this, memory_base, memory_size);
                 }
                 else
                 {
@@ -451,8 +465,16 @@ namespace mem
                 {
                     m_free_callback(this, m_sp_base, m_callback_parameter);
                 }
+                else
+                {
+                    update_largest_free_order();
+                }
             }
 
+            inline uint16_t get_largest_free_order() const
+            {
+                    return m_largest_free_order;
+            }
 
         private:
 
@@ -511,6 +533,7 @@ namespace mem
 
             //buddy system allocation is described by Knuth in The Art of Computer Programming vol 1.
             buddy                       m_buddies[buddy_max_order + 1];             
+            uint16_t                    m_largest_free_order;
 
             //get the buddy of a member address with given order.
             static inline uintptr_t buddy(uintptr_t pointer, uint32_t order, uintptr_t base)
@@ -525,12 +548,36 @@ namespace mem
                 const uintptr_t value_2 = pointer_1 ^ value_1;
                 return value_2 + base;
             }
+
+            void update_largest_free_order()
+            {
+                uint32_t result = 0;
+
+                for(int32_t k = buddy_max_order; k >=0 ; --k )
+                {
+                    buddy_block_list* buddies = &m_buddies[k].m_buddy_elements;
+
+                    if ( !buddies->empty() )
+                    {
+                        result = k;
+                        break;
+                    }
+                }
+                m_largest_free_order = static_cast<uint16_t>(result);
+            }
         };
+
+        inline void free_page_block(page_block* block)
+        {
+            super_page* page = block->get_super_page();
+            page->free(block);
+        }
 
         //---------------------------------------------------------------------------------------
         //super pages have meta information for the memory they manage. this allocator manages the memory for them
         //it uses chunk allocator which allocates chunks of memory. they are never freed back
         //the freed headers form a queue in the freed memory and can be taken back.
+        template <uint32_t super_page_header_size>
         class super_page_header_allocator
         {
             static const uint32_t chunk_size = 4096 - 8; // 8 is the size of the internal headers of the chunk heap
@@ -538,8 +585,7 @@ namespace mem
 
         public:
             explicit super_page_header_allocator(virtual_alloc_heap* virtual_alloc_heap) : 
-            m_virtual_alloc_heap(virtual_alloc_heap)
-                , m_chunk_heap(m_virtual_alloc_heap)
+                  m_chunk_heap(virtual_alloc_heap)
                 , m_free(0)
                 , m_memory(0)
                 , m_free_objects(0)
@@ -548,7 +594,7 @@ namespace mem
 
             }
 
-            super_page* allocate() throw()
+            void* allocate() throw()
             {
                 super_page* result = nullptr;
 
@@ -568,7 +614,7 @@ namespace mem
 
                         if (m_memory != 0)
                         {
-                            const uint16_t super_page_size = static_cast<uint16_t>(sizeof(super_page));
+                            const uint16_t super_page_size = static_cast<uint16_t>(super_page_header_size);
                             m_unallocated_offset = 0;
                             m_free_objects +=  chunk_size  / super_page_size;
                         }
@@ -594,7 +640,6 @@ namespace mem
             }
 
         private:
-            virtual_alloc_heap*     m_virtual_alloc_heap;   
             super_page_headers      m_chunk_heap;           
 
             uintptr_t               m_free;			        
@@ -634,7 +679,7 @@ namespace mem
                 }
 
                 private:
-                // in 1 bit encodes the type of the memory in a page and in 7 bits encodes offset to the page block header
+                // in 1 bit encodes the type of the memory in a page and in 7 bits encodes offset to the page block header in pages
                 uint8_t m_value;
             };
 
@@ -643,7 +688,7 @@ namespace mem
 
             }
 
-            void register_tiny_pages(uintptr_t start_page, uint32_t page_count, uintptr_t page_block)
+            void register_tiny_pages(uintptr_t start_page, uint32_t page_count, uintptr_t page_block)  throw()
             {
                 const uint32_t  page_size   = 4096;
                 uintptr_t       address     = start_page;
@@ -662,7 +707,7 @@ namespace mem
 
                 //mark all pages in this range as large pages;
                 uint8_t* t = reinterpret_cast<uint8_t*>(&m_pages[start_index]);
-                std::fill_n( t , page_count, 0x80 );
+                std::memset( t , page_count, 0x80 );
             }
 
             page_block* decode(const void* pointer) const
@@ -689,13 +734,13 @@ namespace mem
             
             bibop_object m_pages[ 1024*1024 ];  // suitable for 4gb address space and page size 4096
 
-            static inline uint32_t get_index(uintptr_t address)
+            static inline uint32_t get_index(uintptr_t address) throw()
             {
                 const uint32_t page_size = 4096;
                 return ( address & (page_size - 1) )  >> detail::log2_c<page_size>::value;
             }
 
-            static inline uint32_t get_index(const void* pointer)
+            static inline uint32_t get_index(const void* pointer) throw()
             {
                 return get_index( reinterpret_cast<uintptr_t>(pointer) );
             }
@@ -709,14 +754,13 @@ namespace mem
             static const uint32_t       super_page_size   =   4 * 1024 * 1024;
             typedef list<super_page>    super_page_list;
 
-
         public:
             super_page_manager() throw() : m_header_allocator(&m_virtual_alloc_heap)
             {
 
             }
 
-            super_page* allocate() throw()
+            super_page* allocate_super_page() throw()
             {
                 //1. allocate memory for the header
                 void* super_page_memory = m_header_allocator.allocate();
@@ -744,6 +788,21 @@ namespace mem
                 }
             }
 
+            page_block* allocate_page_block(size_t size)
+            {
+                //
+                //std::find( std::begin(super_page_list), std::end(super_page_list), f);
+                
+                
+                return nullptr;
+            }
+
+        private:
+            virtual_alloc_heap                                  m_virtual_alloc_heap;
+            super_page_header_allocator<sizeof(super_page)>     m_header_allocator;
+            super_page_list                                     m_super_pages;
+            bibop_table                                         m_bibop;
+
             void free(super_page* header, void* super_page_base) throw()
             {
                 m_super_pages.remove(header);
@@ -752,13 +811,6 @@ namespace mem
                 m_virtual_alloc_heap.free(super_page_base);
                 m_header_allocator.free(header);
             }
-
-        private:
-            virtual_alloc_heap              m_virtual_alloc_heap;
-            super_page_header_allocator     m_header_allocator;
-            super_page_list                 m_super_pages;
-            bibop_table                     m_bibop;
-
 
             inline static void free_super_page_callback(super_page* header, uintptr_t super_page_base, void* callback_parameter)
             {
@@ -770,11 +822,12 @@ namespace mem
 
         
         //---------------------------------------------------------------------------------------
+        //heap allocated in the thread local storage
         class heap
         {
-            const uint32_t size_classes = 512;
-            typedef list<page_block>	page_block_list;
-            page_block_list				m_page_blocks[ size_classes ];
+            static const uint32_t size_classes  = 512;
+            typedef list<page_block>	        page_block_list;
+            page_block_list				        m_page_blocks[ size_classes ];
 
         public:
 
@@ -787,6 +840,18 @@ namespace mem
                 if ( list && !list->empty() )
                 {
                     page_block* block = list->front();
+
+                    if (block->full())
+                    {
+                        //garbage collect
+                    }
+
+                    if (block->full())
+                    {
+                        //allocate block
+                        block = m_page_manager->allocate_page_block(16384);
+                    }
+
                     result = block->allocate();
 
                     if (block->full())
@@ -799,10 +864,20 @@ namespace mem
                 else
                 {
                     //allocate block
+                    page_block* block = m_page_manager->allocate_page_block(16384);
 
+                    if (block)
+                    {
+                        result = block->allocate();
+
+                        if (block->full())
+                        {
+                            list->push_front(block);
+                        }
+                    }
                 }
 
-                return nullptr;
+                return result;
             }
 
             void local_free(void* pointer, page_block* page_block, uint32_t size_class) throw()
@@ -821,9 +896,13 @@ namespace mem
                 }
                 else
                 {
+                    //todo
                     //return block to global structures for reusing
                 }
             }
+
+            private:
+            super_page_manager* m_page_manager;
         };
     }
 }
