@@ -230,48 +230,65 @@ namespace mem
 
             void push(void* pointer)
             {
-                stack_element*      element  = reinterpret_cast<stack_element*>(pointer);
-                stack_element*      top;
-                uintptr_t           element_for_insert;
+                volatile stack_element* top;
+                stack_element*          element  = reinterpret_cast<stack_element*>(pointer);
+                uintptr_t               element_for_insert;
 
-                do
+                
+                top             = m_top;
+                element->m_next = m_top;
+
+                uint16_t version_of_pointer = get_version( element );
+                element_for_insert          = encode_pointer(element, version_of_pointer+1);
+
+                uint32_t delay_value = 2;
+                while (_InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_insert, (uintptr_t) top) != (uintptr_t) top )
                 {
-                    top = m_top;
+                    delay_value     = delay(delay_value);
+                    top             = m_top;
                     element->m_next = m_top;
 
-                    uint16_t version_of_pointer = get_version(element);
-
-                    element_for_insert = encode_pointer(element, version_of_pointer+1);
+                    uint16_t version_of_pointer = get_version( element );
+                    element_for_insert          = encode_pointer(element, version_of_pointer+1);
                 }
-                while( _InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_insert, (uintptr_t) top) != (uintptr_t) top );
             }
 
 
             void* pop()
             {
-                stack_element*          el_;
-                stack_element*          top;
+                volatile stack_element* top;
                 volatile stack_element* element;
+                stack_element*          el_;
                 uintptr_t               element_for_delete;
 
-                do
-                {
-                    top = m_top;
+                
+                top                         = m_top;
 
-                    el_     = reinterpret_cast<stack_element*> ( decode_pointer(top) );
+                el_                         = reinterpret_cast<stack_element*> ( decode_pointer( top ) );
+                element                     = el_->m_next;
+
+                uint16_t version_of_pointer = get_version( element );
+                element_for_delete          = encode_pointer( element, version_of_pointer+1);
+
+                uint32_t delay_value = 2;
+                while( _InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_delete, (uintptr_t) top) != (uintptr_t) top )
+                {
+                    delay_value = delay(delay_value);
+
+                    top     = m_top;
+                    el_     = reinterpret_cast<stack_element*> ( decode_pointer( top ) );
                     element = el_->m_next;
 
-                    uint16_t version_of_pointer = get_version(element);
-                    element_for_delete = encode_pointer(element, version_of_pointer+1);
+                    uint16_t version_of_pointer = get_version( element );
+                    element_for_delete          = encode_pointer( element, version_of_pointer+1);
                 }
-                while( _InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_delete, (uintptr_t) top) != (uintptr_t) top );
 
                 return el_;
             }
 
             bool empty() const
             {
-                return m_top == nullptr;
+                return (m_top == nullptr);
             }
 
             private:
@@ -285,20 +302,16 @@ namespace mem
                 }
             };
 
-            static inline uint16_t get_version(const volatile void* pointer)
+            static inline uint16_t get_version(uintptr_t pointer)
             {
                 //x64 and ia64 use only 48 bits of 64 of a pointer. we use the rest 16 bits for aba counter
-                uintptr_t       generation_ptr = reinterpret_cast<uintptr_t> (pointer);
-                return static_cast<uint16_t> (generation_ptr >> 48);
+                return static_cast<uint16_t> (pointer >> 48);
             }
 
-            static inline uint16_t get_version(const void* pointer)
+            static inline uint16_t get_version(volatile void* pointer)
             {
-                //x64 and ia64 use only 48 bits of 64 of a pointer. we use the rest 16 bits for aba counter
-                uintptr_t       generation_ptr = reinterpret_cast<uintptr_t> (pointer);
-                return static_cast<uint16_t> (generation_ptr >> 48);
+                return get_version( reinterpret_cast<uintptr_t> (pointer) );
             }
-
 
             static inline void* decode_pointer(uintptr_t pointer)
             {
@@ -306,31 +319,38 @@ namespace mem
                 return reinterpret_cast<void*> ( pointer & mask );
             }
 
-            static inline void* decode_pointer(const void* pointer)
+            static inline void* decode_pointer(volatile void* pointer)
             {
-                return decode_pointer(reinterpret_cast<uintptr_t>(pointer));
+                return decode_pointer( reinterpret_cast<uintptr_t>(pointer) );
             }
 
-            static inline uintptr_t encode_pointer(const volatile void* pointer, uint16_t version)
+            static inline uintptr_t encode_pointer(uintptr_t pointer, uint16_t version)
             {
-                uintptr_t       data_ptr    = reinterpret_cast<uintptr_t> (pointer);
                 const uint64_t  mask        = 0xFFFFFFFFFFFFL;
                 const uint64_t  version_    = static_cast<uintptr_t>(version);
 
-                return (data_ptr & mask ) | (version_ << 48) ;
+                return (pointer & mask ) | (version_ << 48) ;
             }
 
-
-            static inline uintptr_t encode_pointer(const void* pointer, uint16_t version)
+            static inline uintptr_t encode_pointer(volatile void* pointer, uint16_t version)
             {
-                uintptr_t       data_ptr    = reinterpret_cast<uintptr_t> (pointer);
-                const uint64_t  mask        = 0xFFFFFFFFFFFFL;
-                const uint64_t  version_    = static_cast<uintptr_t>(version);
-
-                return (data_ptr & mask ) | (version_ << 48) ;
+                return encode_pointer( reinterpret_cast<uintptr_t>(pointer), version );
             }
 
-            stack_element* m_top;
+            //perform exponential backoff
+            static inline uint32_t delay(uint32_t value)
+            {
+                volatile uint32_t i;
+
+                for (i = 0; i < value; ++i)
+                {
+                    ;
+                }
+
+                return value * value;
+            }
+
+            volatile stack_element* m_top;
         };
 
         class super_page;
