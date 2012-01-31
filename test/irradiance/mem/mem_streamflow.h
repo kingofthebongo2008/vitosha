@@ -13,7 +13,7 @@ namespace mem
         //---------------------------------------------------------------------------------------
         namespace detail
         {
-            inline uint32_t log2(uint32_t x)
+            inline uint32_t log2(uint32_t x) throw()
             {
                 unsigned long result;
                 _BitScanForward(&result, x);
@@ -228,7 +228,7 @@ namespace mem
 
             }
 
-            void push(void* pointer)
+            void push(void* pointer) throw()
             {
                 volatile stack_element* top;
                 stack_element*          element  = reinterpret_cast<stack_element*>(pointer);
@@ -242,7 +242,7 @@ namespace mem
                 element_for_insert          = encode_pointer(element, version_of_pointer+1);
 
                 uint32_t delay_value = 2;
-                while (_InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_insert, (uintptr_t) top) != (uintptr_t) top )
+                while (_InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_insert, (uintptr_t) top) != (long long) top )
                 {
                     delay_value     = delay(delay_value);
                     top             = m_top;
@@ -254,7 +254,7 @@ namespace mem
             }
 
 
-            void* pop()
+            void* pop() throw()
             {
                 volatile stack_element* top;
                 volatile stack_element* element;
@@ -271,7 +271,7 @@ namespace mem
                 element_for_delete          = encode_pointer( element, version_of_pointer+1);
 
                 uint32_t delay_value = 2;
-                while( _InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_delete, (uintptr_t) top) != (uintptr_t) top )
+                while( _InterlockedCompareExchange64( (volatile long long*) &m_top, (uintptr_t) element_for_delete, (uintptr_t) top) != (long long) top )
                 {
                     delay_value = delay(delay_value);
 
@@ -286,7 +286,7 @@ namespace mem
                 return el_;
             }
 
-            bool empty() const
+            bool empty() const throw()
             {
                 return (m_top == nullptr);
             }
@@ -300,31 +300,33 @@ namespace mem
                 {
 
                 }
+
+                uint8_t m_pad[56];
             };
 
-            static inline uint16_t get_version(uintptr_t pointer)
+            static inline uint16_t get_version(uintptr_t pointer) throw()
             {
                 //x64 and ia64 use only 48 bits of 64 of a pointer. we use the rest 16 bits for aba counter
                 return static_cast<uint16_t> (pointer >> 48);
             }
 
-            static inline uint16_t get_version(volatile void* pointer)
+            static inline uint16_t get_version(volatile void* pointer) throw()
             {
                 return get_version( reinterpret_cast<uintptr_t> (pointer) );
             }
 
-            static inline void* decode_pointer(uintptr_t pointer)
+            static inline void* decode_pointer(uintptr_t pointer) throw()
             {
                 const uint64_t  mask    = 0xFFFFFFFFFFFFL;
                 return reinterpret_cast<void*> ( pointer & mask );
             }
 
-            static inline void* decode_pointer(volatile void* pointer)
+            static inline void* decode_pointer(volatile void* pointer) throw()
             {
                 return decode_pointer( reinterpret_cast<uintptr_t>(pointer) );
             }
 
-            static inline uintptr_t encode_pointer(uintptr_t pointer, uint16_t version)
+            static inline uintptr_t encode_pointer(uintptr_t pointer, uint16_t version) throw()
             {
                 const uint64_t  mask        = 0xFFFFFFFFFFFFL;
                 const uint64_t  version_    = static_cast<uintptr_t>(version);
@@ -332,13 +334,13 @@ namespace mem
                 return (pointer & mask ) | (version_ << 48) ;
             }
 
-            static inline uintptr_t encode_pointer(volatile void* pointer, uint16_t version)
+            static inline uintptr_t encode_pointer(volatile void* pointer, uint16_t version) throw()
             {
                 return encode_pointer( reinterpret_cast<uintptr_t>(pointer), version );
             }
 
             //perform exponential backoff
-            static inline uint32_t delay(uint32_t value)
+            static inline uint32_t delay(uint32_t value) throw()
             {
                 volatile uint32_t i;
 
@@ -351,12 +353,13 @@ namespace mem
             }
 
             volatile stack_element* m_top;
+            uint8_t                 m_pad[56];
         };
 
         class super_page;
 
         //---------------------------------------------------------------------------------------
-        //page_block are the basic elements for allocations
+        //page_block are the basic elements for allocations 
         class alignas(64) page_block : public list_element<page_block>
         {
         public:
@@ -448,27 +451,27 @@ namespace mem
             page_block(const page_block&);
             const page_block operator=(const page_block&);
 
-            uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory, not used in page_block
+            uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory, not used in page_block, must be the first member
+            uint32_t		m_free_objects;
 
             super_page*     m_super_page;
             uintptr_t		m_memory;
             uintptr_t		m_memory_size;			//memory size in bytes
 
-            uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
-            uint16_t	    m_free_offset;			
-
-            uint32_t		m_free_objects;
-            uint32_t		m_size_class;			
-
             uint32_t		m_thread_id;
             uint32_t		m_lifo_list;
+
+            uint32_t		m_size_class;
+
+            uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
+            uint16_t	    m_free_offset;			
 
             inline uint32_t convert_to_bytes(uint16_t blocks) const throw()
             {
                 return blocks * m_size_class;
             }
 
-            inline uint16_t convert_to_object_offset(uint32_t bytes) const throw()
+            inline uint16_t convert_to_object_offset(uintptr_t bytes) const throw()
             {
                 return static_cast<uint16_t> ( bytes /  m_size_class );
             }
@@ -640,16 +643,16 @@ namespace mem
                     _bittestandreset( (long*) &m_order, 31);
                 }
 
-                static void* operator new(size_t size, uintptr_t where)
+                static void* operator new(size_t, uintptr_t where)
                 {
                     return reinterpret_cast<void*> (where);
                 }
 
-                static void operator delete(void* memory, uintptr_t where)
+                static void operator delete(void*, uintptr_t)
                 {
 
                 }
-
+                //operator new []
                 private:
                 buddy_element();
                 uint32_t    m_order;    //1 bit for tag
@@ -826,7 +829,6 @@ namespace mem
             void register_tiny_pages(uintptr_t start_page, uint32_t page_count, uintptr_t page_block)  throw()
             {
                 const uint32_t  page_size   = 4096;
-                uintptr_t       address     = start_page;
                 uint32_t        start_index = get_index(start_page);
                 uintptr_t       offset      = ( start_page - page_block ) / page_size; //result should be [0;127]
 
@@ -923,7 +925,7 @@ namespace mem
                 }
             }
 
-            page_block* allocate_page_block(size_t size)
+            page_block* allocate_page_block(size_t)
             {
                 //
                 //std::find( std::begin(super_page_list), std::end(super_page_list), f);
@@ -966,7 +968,7 @@ namespace mem
 
         public:
 
-            void* allocate(size_t size, uint32_t size_class) throw()
+            void* allocate(size_t, uint32_t size_class) throw()
             {
                 page_block_list* list = &m_page_blocks[size_class];
 

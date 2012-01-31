@@ -8,7 +8,7 @@
 
 namespace mem
 {
-    inline uintptr_t align(uintptr_t size, size_t alignment)
+    inline uintptr_t align(uintptr_t size, size_t alignment) throw()
     {
         return size + (alignment - 1)  & ~(alignment - 1);
     }
@@ -65,7 +65,7 @@ namespace mem
 
         }
 
-        ~free_list_heap()
+        ~free_list_heap() throw()
         {
             auto pointer = m_list;
 
@@ -131,7 +131,7 @@ namespace mem
 
         }
 
-        ~chunk_heap()
+        ~chunk_heap() throw()
         {
             auto pointer = m_free_objects;
 
