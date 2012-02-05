@@ -23,20 +23,62 @@ namespace mem
         return reinterpret_cast<t*> (heap.allocate(sizeof(t)));
     }
     
-
     class virtual_alloc_heap
     {
         public:
 
         void* allocate(std::size_t size) throw()
         {
-            return ::VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+            return ::VirtualAlloc( 0, size, MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
         }
 
         void free(void* pointer) throw()
         {
             ::VirtualFree(pointer, 0, MEM_RELEASE);
         }
+    };
+
+    template <uint32_t reserve_page_count, uint32_t allocation_page_count> class virtual_alloc_heap_fixed
+    {
+        static const uint32_t page_size = 4096;
+
+        public:
+
+        virtual_alloc_heap_fixed()
+        {
+            const uintptr_t size = static_cast<uintptr_t> (reserve_page_count) * static_cast<uintptr_t> (page_size);
+            m_heap_base = ::VirtualAlloc(0, size,  MEM_RESERVE , PAGE_READWRITE);
+            //todo exceptions
+        }
+
+        ~virtual_alloc_heap_fixed()
+        {
+            const uintptr_t size = static_cast<uintptr_t> (reserve_page_count) * static_cast<uintptr_t> (page_size);
+            ::VirtualFree(m_heap_base, size, MEM_RELEASE);
+        }
+
+        void* allocate() throw()
+        {
+            const uintptr_t size = static_cast<uintptr_t> (allocation_page_count) * static_cast<uintptr_t> (page_size);
+            return ::VirtualAlloc(m_heap_base, size, MEM_COMMIT,  PAGE_READWRITE);
+        }
+
+        void* allocate(std::size_t) throw()
+        {
+            return allocate();
+        }
+
+        void free(void* pointer) throw()
+        {
+            ::VirtualFree(pointer, page_size, MEM_DECOMMIT);
+        }
+
+        void* get_heap_base() const
+        {
+            return m_heap_base;
+        }
+
+        void*   m_heap_base;
     };
 
     class large_page_virtual_alloc_heap

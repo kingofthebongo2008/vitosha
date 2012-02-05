@@ -286,11 +286,6 @@ namespace mem
                 return el_;
             }
 
-            bool empty() const throw()
-            {
-                return (m_top == nullptr);
-            }
-
             private:
             struct alignas(64) stack_element
             {
@@ -301,7 +296,7 @@ namespace mem
 
                 }
 
-                uint8_t m_pad[56];
+                uint8_t m_pad[ 64 - sizeof(stack_element*) ];
             };
 
             static inline uint16_t get_version(uintptr_t pointer) throw()
@@ -353,7 +348,7 @@ namespace mem
             }
 
             volatile stack_element* m_top;
-            uint8_t                 m_pad[56];
+            uint8_t                 m_pad[ 64 - sizeof(stack_element*) ];
         };
 
         class super_page;
@@ -652,7 +647,10 @@ namespace mem
                 {
 
                 }
+
+                //todo
                 //operator new []
+
                 private:
                 buddy_element();
                 uint32_t    m_order;    //1 bit for tag
@@ -719,7 +717,8 @@ namespace mem
         class super_page_header_allocator
         {
             static const uint32_t chunk_size = 4096 - 8; // 8 is the size of the internal headers of the chunk heap
-            typedef chunk_heap< chunk_size,  virtual_alloc_heap > super_page_headers;
+            typedef virtual_alloc_heap_fixed<1024*1024, 1>       virtual_alloc_heap;
+            typedef chunk_heap< chunk_size, virtual_alloc_heap > super_page_headers;
 
         public:
             explicit super_page_header_allocator(virtual_alloc_heap* virtual_alloc_heap) : 
@@ -789,6 +788,7 @@ namespace mem
         };
 
         //---------------------------------------------------------------------------------------
+        //bibop tables are used as a technique to reduce per allocation headers and battle overhead of small allocations
         class bibop_table
         {
             public:
@@ -821,7 +821,12 @@ namespace mem
                 uint8_t m_value;
             };
 
-            bibop_table()
+            explicit bibop_table(uintptr_t memory_base) : m_memory_base(memory_base)
+            {
+
+            }
+
+            explicit bibop_table(void* memory_base) : m_memory_base(reinterpret_cast<uintptr_t> (memory_base) )
             {
 
             }
@@ -829,7 +834,7 @@ namespace mem
             void register_tiny_pages(uintptr_t start_page, uint32_t page_count, uintptr_t page_block)  throw()
             {
                 const uint32_t  page_size   = 4096;
-                uint32_t        start_index = get_index(start_page);
+                uint32_t        start_index = get_index(m_memory_base, start_page);
                 uintptr_t       offset      = ( start_page - page_block ) / page_size; //result should be [0;127]
 
                 for(uint32_t i = start_index; i < start_index + page_count; ++i, ++offset )
@@ -840,7 +845,7 @@ namespace mem
 
             void register_large_pages(uintptr_t start_page, uint32_t page_count)
             {
-                uint32_t start_index = get_index(start_page);
+                uint32_t start_index = get_index(m_memory_base, start_page);
 
                 //mark all pages in this range as large pages;
                 uint8_t* t = reinterpret_cast<uint8_t*>(&m_pages[start_index]);
@@ -863,25 +868,26 @@ namespace mem
 
             bibop_object decode_pointer(const void* pointer) const
             {
-                uint32_t index = get_index(pointer);
+                uint32_t index = get_index(m_memory_base, pointer);
                 return m_pages[ index ]; 
             }
 
             private:
             
             bibop_object m_pages[ 1024*1024 ];  // suitable for 4gb address space and page size 4096
+            uintptr_t    m_memory_base;         //the beginning of the page table, used for addresses higher than 4gb
 
-            static inline uint32_t get_index(uintptr_t address) throw()
+            static inline uint32_t get_index(uintptr_t memory_base, uintptr_t address) throw()
             {
                 const uint32_t page_size = 4096;
-                return ( address & (page_size - 1) )  >> detail::log2_c<page_size>::value;
+                const uintptr_t p = address - memory_base;
+                return ( p & (page_size - 1) )  >> detail::log2_c<page_size>::value;
             }
 
-            static inline uint32_t get_index(const void* pointer) throw()
+            static inline uint32_t get_index(uintptr_t memory_base, const void* pointer) throw()
             {
-                return get_index( reinterpret_cast<uintptr_t>(pointer) );
+                return get_index( memory_base, reinterpret_cast<uintptr_t>(pointer) );
             }
-
         };
 
 
@@ -890,9 +896,12 @@ namespace mem
         {
             static const uint32_t       super_page_size   =   4 * 1024 * 1024;
             typedef list<super_page>    super_page_list;
+            typedef list<page_block>	page_block_list;
 
         public:
-            super_page_manager() throw() : m_header_allocator(&m_virtual_alloc_heap)
+            super_page_manager() throw() : 
+              m_header_allocator(&m_os_heap_header)
+              , m_bibop(m_os_heap_header.get_heap_base())
             {
 
             }
@@ -905,7 +914,7 @@ namespace mem
                 if (super_page_memory)
                 {
                     //2. allocate memory for the pages
-                    void* sp_base = m_virtual_alloc_heap.allocate(super_page_size);
+                    void* sp_base = m_os_heap_pages.allocate();
 
                     if (sp_base)
                     {
@@ -935,17 +944,23 @@ namespace mem
             }
 
         private:
-            virtual_alloc_heap                                  m_virtual_alloc_heap;
-            super_page_header_allocator<sizeof(super_page)>     m_header_allocator;
-            super_page_list                                     m_super_pages;
+            virtual_alloc_heap_fixed<1024*1024, 1024>           m_os_heap_pages;
+            virtual_alloc_heap_fixed<1024*1024, 1>              m_os_heap_header;
+            super_page_header_allocator< sizeof(super_page)>    m_header_allocator;
+
+            super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
+            page_block_list                                     m_free_page_blocks;     //global cache of free page blocks. orphaned threads put here,
+            page_block_list                                     m_orphaned_page_blocks; //global cache of orphaned page blocks. orphaned threads put here,
             bibop_table                                         m_bibop;
+
+
 
             void free(super_page* header, void* super_page_base) throw()
             {
                 m_super_pages.remove(header);
                 header->~super_page();
 
-                m_virtual_alloc_heap.free(super_page_base);
+                m_os_heap_pages.free(super_page_base);
                 m_header_allocator.free(header);
             }
 
@@ -962,11 +977,8 @@ namespace mem
         //heap allocated in the thread local storage
         class heap
         {
-            static const uint32_t size_classes  = 512;
-            typedef list<page_block>	        page_block_list;
-            page_block_list				        m_page_blocks[ size_classes ];
 
-        public:
+            public:
 
             void* allocate(size_t, uint32_t size_class) throw()
             {
@@ -1039,7 +1051,13 @@ namespace mem
             }
 
             private:
-            super_page_manager* m_page_manager;
+
+            static const uint32_t size_classes  = 512;
+
+            typedef list<page_block>	        page_block_list;
+            page_block_list				        m_page_blocks[ size_classes ];
+            super_page_manager*                 m_page_manager;
+
         };
     }
 }
