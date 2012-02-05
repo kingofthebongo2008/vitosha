@@ -23,7 +23,7 @@ namespace mem
         {
             if (--(( const this_type*) pointer)->counter_ == 0)
             {
-                if (0 < sizeof(Derived))
+                if (0 < sizeof(derived))
                 {
                     delete p;
                 }
