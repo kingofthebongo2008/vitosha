@@ -2,6 +2,7 @@
 #define __SYS_SPIN_LOCK_H__
 
 #include <cstdint>
+#include <intrin.h>
 
 namespace sys
 {
@@ -10,32 +11,60 @@ namespace sys
         //perform exponential backoff
         inline uint32_t delay_eb(uint32_t value) throw()
         {
-            volatile uint32_t i;
+            volatile uint32_t   i;
+            const uint32_t      max = 0x00FFFFFF;
 
             for (i = 0; i < value; ++i)
             {
                 ;
             }
 
-            return value * value;
+            return max & (value * value);
         }
 
-        //perform exponential backoff
+        //perform geometric backoff
         inline uint32_t delay_gm(uint32_t value) throw()
         {
-            volatile uint32_t i;
+            volatile uint32_t   i;
+            const uint32_t      max = 0x00FFFFFF;
 
             for (i = 0; i < value; ++i)
             {
                 ;
             }
-            return value << 1;
+            return max & (value << 1);
+        }
+
+        //stall
+        inline void delay() throw()
+        {
+            _mm_pause();
+        }
+
+        //mapped compiler intrinsics to more standard names in scientific papers and c++ 11x
+
+        inline uint32_t test_and_set(volatile uint32_t* address, uint32_t value)
+        {
+            return _InterlockedExchange( (volatile long*) address, value);
+        }
+
+        inline uint32_t fetch_and_add(volatile uint32_t* address, uint32_t value)
+        {
+            return _InterlockedExchangeAdd((volatile long*) address, value);
+        }
+
+        inline bool compare_and_swap(volatile uint64_t* address, uint64_t old_value, uint64_t new_value)
+        {
+            return ( _InterlockedCompareExchange64((volatile long long*) address, new_value, old_value) == (long long) old_value );
+        }
+
+        inline uint64_t fetch_and_store(volatile uint64_t* address, uint64_t value)
+        {
+            return _InterlockedExchange64( (volatile long long*)  address, value);
         }
     }
 
-    //use for low contention
-    //paper: The Performance of Spin Lock Alternatives for Shaded - Memory Multiprocessors
-    //implemented also in cilk
+    //paper: The Performance of Spin Lock Alternatives for Shared - Memory Multiprocessors
     class alignas(64) spinlock_fas
     {
         public:
@@ -44,43 +73,33 @@ namespace sys
 
         }
 
-        void lock()
+        void acquire()
         {
-            while ( m_lock == busy || _InterlockedExchange(&m_lock, busy) == busy)
+            while ( m_lock == busy || details::test_and_set(&m_lock, busy) == busy)
             {
                 _mm_pause();
             }
         }
 
-        void lock_eb()
+        void acquire_eb()
         {
             uint32_t delay_value = 2;
-            while ( m_lock == busy || _InterlockedExchange(&m_lock, busy) == busy)
+            while ( m_lock == busy || details::test_and_set(&m_lock, busy) == busy)
             {
                 delay_value = details::delay_eb(delay_value);
             }
         }
 
-        void lock_gm()
+        void acquire_gm()
         {
             uint32_t delay_value = 2;
-            while ( m_lock == busy || _InterlockedExchange(&m_lock, busy) == busy)
+            while ( m_lock == busy || details::test_and_set(&m_lock, busy) == busy)
             {
                 delay_value = details::delay_gm(delay_value);
             }
         }
 
-        //does not work on amd sse3
-        void lock_wait()
-        {
-            while (_InterlockedExchange(&m_lock, busy) == busy )
-            {
-                volatile long* address = &m_lock;
-                _mm_mwait( (unsigned int) address, (unsigned int) ( address + 1) );
-            }
-        }
-
-        void unlock()
+        void release()
         {
             m_lock = free;
         }
@@ -92,14 +111,13 @@ namespace sys
             busy = 1
         };
 
-        volatile long     m_lock;
+        volatile uint32_t m_lock;
         uint8_t           m_pad[64 - sizeof(uint32_t)];
 
         spinlock_fas(const spinlock_fas&);
         const spinlock_fas& operator=(const spinlock_fas&);
     };
 
-    //use for medium to high contention. has increased latency. takes a lot of space
     //paper: The Performance of Spin Lock Alternatives for Shared - Memory Multiprocessors
     class alignas(64) spinlock_anderson
     {
@@ -116,20 +134,20 @@ namespace sys
             std::fill( &m_slots[1], &m_slots[1] + slot_count - 1, slot );
         }
 
-        void lock( uint32_t* position )
+        void acquire( uint32_t* position )
         {
-            uint32_t pos = _InterlockedIncrement( (volatile long*) &m_queue_last) - 1;
+            uint32_t pos = details::fetch_and_add(&m_queue_last, 1);
 
             while ( m_slots[ pos % slot_count].m_flag == must_wait)
             {
-                _mm_pause();
+                details::delay();
             }
 
             m_slots[ pos % slot_count ].m_flag = must_wait;
             *position = pos;
         }
 
-        void unlock(uint32_t position)
+        void release(uint32_t position)
         {
             m_slots[ (position + 1 ) % slot_count ].m_flag = has_lock;
         }
@@ -144,7 +162,7 @@ namespace sys
         typedef union alignas(64) 
         {
             uint32_t m_flag;
-            uint8_t  m_pad  [ 64 - sizeof(uint32_t) ];
+            uint8_t  m_pad  [ 64  ];
         } slot;
 
         slot        m_slots[slot_count];
@@ -157,10 +175,71 @@ namespace sys
         const spinlock_anderson& operator=(const spinlock_anderson&);
 
     };
-    
-    class spinlock_mcs
-    {
 
+    //paper: Algorithms for Scalable Synchronization on Shared-Memory Multiprocessors
+    class alignas(64) spinlock_mcs
+    {
+        public:
+        struct alignas(64) qnode
+        {
+            qnode*      m_next;
+            uint32_t    m_locked;
+
+            uint8_t     m_pad[ 64 - sizeof(uint64_t) - sizeof(uint32_t) ];
+
+            qnode() : m_next(nullptr), m_locked(0)
+            {
+
+            }
+        };
+
+        spinlock_mcs() : m_node(nullptr)
+        {
+
+        }
+
+        void acquire(qnode* node)
+        {
+            //prepare the node for insertion
+            node->m_next = nullptr;
+            node->m_locked = 1;      
+            _WriteBarrier();
+
+            qnode* predecessor = reinterpret_cast<qnode*> ( details::fetch_and_store((volatile uint64_t*) &m_node, (uint64_t) node) );
+
+            if (predecessor != nullptr)
+            {
+                predecessor->m_next = node;
+                while (predecessor->m_locked)
+                {
+                    details::delay();
+                }
+            }
+        }
+
+        void release(qnode* node)
+        {
+            if ( node->m_next == nullptr)
+            {
+                if ( details::compare_and_swap( (volatile uint64_t*) &m_node, (uint64_t) node, 0) )
+                {
+                    return;
+                }
+
+                //compensates for the timing window between fetch_and_store and the assignment
+                //to predecessor->m_next
+                while(node->m_next == nullptr)
+                {
+                    details::delay();
+                }
+            }
+
+            node->m_next->m_locked = 0;
+        }
+
+        private:
+        qnode*  m_node;
+        uint8_t m_pad[64 - sizeof(uint64_t) ];
     };
 
     class spinlock_clh
@@ -171,17 +250,19 @@ namespace sys
     template <typename t> class lock
     {
         public:
-        lock(t& l) : m_l(l)
+        explicit lock(t& l) : m_l(l)
         {
-            l.lock();
+            m_l.acquire();
         }
 
         ~lock()
         {
-            l.unlock();
+            m_l.release();
         }
 
         private:
+        t& m_l;
+
         lock(const lock&);
         const lock& operator = (const lock&);
     };
@@ -189,14 +270,14 @@ namespace sys
     template <> class lock<spinlock_anderson>
     {
         public:
-        lock(spinlock_anderson& l) : m_l(l)
+        explicit lock(spinlock_anderson& l) : m_l(l)
         {
-            l.lock(&m_position);
+            l.acquire(&m_position);
         }
 
         ~lock()
         {
-            m_l.unlock(m_position);
+            m_l.release(m_position);
         }
 
         private:
@@ -204,8 +285,30 @@ namespace sys
         uint32_t m_position;
         lock(const lock&);
         const lock& operator = (const lock&);
+    };
 
+    template <> class alignas(64) lock<spinlock_mcs>
+    {
+        private:
+        typedef lock<spinlock_mcs> this_type;
 
+        public:
+        explicit lock(spinlock_mcs& l) : m_l(l)
+        {
+            m_l.acquire(&m_node);   
+        }
+
+        ~lock()
+        {
+            m_l.release(&m_node);
+        }
+
+        private:
+        spinlock_mcs::qnode m_node;
+        spinlock_mcs& m_l;
+
+        lock(const lock&);
+        const lock& operator = (const lock&);
     };
 }
 
