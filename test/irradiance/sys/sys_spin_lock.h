@@ -75,9 +75,14 @@ namespace sys
 
         void acquire()
         {
+            acquire_eb();
+        }
+
+        void acquire_lock()
+        {
             while ( m_lock == busy || details::test_and_set(&m_lock, busy) == busy)
             {
-                _mm_pause();
+                details::delay();
             }
         }
 
@@ -119,10 +124,11 @@ namespace sys
     };
 
     //paper: The Performance of Spin Lock Alternatives for Shared - Memory Multiprocessors
+    //performs poorly when the lock is shared by more threads than processors
     class alignas(64) spinlock_anderson
     {
         //fix contending processor to 16.
-        static const uint32_t slot_count = 16;
+        static const uint32_t slot_count = 32;
 
         public:
 
@@ -177,13 +183,14 @@ namespace sys
     };
 
     //paper: Algorithms for Scalable Synchronization on Shared-Memory Multiprocessors
+    //performs poorly when the lock is shared by more threads than processors
     class alignas(64) spinlock_mcs
     {
         public:
         struct alignas(64) qnode
         {
-            qnode*      m_next;
-            uint32_t    m_locked;
+            volatile qnode*      m_next;
+            volatile uint32_t    m_locked;
 
             uint8_t     m_pad[ 64 - sizeof(uint64_t) - sizeof(uint32_t) ];
 
@@ -202,15 +209,14 @@ namespace sys
         {
             //prepare the node for insertion
             node->m_next = nullptr;
-            node->m_locked = 1;      
-            _WriteBarrier();
 
             qnode* predecessor = reinterpret_cast<qnode*> ( details::fetch_and_store((volatile uint64_t*) &m_node, (uint64_t) node) );
 
             if (predecessor != nullptr)
             {
+                node->m_locked = 1;
                 predecessor->m_next = node;
-                while (predecessor->m_locked)
+                while (node->m_locked)
                 {
                     details::delay();
                 }
@@ -221,7 +227,7 @@ namespace sys
         {
             if ( node->m_next == nullptr)
             {
-                if ( details::compare_and_swap( (volatile uint64_t*) &m_node, (uint64_t) node, 0) )
+                if ( details::compare_and_swap( (volatile uint64_t*) &m_node, (uint64_t) node, 0 ) )
                 {
                     return;
                 }
@@ -287,13 +293,13 @@ namespace sys
         const lock& operator = (const lock&);
     };
 
-    template <> class alignas(64) lock<spinlock_mcs>
+    template <> class lock<spinlock_mcs>
     {
         private:
         typedef lock<spinlock_mcs> this_type;
 
         public:
-        explicit lock(spinlock_mcs& l) : m_l(l)
+        explicit lock(spinlock_mcs& l, spinlock_mcs::qnode& node) : m_l(l), m_node(node)
         {
             m_l.acquire(&m_node);   
         }
@@ -304,9 +310,8 @@ namespace sys
         }
 
         private:
-        spinlock_mcs::qnode m_node;
+        spinlock_mcs::qnode& m_node;
         spinlock_mcs& m_l;
-
         lock(const lock&);
         const lock& operator = (const lock&);
     };
