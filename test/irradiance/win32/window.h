@@ -12,12 +12,12 @@
 namespace wnd
 {
 
-	class application;
+    class application;
 
-	class window : public boost::noncopyable
+	class window : private boost::noncopyable
 	{
 		public:
-		explicit window(application& application, dx11::system_context system_context) : m_application(application), m_system_context(system_context)
+		window(application& application, dx11::system_context system_context) : m_application(application), m_system_context(system_context)
 		{
 
 		}

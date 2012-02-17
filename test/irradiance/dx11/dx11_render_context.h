@@ -6,9 +6,9 @@
 #include <cstdint>
 #include <boost/noncopyable.hpp>
 
-#include "dx11/dx11_pointers.h"
-#include "dx11/dx11_error.h"
-#include "dx11/dx11_system.h"
+#include <dx11/dx11_pointers.h>
+#include <dx11/dx11_error.h>
+#include <dx11/dx11_system.h>
 
 namespace dx11
 {

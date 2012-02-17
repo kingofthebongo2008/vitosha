@@ -13,7 +13,7 @@ namespace wnd
 {
 	class window;
 
-	class application : public boost::noncopyable
+	class application : private boost::noncopyable
 	{
 		public:
 		application();

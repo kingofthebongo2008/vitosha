@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <intrin.h>
 
+#include <sys/sys_spin_lock.h>
 #include <mem/mem_alloc.h>
 
 namespace mem

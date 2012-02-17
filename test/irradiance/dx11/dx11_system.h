@@ -1,7 +1,7 @@
 #ifndef __dx11_SYSTEM_H__
 #define __dx11_SYSTEM_H__
 
-#include "dx11_pointers.h"
+#include <dx11/dx11_pointers.h>
 
 namespace dx11
 {
@@ -15,6 +15,7 @@ namespace dx11
     };
 
     system_context create_system_context(HWND hwnd);
+    system_context create_system_context(HWND hwnd, system_context context);
 }
 
 

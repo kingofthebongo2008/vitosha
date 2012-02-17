@@ -1,6 +1,7 @@
 #include "precompiled.h"
-#include "window.h"
-#include "application.h"
+
+#include <win32/window.h>
+#include <win32/application.h>
 
 
 namespace wnd

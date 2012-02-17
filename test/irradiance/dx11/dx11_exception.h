@@ -20,6 +20,11 @@ namespace dx11
 
     };
 
+    class create_dxgi_factory_exception : public d3d11_exception
+    {
+
+    };
+
     class create_swap_chain_exception : public d3d11_exception
     {
 

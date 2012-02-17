@@ -1,9 +1,11 @@
 #include "precompiled.h"
 
+#include <win32/application.h>
+
+#include <win32/window.h>
+
 #include <algorithm>
 
-#include "application.h"
-#include "window.h"
 
 namespace wnd
 {

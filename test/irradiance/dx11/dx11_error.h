@@ -1,7 +1,7 @@
 #ifndef __DX11_ERROR_H__
 #define __DX11_ERROR_H__
 
-#include "dx11/dx11_exception.h"
+#include <dx11/dx11_exception.h>
 
 namespace dx11
 {

@@ -189,8 +189,8 @@ namespace sys
         public:
         struct alignas(64) qnode
         {
-            volatile qnode*      m_next;
-            volatile uint32_t    m_locked;
+            qnode*      m_next;
+            uint32_t    m_locked;
 
             uint8_t     m_pad[ 64 - sizeof(uint64_t) - sizeof(uint32_t) ];
 
@@ -299,7 +299,7 @@ namespace sys
         typedef lock<spinlock_mcs> this_type;
 
         public:
-        explicit lock(spinlock_mcs& l, spinlock_mcs::qnode& node) : m_l(l), m_node(node)
+        explicit lock(spinlock_mcs& l) : m_l(l)
         {
             m_l.acquire(&m_node);   
         }
@@ -310,7 +310,7 @@ namespace sys
         }
 
         private:
-        spinlock_mcs::qnode& m_node;
+        spinlock_mcs::qnode m_node;
         spinlock_mcs& m_l;
         lock(const lock&);
         const lock& operator = (const lock&);
