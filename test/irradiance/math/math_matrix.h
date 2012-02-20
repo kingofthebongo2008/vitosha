@@ -252,7 +252,7 @@ namespace math
 		m.r[2] = matrix44_mul(m1.r[2], m2);
 		m.r[3] = matrix44_mul(m1.r[3], m2);
 
-		return m1;
+		return m;
 	}
 
 	inline matrix_float44 matrix44_add(matrix_float44 m1, matrix_float44 m2)
@@ -564,7 +564,7 @@ namespace math
 		return m;
 	}
 
-	inline void matrix44_extract_view_frustum(matrix_float44 m, float frustum[24])
+	inline void matrix44_extract_view_frustum(matrix_float44 wvp, float frustum[24])
 	{
 		vector_float4 v1;
 		vector_float4 v2;
@@ -575,15 +575,15 @@ namespace math
 
 		matrix_float44 m1;
 
-		m1 = matrix44_transpose(m);
+		m1 = matrix44_transpose(wvp);
 
-		v1 = add(m.r[3], m1.r[0]);	//left
-		v2 = sub(m.r[3], m1.r[0]);	//right
-		v3 = sub(m.r[3], m1.r[1]);	//top
-		v4 = add(m.r[3], m1.r[0]);	//bottom
+		v1 = add(wvp.r[3], m1.r[0]);	//left
+		v2 = sub(wvp.r[3], m1.r[0]);	//right
+		v3 = sub(wvp.r[3], m1.r[1]);	//top
+		v4 = add(wvp.r[3], m1.r[0]);	//bottom
 				
-		v5 = m1.r[2];				//near
-		v6 = sub(m.r[3],m1.r[2]);	//far
+		v5 = m1.r[2];				    //near
+		v6 = sub(wvp.r[3],m1.r[2]);	    //far
 
 		v1 = normalize_plane(v1);
 		v2 = normalize_plane(v2);
@@ -599,12 +599,12 @@ namespace math
 		v5 = negate(v5);
 		v6 = negate(v6);
 
-		store4( &frustum[0], v1);   //left
-		store4( &frustum[4], v2);   //right
-		store4( &frustum[8], v3);   //top
-		store4( &frustum[12], v4);  //bottom
-		store4( &frustum[16], v5);  //near
-		store4( &frustum[20], v6);  //far
+		store4( &frustum[0], v1);       //left
+		store4( &frustum[4], v2);       //right
+		store4( &frustum[8], v3);       //top
+		store4( &frustum[12], v4);      //bottom
+		store4( &frustum[16], v5);      //near
+		store4( &frustum[20], v6);      //far
 	}
 
 	//determinant
