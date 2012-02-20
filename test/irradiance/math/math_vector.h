@@ -186,10 +186,10 @@ namespace math
 		return _mm_cmpnge_ps(v1, v2);
 	}
 
-	inline vector_float4 select(vector_float4 value, vector_float4 value2, vector_float4 control)
+	inline vector_float4 select(vector_float4 value1, vector_float4 value2, vector_float4 control)
 	{
-		vector_float4 v1 = _mm_andnot_ps(control, value);
-		vector_float4 v2 = _mm_and_ps(value, control);
+		vector_float4 v1 = _mm_andnot_ps(control, value1);
+		vector_float4 v2 = _mm_and_ps(value2, control);
 		return _mm_or_ps(v1, v2);
 	}
 

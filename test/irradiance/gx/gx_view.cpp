@@ -1,2 +1,2 @@
 #include "precompiled.h"
-#include "gx_view_port.h"
+#include <gx/gx_view.h>

@@ -8,7 +8,6 @@
 
 #include "fnd/fnd_universe.h"
 
-
 namespace wnd
 {
 	class window;

@@ -23,6 +23,8 @@ static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 using namespace wnd;
 
 
+extern void universe_bootstrap( std::shared_ptr<fnd::universe> universe );
+
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
@@ -48,15 +50,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	dx11::system_context context = dx11::create_system_context(hwnd);
-	application application;
+    dx11::system_context context = dx11::create_system_context(hwnd);
 
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
+    application application;
+
+    std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
+    universe_bootstrap( universe );
+
+    application.set_universe(universe);
+
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
 	
 	window* wnd = new window(application, context);
 	application.new_window(wnd);
 
-	LONG_PTR ptr = ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG>(wnd) );
+	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG>(wnd) );
 
 	MSG msg = {};
 
@@ -202,12 +210,3 @@ static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	return (INT_PTR)FALSE;
 }
 
-static void UpdateApplication(dx11::system_context context)
-{
-
-}
-
-static void RenderApplication(dx11::system_context*)
-{
-	std::vector<int> v;
-}

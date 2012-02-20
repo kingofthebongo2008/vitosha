@@ -57,7 +57,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)/Lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;d3dx10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -86,6 +86,7 @@
     <None Include="irradiance.ico" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
+    <None Include="util\util_iterator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dx11\dx11_error.h" />
@@ -96,27 +97,26 @@
     <ClInclude Include="fnd\fnd_universe.h" />
     <ClInclude Include="fnd\fnd_updater.h" />
     <ClInclude Include="fnd\fnd_world.h" />
+    <ClInclude Include="gx\gx_scene.h" />
     <ClInclude Include="math\math_matrix.h" />
     <ClInclude Include="math\math_vector.h" />
     <ClInclude Include="mem\mem_alloc.h" />
     <ClInclude Include="mem\mem_ref_counter.h" />
     <ClInclude Include="mem\mem_streamflow.h" />
     <ClInclude Include="precompiled.h" />
-    <ClInclude Include="render\gx_view.h" />
-    <ClInclude Include="render\gx_view_port.h" />
-    <ClInclude Include="scene.h" />
+    <ClInclude Include="gx\gx_view.h" />
+    <ClInclude Include="gx\gx_view_port.h" />
     <ClInclude Include="sys\sys_base.h" />
     <ClInclude Include="sys\sys_scheduler.h" />
     <ClInclude Include="sys\sys_spin_lock.h" />
     <ClInclude Include="sys\sys_spsc_queue.h" />
     <ClInclude Include="sys\sys_task.h" />
     <ClInclude Include="sys\sys_thread.h" />
-    <ClInclude Include="view.h" />
     <ClInclude Include="win32/irradiance.h" />
     <ClInclude Include="win32/resource.h" />
-    <ClInclude Include="win32\application.h" />
-    <ClInclude Include="win32\targetver.h" />
-    <ClInclude Include="win32\window.h" />
+    <ClInclude Include="win32/application.h" />
+    <ClInclude Include="win32/targetver.h" />
+    <ClInclude Include="win32/window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dx11\dx11_render_context.cpp" />
@@ -124,6 +124,7 @@
     <ClCompile Include="fnd\fnd_universe.cpp" />
     <ClCompile Include="fnd\fnd_updater.cpp" />
     <ClCompile Include="fnd\fnd_world.cpp" />
+    <ClCompile Include="gx\gx_scene.cpp" />
     <ClCompile Include="irradiance.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>
     </ClCompile>
@@ -133,10 +134,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="render\gx_view.cpp" />
-    <ClCompile Include="render\gx_view_port.cpp" />
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="view.cpp" />
+    <ClCompile Include="gx\gx_view.cpp" />
+    <ClCompile Include="gx\gx_view_port.cpp" />
     <ClCompile Include="win32\application.cpp" />
     <ClCompile Include="win32\window.cpp" />
   </ItemGroup>

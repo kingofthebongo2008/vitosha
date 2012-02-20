@@ -49,7 +49,7 @@ namespace math
 		return m;
 	}
 
-	matrix_float44 matrix44_load44(const float* __restrict address)
+	inline matrix_float44 matrix44_load44(const float* __restrict address)
 	{
 		matrix_float44 m;
 
@@ -61,7 +61,7 @@ namespace math
 		return m;
 	}
 
-	matrix_float44 matrix44_load43(const float* __restrict address)
+	inline matrix_float44 matrix44_load43(const float* __restrict address)
 	{
 		matrix_float44 m;
 
@@ -75,7 +75,7 @@ namespace math
 		return m;
 	}
 
-	void matrix44_store44(float* __restrict address, matrix_float44 m)
+	inline void matrix44_store44(float* __restrict address, matrix_float44 m)
 	{
 		store4(address, m.r[0]);
 		store4(address+4, m.r[1]);
@@ -83,7 +83,7 @@ namespace math
 		store4(address+12, m.r[3]);
 	}
 
-	void matrix44_store43(float* __restrict address, matrix_float44 m)
+	inline void matrix44_store43(float* __restrict address, matrix_float44 m)
 	{
 		store4(address, m.r[0]);
 		store4(address+4, m.r[1]);
@@ -492,7 +492,6 @@ namespace math
 
 		vector_float4 v3 = and(v1, reinterpret_cast< const vector_float4*> (&mask_yzw)[0] );
 			
-
 		m.r[1] = swizzle<x,y,x,x>(v1);
 
 		vector_float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
@@ -503,14 +502,11 @@ namespace math
 		return m;
 	}
 
-
-	inline matrix_float44 matrix44_perspective_lh(float fov, float aspect_ratio, float view_height, float z_near, float z_far)
+	inline matrix_float44 matrix44_perspective_fov_lh(float fov, float aspect_ratio, float z_near, float z_far)
 	{
 		static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
 		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
-
-		float a = 2 * z_near;
 
 		float r = z_far / (z_far - z_near);
 
@@ -544,7 +540,7 @@ namespace math
 		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
-		float a = 2;
+		float a = 2.0f;
 
 		float r = 1.0f / (z_far - z_near);
 
@@ -568,7 +564,6 @@ namespace math
 		return m;
 	}
 
-	
 	inline void matrix44_extract_view_frustum(matrix_float44 m, float frustum[24])
 	{
 		vector_float4 v1;
@@ -604,12 +599,12 @@ namespace math
 		v5 = negate(v5);
 		v6 = negate(v6);
 
-		store4( &frustum[0], v1);
-		store4( &frustum[4], v2);
-		store4( &frustum[8], v3);
-		store4( &frustum[12], v4);
-		store4( &frustum[16], v5);
-		store4( &frustum[20], v6);
+		store4( &frustum[0], v1);   //left
+		store4( &frustum[4], v2);   //right
+		store4( &frustum[8], v3);   //top
+		store4( &frustum[12], v4);  //bottom
+		store4( &frustum[16], v5);  //near
+		store4( &frustum[20], v6);  //far
 	}
 
 	//determinant

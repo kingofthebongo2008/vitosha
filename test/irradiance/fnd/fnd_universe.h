@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "fnd/fnd_world.h"
+#include <fnd/fnd_world.h>
 
 namespace fnd
 {
@@ -25,18 +25,19 @@ namespace fnd
 
 		void add_world(std::shared_ptr<fnd::world> world)
 		{
-
+            m_worlds.push_back(world);
 		}
 
 		void remove_world(std::shared_ptr<fnd::world> world)
 		{
-
+            std::remove(begin(m_worlds), end(m_worlds), world);
 		}
 
 		protected:
 		typedef std::shared_ptr<fnd::world> world_ptr;
+        typedef std::vector<world_ptr>      world_container;
 
-		std::vector< std::shared_ptr<fnd::world> > m_worlds;
+        world_container m_worlds;
 
 		virtual void on_update(float dt)
 		{
