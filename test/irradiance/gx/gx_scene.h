@@ -30,6 +30,7 @@ namespace gx
                     m_transform( math::matrix44_identity() )
                     , m_data(nullptr)
                     , m_status(nullptr)
+                    , m_node_transform(nullptr)
             {
                 m_children.reserve(16);
             }
@@ -50,6 +51,12 @@ namespace gx
             inline void set_transform(math::matrix_float44 transform)
             {
                 m_transform = transform;
+
+                if (m_node_transform)
+                {
+                    *m_node_transform = transform;
+                }
+
                 set_modified();
             }
 
@@ -66,6 +73,11 @@ namespace gx
             inline void set_node_status(node_status* status)
             {
                 m_status = status;
+            }
+
+            inline void set_node_transform(math::matrix_float44* node_transform)
+            {
+                m_node_transform = node_transform;
             }
 
             inline std::weak_ptr<node> get_parent()
@@ -96,6 +108,7 @@ namespace gx
             private:
             friend class const_node_iterator;
             friend class node_iterator;
+            friend class scene;
             
             typedef std::vector< std::shared_ptr<node> > children_container;
 
@@ -104,6 +117,7 @@ namespace gx
             std::weak_ptr<node>         m_parent;
             void*                       m_data;
             node_status*                m_status;
+            math::matrix_float44*       m_node_transform;
 
             inline void set_modified()
             {
@@ -310,7 +324,7 @@ namespace gx
                 do_build();
             }
 
-            m_status = clean;
+            set_status(clean);
         }
 
         void rebuild();
@@ -346,17 +360,25 @@ namespace gx
         }
 
         private:
-
         std::shared_ptr<node>                               m_root;
         node_iterator                                       m_end;
         const_node_iterator                                 m_cend;
         node_status                                         m_status;
 
-        std::vector< std::vector< math::matrix_float44> >   m_matrices;
-        std::vector< std::vector< math::matrix_float44> >   m_world_matrices;
-        std::vector< std::vector<void* > >                  m_data;
+        typedef uint32_t flat_node_parent_info;
+
+
+        std::vector< math::matrix_float44 >                 m_world_matrices;
+        std::vector< math::matrix_float44 >                 m_matrices;
+        std::vector< void* >                                m_data;
+        std::vector< flat_node_parent_info >                m_flat_nodes;
 
         void do_build();
+
+        inline void set_status(node_status status)
+        {
+            m_status = status;
+        }
     };
 
     inline void add_node(std::weak_ptr<scene::node> parent, std::shared_ptr<scene::node> child)

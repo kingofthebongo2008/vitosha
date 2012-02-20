@@ -13,33 +13,35 @@ void universe_bootstrap( std::shared_ptr<fnd::universe> universe )
     auto it_end = scene->end();
 
     math::matrix_float44 m = math::matrix44_identity();
+    math::matrix_float44 m_1 = math::matrix44_scaling(2.0f, 2.0f, 2.0f);
+    math::matrix_float44 m_2 = math::matrix44_scaling(2.0f, 2.0f, 2.0f);
 
     std::shared_ptr<gx::scene::node> root = scene->get_root();
 
-    std::shared_ptr<gx::scene::node> node_1 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x01L) );
-    std::shared_ptr<gx::scene::node> node_2 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x02L) );
-    std::shared_ptr<gx::scene::node> node_3 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x03L) );
-    std::shared_ptr<gx::scene::node> node_4 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x04L) );
+    std::shared_ptr<gx::scene::node> node_1 = std::make_shared<gx::scene::node> ( m_1, reinterpret_cast<void*> (0x01L) );
+    std::shared_ptr<gx::scene::node> node_2 = std::make_shared<gx::scene::node> ( m_1, reinterpret_cast<void*> (0x02L) );
+    std::shared_ptr<gx::scene::node> node_3 = std::make_shared<gx::scene::node> ( m_1, reinterpret_cast<void*> (0x03L) );
+    std::shared_ptr<gx::scene::node> node_4 = std::make_shared<gx::scene::node> ( m_1, reinterpret_cast<void*> (0x04L) );
 
-    std::shared_ptr<gx::scene::node> node_11 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x011L) );
-    std::shared_ptr<gx::scene::node> node_12 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x012L) );
-    std::shared_ptr<gx::scene::node> node_13 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x013L) );
-    std::shared_ptr<gx::scene::node> node_14 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x014L) );
+    std::shared_ptr<gx::scene::node> node_11 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x011L) );
+    std::shared_ptr<gx::scene::node> node_12 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x012L) );
+    std::shared_ptr<gx::scene::node> node_13 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x013L) );
+    std::shared_ptr<gx::scene::node> node_14 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x014L) );
 
-    std::shared_ptr<gx::scene::node> node_21 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x021L) );
-    std::shared_ptr<gx::scene::node> node_22 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x022L) );
-    std::shared_ptr<gx::scene::node> node_23 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x023L) );
-    std::shared_ptr<gx::scene::node> node_24 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x024L) );
+    std::shared_ptr<gx::scene::node> node_21 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x021L) );
+    std::shared_ptr<gx::scene::node> node_22 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x022L) );
+    std::shared_ptr<gx::scene::node> node_23 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x023L) );
+    std::shared_ptr<gx::scene::node> node_24 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x024L) );
 
-    std::shared_ptr<gx::scene::node> node_31 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x031L) );
-    std::shared_ptr<gx::scene::node> node_32 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x032L) );
-    std::shared_ptr<gx::scene::node> node_33 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x033L) );
-    std::shared_ptr<gx::scene::node> node_34 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x034L) );
+    std::shared_ptr<gx::scene::node> node_31 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x031L) );
+    std::shared_ptr<gx::scene::node> node_32 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x032L) );
+    std::shared_ptr<gx::scene::node> node_33 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x033L) );
+    std::shared_ptr<gx::scene::node> node_34 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x034L) );
 
-    std::shared_ptr<gx::scene::node> node_41 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x041L) );
-    std::shared_ptr<gx::scene::node> node_42 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x042L) );
-    std::shared_ptr<gx::scene::node> node_43 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x043L) );
-    std::shared_ptr<gx::scene::node> node_44 = std::make_shared<gx::scene::node> ( m, reinterpret_cast<void*> (0x044L) );
+    std::shared_ptr<gx::scene::node> node_41 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x041L) );
+    std::shared_ptr<gx::scene::node> node_42 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x042L) );
+    std::shared_ptr<gx::scene::node> node_43 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x043L) );
+    std::shared_ptr<gx::scene::node> node_44 = std::make_shared<gx::scene::node> ( m_2, reinterpret_cast<void*> (0x044L) );
 
     gx::add_node(root, node_1);
     gx::add_node(root, node_2);
@@ -66,21 +68,6 @@ void universe_bootstrap( std::shared_ptr<fnd::universe> universe )
     gx::add_node(node_4, node_43);
     gx::add_node(node_4, node_44);
 
-
-    std::for_each( scene->begin(), scene->end(), [=]( std::shared_ptr<gx::scene::node>& n  )
-    {
-        void* data = n->get_data();
-
-        static void* g_data_1 = data;
-    }
-    );
-
-    std::for_each( scene->cbegin(), scene->cend(), [=]( const std::shared_ptr<const gx::scene::node>& n  )
-    {
-        void* data = n->get_data();
-
-        static void* g_data2 = data;
-    }
-    );
+    scene->rebuild();
 }
 
