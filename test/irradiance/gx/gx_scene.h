@@ -135,9 +135,9 @@ namespace gx
             typedef const_node_iterator                         this_type;
 
             typedef std::input_iterator_tag                     iterator_category;
-	        typedef std::shared_ptr<node>                       value_type;
-	        typedef std::shared_ptr<const node>*                pointer;
-	        typedef const std::shared_ptr<const node>&          reference;
+            typedef std::shared_ptr<node>                       value_type;
+            typedef std::shared_ptr<const node>*                pointer;
+            typedef const std::shared_ptr<const node>&          reference;
             typedef std::ptrdiff_t                              difference_type;
 
             typedef const std::shared_ptr<const node>*          const_pointer;
@@ -190,27 +190,27 @@ namespace gx
             inline this_type operator++(int)
             {
                 this_type temp = *this;
-		        ++*this;
-		        return (temp);
+                ++*this;
+                return (temp);
             }
 
             inline bool operator==(const this_type& right) const
-		    {
+            {
                 return (m_current == right.m_current);
-		    }
+            }
 
-	        inline bool operator!=(const this_type& right) const
-		    {
+            inline bool operator!=(const this_type& right) const
+            {
                 return (!(*this == right));
             }
 
             const_pointer operator->() const
-		    {	
-		        return &m_current;
-		    }
+            {	
+                return &m_current;
+            }
 
             reference operator*() const
-		    {
+            {
                 return m_current;
             }
 
@@ -229,9 +229,9 @@ namespace gx
             typedef node_iterator                               this_type;
 
             typedef std::input_iterator_tag                     iterator_category;
-	        typedef std::shared_ptr<node>                       value_type;
-	        typedef std::shared_ptr<node>*                      pointer;
-	        typedef std::shared_ptr<node>&                      reference;
+            typedef std::shared_ptr<node>                       value_type;
+            typedef std::shared_ptr<node>*                      pointer;
+            typedef std::shared_ptr<node>&                      reference;
             typedef std::ptrdiff_t                              difference_type;
 
             this_type() :
@@ -282,27 +282,27 @@ namespace gx
             inline this_type operator++(int)
             {
                 this_type temp = *this;
-		        ++*this;
-		        return (temp);
+                ++*this;
+                return (temp);
             }
 
             inline bool operator==(const this_type& right) const
-		    {
+            {
                 return (m_current == right.m_current);
-		    }
+            }
 
-	        inline bool operator!=(const this_type& right) const
-		    {
+            inline bool operator!=(const this_type& right) const
+            {
                 return (!(*this == right));
             }
 
             pointer operator->()
-		    {	
-		        return &m_current;
-		    }
+            {	
+                return &m_current;
+            }
 
             reference operator*()
-		    {
+            {
                 return m_current;
             }
 
@@ -357,6 +357,11 @@ namespace gx
         inline const_node_iterator cend() const
         {
             return const_node_iterator( std::shared_ptr<node>(), const_cast<const_node_iterator*> (&m_cend) );
+        }
+
+        template <typename t> void process(t* processor) const
+        {
+            processor->submit( &m_world_matrices, &m_data );
         }
 
         private:

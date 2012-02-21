@@ -9,19 +9,29 @@ namespace gx
     class view
     {
         public:
-        view() : m_view( math::matrix44_identity()), m_projection(math::matrix44_identity() )
+        view() : m_view_matrix( math::matrix44_identity()), m_projection_matrix(math::matrix44_identity() )
         {
         }
 
-        view(math::matrix_float44 view, math::matrix_float44 projection) : m_view(view), m_projection(projection)
+        view(math::matrix_float44 view, math::matrix_float44 projection) : m_view_matrix(view), m_projection_matrix(projection)
         {
 
+        }
+
+        math::matrix_float44 get_view_matrix() const
+        {
+            return m_view_matrix;
+        }
+
+        math::matrix_float44 get_projection_matrix() const
+        {
+            return m_view_matrix;
         }
 
         private:
 
-        math::matrix_float44  m_view;
-        math::matrix_float44  m_projection;
+        math::matrix_float44  m_view_matrix;
+        math::matrix_float44  m_projection_matrix;
     };
 }
 
