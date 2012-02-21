@@ -97,6 +97,11 @@
     <ClInclude Include="fnd\fnd_universe.h" />
     <ClInclude Include="fnd\fnd_updater.h" />
     <ClInclude Include="fnd\fnd_world.h" />
+    <ClInclude Include="gx\gx_final_pipeline_node.h" />
+    <ClInclude Include="gx\gx_pipeline.h" />
+    <ClInclude Include="gx\gx_pipeline_params.h" />
+    <ClInclude Include="gx\gx_scene_pipeline_node.h" />
+    <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
     <ClInclude Include="math\math_matrix.h" />
     <ClInclude Include="math\math_vector.h" />
@@ -124,6 +129,10 @@
     <ClCompile Include="fnd\fnd_universe.cpp" />
     <ClCompile Include="fnd\fnd_updater.cpp" />
     <ClCompile Include="fnd\fnd_world.cpp" />
+    <ClCompile Include="gx\gx_final_pipeline_node.cpp" />
+    <ClCompile Include="gx\gx_pipeline.cpp" />
+    <ClCompile Include="gx\gx_scene_pipeline_node.cpp" />
+    <ClCompile Include="gx\gx_view_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_scene.cpp" />
     <ClCompile Include="irradiance.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>

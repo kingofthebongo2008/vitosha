@@ -3,7 +3,7 @@
 #include <fnd/fnd_universe.h>
 #include <gx/gx_scene.h>
 
-void universe_bootstrap( std::shared_ptr<fnd::universe> universe )
+std::shared_ptr<gx::scene> universe_bootstrap( std::shared_ptr<fnd::universe> universe )
 {
     std::shared_ptr<gx::scene> scene = std::make_shared<gx::scene>();
 
@@ -69,5 +69,7 @@ void universe_bootstrap( std::shared_ptr<fnd::universe> universe )
     gx::add_node(node_4, node_44);
 
     scene->rebuild();
+
+    return scene;
 }
 

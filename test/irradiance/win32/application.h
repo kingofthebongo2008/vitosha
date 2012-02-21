@@ -6,7 +6,15 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "fnd/fnd_universe.h"
+namespace fnd
+{
+    class universe;
+}
+
+namespace gx
+{
+    class scene;
+}
 
 namespace wnd
 {
@@ -15,7 +23,9 @@ namespace wnd
 	class application : private boost::noncopyable
 	{
 		public:
-		application();
+
+        application();
+        ~application();
 
 		void	update();
 		void	render();
@@ -28,10 +38,16 @@ namespace wnd
 			m_universe = universe;
 		}
 
+        void set_scene( std::shared_ptr<gx::scene> scene)
+		{
+			m_scene = scene;
+		}
+
 		private:
 
-		std::vector< window* > m_windows;
-		std::shared_ptr<fnd::universe> m_universe;
+		std::vector< window* >          m_windows;
+		std::shared_ptr<fnd::universe>  m_universe;
+        std::shared_ptr<gx::scene>      m_scene;
 
 	};
 }

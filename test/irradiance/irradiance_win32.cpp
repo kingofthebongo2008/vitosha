@@ -3,6 +3,7 @@
 #include <sys/sys_base.h>
 #include <win32/irradiance.h>
 
+#include <fnd/fnd_universe.h>
 #include <win32/application.h>
 #include <win32/window.h>
 
@@ -23,7 +24,7 @@ static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 using namespace wnd;
 
 
-extern void universe_bootstrap( std::shared_ptr<fnd::universe> universe );
+extern std::shared_ptr<gx::scene> universe_bootstrap( std::shared_ptr<fnd::universe> universe );
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -55,9 +56,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     application application;
 
     std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
-    universe_bootstrap( universe );
+    std::shared_ptr<gx::scene> scene = universe_bootstrap( universe );
 
     application.set_universe(universe);
+    application.set_scene(scene);
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
 	
