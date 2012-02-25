@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
 namespace gx
 {
-    class pipeline_node
+    class pipeline_node : private boost::noncopyable
     {
         public:
 
@@ -25,7 +27,7 @@ namespace gx
         virtual void*   do_process(void* input) = 0;
     };
 
-    class pipeline
+    class pipeline : public pipeline_node
     {
         public:
         pipeline();
@@ -45,6 +47,8 @@ namespace gx
         private:
 
         std::vector< std::shared_ptr<pipeline_node> >   m_nodes;
+
+        void*   do_process(void* input);
     };
 }
 

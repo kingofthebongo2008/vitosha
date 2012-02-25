@@ -60,14 +60,19 @@ namespace gx
                 set_modified();
             }
 
-            inline void*   get_data() const
+            inline void* get_data() const
             {
                 return m_data;
             }
 
-            template <typename t> t* get_data() 
+            template <typename t> t* get_data()
             {
-                return reinterpret_cast<t*> (m_data);
+                return m_data;
+            }
+
+            template <typename t> const t* get_data() const
+            {
+                return m_data;
             }
 
             inline void set_node_status(node_status* status)
@@ -113,9 +118,9 @@ namespace gx
             typedef std::vector< std::shared_ptr<node> > children_container;
 
             math::matrix_float44        m_transform;
+            void*                       m_data;
             children_container          m_children;
             std::weak_ptr<node>         m_parent;
-            void*                       m_data;
             node_status*                m_status;
             math::matrix_float44*       m_node_transform;
 

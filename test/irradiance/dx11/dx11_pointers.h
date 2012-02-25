@@ -17,6 +17,8 @@ namespace dx11
     typedef boost::intrusive_ptr<ID3D11DeviceContext> id3d11devicecontext_ptr;
 
     typedef boost::intrusive_ptr<ID3D11CommandList> id3d11commandlist_ptr;
+
+    typedef boost::intrusive_ptr<ID3D11Buffer> id3d11buffer_ptr;
 }
 
 

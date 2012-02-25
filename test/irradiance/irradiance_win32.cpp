@@ -31,7 +31,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-
     UNUSED_PARAMETER(hInstance);
 	UNUSED_PARAMETER(nCmdShow);
 

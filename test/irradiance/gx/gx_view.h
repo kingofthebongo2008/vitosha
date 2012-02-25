@@ -9,8 +9,10 @@ namespace gx
     class view
     {
         public:
+
         view() : m_view_matrix( math::matrix44_identity()), m_projection_matrix(math::matrix44_identity() )
         {
+
         }
 
         view(math::matrix_float44 view, math::matrix_float44 projection) : m_view_matrix(view), m_projection_matrix(projection)

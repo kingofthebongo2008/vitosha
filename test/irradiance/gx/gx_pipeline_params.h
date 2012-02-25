@@ -17,7 +17,9 @@ namespace gx
     {
         math::matrix_float44                 m_view_matrix;
         math::matrix_float44                 m_projection_matrix;
-        std::vector< math::matrix_float44 >* m_wvp_matrices;
+        math::matrix_float44                 m_inverse_view_matrix;
+        math::matrix_float44                 m_inverse_projection_matrix;
+        std::vector< math::matrix_float44 >* m_pvw_matrices;
         std::vector< math::matrix_float44 >* m_world_matrices;
         std::vector< void* >*                m_data;
     };

@@ -25,7 +25,7 @@ namespace gx
         void*   do_process(void* input);
         view*   m_view;
 
-        std::vector< math::matrix_float44> m_wvp_matrices;
+        std::vector< math::matrix_float44 > m_pvw_matrices;
 
     };
 }
