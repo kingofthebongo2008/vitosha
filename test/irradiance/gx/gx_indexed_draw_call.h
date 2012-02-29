@@ -26,6 +26,7 @@ namespace gx
         };
 
         indexed_draw_call( index_info info, dx11::id3d11buffer_ptr vertex_buffer, dx11::id3d11buffer_ptr index_buffer );
+        indexed_draw_call( index_info info, dx11::id3d11buffer_ptr vertex_buffer0, dx11::id3d11buffer_ptr vertex_buffer1, dx11::id3d11buffer_ptr index_buffer );
 
         ~indexed_draw_call();
 
@@ -34,11 +35,11 @@ namespace gx
         private:
 
         indexed_draw_call();
-
         index_info                m_index_info;
 
-        dx11::id3d11buffer_ptr    m_vertex_buffer;
+        dx11::id3d11buffer_ptr    m_vertex_buffer[2];
         dx11::id3d11buffer_ptr    m_index_buffer;
+        uint8_t                   m_buffer_count;
 
     };
 }

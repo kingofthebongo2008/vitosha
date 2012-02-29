@@ -41,40 +41,32 @@ namespace dx11
 
         DXGI_SWAP_CHAIN_DESC desc  = create_default_swap_chain_desc(hwnd);
 
-        IDXGIAdapter* adapter = 0;
-        IDXGISwapChain* swap_chain = 0;
+        idxgiadapter_ptr		adapter;
+        idxgiswapchain_ptr		swap_chain;
 
-        ID3D11Device* device = 0;
-        ID3D11DeviceContext* context = 0;
+        id3d11device_ptr		device;
+        id3d11devicecontext_ptr context;
 
-        HRESULT hr  = D3D11CreateDeviceAndSwapChain(adapter, D3D_DRIVER_TYPE_HARDWARE, 0, flags, &level , 1, D3D11_SDK_VERSION, &desc, &swap_chain, &device, 0, &context);
-
-        idxgiadapter_ptr		adapter_ptr(adapter,false);
-        idxgiswapchain_ptr		swap_chain_ptr(swap_chain,false);
-
-        id3d11device_ptr		device_ptr(device, false);
-        id3d11devicecontext_ptr context_ptr(context,false);
+        HRESULT hr  = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, flags, &level , 1, D3D11_SDK_VERSION, &desc, get_pointer(swap_chain), get_pointer(device), 0, get_pointer(context) );
 
         throw_if_failed<create_device_exception>(hr);
 
-        system_context result = {adapter_ptr, swap_chain_ptr, device_ptr, context_ptr, hwnd};
+        system_context result = {adapter, swap_chain, device, context, hwnd};
         return result;
     }
 
     system_context create_system_context(HWND hwnd, system_context context)
     {
-        IDXGIFactory1 * factory = 0;
-        IDXGISwapChain* swap_chain = 0;
+        idxgifactory1_ptr factory;
 
-        throw_if_failed<create_dxgi_factory_exception>( CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&factory) ) );
-        idxgifactory_ptr factory_ptr(factory, false);
+        throw_if_failed<create_dxgi_factory_exception>( CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) get_pointer(factory)  ) );
 
         DXGI_SWAP_CHAIN_DESC desc = create_default_swap_chain_desc(hwnd);
       
-        throw_if_failed<create_swap_chain_exception>( factory_ptr->CreateSwapChain(context.m_device.get(), &desc, &swap_chain) ); 
-        idxgiswapchain_ptr		swap_chain_ptr(swap_chain,false);
-
-        system_context result = {context.m_adapter, swap_chain_ptr, context.m_device,  context.m_immediate_context, hwnd};
+        idxgiswapchain_ptr		swap_chain;
+        throw_if_failed<create_swap_chain_exception>( factory->CreateSwapChain(context.m_device.get(), &desc,  get_pointer(swap_chain) ) ); 
+        
+        system_context result = {context.m_adapter, swap_chain, context.m_device,  context.m_immediate_context, hwnd};
 
         return result;
     }

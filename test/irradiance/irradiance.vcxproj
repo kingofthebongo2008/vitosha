@@ -97,6 +97,8 @@
     <ClInclude Include="fnd\fnd_universe.h" />
     <ClInclude Include="fnd\fnd_updater.h" />
     <ClInclude Include="fnd\fnd_world.h" />
+    <ClInclude Include="gxu\gxu_entity_factory.h" />
+    <ClInclude Include="gxu\gxu_static_mesh_entity.h" />
     <ClInclude Include="gx\gx_create_draw_calls_pipeline_node.h" />
     <ClInclude Include="gx\gx_draw_calls_pipeline_params.h" />
     <ClInclude Include="gx\gx_draw_call_collector.h" />
@@ -138,6 +140,8 @@
     <ClCompile Include="fnd\fnd_universe.cpp" />
     <ClCompile Include="fnd\fnd_updater.cpp" />
     <ClCompile Include="fnd\fnd_world.cpp" />
+    <ClCompile Include="gxu\gxu_entity_factory.cpp" />
+    <ClCompile Include="gxu\gxu_static_mesh_entity.cpp" />
     <ClCompile Include="gx\gx_create_draw_calls_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_draw_call_collector.cpp" />
     <ClCompile Include="gx\gx_draw_call_collector_context.cpp" />

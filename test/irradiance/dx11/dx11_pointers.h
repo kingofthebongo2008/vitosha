@@ -19,6 +19,12 @@ namespace dx11
     typedef boost::intrusive_ptr<ID3D11CommandList> id3d11commandlist_ptr;
 
     typedef boost::intrusive_ptr<ID3D11Buffer> id3d11buffer_ptr;
+
+    template<typename T> 
+    inline T** get_pointer(boost::intrusive_ptr<T>& ptr)
+    {
+        return reinterpret_cast<T**>(&(ptr));
+    }
 }
 
 
@@ -31,6 +37,8 @@ inline void intrusive_ptr_add_ref( IUnknown* px )
 {
     px->AddRef();
 }
+
+
 
 
 

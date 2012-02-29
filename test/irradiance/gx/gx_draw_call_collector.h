@@ -17,6 +17,8 @@ namespace gx
         entity*             m_entity;
     };
 
+
+   //collects draw calls for later sorting
    class draw_call_collector
    {
         public:
