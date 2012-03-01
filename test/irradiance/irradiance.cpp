@@ -1,11 +1,17 @@
 #include "precompiled.h"
 
+
+#include <dx11/dx11_system.h>
+
 #include <fnd/fnd_universe.h>
 
 #include <gx/gx_entity.h>
 #include <gx/gx_scene.h>
 
+#include <gxu/gxu_entity_factory.h>
+
 class entity_world : public fnd::world
+
 {
     public:
 
@@ -22,7 +28,7 @@ class entity_world : public fnd::world
     std::vector < std::shared_ptr< gx::entity> > m_entities;
 };
 
-std::shared_ptr<gx::scene> universe_bootstrap( std::shared_ptr<fnd::universe> universe )
+std::shared_ptr<gx::scene> universe_bootstrap( dx11::system_context context, std::shared_ptr<fnd::universe> universe )
 {
     std::shared_ptr<gx::scene> scene = std::make_shared<gx::scene>();
     std::shared_ptr<entity_world> entities = std::make_shared<entity_world> ();
@@ -39,30 +45,30 @@ std::shared_ptr<gx::scene> universe_bootstrap( std::shared_ptr<fnd::universe> un
 
     std::shared_ptr<gx::scene::node> root = scene->get_root();
 
-    std::shared_ptr< gx::entity > entity_1 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_2 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_3 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_4 = std::make_shared< gx::entity > ();
+    std::shared_ptr< gx::entity > entity_1 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_2 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_3 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_4 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
 
-    std::shared_ptr< gx::entity > entity_11 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_12 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_13 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_14 = std::make_shared< gx::entity > ();
+    std::shared_ptr< gx::entity > entity_11 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_12 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_13 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_14 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
 
-    std::shared_ptr< gx::entity > entity_21 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_22 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_23 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_24 = std::make_shared< gx::entity > ();
+    std::shared_ptr< gx::entity > entity_21 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_22 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_23 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_24 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
     
-    std::shared_ptr< gx::entity > entity_31 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_32 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_33 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_34 = std::make_shared< gx::entity > ();
+    std::shared_ptr< gx::entity > entity_31 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_32 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_33 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_34 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
 
-    std::shared_ptr< gx::entity > entity_41 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_42 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_43 = std::make_shared< gx::entity > ();
-    std::shared_ptr< gx::entity > entity_44 = std::make_shared< gx::entity > ();
+    std::shared_ptr< gx::entity > entity_41 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_42 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_43 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
+    std::shared_ptr< gx::entity > entity_44 = gxu::create_lat_lon_sphere_entity( context.m_device.get(), 1.0f, 5 ); 
 
     entities->add_entity(entity_1);
     entities->add_entity(entity_2);

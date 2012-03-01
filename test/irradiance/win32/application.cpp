@@ -36,9 +36,8 @@ namespace wnd
 
 	void application::render()
 	{
-        gx::pipeline pipeline;
-
-        gx::view view;
+        gx::pipeline    pipeline;
+        gx::view        view;
 
         pipeline.add_node( std::make_shared< gx::scene_pipeline_node>(m_scene.get()) );
         pipeline.add_node( std::make_shared< gx::view_pipeline_node>(&view) );

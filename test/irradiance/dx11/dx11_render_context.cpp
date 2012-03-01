@@ -5,13 +5,17 @@
 
 namespace dx11
 {
-    render_context::render_context(system_context sys_context, std::uint32_t render_context_count) : m_system_context(sys_context)
+    render_context::render_context(system_context sys_context, std::uint32_t thread_render_context_count) : m_system_context(sys_context)
     {
-        m_render_contexts.reserve(render_context_count);
+        m_render_contexts.reserve(thread_render_context_count);
 
-        for (std::uint32_t i = 0; i < render_context_count; ++i)
+        for (std::uint32_t i = 0; i < thread_render_context_count; ++i)
         {
-            std::unique_ptr<thread_render_context> ptr(new thread_render_context(*this) );
+			id3d11devicecontext_ptr device_context;
+
+			dx11::throw_if_failed<dx11::create_deferred_context_exception> ( sys_context.m_device->CreateDeferredContext(0, dx11::get_pointer(device_context)));
+
+			std::unique_ptr<thread_render_context> ptr(new thread_render_context(device_context) );
             m_render_contexts.push_back( std::move(ptr) );
         }
     }

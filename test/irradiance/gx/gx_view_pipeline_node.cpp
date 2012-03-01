@@ -9,9 +9,9 @@ namespace gx
 {
     void*   view_pipeline_node::do_process(void* input)
     {
-        scene_pipeline_params* params = reinterpret_cast<scene_pipeline_params*> (input);
+        scene_pipeline_params* in_params = reinterpret_cast<scene_pipeline_params*> (input);
 
-        uint32_t size = static_cast<uint32_t> ( params->m_world_matrices->size() );
+        uint32_t size = static_cast<uint32_t> ( in_params->m_world_matrices->size() );
 
         m_pvw_matrices.resize( size );
 
@@ -24,16 +24,16 @@ namespace gx
         view_pipeline_params view_params = {
                                 view_matrix, projection_matrix, 
                                 inverse_view_matrix, inverse_projection_matrix,
-                                &m_pvw_matrices, params->m_world_matrices, params->m_data } ;
+                                &m_pvw_matrices, in_params->m_world_matrices, in_params->m_data } ;
 
         math::matrix_float44 pv = math::matrix44_mul( projection_matrix, view_matrix );
         
         for (uint32_t i = 0; i < size; ++i)
         {
-            m_pvw_matrices[i] = math::matrix44_mul( pv, params->m_world_matrices->operator[](i) );
+            m_pvw_matrices[i] = math::matrix44_mul( pv, in_params->m_world_matrices->operator[](i) );
         }
 
-        delete params;
+        delete in_params;
         return new view_pipeline_params(view_params);
     }
 }

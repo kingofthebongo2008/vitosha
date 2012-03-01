@@ -22,6 +22,6 @@ namespace gxu
 
     std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( ID3D11Device* device, float radius, uint32_t subdivision_count )
     {
-        return std::shared_ptr<gx::entity> ( new static_mesh_entity( create_lat_lon_sphere(device, radius, subdivision_count) ));
+        return std::make_shared< gxu::static_mesh_entity >( create_lat_lon_sphere(device, radius, subdivision_count) );
     }
  }

@@ -2,6 +2,7 @@
 #define __GX_PIPELINE_H__
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 #include <boost/noncopyable.hpp>

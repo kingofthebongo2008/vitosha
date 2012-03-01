@@ -24,7 +24,7 @@ static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 using namespace wnd;
 
 
-extern std::shared_ptr<gx::scene> universe_bootstrap( std::shared_ptr<fnd::universe> universe );
+extern std::shared_ptr<gx::scene> universe_bootstrap(  dx11::system_context context, std::shared_ptr<fnd::universe> universe );
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -55,7 +55,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     application application;
 
     std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
-    std::shared_ptr<gx::scene> scene = universe_bootstrap( universe );
+    std::shared_ptr<gx::scene> scene = universe_bootstrap( context, universe );
 
     application.set_universe(universe);
     application.set_scene(scene);

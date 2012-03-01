@@ -54,6 +54,11 @@ namespace dx11
     {
 
     };
+
+	class create_deferred_context_exception : public d3d11_exception
+    {
+
+    };
 }
 
 

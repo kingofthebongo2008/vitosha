@@ -19,7 +19,7 @@
 #include <memory.h>
 #include <tchar.h>
 
-#define alignas(x) __declspec(align(x))
+//#define alignas(x) __declspec(align(x))
 
 
 // TODO: reference additional headers your program requires here
