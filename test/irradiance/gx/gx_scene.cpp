@@ -1,6 +1,8 @@
 #include "precompiled.h"
 #include <gx/gx_scene.h>
 
+#include <sys/sys_base.h>
+
 namespace gx
 {
     scene::scene() : 
@@ -77,4 +79,10 @@ namespace gx
         set_status(modified);
         build();
     }
+
+	void scene::on_update(float dt)
+	{
+		UNUSED_PARAMETER(dt);
+		build();
+	}
 }

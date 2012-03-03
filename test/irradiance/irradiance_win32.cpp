@@ -167,7 +167,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_PAINT:
 		if (wnd !=0 )
 		{
-			//wnd->render();
+			wnd->render();
 			ValidateRect( hWnd, NULL );
 		}
 		break;
@@ -177,6 +177,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			if (wnd !=0 )
 			{
 				wnd->resize_window(LOWORD(lParam), HIWORD(lParam));
+				wnd->render();
 			}
 		}
 		break;

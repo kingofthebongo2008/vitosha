@@ -21,7 +21,7 @@ namespace gx
         }
 
 
-		create_buffers();
+		create_swap_chain_buffers();
     }
 
 	render_context::~render_context()
@@ -47,13 +47,7 @@ namespace gx
 
     }
 
-	void render_context::resize_buffers()
-	{
-		release_buffers();
-		create_buffers();
-	}
-
-	void render_context::create_buffers()
+	void render_context::create_swap_chain_buffers()
 	{
 		create_back_buffer_render_target();
 		create_depth_buffer();
@@ -69,7 +63,7 @@ namespace gx
 		m_depth_render_set.m_depth_stencil_target = m_depth_stencil_target;
 	}
 
-	void render_context::release_buffers()
+	void render_context::release_swap_chain_buffers()
 	{
 		m_back_buffer_render_target.reset();
 

@@ -28,6 +28,7 @@ namespace wnd
 			m_application(application)
 			, m_swap_chain(swap_chain)
 			, m_render_context(render_context)
+			, m_occluded_by_another_window(false)
 		{
 
 		}
@@ -44,14 +45,15 @@ namespace wnd
 		void destroy();
 
 		private:
-	
 		~window();
 
 		application&				m_application;
 		dx11::idxgiswapchain_ptr    m_swap_chain;
 		gx::render_context*			m_render_context;
-
 		std::shared_ptr<gx::scene>	m_scene;
+		bool						m_occluded_by_another_window;
+
+		void render_frame();
 	};
 
 }

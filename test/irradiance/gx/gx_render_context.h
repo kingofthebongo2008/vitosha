@@ -64,10 +64,8 @@ namespace gx
         void begin_frame();
 		void end_frame();
 
-		void create_buffers();
-		void release_buffers();
-
-		void resize_buffers();
+		void create_swap_chain_buffers();
+		void release_swap_chain_buffers();
 
 		void select_gbuffer(dx11::id3d11devicecontext_ptr device_context);
 		void select_main_target(dx11::id3d11devicecontext_ptr device_context);

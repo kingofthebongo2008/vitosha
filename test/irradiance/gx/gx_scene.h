@@ -389,6 +389,8 @@ namespace gx
         {
             m_status = status;
         }
+
+		virtual void on_update(float dt);
     };
 
     inline void add_node(std::weak_ptr<scene::node> parent, std::shared_ptr<scene::node> child)

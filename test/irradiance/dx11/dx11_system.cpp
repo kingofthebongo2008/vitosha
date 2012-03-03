@@ -29,7 +29,7 @@ namespace dx11
             desc.SampleDesc.Count = 1;
             desc.SampleDesc.Quality = 0;
             //desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-            desc.Flags = 0;
+			desc.Flags = 0;
             return desc;
         }
     }

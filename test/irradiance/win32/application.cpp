@@ -1,6 +1,8 @@
 #include "precompiled.h"
 
 #include <win32/application.h>
+
+#include <fnd/fnd_universe.h>
 #include <win32/window.h>
 
 #include <algorithm>
@@ -19,7 +21,7 @@ namespace wnd
 
 	void application::update()
 	{
-
+		m_universe->update(0.0f);
 	}
 
 	void application::render()
