@@ -8,12 +8,11 @@
 
 namespace gx
 {
+
     void* scene_pipeline_node::do_process(void* input)
     {
         m_scene->build();
-
         m_scene->process(this);
-
         scene_pipeline_params params = { &m_world_matrices, &m_data };
         return new scene_pipeline_params (params); 
     }

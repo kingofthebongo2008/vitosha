@@ -3,7 +3,10 @@
 #include <sys/sys_base.h>
 #include <win32/irradiance.h>
 
+#include <dx11/dx11_system.h>
 #include <fnd/fnd_universe.h>
+#include <gx/gx_render_context.h>
+
 #include <win32/application.h>
 #include <win32/window.h>
 
@@ -51,6 +54,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 
     dx11::system_context context = dx11::create_system_context(hwnd);
+	gx::render_context	 render_context(context, 1);
 
     application application;
 
@@ -60,12 +64,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     application.set_universe(universe);
     application.set_scene(scene);
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
-	
-	window* wnd = new window(application, context);
+	window* wnd = new window( application, context.m_swap_chain, &render_context );
 	application.new_window(wnd);
 
+	wnd->set_scene(scene);
 	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG>(wnd) );
+
+	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
 
 	MSG msg = {};
 
@@ -162,7 +167,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_PAINT:
 		if (wnd !=0 )
 		{
-			wnd->render();
+			//wnd->render();
 			ValidateRect( hWnd, NULL );
 		}
 		break;

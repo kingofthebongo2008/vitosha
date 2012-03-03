@@ -5,7 +5,7 @@
 
 #include <gx/gx_pipeline.h>
 
-#include <dx11/dx11_render_context.h>
+#include <gx/gx_render_context.h>
 
 namespace gx
 {
@@ -14,16 +14,15 @@ namespace gx
     class execute_draw_calls_pipeline_node : public pipeline_node
     {
         public:
-
-		explicit execute_draw_calls_pipeline_node(dx11::render_context* render_context) : m_render_context (render_context)
+		
+		explicit execute_draw_calls_pipeline_node(render_context* render_context) : m_render_context (render_context)
 		{
 
 		}
-
+		
         private:
-
-        dx11::render_context* m_render_context;
-        void*   do_process(void* input);
+        render_context*	m_render_context;
+        void*			do_process(void* input);
     };
 }
 

@@ -59,6 +59,16 @@ namespace dx11
     {
 
     };
+
+	class create_depth_stencil_view : public create_resource_exception
+    {
+
+    };
+
+	class create_render_target_view : public create_resource_exception
+    {
+
+    };
 }
 
 

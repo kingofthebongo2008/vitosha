@@ -52,7 +52,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\sdk\boost_1_43_0;./;$(DXSDK_DIR)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\sdk\boost_1_43_0;./;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -94,7 +94,6 @@
     <ClInclude Include="dx11\dx11_error.h" />
     <ClInclude Include="dx11\dx11_exception.h" />
     <ClInclude Include="dx11\dx11_pointers.h" />
-    <ClInclude Include="dx11\dx11_render_context.h" />
     <ClInclude Include="dx11\dx11_system.h" />
     <ClInclude Include="fnd\fnd_universe.h" />
     <ClInclude Include="fnd\fnd_updater.h" />
@@ -105,7 +104,6 @@
     <ClInclude Include="gx\gx_draw_calls_pipeline_params.h" />
     <ClInclude Include="gx\gx_draw_call_collector.h" />
     <ClInclude Include="gx\gx_draw_call_collector_context.h" />
-    <ClInclude Include="gx\gx_draw_call_context.h" />
     <ClInclude Include="gx\gx_execute_draw_calls_pipeline_node.h" />
     <ClInclude Include="gx\gx_indexed_draw_call.h" />
     <ClInclude Include="gx\gx_entity.h" />
@@ -113,7 +111,9 @@
     <ClInclude Include="gx\gx_final_pipeline_node.h" />
     <ClInclude Include="gx\gx_pipeline.h" />
     <ClInclude Include="gx\gx_pipeline_params.h" />
+    <ClInclude Include="gx\gx_render_context.h" />
     <ClInclude Include="gx\gx_scene_pipeline_node.h" />
+    <ClInclude Include="gx\gx_thread_render_context.h" />
     <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
     <ClInclude Include="math\math_matrix.h" />
@@ -137,7 +137,6 @@
     <ClInclude Include="win32/window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dx11\dx11_render_context.cpp" />
     <ClCompile Include="dx11\dx11_system.cpp" />
     <ClCompile Include="fnd\fnd_universe.cpp" />
     <ClCompile Include="fnd\fnd_updater.cpp" />
@@ -153,7 +152,9 @@
     <ClCompile Include="gx\gx_draw_call_key.cpp" />
     <ClCompile Include="gx\gx_final_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_pipeline.cpp" />
+    <ClCompile Include="gx\gx_render_context.cpp" />
     <ClCompile Include="gx\gx_scene_pipeline_node.cpp" />
+    <ClCompile Include="gx\gx_thread_render_context.cpp" />
     <ClCompile Include="gx\gx_view_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_scene.cpp" />
     <ClCompile Include="irradiance.cpp">

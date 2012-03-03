@@ -1,45 +1,45 @@
 #ifndef __WIN32_WINDOW_H__
 #define __WIN32_WINDOW_H__
 
-#include <boost/noncopyable.hpp>
 #include <cstdint>
+#include <memory>
+
+#include <boost/noncopyable.hpp>
 
 #include "dx11/dx11_error.h"
-#include "dx11/dx11_system.h"
+#include "dx11/dx11_pointers.h"
 
 #include "fnd/fnd_world.h"
 
+namespace gx
+{
+	class scene;
+	class render_context;
+}
+
 namespace wnd
 {
-
     class application;
 
 	class window : private boost::noncopyable
 	{
 		public:
-		window(application& application, dx11::system_context system_context) : m_application(application), m_system_context(system_context)
+		window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
+			m_application(application)
+			, m_swap_chain(swap_chain)
+			, m_render_context(render_context)
 		{
 
 		}
 
-		void resize_window(std::uint32_t width, std::uint32_t height)
+		inline void set_scene( std::shared_ptr<gx::scene> scene )
 		{
-			using namespace dx11;
-			DXGI_SWAP_CHAIN_DESC desc;
-
-			throw_if_failed<d3d11_exception>(m_system_context.m_swap_chain->GetDesc(&desc));
-			throw_if_failed<d3d11_exception>(m_system_context.m_swap_chain->ResizeBuffers(desc.BufferCount, width, height,  desc.BufferDesc.Format, desc.Flags));
+			m_scene = scene;
 		}
 
-		void render()
-		{
-			//render world
-		}
+		void resize_window(std::uint32_t width, std::uint32_t height);
 
-		void set_world()
-		{
-
-		}
+		void render();
 
 		void destroy();
 
@@ -48,7 +48,10 @@ namespace wnd
 		~window();
 
 		application&				m_application;
-		dx11::system_context		m_system_context;
+		dx11::idxgiswapchain_ptr    m_swap_chain;
+		gx::render_context*			m_render_context;
+
+		std::shared_ptr<gx::scene>	m_scene;
 	};
 
 }

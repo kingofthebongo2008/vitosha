@@ -16,7 +16,7 @@ namespace gx
     {
         draw_calls_pipeline_params* in_params = reinterpret_cast<draw_calls_pipeline_params*> (input);
 
-        m_render_context->begin_frame();
+		m_render_context->begin_frame();
 
 
         m_render_context->end_frame();
