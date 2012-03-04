@@ -8,9 +8,9 @@
 namespace gx
 {
     class draw_call_collector;
-    class draw_call_collector_context;
+    struct draw_call_collector_context ;
 
-    class draw_call_context;
+    struct draw_call_context;
 
     class entity : private boost::noncopyable
     {

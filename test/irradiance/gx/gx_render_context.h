@@ -57,6 +57,7 @@ namespace gx
     class render_context : public boost::noncopyable
     {
         public:
+		typedef  std::vector< std::unique_ptr<thread_render_context> > thread_render_context_container;
 
 		render_context(dx11::system_context sys_context, std::uint32_t render_context_count);
 		~render_context();
@@ -67,8 +68,30 @@ namespace gx
 		void create_swap_chain_buffers();
 		void release_swap_chain_buffers();
 
-		void select_gbuffer(dx11::id3d11devicecontext_ptr device_context);
-		void select_main_target(dx11::id3d11devicecontext_ptr device_context);
+		void select_gbuffer(ID3D11DeviceContext* device_context);
+		void select_main_target(ID3D11DeviceContext* device_context);
+
+
+		inline thread_render_context_container::iterator begin()
+		{
+			return m_render_contexts.begin();
+		}
+
+		inline thread_render_context_container::const_iterator begin() const
+		{
+			return m_render_contexts.begin();
+		}
+
+
+		inline thread_render_context_container::iterator end()
+		{
+			return m_render_contexts.end();
+		}
+
+		inline thread_render_context_container::const_iterator end() const
+		{
+			return m_render_contexts.end();
+		}
 
 		private:
 
@@ -81,11 +104,11 @@ namespace gx
 		void create_specular_buffer();
 		void create_normal_depth_buffer();
 
-		void clear_buffers();
+		void clear_buffers( ID3D11DeviceContext* device_context);
 
 
         dx11::system_context									m_system_context;
-        std::vector< std::unique_ptr<thread_render_context> >	m_render_contexts;
+        thread_render_context_container							m_render_contexts;
 
 		dx11::id3d11rendertargetview_ptr						m_back_buffer_render_target;
 

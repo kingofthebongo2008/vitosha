@@ -11,7 +11,7 @@
 
 namespace gx
 {
-    class draw_call_context;
+    struct draw_call_context;
 
     class indexed_draw_call
     {
@@ -30,7 +30,7 @@ namespace gx
 
         ~indexed_draw_call();
 
-        void draw(draw_call_context* context);
+		void draw(draw_call_context* device_context);
 
         private:
 

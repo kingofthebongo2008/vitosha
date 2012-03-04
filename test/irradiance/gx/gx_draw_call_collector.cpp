@@ -22,9 +22,9 @@ namespace gx
         std::sort( std::begin(*m_draw_calls), std::end(*m_draw_calls) );
     }
 
-    void draw_call_collector::add_draw_call( draw_call_key key, entity* entity )
+    void draw_call_collector::add_draw_call( draw_call_key key, uint32_t entity_index )
     {
-        draw_call_info info = { key, entity };
+        draw_call_info info = { key, entity_index };
         m_draw_calls->push_back( info );
     }
 

@@ -34,6 +34,7 @@ namespace gx
         {
             context.m_pvw = &in_params->m_pvw_matrices->operator[](i);
             context.m_world_matrix = &in_params->m_world_matrices->operator[](i);
+			context.m_entity_index = i;
             entity* enty = reinterpret_cast<entity*> ( in_params->m_data->operator[](i) ) ;
 
             enty->create_draw_calls(&context, &collector);

@@ -43,11 +43,8 @@ namespace gx
 
     void indexed_draw_call::draw(draw_call_context* context)
     {
-        UNUSED_PARAMETER(context);
-
-        ID3D11DeviceContext* device_context = context->m_device_context.get();
-
-        uint32_t stride = m_index_info.m_vertex_size;
+		ID3D11DeviceContext* device_context = context->m_device_context;
+		uint32_t stride = m_index_info.m_vertex_size;
         uint32_t offset = 0;
         ID3D11Buffer* buffers[2] = { m_vertex_buffer[0].get(), m_vertex_buffer[1].get() };
 

@@ -30,20 +30,24 @@ namespace gx
 
     void render_context::begin_frame()
     {
+		//submit everything we have done in the previous frame
+		for  (auto it = std::begin(m_render_contexts); it!= std::end(m_render_contexts); ++it)
+        {
+            (*it)->submit(m_system_context.m_immediate_context);
+        }
+
+		//begin new command lists
         for  (auto it = std::begin(m_render_contexts); it!= std::end(m_render_contexts); ++it)
         {
             (*it)->swap();
         }
-
-		clear_buffers();
+		
+		dx11::id3d11devicecontext_ptr device_context = m_render_contexts.front()->get_device_context();
+		clear_buffers( device_context.get() );
     }
 
     void render_context::end_frame()
     {
-        for  (auto it = std::begin(m_render_contexts); it!= std::end(m_render_contexts); ++it)
-        {
-            (*it)->submit(m_system_context.m_immediate_context);
-        }
 
     }
 
@@ -177,21 +181,21 @@ namespace gx
 		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_set.m_normal_depth_target)));
 	}
 	
-	void render_context::clear_buffers()
+	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
 	{
-		m_system_context.m_immediate_context->ClearDepthStencilView( m_depth_stencil_target.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
+		device_context->ClearDepthStencilView( m_depth_stencil_target.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
 
-		float clear_color_1[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		float clear_color_1[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 		float clear_color_2[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
 		float clear_color_3[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-		m_system_context.m_immediate_context->ClearRenderTargetView( m_back_buffer_render_target.get(), clear_color_1);
-		m_system_context.m_immediate_context->ClearRenderTargetView( m_gbuffer_render_set.m_normal_depth_target.get(), clear_color_2);
-		m_system_context.m_immediate_context->ClearRenderTargetView( m_gbuffer_render_set.m_diffuse_target.get(), clear_color_3);
-		m_system_context.m_immediate_context->ClearRenderTargetView( m_gbuffer_render_set.m_specular_target.get(), clear_color_3);
+		device_context->ClearRenderTargetView( m_back_buffer_render_target.get(), clear_color_1);
+		device_context->ClearRenderTargetView( m_gbuffer_render_set.m_normal_depth_target.get(), clear_color_2);
+		device_context->ClearRenderTargetView( m_gbuffer_render_set.m_diffuse_target.get(), clear_color_3);
+		device_context->ClearRenderTargetView( m_gbuffer_render_set.m_specular_target.get(), clear_color_3);
 	}
 
-	void render_context::select_gbuffer(dx11::id3d11devicecontext_ptr device_context)
+	void render_context::select_gbuffer(ID3D11DeviceContext* device_context)
 	{
 		ID3D11RenderTargetView* views[3] =
 		{ 
@@ -203,7 +207,7 @@ namespace gx
 		device_context->OMSetRenderTargets( 3, views, m_depth_stencil_target.get() );
 	}
 	
-	void render_context::select_main_target(dx11::id3d11devicecontext_ptr device_context)
+	void render_context::select_main_target(ID3D11DeviceContext* device_context)
 	{
 		device_context->OMSetRenderTargets( 1, dx11::get_pointer(m_back_buffer_render_target), m_depth_stencil_target.get() );
 	}

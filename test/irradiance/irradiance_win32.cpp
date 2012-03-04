@@ -54,7 +54,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 
     dx11::system_context context = dx11::create_system_context(hwnd);
-	gx::render_context	 render_context(context, 1);
+	gx::render_context	 render_context(context, 3);
 
     application application;
 

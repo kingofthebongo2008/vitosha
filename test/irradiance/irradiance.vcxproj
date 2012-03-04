@@ -104,6 +104,7 @@
     <ClInclude Include="gx\gx_draw_calls_pipeline_params.h" />
     <ClInclude Include="gx\gx_draw_call_collector.h" />
     <ClInclude Include="gx\gx_draw_call_collector_context.h" />
+    <ClInclude Include="gx\gx_draw_call_context.h" />
     <ClInclude Include="gx\gx_execute_draw_calls_pipeline_node.h" />
     <ClInclude Include="gx\gx_indexed_draw_call.h" />
     <ClInclude Include="gx\gx_entity.h" />
