@@ -69,6 +69,16 @@ namespace dx11
     {
 
     };
+
+	class create_vertex_shader : public create_resource_exception
+    {
+
+    };
+
+	class create_pixel_shader : public create_resource_exception
+    {
+
+    };
 }
 
 

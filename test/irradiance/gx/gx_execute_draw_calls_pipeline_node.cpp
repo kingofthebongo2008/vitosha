@@ -62,6 +62,8 @@ namespace gx
 
 		m_render_context->begin_frame();
 
+		m_render_context->select_depth_pass( m_render_context->front()->get_device_context().get() );
+
 		for (uint32_t i = 0; it != end; ++i, ++it)
 		{
 			(*it)->begin_frame();
@@ -70,6 +72,8 @@ namespace gx
 			uint32_t end_item = range_max[i];
 
 			ID3D11DeviceContext* device_context = (*it)->get_device_context().get();
+
+			m_render_context->select_depth_pass( device_context );
 
 			gx::draw_call_context draw_call_context = create_draw_call_context( device_context, in_params);
 														

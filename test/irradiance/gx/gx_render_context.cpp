@@ -6,7 +6,10 @@
 
 namespace gx
 {
-    render_context::render_context(dx11::system_context sys_context, std::uint32_t thread_render_context_count) : m_system_context(sys_context)
+    render_context::render_context(dx11::system_context sys_context, std::uint32_t thread_render_context_count) : 
+		m_system_context(sys_context)
+		, m_depth_vertex_shader( sys_context.m_device.get() )
+		, m_depth_constant_buffer ( sys_context.m_device.get() )
     {
         m_render_contexts.reserve(thread_render_context_count);
 
@@ -22,6 +25,8 @@ namespace gx
 
 
 		create_swap_chain_buffers();
+		create_gbuffer_state();
+		create_depth_state();
     }
 
 	render_context::~render_context()
@@ -205,12 +210,111 @@ namespace gx
 		};
 
 		device_context->OMSetRenderTargets( 3, views, m_depth_stencil_target.get() );
+		device_context->OMSetBlendState(m_gbuffer_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetDepthStencilState(m_gbuffer_state.m_depth.get(), 0 );
+		
+		device_context->RSSetState(m_gbuffer_state.m_rasterizer.get());
+
+		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 	
-	void render_context::select_main_target(ID3D11DeviceContext* device_context)
+	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
 	{
 		device_context->OMSetRenderTargets( 1, dx11::get_pointer(m_back_buffer_render_target), m_depth_stencil_target.get() );
 	}
 
+	void render_context::select_depth_pass(ID3D11DeviceContext* device_context)
+	{
+		device_context->OMSetRenderTargets(0, nullptr, m_depth_render_set.m_depth_stencil_target.get());
+		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		device_context->PSSetShader(nullptr, nullptr, 0);
+
+		device_context->OMSetBlendState(m_depth_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetDepthStencilState(m_depth_state.m_depth.get(), 0 );
+		device_context->RSSetState(m_depth_state.m_rasterizer.get());
+
+		m_depth_vertex_shader.bind(device_context, &m_depth_constant_buffer);
+	}
+
+	void render_context::create_gbuffer_state()
+	{
+		D3D11_SAMPLER_DESC sampler = {};
+
+		sampler.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampler.MaxAnisotropy = 16;
+		sampler.MaxLOD = std::numeric_limits<float>::max();
+		sampler.MinLOD = std::numeric_limits<float>::min();
+		sampler.MipLODBias = 0;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateSamplerState(&sampler, dx11::get_pointer(m_gbuffer_state.m_sampler)));
+
+		D3D11_BLEND_DESC blend = {};
+		blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_gbuffer_state.m_blend_opaque)));
+
+		D3D11_DEPTH_STENCIL_DESC depth_stencil = {};
+		depth_stencil.DepthEnable = true;
+		depth_stencil.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+		depth_stencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateDepthStencilState(&depth_stencil, dx11::get_pointer(m_gbuffer_state.m_depth)));
+
+
+		D3D11_RASTERIZER_DESC rasterizer = {};
+
+		rasterizer.FillMode = D3D11_FILL_SOLID;
+		rasterizer.CullMode = D3D11_CULL_BACK;
+		rasterizer.DepthClipEnable = 1;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateRasterizerState(&rasterizer, dx11::get_pointer(m_gbuffer_state.m_rasterizer)));
+	}
+
+	void render_context::create_depth_state()
+	{
+		D3D11_SAMPLER_DESC sampler = {};
+
+		sampler.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampler.MaxAnisotropy = 16;
+		sampler.MaxLOD = std::numeric_limits<float>::max();
+		sampler.MinLOD = std::numeric_limits<float>::min();
+		sampler.MipLODBias = 0;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateSamplerState(&sampler, dx11::get_pointer(m_depth_state.m_sampler)));
+
+		D3D11_BLEND_DESC blend = {};
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_depth_state.m_blend_opaque)));
+
+		D3D11_DEPTH_STENCIL_DESC depth_stencil = {};
+		depth_stencil.DepthEnable = true;
+		depth_stencil.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+		depth_stencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateDepthStencilState(&depth_stencil, dx11::get_pointer(m_depth_state.m_depth)));
+
+
+		D3D11_RASTERIZER_DESC rasterizer = {};
+
+		rasterizer.FillMode = D3D11_FILL_SOLID;
+		rasterizer.CullMode = D3D11_CULL_BACK;
+		rasterizer.DepthClipEnable = 1;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateRasterizerState(&rasterizer, dx11::get_pointer(m_depth_state.m_rasterizer)));
+	}
+
+
+	/*
+	id3d11samplerstate_ptr
+	id3d11depthstencilstate_ptr
+	id3d11blendstate_ptr
+	id3d11rasterizerstate_ptr
+
+
+	CreateDepthStencilState
+	CreateRasterizerState
+	CreateSamplerState
+	CreateBlendState
+	*/
 }
 

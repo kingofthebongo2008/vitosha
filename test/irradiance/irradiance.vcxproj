@@ -42,6 +42,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IntDir)\shaders;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -85,6 +86,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CustomBuild Include="gx\gx_shader_depth.vsh">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename).h  /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename).h</Outputs>
+    </CustomBuild>
     <None Include="irradiance.ico" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
@@ -114,6 +120,7 @@
     <ClInclude Include="gx\gx_pipeline_params.h" />
     <ClInclude Include="gx\gx_render_context.h" />
     <ClInclude Include="gx\gx_scene_pipeline_node.h" />
+    <ClInclude Include="gx\gx_depth_shader.h" />
     <ClInclude Include="gx\gx_thread_render_context.h" />
     <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
@@ -155,6 +162,7 @@
     <ClCompile Include="gx\gx_pipeline.cpp" />
     <ClCompile Include="gx\gx_render_context.cpp" />
     <ClCompile Include="gx\gx_scene_pipeline_node.cpp" />
+    <ClCompile Include="gx\gx_depth_shader.cpp" />
     <ClCompile Include="gx\gx_thread_render_context.cpp" />
     <ClCompile Include="gx\gx_view_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_scene.cpp" />

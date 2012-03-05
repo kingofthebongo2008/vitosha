@@ -31,12 +31,15 @@ namespace dx11
 
     typedef boost::intrusive_ptr<ID3D11DepthStencilState>	id3d11depthstencilstate_ptr;
     typedef boost::intrusive_ptr<ID3D11BlendState>			id3d11blendstate_ptr;
+	typedef boost::intrusive_ptr<ID3D11RasterizerState>		id3d11rasterizerstate_ptr;
 
     typedef boost::intrusive_ptr<ID3D11DepthStencilView>	id3d11depthstencilview_ptr;
 
-    
+	typedef boost::intrusive_ptr<ID3D11VertexShader>		id3d11vertexshader_ptr;
+	typedef boost::intrusive_ptr<ID3D11PixelShader>			id3d11pixelshader_ptr;
+
     template<typename T> 
-    inline T** get_pointer(boost::intrusive_ptr<T>& ptr)
+    inline T** get_pointer( boost::intrusive_ptr<T>& ptr )
     {
         return reinterpret_cast<T**>(&(ptr));
     }
