@@ -224,7 +224,7 @@ namespace math
 
 	}
 
-	inline vector_float4 matrix44_mul(matrix_float44 m, vector_float4 v)
+	inline vector_float4 matrix44_mul(vector_float4 v, matrix_float44 m)
 	{
 		vector_float4  v1 = swizzle<x,x,x,x>(v);
 		vector_float4  v2 = swizzle<y,y,y,y>(v);
@@ -243,7 +243,7 @@ namespace math
 		return v11;
 	}
 
-	inline vector_float4 matrix44_mul(vector_float4 v, matrix_float44 m )
+	inline vector_float4 matrix44_mul(matrix_float44 m, vector_float4 v)
 	{
 		matrix_float44 transpose = matrix44_transpose(m);
 		return matrix44_mul(v, transpose);
@@ -253,10 +253,10 @@ namespace math
 	{
 		matrix_float44 m;
 
-		m.r[0] = matrix44_mul(m1, m2.r[0]);
-		m.r[1] = matrix44_mul(m1, m2.r[1]);
-		m.r[2] = matrix44_mul(m1, m2.r[2]);
-		m.r[3] = matrix44_mul(m1, m2.r[3]);
+		m.r[0] = matrix44_mul(m1.r[0], m2);
+		m.r[1] = matrix44_mul(m1.r[1], m2);
+		m.r[2] = matrix44_mul(m1.r[2], m2);
+		m.r[3] = matrix44_mul(m1.r[3], m2);
 
 		return m;
 	}

@@ -41,16 +41,6 @@ namespace gx
 		type* data = static_cast< type*> (lock.m_mapped_resource.pData);
 		*data = *value;
 	}
-
-	template <typename type> void constant_buffer_update( ID3D11DeviceContext* context, dx11::id3d11buffer_ptr buffer, type* value )
-	{
-		constant_buffer_update( context, buffer.get(), value);
-	}
-
-	template <typename type> void constant_buffer_update( dx11::id3d11devicecontext_ptr context, dx11::id3d11buffer_ptr buffer, type* value )
-	{
-		constant_buffer_update( context.get(), buffer, value);
-	}
 }
 
 #endif

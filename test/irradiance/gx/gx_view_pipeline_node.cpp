@@ -13,7 +13,7 @@ namespace gx
 
         uint32_t size = static_cast<uint32_t> ( in_params->m_world_matrices->size() );
 
-        m_pvw_matrices.resize( size );
+        m_wvp_matrices.resize( size );
 
         math::matrix_float44 view_matrix = m_view->get_view_matrix();
         math::matrix_float44 projection_matrix = m_view->get_projection_matrix();
@@ -24,13 +24,13 @@ namespace gx
         view_pipeline_params view_params = {
                                 view_matrix, projection_matrix, 
                                 inverse_view_matrix, inverse_projection_matrix,
-                                &m_pvw_matrices, in_params->m_world_matrices, in_params->m_data } ;
+                                &m_wvp_matrices, in_params->m_world_matrices, in_params->m_data } ;
 
-        math::matrix_float44 pv = math::matrix44_mul( projection_matrix, view_matrix );
+        math::matrix_float44 vp = math::matrix44_mul( view_matrix, projection_matrix  );
         
         for (uint32_t i = 0; i < size; ++i)
         {
-            m_pvw_matrices[i] = math::matrix44_mul( pv, in_params->m_world_matrices->operator[](i) );
+            m_wvp_matrices[i] = math::matrix44_mul( vp, in_params->m_world_matrices->operator[](i) );
         }
 
         delete in_params;

@@ -18,9 +18,9 @@ namespace gx
 		public:
 		depth_vertex_shader_constant_buffer ( dx11::id3d11device_ptr device );
 
-		void set_pvw(math::matrix_float44 value)
+		void set_wvp(math::matrix_float44 value)
 		{
-			m_pvw = value;
+			m_wvp = value;
 		}
 
 		void update ( ID3D11DeviceContext* context, math::matrix_float44* value)
@@ -30,7 +30,7 @@ namespace gx
 
 		void flush ( ID3D11DeviceContext* context )
 		{
-			update(context, &m_pvw);
+			update(context, &m_wvp);
 		}
 
 		void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
@@ -41,7 +41,7 @@ namespace gx
 		private:
 
 		dx11::id3d11buffer_ptr	m_buffer;
-		math::matrix_float44	m_pvw;
+		math::matrix_float44	m_wvp;
 	};
 
 	class depth_vertex_shader

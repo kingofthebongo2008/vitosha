@@ -1,6 +1,6 @@
 cbuffer per_object
 {
-	float4x4 m_pvw;
+	row_major float4x4 m_wvp; 
 }
 
 struct vs_input
@@ -18,12 +18,8 @@ struct vs_output
 vs_output main( in  vs_input input)
 {
 	vs_output output;
-	output.position = mul ( m_pvw, float4(input.position, 1.0f) )  ;	
+	output.position = mul ( float4(input.position, 1.0f), m_wvp )  ;	
 	output.uv = input.uv;
 	return output;
 }
-
-
-
-
 

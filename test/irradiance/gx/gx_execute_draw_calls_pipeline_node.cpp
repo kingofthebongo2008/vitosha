@@ -47,7 +47,7 @@ namespace gx
 
 		for (uint32_t j = 0; j < in_params->m_draw_calls->size(); ++j )
 		{
-			draw_call_context.m_pvw_matrix = &in_params->m_pvw_matrices->operator[](j);
+			draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->operator[](j);
 
 			gx::draw_call_info key = in_params->m_draw_calls->operator[](j);
 
@@ -60,10 +60,14 @@ namespace gx
 		
 		device_context->PSSetShader(m_render_context->m_test_shader, nullptr, 0);
 	
-		math::matrix_float44 m = math::matrix44_identity();//::matrix44_translation(-0.5f, -0.5f, 0.0f);
+		math::matrix_float44 m = math::matrix44_identity();
 		math::matrix_float44 m1 = math::matrix44_translation(-0.5f, -0.5f, 0.0f);
 		math::matrix_float44 m2 = math::matrix44_scaling(0.5f, 0.5f, 1.0f);
-		math::matrix_float44 m3 = math::matrix44_mul(m1, m2);
+		math::matrix_float44 m3 = math::matrix44_mul(m2, m1);
+
+		math::vector_float4 v = math::set( 0.0f, 0.0f, 0.0f, 1.0f );
+		math::vector_float4 v1 = math::matrix44_mul(m1, v); 
+		math::vector_float4 v2 = math::matrix44_mul(v, m1); 
 
 		draw_screen_space_quad(device_context, m_render_context, m3);
 
@@ -115,7 +119,7 @@ namespace gx
 														
 			for (uint32_t j = start_item; j < end_item; ++j )
 			{
-				draw_call_context.m_pvw_matrix = &in_params->m_pvw_matrices->operator[](j);
+				draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->operator[](j);
 
 				gx::draw_call_info key = in_params->m_draw_calls->operator[](j);
 

@@ -32,7 +32,7 @@ namespace gx
 
         for(uint32_t i = 0 ; i < in_params->m_data->size(); ++i)
         {
-            context.m_pvw = &in_params->m_pvw_matrices->operator[](i);
+            context.m_wvp = &in_params->m_wvp_matrices->operator[](i);
             context.m_world_matrix = &in_params->m_world_matrices->operator[](i);
 			context.m_entity_index = i;
             entity* enty = reinterpret_cast<entity*> ( in_params->m_data->operator[](i) ) ;
@@ -48,7 +48,7 @@ namespace gx
                 in_params->m_projection_matrix, 
                 in_params->m_inverse_view_matrix, 
                 in_params->m_inverse_projection_matrix, 
-                in_params->m_pvw_matrices,
+                in_params->m_wvp_matrices,
                 in_params->m_world_matrices,
                 &m_draw_calls,
                 in_params->m_data

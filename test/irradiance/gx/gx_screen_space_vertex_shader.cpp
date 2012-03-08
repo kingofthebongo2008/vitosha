@@ -7,7 +7,7 @@ namespace gx
 	{
 		D3D11_BUFFER_DESC desc = {};
 
-		desc.ByteWidth = sizeof(m_pvw);
+		desc.ByteWidth = sizeof(m_wvp);
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
