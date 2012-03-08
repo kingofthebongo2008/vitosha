@@ -11,6 +11,10 @@
 #include <dx11/dx11_system.h>
 
 #include <gx/gx_depth_shader.h>
+#include <gx/gx_screen_space_quad.h>
+#include <gx/gx_screen_space_vertex_shader.h>
+#include <gx/gx_screen_space_pixel_shader.h>
+#include <gx/gx_view_port.h>
 
 namespace gx
 {
@@ -77,7 +81,7 @@ namespace gx
         public:
 		typedef  std::vector< std::unique_ptr<thread_render_context> > thread_render_context_container;
 
-		render_context(dx11::system_context sys_context, std::uint32_t render_context_count);
+		render_context(dx11::system_context sys_context, std::uint32_t render_context_count, view_port view_port);
 		~render_context();
 
         void begin_frame();
@@ -86,10 +90,12 @@ namespace gx
 		void create_swap_chain_buffers();
 		void release_swap_chain_buffers();
 
+		void clear_buffers( ID3D11DeviceContext* device_context);
 		void select_depth_pass(ID3D11DeviceContext* device_context);
 		void select_gbuffer(ID3D11DeviceContext* device_context);
 		void select_back_buffer_target(ID3D11DeviceContext* device_context);
 
+		screen_space_quad_render	create_screen_space_quad_render();
 
 		inline thread_render_context_container::iterator begin()
 		{
@@ -100,7 +106,6 @@ namespace gx
 		{
 			return m_render_contexts.begin();
 		}
-
 
 		inline thread_render_context_container::iterator end()
 		{
@@ -122,6 +127,16 @@ namespace gx
 			return m_render_contexts.front();
 		}
 
+		inline void set_view_port ( view_port value )
+		{
+			m_view_port = value;
+		}
+
+		inline dx11::id3d11devicecontext_ptr get_immediate_context()
+		{
+			return m_system_context.m_immediate_context;
+		}
+
 		private:
 
 		render_context();
@@ -133,10 +148,14 @@ namespace gx
 		void create_specular_buffer();
 		void create_normal_depth_buffer();
 
-		void clear_buffers( ID3D11DeviceContext* device_context);
-
 		void create_gbuffer_state();
 		void create_depth_state();
+
+		void create_depth_buffer_layout();
+		void create_screen_space_input_layout();
+		void create_screen_space_vertex_buffer();
+
+		void select_view_port(ID3D11DeviceContext* device_context);
 
         dx11::system_context									m_system_context;
         thread_render_context_container							m_render_contexts;
@@ -155,6 +174,20 @@ namespace gx
 		depth_vertex_shader										m_depth_vertex_shader;
 		depth_vertex_shader_constant_buffer						m_depth_constant_buffer;
 
+		dx11::id3d11inputlayout_ptr								m_depth_input_layout;
+
+		view_port												m_view_port;
+
+
+		//render screen space quads
+		dx11::id3d11inputlayout_ptr								m_screen_space_input_layout;
+		screen_space_vertex_shader								m_screen_space_vertex_shader;
+		screen_space_vertex_shader_constant_buffer				m_screen_space_constant_buffer;
+		dx11::id3d11buffer_ptr									m_screen_space_vertex_buffer;
+
+
+		public:
+		screen_space_pixel_shader								m_test_shader;
     };
 }
 

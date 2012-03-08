@@ -23,6 +23,7 @@ namespace gx
         private:
         render_context*	m_render_context;
         void*			do_process(void* input);
+		void*			do_process1(void* input);
     };
 }
 

@@ -38,6 +38,8 @@ namespace dx11
 	typedef boost::intrusive_ptr<ID3D11VertexShader>		id3d11vertexshader_ptr;
 	typedef boost::intrusive_ptr<ID3D11PixelShader>			id3d11pixelshader_ptr;
 
+	typedef boost::intrusive_ptr<ID3D11InputLayout>			id3d11inputlayout_ptr;
+
     template<typename T> 
     inline T** get_pointer( boost::intrusive_ptr<T>& ptr )
     {

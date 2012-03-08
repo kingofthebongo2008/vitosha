@@ -97,6 +97,9 @@ namespace wnd
 		throw_if_failed<d3d11_exception>(m_swap_chain->GetDesc(&desc));
 		throw_if_failed<d3d11_exception>(m_swap_chain->ResizeBuffers(desc.BufferCount, width, height,  desc.BufferDesc.Format, desc.Flags));
 
+		gx::view_port view_port ( 0, 0, width, height );
+		m_render_context->set_view_port(view_port);
+
 		m_render_context->create_swap_chain_buffers();
 	}
 }

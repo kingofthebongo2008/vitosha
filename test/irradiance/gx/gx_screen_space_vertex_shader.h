@@ -1,5 +1,5 @@
-#ifndef __GX_DEPTH_SHADER_H__
-#define __GX_DEPTH_SHADER_H__
+#ifndef __GX_SCREEN_SPACE_VERTEX_SHADER_H__
+#define __GX_SCREEN_SPACE_VERTEX_SHADER_H__
 
 #include <cstdint>
 #include <memory>
@@ -13,10 +13,11 @@
 
 namespace gx
 {
-	class depth_vertex_shader_constant_buffer 
+	class screen_space_vertex_shader_constant_buffer 
 	{
 		public:
-		depth_vertex_shader_constant_buffer ( dx11::id3d11device_ptr device );
+
+		screen_space_vertex_shader_constant_buffer ( dx11::id3d11device_ptr device );
 
 		void set_pvw(math::matrix_float44 value)
 		{
@@ -38,19 +39,19 @@ namespace gx
 			context->VSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
 		}
 
-		private:
+		public:
 
 		dx11::id3d11buffer_ptr	m_buffer;
 		math::matrix_float44	m_pvw;
 	};
 
-	class depth_vertex_shader
+	class screen_space_vertex_shader
     {
 		public:
 
-		depth_vertex_shader ( dx11::id3d11device_ptr device );
+		screen_space_vertex_shader ( dx11::id3d11device_ptr device );
 
-		void bind(ID3D11DeviceContext* context, depth_vertex_shader_constant_buffer* constant_buffer)
+		void bind(ID3D11DeviceContext* context, screen_space_vertex_shader_constant_buffer* constant_buffer)
 		{
 			constant_buffer->bind_as_vertex_constant_buffer(context);
 			context->VSSetShader(m_shader.get(), nullptr, 0 );

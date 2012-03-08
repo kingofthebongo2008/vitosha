@@ -6,10 +6,14 @@
 
 namespace gx
 {
-    render_context::render_context(dx11::system_context sys_context, std::uint32_t thread_render_context_count) : 
+    render_context::render_context(dx11::system_context sys_context, std::uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
 		, m_depth_vertex_shader( sys_context.m_device.get() )
 		, m_depth_constant_buffer ( sys_context.m_device.get() )
+		, m_view_port(view_port)
+		, m_screen_space_vertex_shader ( sys_context.m_device.get() )
+		, m_screen_space_constant_buffer ( sys_context.m_device.get() )
+		, m_test_shader (sys_context.m_device.get())
     {
         m_render_contexts.reserve(thread_render_context_count);
 
@@ -23,10 +27,13 @@ namespace gx
             m_render_contexts.push_back( std::move(ptr) );
         }
 
-
 		create_swap_chain_buffers();
 		create_gbuffer_state();
 		create_depth_state();
+
+		create_depth_buffer_layout();
+		create_screen_space_input_layout();
+		create_screen_space_vertex_buffer();
     }
 
 	render_context::~render_context()
@@ -108,7 +115,7 @@ namespace gx
 		texture_description.MiscFlags = 0;
 		texture_description.SampleDesc = desc.SampleDesc;
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
-		texture_description.Width = desc.BufferDesc.Height;
+		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_depth_stencil)));
 		dx11::throw_if_failed< dx11::create_depth_stencil_view> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), 0, dx11::get_pointer(m_depth_stencil_target) ));
@@ -132,7 +139,7 @@ namespace gx
 		texture_description.MiscFlags = 0;
 		texture_description.SampleDesc = desc.SampleDesc;
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
-		texture_description.Width = desc.BufferDesc.Height;
+		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( & texture_description, 0, dx11::get_pointer(m_gbuffer_render_set.m_diffuse)));
 		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_set.m_diffuse_target)));
@@ -156,7 +163,7 @@ namespace gx
 		texture_description.MiscFlags = 0;
 		texture_description.SampleDesc = desc.SampleDesc;
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
-		texture_description.Width = desc.BufferDesc.Height;
+		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_set.m_specular)));
 		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_set.m_specular_target)));
@@ -180,7 +187,7 @@ namespace gx
 		texture_description.MiscFlags = 0;
 		texture_description.SampleDesc = desc.SampleDesc;
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
-		texture_description.Width = desc.BufferDesc.Height;
+		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_set.m_normal_depth)));
 		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_set.m_normal_depth_target)));
@@ -212,28 +219,51 @@ namespace gx
 		device_context->OMSetRenderTargets( 3, views, m_depth_stencil_target.get() );
 		device_context->OMSetBlendState(m_gbuffer_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_gbuffer_state.m_depth.get(), 0 );
-		
 		device_context->RSSetState(m_gbuffer_state.m_rasterizer.get());
-
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 	
 	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
 	{
+		device_context->OMSetBlendState(m_gbuffer_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetDepthStencilState(m_gbuffer_state.m_depth.get(), 0 );
+		device_context->RSSetState(m_gbuffer_state.m_rasterizer.get());
+		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
 		device_context->OMSetRenderTargets( 1, dx11::get_pointer(m_back_buffer_render_target), m_depth_stencil_target.get() );
 	}
 
 	void render_context::select_depth_pass(ID3D11DeviceContext* device_context)
 	{
-		device_context->OMSetRenderTargets(0, nullptr, m_depth_render_set.m_depth_stencil_target.get());
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		device_context->IASetInputLayout(m_depth_input_layout.get());
+
 		device_context->PSSetShader(nullptr, nullptr, 0);
 
+		device_context->OMSetRenderTargets(0, nullptr, m_depth_render_set.m_depth_stencil_target.get());
 		device_context->OMSetBlendState(m_depth_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_depth_state.m_depth.get(), 0 );
+
 		device_context->RSSetState(m_depth_state.m_rasterizer.get());
 
 		m_depth_vertex_shader.bind(device_context, &m_depth_constant_buffer);
+
+		select_view_port(device_context);
+	}
+
+	void render_context::select_view_port(ID3D11DeviceContext* device_context)
+	{
+		D3D11_VIEWPORT view_port;
+
+		view_port.Height	= static_cast<float> (m_view_port.get_height());
+		view_port.MaxDepth	= m_view_port.get_max_z();
+		view_port.MinDepth	= m_view_port.get_min_z();
+		view_port.TopLeftX	= static_cast<float> (m_view_port.get_top());
+		view_port.TopLeftY	= static_cast<float> (m_view_port.get_top());
+		view_port.Width		= static_cast<float> (m_view_port.get_width());
+
+		device_context->RSSetViewports(1, &view_port);
 	}
 
 	void render_context::create_gbuffer_state()
@@ -303,18 +333,63 @@ namespace gx
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateRasterizerState(&rasterizer, dx11::get_pointer(m_depth_state.m_rasterizer)));
 	}
 
+	void render_context::create_depth_buffer_layout()
+	{
+		D3D11_INPUT_ELEMENT_DESC desc = { "POSITION", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc, 1, m_depth_vertex_shader.m_code, m_depth_vertex_shader.m_code_size, dx11::get_pointer(m_depth_input_layout)));
+	}
 
-	/*
-	id3d11samplerstate_ptr
-	id3d11depthstencilstate_ptr
-	id3d11blendstate_ptr
-	id3d11rasterizerstate_ptr
+	void render_context::create_screen_space_input_layout()
+	{
+		D3D11_INPUT_ELEMENT_DESC desc[2] = 
+		{
+			{ "POSITION",	0,	DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",	0,  DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
 
+		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc[0], 2, m_screen_space_vertex_shader.m_code, m_screen_space_vertex_shader.m_code_size, dx11::get_pointer(m_screen_space_input_layout)));
+	}
 
-	CreateDepthStencilState
-	CreateRasterizerState
-	CreateSamplerState
-	CreateBlendState
-	*/
+	screen_space_quad_render	render_context::create_screen_space_quad_render()
+	{
+		screen_space_quad_render quad_render  = { 
+													m_screen_space_vertex_shader.m_shader
+													, m_screen_space_vertex_buffer
+													, m_screen_space_constant_buffer.m_buffer
+													, m_screen_space_input_layout
+												};
+
+		return quad_render;
+	}
+
+	void render_context::create_screen_space_vertex_buffer()
+	{
+		D3D11_BUFFER_DESC desc = {};
+
+		desc.ByteWidth = 6 * 20;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+
+		struct vertex
+		{
+			float v[3];
+			float uv[2];
+		};
+
+		vertex v[6] =
+		{ 
+			 { {-1.0f,	-1.0f,	0.0f }, {0.0f, 0.0f }  },
+			 { {-1.0f,	1.0f,	0.0f } , {0.0f, 1.0f }  },
+			 { { 1.0f,	1.0f,	0.0f } ,  {1.0f, 1.0f } },
+
+			 { { 1.0f,	1.0f,	0.0f } , {1.0f, 1.0f } },
+			 { { 1.0f, -1.0f,	0.0f } , {1.0f, 0.0f } },
+			 { {-1.0f,	-1.0f,	0.0f }, {0.0f, 0.0f }  }
+		};
+
+		D3D11_SUBRESOURCE_DATA initial_data = { &v[0], 0, 0};
+
+		dx11::throw_if_failed<dx11::create_buffer_exception> (m_system_context.m_device->CreateBuffer(&desc, &initial_data, dx11::get_pointer(m_screen_space_vertex_buffer)));
+	}
 }
 

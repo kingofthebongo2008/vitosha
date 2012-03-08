@@ -11,8 +11,6 @@
 
 namespace gx
 {
-    struct draw_call_context;
-
     class indexed_draw_call
     {
         public:
@@ -30,7 +28,7 @@ namespace gx
 
         ~indexed_draw_call();
 
-		void draw(draw_call_context* device_context);
+		void draw(ID3D11DeviceContext* device_context);
 
         private:
 
@@ -40,7 +38,6 @@ namespace gx
         dx11::id3d11buffer_ptr    m_vertex_buffer[2];
         dx11::id3d11buffer_ptr    m_index_buffer;
         uint8_t                   m_buffer_count;
-
     };
 }
 

@@ -24,6 +24,6 @@ namespace gxu
     void static_mesh_entity::on_execute_draw_calls(gx::draw_call_context* context)
     {
         //set vertex, pixel shader, upload constants and issue a draw call
-		m_draw_call.draw(context);
+		m_draw_call.draw(context->m_device_context);
     }
 }

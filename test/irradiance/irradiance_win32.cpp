@@ -53,8 +53,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return FALSE;
 	}
 
+	RECT r;
+
+	::GetClientRect(hwnd, &r);
+
+	gx::view_port view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
     dx11::system_context context = dx11::create_system_context(hwnd);
-	gx::render_context	 render_context(context, 3);
+	gx::render_context	 render_context(context, 3, view_port);
 
     application application;
 

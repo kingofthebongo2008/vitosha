@@ -79,6 +79,11 @@ namespace dx11
     {
 
     };
+
+	class create_input_layout : public create_resource_exception
+    {
+
+    };
 }
 
 

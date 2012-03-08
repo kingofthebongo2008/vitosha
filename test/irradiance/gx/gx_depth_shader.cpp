@@ -15,10 +15,12 @@ namespace gx
 		dx11::throw_if_failed<dx11::create_buffer_exception> (device->CreateBuffer(&desc, nullptr, dx11::get_pointer(m_buffer) ));
 	}
 
+	#include "gx_shader_depth.h"
+
 	depth_vertex_shader::depth_vertex_shader ( dx11::id3d11device_ptr device )
 	{
-		#include "gx_shader_depth.h"
-
 		dx11::throw_if_failed<dx11::create_vertex_shader> (device->CreateVertexShader( gx_shader_depth, sizeof(gx_shader_depth), nullptr, dx11::get_pointer(m_shader)));
+		m_code = &gx_shader_depth[0];
+		m_code_size = sizeof(gx_shader_depth);
 	}
 }

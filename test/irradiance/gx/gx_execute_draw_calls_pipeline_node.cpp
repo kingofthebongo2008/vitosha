@@ -9,9 +9,8 @@
 #include <gx/gx_entity.h>
 
 #include <gx/gx_pipeline_params.h>
-
+#include <gx/gx_screen_space_quad.h>
 #include <gx/gx_thread_render_context.h>
-
 #include <gx/gx_view.h>
 
 namespace gx
@@ -35,7 +34,44 @@ namespace gx
 
 	}
 
-    void*   execute_draw_calls_pipeline_node::do_process(void* input)
+	void*   execute_draw_calls_pipeline_node::do_process(void* input)
+    {
+        draw_calls_pipeline_params* in_params = reinterpret_cast<draw_calls_pipeline_params*> (input);
+
+		ID3D11DeviceContext* device_context = m_render_context->get_immediate_context().get();
+
+		m_render_context->clear_buffers(device_context);
+		m_render_context->select_depth_pass( device_context );
+
+		gx::draw_call_context draw_call_context = create_draw_call_context( device_context, in_params);
+
+		for (uint32_t j = 0; j < in_params->m_draw_calls->size(); ++j )
+		{
+			draw_call_context.m_pvw_matrix = &in_params->m_pvw_matrices->operator[](j);
+
+			gx::draw_call_info key = in_params->m_draw_calls->operator[](j);
+
+			gx::entity* enty = reinterpret_cast<entity*> ( in_params->m_data->operator[](key.m_entity_index) );
+
+			enty->execute_draw_calls(&draw_call_context);
+		}
+
+		m_render_context->select_back_buffer_target(device_context);
+		
+		device_context->PSSetShader(m_render_context->m_test_shader, nullptr, 0);
+	
+		math::matrix_float44 m = math::matrix44_identity();//::matrix44_translation(-0.5f, -0.5f, 0.0f);
+		math::matrix_float44 m1 = math::matrix44_translation(-0.5f, -0.5f, 0.0f);
+		math::matrix_float44 m2 = math::matrix44_scaling(0.5f, 0.5f, 1.0f);
+		math::matrix_float44 m3 = math::matrix44_mul(m1, m2);
+
+		draw_screen_space_quad(device_context, m_render_context, m3);
+
+		delete in_params;
+		return nullptr;
+    }
+
+    void*  execute_draw_calls_pipeline_node::do_process1(void* input)
     {
         draw_calls_pipeline_params* in_params = reinterpret_cast<draw_calls_pipeline_params*> (input);
 

@@ -9,7 +9,13 @@ namespace gxu
 {
     gx::indexed_draw_call create_lat_lon_sphere( ID3D11Device* device , float radius, uint32_t subdivision_count )
     {
+		subdivision_count;
+		radius;
+		device;
+
         D3D11_BUFFER_DESC desc = {};
+
+		desc;
 
         dx11::id3d11buffer_ptr positions;
         dx11::id3d11buffer_ptr normals_uvs;
