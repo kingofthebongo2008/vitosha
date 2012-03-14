@@ -57,7 +57,7 @@ namespace gx
 		}
 
 		m_render_context->select_back_buffer_target(device_context);
-		
+
 		device_context->PSSetShader(m_render_context->m_test_shader, nullptr, 0);
 	
 		math::matrix_float44 m = math::matrix44_identity();

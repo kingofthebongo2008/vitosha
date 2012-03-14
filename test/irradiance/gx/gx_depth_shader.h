@@ -56,6 +56,21 @@ namespace gx
 			context->VSSetShader(m_shader.get(), nullptr, 0 );
 		}
 
+		operator dx11::id3d11vertexshader_ptr()
+		{
+			return m_shader;
+		}
+
+		operator ID3D11VertexShader*()
+		{
+			return m_shader.get();
+		}
+
+		operator const ID3D11VertexShader*() const
+		{
+			return m_shader.get();
+		}
+
 		dx11::id3d11vertexshader_ptr						 m_shader;
 		const void*											 m_code;
 		std::uint32_t										 m_code_size;

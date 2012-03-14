@@ -58,7 +58,7 @@ namespace gx
 		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
 	};
 
-	struct gbuffer_state
+	struct render_state
 	{
 		dx11::id3d11samplerstate_ptr			m_sampler;
 		dx11::id3d11depthstencilstate_ptr		m_depth;
@@ -66,12 +66,75 @@ namespace gx
 		dx11::id3d11rasterizerstate_ptr			m_rasterizer;
 	};
 
-	struct depth_state
+	struct gbuffer_state : public render_state
 	{
-		dx11::id3d11samplerstate_ptr			m_sampler;
-		dx11::id3d11depthstencilstate_ptr		m_depth;
-		dx11::id3d11blendstate_ptr				m_blend_opaque;
-		dx11::id3d11rasterizerstate_ptr			m_rasterizer;
+
+	};
+
+	struct depth_state : public render_state
+	{
+	};
+
+	struct gbuffer_render_data
+	{
+		gbuffer_state m_state;
+		gbuffer_render_set m_render_set;
+	};
+
+	struct depth_render_data
+	{
+		explicit depth_render_data  ( dx11::id3d11device_ptr device ) :
+			m_depth_vertex_shader(device)
+		,   m_depth_constant_buffer(device)
+		{
+
+		}
+
+		depth_state												m_state;
+		depth_render_set										m_render_set;
+		dx11::id3d11inputlayout_ptr								m_input_layout;
+		depth_vertex_shader										m_depth_vertex_shader;
+		depth_vertex_shader_constant_buffer						m_depth_constant_buffer;
+	};
+
+	struct screen_space_render_data
+	{
+		explicit screen_space_render_data (dx11::id3d11device_ptr device) :
+			m_screen_space_vertex_shader(device)
+			, m_screen_space_constant_buffer(device)
+		{
+
+		}
+
+		dx11::id3d11inputlayout_ptr								m_screen_space_input_layout;
+		screen_space_vertex_shader								m_screen_space_vertex_shader;
+		screen_space_vertex_shader_constant_buffer				m_screen_space_constant_buffer;
+		dx11::id3d11buffer_ptr									m_screen_space_vertex_buffer;
+	};
+
+	struct default_render_state : public render_state
+	{
+
+	};
+
+	struct default_render_set
+	{
+		inline void reset()
+		{
+			m_back_buffer_render_target.reset();
+			m_depth_stencil.reset();
+			m_depth_stencil_target.reset();
+		}
+
+		dx11::id3d11rendertargetview_ptr		m_back_buffer_render_target;
+		dx11::id3d11texture2d_ptr				m_depth_stencil;
+		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
+	};
+
+	struct default_render_data
+	{
+		default_render_state					m_state;
+		default_render_set						m_render_set;
 	};
 
     class thread_render_context;
@@ -155,6 +218,8 @@ namespace gx
 		void create_screen_space_input_layout();
 		void create_screen_space_vertex_buffer();
 
+		void create_default_render_data();
+
 		void select_view_port(ID3D11DeviceContext* device_context);
 
         dx11::system_context									m_system_context;
@@ -165,28 +230,15 @@ namespace gx
 		dx11::id3d11texture2d_ptr								m_depth_stencil;
 		dx11::id3d11depthstencilview_ptr						m_depth_stencil_target;
 
-		gbuffer_render_set										m_gbuffer_render_set;
-		depth_render_set										m_depth_render_set;
-
-		gbuffer_state											m_gbuffer_state;
-		depth_state												m_depth_state;
-
-		depth_vertex_shader										m_depth_vertex_shader;
-		depth_vertex_shader_constant_buffer						m_depth_constant_buffer;
-
-		dx11::id3d11inputlayout_ptr								m_depth_input_layout;
+		gbuffer_render_data										m_gbuffer_render_data;
+		depth_render_data										m_depth_render_data;
+		default_render_data										m_default_render_data;
 
 		view_port												m_view_port;
 
-
-		//render screen space quads
-		dx11::id3d11inputlayout_ptr								m_screen_space_input_layout;
-		screen_space_vertex_shader								m_screen_space_vertex_shader;
-		screen_space_vertex_shader_constant_buffer				m_screen_space_constant_buffer;
-		dx11::id3d11buffer_ptr									m_screen_space_vertex_buffer;
-
-
+		screen_space_render_data								m_screen_space_render_data;
 		public:
+
 		screen_space_pixel_shader								m_test_shader;
     };
 }

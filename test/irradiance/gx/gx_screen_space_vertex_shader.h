@@ -42,6 +42,7 @@ namespace gx
 		public:
 
 		dx11::id3d11buffer_ptr	m_buffer;
+
 		math::matrix_float44	m_wvp;
 	};
 
@@ -55,6 +56,21 @@ namespace gx
 		{
 			constant_buffer->bind_as_vertex_constant_buffer(context);
 			context->VSSetShader(m_shader.get(), nullptr, 0 );
+		}
+
+		operator dx11::id3d11vertexshader_ptr()
+		{
+			return m_shader;
+		}
+
+		operator ID3D11VertexShader*()
+		{
+			return m_shader.get();
+		}
+
+		operator const ID3D11VertexShader*() const
+		{
+			return m_shader.get();
 		}
 
 		dx11::id3d11vertexshader_ptr						 m_shader;

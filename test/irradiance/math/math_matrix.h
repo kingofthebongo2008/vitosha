@@ -19,7 +19,6 @@ namespace math
 		};
 	};
 
-
 	inline matrix_float44 matrix44_identity()
 	{
 		matrix_float44 m;

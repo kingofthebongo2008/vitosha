@@ -5,8 +5,8 @@ cbuffer per_object
 
 struct vs_input
 {
-	float3	position	: POSITION;
-	float2	uv			: TexCoord;
+	half4	position	: POSITION;
+	half2	uv			: TexCoord;
 };
 
 struct vs_output
@@ -18,8 +18,8 @@ struct vs_output
 vs_output main( in  vs_input input)
 {
 	vs_output output;
-	output.position = mul ( float4(input.position, 1.0f), m_wvp )  ;	
-	output.uv = input.uv;
+	output.position = mul ( float4(input.position), m_wvp )  ;	
+	output.uv = float2(input.uv);
 	return output;
 }
 

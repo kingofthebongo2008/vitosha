@@ -25,7 +25,7 @@ namespace gx
 		device_context->IASetInputLayout(m_input_layout.get());
 		device_context->VSSetShader(m_vertex_shader.get(), 0, 0) ;
 
-		uint32_t stride = 20;
+		uint32_t stride = 12;
         uint32_t offset = 0;
 		device_context->IASetVertexBuffers( 0, 1, dx11::get_pointer(m_vertex_buffer), &stride, &offset );
 	}

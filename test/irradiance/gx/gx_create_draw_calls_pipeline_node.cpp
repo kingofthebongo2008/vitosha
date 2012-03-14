@@ -10,9 +10,6 @@
 #include <gx/gx_pipeline_params.h>
 #include <gx/gx_view.h>
 
-
-
-
 namespace gx
 {
     create_draw_calls_pipeline_node::create_draw_calls_pipeline_node()
