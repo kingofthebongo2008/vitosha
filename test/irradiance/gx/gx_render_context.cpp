@@ -379,27 +379,35 @@ namespace gx
 			half uv[2];
 		};
 
-		const half one = convert_f32_f16(1.0f);
-		const half minus_one = convert_f32_f16(-1.0f);
-		const half zero = convert_f32_f16(0.0f);
-
-		const vertex v[6] =
-		{ 
-			 { {minus_one,	minus_one,	zero, one},  {zero, zero}},
-			 { {minus_one,	one,		zero, one},  {zero, one}},
-			 { {one,		one,		zero, one},  {one, one}},
-
-			 { {one,		one,		zero, one} , {one, one}},
-			 { {one,		minus_one,	zero, one} , {one, zero}},
-			 { {minus_one,	minus_one,	zero, one} , {zero,zero}}
+		struct vertex_float
+		{
+			float v[4];
+			float uv[2];
 		};
-		
+
+		const vertex_float v_1[ 6 + 2 ] =
+		{ 
+			 { {-1.0f,	-1.0f,	0.0f, 1.0f},  {0.0f, 0.0f}},
+			 { {-1.0f,	 1.0f,	0.0f, 1.0f},  {0.0f, 1.0f}},
+			 { {1.0f,	 1.0f,	0.0f, 1.0f},  {1.0f, 1.0f}},
+
+			 { {1.0f,	 1.0f,	0.0f, 1.0f} , {1.0f, 1.0f}},
+			 { {1.0f,	-1.0f,	0.0f, 1.0f} , {1.0f, 0.0f}},
+			 { {-1.0f,	-1.0f,	0.0f, 1.0f} , {0.0f,0.0f}},
+
+			 { {0.0f,	0.0f,	0.0f, 0.0f} , {0.0f,0.0f}},	//padding
+			 { {0.0f,	0.0f,	0.0f, 0.0f} , {0.0f,0.0f}},	//padding
+		};
+
+		__declspec( align(16) ) math::half h_1 [ 40 ];
+
+		math::convert_f32_f16_stream(reinterpret_cast<const float*> (&v_1[0]), 40, &h_1[0] );
 
 		desc.ByteWidth = 6 * sizeof(vertex);
 		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		desc.Usage = D3D11_USAGE_DEFAULT;
 
-		D3D11_SUBRESOURCE_DATA initial_data = { &v[0], 0, 0};
+		D3D11_SUBRESOURCE_DATA initial_data = { &h_1[0], 0, 0};
 
 		dx11::throw_if_failed<dx11::create_buffer_exception> (m_system_context.m_device->CreateBuffer(&desc, &initial_data, dx11::get_pointer(m_screen_space_render_data.m_screen_space_vertex_buffer)));
 	}
@@ -414,8 +422,6 @@ namespace gx
 		m_default_render_data.m_state.m_depth = m_gbuffer_render_data.m_state.m_depth;
 		m_default_render_data.m_state.m_rasterizer = m_gbuffer_render_data.m_state.m_rasterizer;
 		m_default_render_data.m_state.m_sampler = m_gbuffer_render_data.m_state.m_sampler;
-
-		
 	}
 }
 

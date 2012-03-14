@@ -147,6 +147,7 @@
     <ClInclude Include="gx\gx_thread_render_context.h" />
     <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
+    <ClInclude Include="math\math_half.h" />
     <ClInclude Include="math\math_matrix.h" />
     <ClInclude Include="math\math_vector.h" />
     <ClInclude Include="mem\mem_alloc.h" />
@@ -196,6 +197,7 @@
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>
     </ClCompile>
     <ClCompile Include="irradiance_win32.cpp" />
+    <ClCompile Include="math\math_half.cpp" />
     <ClCompile Include="precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

@@ -370,21 +370,6 @@ namespace math
 		return details2::convert_f32_f16(v1, v2);
 	}
 
-	inline void store1(half* __restrict address, vector_half4 value)
-	{
-		//_mm_store_ss(address, value);	
-	}
-
-	inline void store2(half* __restrict address, vector_half4 value)
-	{
-		//_mm_store_ss(address, value);	
-	}
-
-	inline void store3(half* __restrict address, vector_half4 value)
-	{
-		//_mm_store_ss(address, value);	
-	}
-
 	inline compact_half4 compact(vector_half4 value)
 	{
 		const uint32_t shuffle_k = _MM_SHUFFLE(3, 0, 2, 1);
@@ -400,6 +385,30 @@ namespace math
 		return s;
 	}
 
+	inline void store1(half* __restrict address, vector_half4 value)
+	{
+		compact_half4 s = compact(value);
+		half* __restrict h = reinterpret_cast<half* __restrict> (&s);		
+		*address++ = *h++;
+	}
+
+	inline void store2(half* __restrict address, vector_half4 value)
+	{
+		compact_half4 s = compact(value);
+		half* __restrict h = reinterpret_cast<half* __restrict> (&s);		
+		*address++ = *h++;
+		*address++ = *h++;
+	}
+
+	inline void store3(half* __restrict address, vector_half4 value)
+	{
+		compact_half4 s = compact(value);
+		half* __restrict h = reinterpret_cast<half* __restrict> (&s);		
+		*address++ = *h++;
+		*address++ = *h++;
+		*address++ = *h++;
+	}
+
 	inline void store4(half* __restrict address, vector_half4 value)
 	{
 		compact_half4 s = compact(value);
@@ -409,6 +418,17 @@ namespace math
 	inline void stream(half* __restrict address, vector_half4_2 value)
 	{
 		_mm_stream_si128(reinterpret_cast<__m128i* __restrict>(address), value);
+	}
+
+	inline void convert_f32_f16_stream(const float* in_buffer, std::uint32_t count,  math::half* out_buffer)
+	{
+		for (uint32_t i = 0; i < count ; i+=8 )
+		{
+			math::vector_float4 v_1 = math::load4(&in_buffer[i]);
+			math::vector_float4 v_2 = math::load4(&in_buffer[i+4]);
+			math::vector_half4  k = math::convert_f32_f16( v_1, v_2 ) ;
+			math::stream(  &out_buffer[i], k);
+		}
 	}
 }
 
