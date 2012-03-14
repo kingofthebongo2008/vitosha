@@ -10,7 +10,8 @@ namespace math
 {
     typedef std::uint16_t	half;
 	typedef __m128i			vector_half4;
-	typedef __m128i			vector_half4_2;	// two half4 vectors in a compact form
+	typedef __m128i			vector_half4_2;		// two half4 vectors in a compact form
+	typedef std::uint64_t	compact_half4;		// half4 vector in a compact form, suitable for storage
 
 	struct vector_half2
 	{
@@ -263,6 +264,46 @@ namespace math
 		}
 
 		void generate_tables();
+
+		inline __m128i select(__m128i value1, __m128i value2, __m128i control)
+		{
+			// (((b ^ a) & mask)^a)
+			/*
+			__m128i v1 = _mm_xor_si128(value2, value1);
+			__m128i v2 = _mm_andnot_si128(control, v1);
+			return _mm_or_si128(v1, v2);
+			*/
+
+			__m128i v1 = _mm_andnot_si128(control, value1);
+			__m128i v2 = _mm_and_si128(value2, control);
+			return _mm_or_si128(v1, v2);
+		}
+
+		inline math::vector_half4_2 convert_f32_f16(math::vector_float4 v1, math::vector_float4 v2)
+		{
+			static __declspec( align(16) ) const uint32_t sign_mask[4]			= { 0x80008000,	0x80008000,	0x80008000,	0x80008000 };
+			static __declspec( align(16) ) const uint32_t exponent_offset[4]	= { 0x38003800,	0x38003800,	0x38003800,	0x38003800 };	// greater than 112
+			static __declspec( align(16) ) const uint32_t sub_112[4]			= { 0x40004000, 0x40004000, 0x40004000, 0x40004000 };
+
+			__m128i	v_1	= _mm_castps_si128(v1);
+			__m128i	v_2	= _mm_castps_si128(v2);
+
+			__m128i v_1_1 = _mm_slli_epi32(v_1, 3);
+			__m128i v_2_1 = _mm_slli_epi32(v_2, 3);
+
+			__m128i e_m = details::extract_hi16( v_1_1, v_2_1 );	//  | eeeeeemm mmmmmmmm |	// extract 10 bit mantissa + exponent
+			__m128i e_m_x = _mm_xor_si128( e_m, * reinterpret_cast<const __m128i*> (&sub_112[0]) );	// (e = ((e – 127) + 15)) ( relies on the fact that 1111 1111 - 01110000 flips a bit (great trick by Mike Day from Insomniac) )
+
+			__m128i se = details::extract_hi16( v_1, v_2 );			//  | seeeeeee emmmmmmm |	//extract the sign + exponent
+			__m128i result = select( e_m_x, se, * reinterpret_cast<const __m128i*> (&sign_mask[0]) );
+
+			__m128i e = _mm_andnot_si128( * reinterpret_cast< const __m128i*> (&sign_mask[0]) , se);	//  | 0eeeeeee emmmmmmm |
+			__m128i underflow_mask = _mm_cmpgt_epi16 (e, * reinterpret_cast< const __m128i*>(&exponent_offset[0]) );
+
+			result = _mm_and_si128( underflow_mask, result );	//map to zero all numbers that are small. most gpus do not have denormal(subnormal) halves.
+
+			return result;
+		}
     }
 
     inline half convert_f32_f16( float value)
@@ -326,7 +367,7 @@ namespace math
 
 	inline math::vector_half4_2 convert_f32_f16(math::vector_float4 v1, math::vector_float4 v2)
 	{
-		return details1::convert_f32_f16(v1, v2);
+		return details2::convert_f32_f16(v1, v2);
 	}
 
 	inline void store1(half* __restrict address, vector_half4 value)
@@ -344,7 +385,7 @@ namespace math
 		//_mm_store_ss(address, value);	
 	}
 
-	inline std::uint64_t compact(vector_half4 value)
+	inline compact_half4 compact(vector_half4 value)
 	{
 		const uint32_t shuffle_k = _MM_SHUFFLE(3, 0, 2, 1);
 		const uint32_t shuffle_k_1 = _MM_SHUFFLE(0, 3, 1, 2);
@@ -361,8 +402,8 @@ namespace math
 
 	inline void store4(half* __restrict address, vector_half4 value)
 	{
-		std::uint64_t s = compact(value);
-		* ( reinterpret_cast<__int64*> ( address ) ) = s;
+		compact_half4 s = compact(value);
+		* ( reinterpret_cast<compact_half4*> ( address ) ) = s;
 	}
 
 	inline void stream(half* __restrict address, vector_half4_2 value)
