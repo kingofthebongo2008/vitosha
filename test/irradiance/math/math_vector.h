@@ -17,8 +17,6 @@ namespace math
 		w = 3
 	};
 		
-
-
 	//memory control and initialization
 
 	inline vector_float4 zero()
@@ -47,6 +45,16 @@ namespace math
 		return shuffle<v1, v2, v3, v4>(value, value);
 	}
 
+	inline vector_float4 merge_xy(vector_float4 v1, vector_float4 v2)
+	{
+		return _mm_unpacklo_ps( v1, v2 );		
+	}
+
+	inline vector_float4 merge_zw(vector_float4 v1, vector_float4 v2)
+	{
+		return _mm_unpackhi_ps( v1, v2 );		
+	}
+	
 	inline vector_float4 splat(float value)
 	{
 		return _mm_set1_ps(value);
