@@ -7,9 +7,13 @@
 #include <fnd/fnd_universe.h>
 #include <gx/gx_render_context.h>
 
+
 #include <win32/application.h>
 #include <win32/window.h>
 
+#include <iostream>
+#include <fstream>
+#include <math/math_functions.h>
 
 #define MAX_LOADSTRING 100
 
@@ -26,6 +30,27 @@ static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 using namespace wnd;
 
+double PCFreq = 0.0;
+__int64 CounterStart = 0;
+
+void StartCounter()
+{
+    LARGE_INTEGER li;
+    if(!QueryPerformanceFrequency(&li))
+        std::cout << "QueryPerformanceFrequency failed!\n";
+
+    PCFreq = double(li.QuadPart) / 1000.0;
+
+    QueryPerformanceCounter(&li);
+    CounterStart = li.QuadPart;
+}
+
+double GetCounter()
+{
+    LARGE_INTEGER li;
+    QueryPerformanceCounter(&li);
+    return double(li.QuadPart-CounterStart) / PCFreq;
+}
 
 extern std::shared_ptr<gx::scene> universe_bootstrap(  dx11::system_context context, std::shared_ptr<fnd::universe> universe );
 
@@ -54,14 +79,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 
 	RECT r;
-
 	::GetClientRect(hwnd, &r);
 
-	gx::view_port view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
-    dx11::system_context context = dx11::create_system_context(hwnd);
-	gx::render_context	 render_context(context, 3, view_port);
-
-    application application;
+	gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
+    dx11::system_context	context = dx11::create_system_context(hwnd);
+	gx::render_context		render_context(context, 3, view_port);
+    application				application;
 
     std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
     std::shared_ptr<gx::scene> scene = universe_bootstrap( context, universe );
@@ -71,12 +94,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	window* wnd = new window( application, context.m_swap_chain, &render_context );
 	application.new_window(wnd);
-
 	wnd->set_scene(scene);
 	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG>(wnd) );
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
-
 	MSG msg = {};
 
 	while (msg.message != WM_QUIT)
