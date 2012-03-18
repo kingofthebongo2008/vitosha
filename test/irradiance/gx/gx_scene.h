@@ -27,7 +27,7 @@ namespace gx
         {
             public:
             node() : 
-                    m_transform( math::matrix44_identity() )
+                    m_transform( math::identity_matrix() )
                     , m_data(nullptr)
                     , m_status(nullptr)
                     , m_node_transform(nullptr)

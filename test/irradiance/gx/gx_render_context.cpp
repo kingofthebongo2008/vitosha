@@ -10,7 +10,7 @@ namespace gx
 {
     render_context::render_context(dx11::system_context sys_context, std::uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
-		, m_depth_render_data( sys_context.m_device )
+		, m_depth_render_data( sys_context.m_device.get() )
 		, m_view_port(view_port)
 		, m_screen_space_render_data ( sys_context.m_device.get() )
 		, m_test_shader (sys_context.m_device.get())
@@ -102,7 +102,7 @@ namespace gx
 	{
 		dx11::id3d11texture2d_ptr	back_buffer;
 		dx11::throw_if_failed< dx11::d3d11_exception> ( m_system_context.m_swap_chain->GetBuffer(0, __uuidof( ID3D11Texture2D ), (void**) dx11::get_pointer(back_buffer) ) );
-		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( back_buffer.get(), 0, dx11::get_pointer(m_back_buffer_render_target) ) );
+		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( back_buffer.get(), 0, dx11::get_pointer(m_back_buffer_render_target) ) );
 	}
 
 	void render_context::create_depth_buffer()
@@ -126,7 +126,7 @@ namespace gx
 		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_depth_stencil)));
-		dx11::throw_if_failed< dx11::create_depth_stencil_view> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), 0, dx11::get_pointer(m_depth_stencil_target) ));
+		dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), 0, dx11::get_pointer(m_depth_stencil_target) ));
 	}
 
 	void render_context::create_diffuse_buffer()
@@ -150,7 +150,7 @@ namespace gx
 		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( & texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse)));
-		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse_target)));
+		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse_target)));
 	}
 
 	void render_context::create_specular_buffer()
@@ -173,8 +173,8 @@ namespace gx
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
 		texture_description.Width = desc.BufferDesc.Width;
 
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular)));
-		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_target)));
+		dx11::throw_if_failed< dx11::create_texture_exception > ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular)));
+		dx11::throw_if_failed< dx11::create_render_target_view_exception > ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_target)));
 	}
 
 	void render_context::create_normal_depth_buffer()
@@ -198,7 +198,7 @@ namespace gx
 		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth)));
-		dx11::throw_if_failed< dx11::create_render_target_view> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_target)));
+		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_target)));
 	}
 	
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)

@@ -16,7 +16,7 @@ namespace gx
 	class depth_vertex_shader_constant_buffer 
 	{
 		public:
-		depth_vertex_shader_constant_buffer ( dx11::id3d11device_ptr device );
+		depth_vertex_shader_constant_buffer ( ID3D11Device* device );
 
 		void set_wvp(math::matrix_float44 value)
 		{
@@ -48,7 +48,7 @@ namespace gx
     {
 		public:
 
-		depth_vertex_shader ( dx11::id3d11device_ptr device );
+		depth_vertex_shader ( ID3D11Device* device );
 
 		void bind(ID3D11DeviceContext* context, depth_vertex_shader_constant_buffer* constant_buffer)
 		{

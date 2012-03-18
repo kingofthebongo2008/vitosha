@@ -2,7 +2,6 @@
 
 #include <math/math_functions.h>
 
-
 namespace math
 {
 	math::vector_float4	sin_1(math::vector_float4 value)
@@ -115,5 +114,4 @@ namespace math
 		return result;
 	}
 }
-
 

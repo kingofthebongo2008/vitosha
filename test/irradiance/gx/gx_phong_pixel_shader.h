@@ -1,5 +1,5 @@
-#ifndef __GX_SCREEN_SPACE_PIXEL_SHADER_H__
-#define __GX_SCREEN_SPACE_PIXEL_SHADER_H__
+#ifndef __GX_PHONG_PIXEL_SHADER_H__
+#define __GX_PHONG_PIXEL_SHADER_H__
 
 #include <cstdint>
 #include <memory>
@@ -11,10 +11,10 @@
 
 namespace gx
 {
-	class screen_space_pixel_shader
+	class phong_pixel_shader
     {
 		public:
-		explicit screen_space_pixel_shader ( ID3D11Device* device );
+		explicit phong_pixel_shader ( ID3D11Device* device );
 
 		operator dx11::id3d11pixelshader_ptr()
 		{

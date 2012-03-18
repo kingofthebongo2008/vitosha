@@ -9,7 +9,7 @@ namespace gx
 {
 	void screen_space_quad_render::draw_quad(ID3D11DeviceContext* device_context)
 	{
-		math::matrix_float44 identity = math::matrix44_identity();
+		math::matrix_float44 identity = math::identity_matrix();
 		draw_quad( device_context, identity);
 	}
 

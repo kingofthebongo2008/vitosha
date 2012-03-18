@@ -1,8 +1,5 @@
-#if !defined(__MATH_HALF_H__)
+#ifndef __MATH_HALF_H__
 #define __MATH_HALF_H__
-
-#include <intrin.h>
-#include <cstdint>
 
 #include <math/math_vector.h>
 

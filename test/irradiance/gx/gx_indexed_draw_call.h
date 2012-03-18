@@ -3,8 +3,6 @@
 
 #include <cstdint>
 
-#include <boost/noncopyable.hpp>
-
 #include <math/math_matrix.h>
 #include <dx11/dx11_pointers.h>
 

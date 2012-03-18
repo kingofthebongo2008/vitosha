@@ -37,7 +37,7 @@ namespace gx
         } type;
     };
 
-    struct view_layer
+    struct view_port_layer
     {
         typedef enum
         {
@@ -47,39 +47,66 @@ namespace gx
         } type;
     };
 
-    class draw_call_key
+	struct translucency_key_data
+	{
+		uint8_t		m_full_screen_layer	: 2;
+		uint8_t		m_view_port : 3;			
+		uint8_t		m_view_port_layer : 2;
+		uint8_t		m_pass : 3;
+		uint8_t		m_translucency : 2;
+
+		uint32_t	m_depth : 24;
+		uint16_t	material_id : 16;
+		uint16_t	material_pass : 14;
+	};
+
+	struct opaque_key_data
+	{
+		uint8_t		m_full_screen_layer	: 2;
+		uint8_t		m_view_port : 3;			
+		uint8_t		m_view_port_layer : 2;
+		uint8_t		m_pass : 3;
+		uint8_t		m_translucency : 2;
+
+		uint16_t	material_id : 16;
+		uint16_t	material_pass : 14;
+		uint32_t	m_depth : 24;
+	};
+
+	struct command_key_data
+	{
+		uint8_t		m_full_screen_layer	: 2;
+		uint8_t		m_view_port : 3;
+		uint8_t		m_view_port_layer : 2;
+		uint8_t		m_pass : 3;
+		uint8_t		m_translucency : 2;
+
+		uint32_t	m_sequence_number : 8;
+		uint64_t	m_command : 44;
+	};
+
+	class draw_call_key
     {
         public:
 
-        draw_call_key() : m_data(0)
+        draw_call_key()
         {
-
+			m_data.m_key = 0;
         }
+
+		explicit draw_call_key(opaque_key_data opaque)
+		{
+			m_data.m_opaque = opaque;
+		}
            
         inline translucency::type get_translucency_type() const
         {
             return translucency::opaque;
         }
 
-        inline void set_translucency_type( translucency::type type)
-        {
-            uint64_t mask = 0xC000000000000000L;
-            uint64_t not_mask = ~mask;
-            uint64_t t = m_data & not_mask;
-            m_data = t | ( (uint64_t) type << 63);
-        }
-
-        inline uint32_t get_depth() const
+		inline uint32_t get_depth() const
         {
             return 0;
-        }
-
-        inline void set_depth(uint32_t depth)
-        {
-            uint64_t mask = 0x0FFFFFFFF;
-            uint64_t not_mask = ~mask;
-            uint64_t t = m_data & not_mask;
-            m_data = t | depth;
         }
 
         inline uint32_t get_material_id() const
@@ -87,48 +114,58 @@ namespace gx
             return 0;
         }
 
-        inline void set_material_id(uint32_t material_id)
-        {
-            uint64_t mask = 0x3FFFFFFF00000000L;
-            uint64_t not_mask = ~mask;
-            uint64_t t = m_data & not_mask;
-            m_data = t | ( (uint64_t) material_id << 61);
-        }
-
-        uint64_t m_data;
+		union 
+		{
+			uint64_t				m_key;
+			opaque_key_data			m_opaque;
+			translucency_key_data	m_translucency;
+			command_key_data		m_command;
+		} m_data;
     };
 
-    inline draw_call_key create_draw_call_key( translucency::type type, uint32_t material_id, uint32_t depth)
+    inline bool operator<(draw_call_key key1, draw_call_key key2)
     {
-        draw_call_key key;
-        key.m_data = ( (uint64_t) type << 63) | ( (uint64_t) material_id << 61) | depth;
-        return key;
+		return key1.m_data.m_key < key2.m_data.m_key;
     }
 
-    inline draw_call_key create_draw_call_key( translucency::type type, uint32_t material_id, float depth)
+	inline draw_call_key create_gbuffer_opaque_key ( uint32_t material_id, uint32_t material_pass, uint32_t depth )
     {
-        uint32_t integer_depth = static_cast<uint32_t> ( depth * ( ( 1 << 24 ) - 1) );
-        return create_draw_call_key(type, material_id, integer_depth);
+		opaque_key_data opaque_key;
+
+		//setup some default values
+		opaque_key.m_full_screen_layer = full_screen_layer::game;
+		opaque_key.m_view_port = 0;
+		opaque_key.m_view_port_layer = view_port_layer::world;
+
+		opaque_key.m_pass = pass::gbuffer;
+		opaque_key.m_translucency = translucency::opaque;
+
+		opaque_key.material_id = material_id;
+		opaque_key.material_pass = material_pass;
+		opaque_key.m_depth = depth;
+
+		return draw_call_key ( opaque_key );
+	}
+
+	inline draw_call_key create_gbuffer_opaque_key ( uint32_t material_id, uint32_t material_pass, float depth )
+    {
+		uint32_t integer_depth = static_cast<uint32_t> ( depth * ( ( 1 << 24 ) - 1) );
+        return create_gbuffer_opaque_key( material_id, material_pass, integer_depth);
     }
 
-    inline draw_call_key create_opaque_key ( uint32_t material_id, float depth)
+	inline draw_call_key create_gbuffer_opaque_key ( uint32_t material_id, float depth )
     {
-        return create_draw_call_key( translucency::opaque, material_id, depth);
+        return create_gbuffer_opaque_key( material_id, 0, depth);
     }
 
     inline draw_call_key create_additive_key( uint32_t material_id, float depth)
     {
-        return create_draw_call_key( translucency::additive, material_id, 1.0f - depth);
+        return create_gbuffer_opaque_key( material_id, 1.0f - depth);
     }
 
     inline draw_call_key create_subtractive_key( uint32_t material_id, float depth)
     {
-        return create_draw_call_key( translucency::subtractive, material_id, 1.0f - depth);
-    }
-    
-    inline bool operator<(draw_call_key key1, draw_call_key key2)
-    {
-        return key1.m_data < key2.m_data;
+		return create_gbuffer_opaque_key( material_id, 1.0f - depth);
     }
 }
 

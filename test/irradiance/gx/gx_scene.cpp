@@ -28,7 +28,7 @@ namespace gx
         for ( uint32_t i = 0; i  < size; ++i)
         {
             flat_node_parent_info info = m_flat_nodes[i];
-            m_world_matrices[i] = math::matrix44_mul( m_matrices[info], m_matrices[i]);
+            m_world_matrices[i] = math::mul( m_matrices[info], m_matrices[i]);
         }
     }
 

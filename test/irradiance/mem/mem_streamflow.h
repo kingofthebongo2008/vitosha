@@ -220,7 +220,7 @@ namespace mem
 
 
         //---------------------------------------------------------------------------------------
-        class alignas(64) concurrent_stack
+        class __declspec( align(64) ) concurrent_stack
         {
             public:
 
@@ -288,7 +288,7 @@ namespace mem
             }
 
             private:
-            struct alignas(64) stack_element
+            struct __declspec( align(64) ) stack_element
             {
                 volatile stack_element  * m_next;
 
@@ -356,7 +356,7 @@ namespace mem
 
         //---------------------------------------------------------------------------------------
         //page_block are the basic elements for allocations 
-        class alignas(64) page_block : public list_element<page_block>
+        class __declspec( align(64) ) page_block : public list_element<page_block>
         {
         public:
             page_block(super_page* super_page, uintptr_t memory, uint32_t memory_size) throw() : 

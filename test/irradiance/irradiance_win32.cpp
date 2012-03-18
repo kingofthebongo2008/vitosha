@@ -1,10 +1,13 @@
 ﻿#include "precompiled.h"
 
-#include <sys/sys_base.h>
 #include <win32/irradiance.h>
+
+#include <sys/sys_base.h>
 
 #include <dx11/dx11_system.h>
 #include <fnd/fnd_universe.h>
+
+#include <gx/gx_initializer.h>
 #include <gx/gx_render_context.h>
 
 
@@ -81,10 +84,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	RECT r;
 	::GetClientRect(hwnd, &r);
 
+	//1. Initialize static graphic data (singletons)
+	gx::initializer			initializer;
+
+	//2. Create a default view port
 	gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
-    dx11::system_context	context = dx11::create_system_context(hwnd);
+    //3. Create direct3d11 structures
+	dx11::system_context	context = dx11::create_system_context(hwnd);
+	//4. Create render contexts
 	gx::render_context		render_context(context, 3, view_port);
-    application				application;
+	//5. Create application with a window and worlds with data
+	application				application;
 
     std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
     std::shared_ptr<gx::scene> scene = universe_bootstrap( context, universe );

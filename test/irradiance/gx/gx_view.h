@@ -10,7 +10,7 @@ namespace gx
     {
         public:
 
-        view() : m_view_matrix( math::matrix44_identity()), m_projection_matrix(math::matrix44_identity() )
+        view() : m_view_matrix( math::identity_matrix()), m_projection_matrix(math::identity_matrix() )
         {
 
         }

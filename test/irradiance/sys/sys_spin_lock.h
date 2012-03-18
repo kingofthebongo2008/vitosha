@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <intrin.h>
 
+#include <algorithm>
+
 namespace sys
 {
     namespace details
@@ -65,7 +67,7 @@ namespace sys
     }
 
     //paper: The Performance of Spin Lock Alternatives for Shared - Memory Multiprocessors
-    class alignas(64) spinlock_fas
+    class __declspec( align(64) ) spinlock_fas
     {
         public:
         spinlock_fas() : m_lock(free)
@@ -125,7 +127,7 @@ namespace sys
 
     //paper: The Performance of Spin Lock Alternatives for Shared - Memory Multiprocessors
     //performs poorly when the lock is shared by more threads than processors
-    class alignas(64) spinlock_anderson
+    class __declspec( align(64) ) spinlock_anderson
     {
         //fix contending processor to 16.
         static const uint32_t slot_count = 32;
@@ -165,7 +167,7 @@ namespace sys
             must_wait = 1
         };
 
-        typedef union alignas(64) 
+        typedef union __declspec( align(64) ) 
         {
             uint32_t m_flag;
             uint8_t  m_pad  [ 64  ];
@@ -184,10 +186,10 @@ namespace sys
 
     //paper: Algorithms for Scalable Synchronization on Shared-Memory Multiprocessors
     //performs poorly when the lock is shared by more threads than processors
-    class alignas(64) spinlock_mcs
+    class __declspec( align(64) ) spinlock_mcs
     {
         public:
-        struct alignas(64) qnode
+        struct __declspec( align(64) ) qnode
         {
             qnode*      m_next;
             uint32_t    m_locked;

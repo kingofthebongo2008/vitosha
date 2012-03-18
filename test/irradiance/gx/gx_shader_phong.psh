@@ -1,0 +1,17 @@
+struct vs_output
+{
+    float4	position	: SV_POSITION; 
+	float2	uv			: TexCoord; 
+};
+
+Texture2D    diffuse;
+Texture2D    normal;
+Texture2D    specular;
+
+SamplerState default_sampler;
+
+float4 main( in  vs_output input) : SV_Target
+{
+	return float4(0.0f, 0.5f, 0.0f, 1.0f);
+}
+

@@ -1,5 +1,5 @@
-#ifndef __GX_SCREEN_SPACE_VERTEX_SHADER_H__
-#define __GX_SCREEN_SPACE_VERTEX_SHADER_H__
+#ifndef __GX_PHONG_VERTEX_SHADER_H__
+#define __GX_PHONG_VERTEX_SHADER_H__
 
 #include <cstdint>
 #include <memory>
@@ -13,11 +13,11 @@
 
 namespace gx
 {
-	class screen_space_vertex_shader_constant_buffer 
+	class phong_vertex_shader_constant_buffer 
 	{
 		public:
 
-		screen_space_vertex_shader_constant_buffer ( ID3D11Device* device );
+		explicit phong_vertex_shader_constant_buffer ( ID3D11Device* device );
 
 		void set_wvp(math::matrix_float44 value)
 		{
@@ -46,13 +46,13 @@ namespace gx
 		math::matrix_float44	m_wvp;
 	};
 
-	class screen_space_vertex_shader
+	class phong_vertex_shader
     {
 		public:
 
-		screen_space_vertex_shader ( ID3D11Device* device );
+		explicit phong_vertex_shader ( ID3D11Device* device );
 
-		void bind(ID3D11DeviceContext* context, screen_space_vertex_shader_constant_buffer* constant_buffer)
+		void bind(ID3D11DeviceContext* context, phong_vertex_shader_constant_buffer* constant_buffer)
 		{
 			constant_buffer->bind_as_vertex_constant_buffer(context);
 			context->VSSetShader(m_shader.get(), nullptr, 0 );

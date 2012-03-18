@@ -13,6 +13,8 @@
 #include <gx/gx_thread_render_context.h>
 #include <gx/gx_view.h>
 
+#include <math/math_graphics.h>
+
 namespace gx
 {
 	namespace
@@ -60,14 +62,10 @@ namespace gx
 
 		device_context->PSSetShader(m_render_context->m_test_shader, nullptr, 0);
 	
-		math::matrix_float44 m = math::matrix44_identity();
-		math::matrix_float44 m1 = math::matrix44_translation(-0.5f, -0.5f, 0.0f);
-		math::matrix_float44 m2 = math::matrix44_scaling(0.5f, 0.5f, 1.0f);
-		math::matrix_float44 m3 = math::matrix44_mul(m2, m1);
+		math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
+		math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
+		math::matrix_float44 m3 = math::mul(m2, m1);
 
-		math::vector_float4 v = math::set( 0.0f, 0.0f, 0.0f, 1.0f );
-		math::vector_float4 v1 = math::matrix44_mul(m1, v); 
-		math::vector_float4 v2 = math::matrix44_mul(v, m1); 
 
 		draw_screen_space_quad(device_context, m_render_context, m3);
 

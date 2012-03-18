@@ -1,4 +1,4 @@
-#if !defined(__MATH_VECTOR_H__)
+#ifndef __MATH_VECTOR_H__
 #define __MATH_VECTOR_H__
 
 #include <intrin.h>
@@ -7,7 +7,6 @@
 namespace math
 {
 	typedef __m128 vector_float4;
-		
 
 	enum component
 	{
@@ -16,7 +15,7 @@ namespace math
 		z = 2,
 		w = 3
 	};
-		
+
 	//memory control and initialization
 
 	inline vector_float4 zero()
@@ -461,6 +460,38 @@ namespace math
 		vector_float4 v4 = negate(v3);
 		return v4;
 	}
+
+	namespace details
+	{
+		template <uint32_t c> inline float get_component(vector_float4 v)
+		{
+			vector_float4 v1 = swizzle<c,c,c,c>(v);
+			float __declspec( align(16) ) f;
+			store1(&f, v1);
+			return f;
+		}
+	}
+
+	inline float get_x(vector_float4 v)
+	{
+		return details::get_component<x>(v);
+	}
+
+	inline float get_y(vector_float4 v)
+	{
+		return details::get_component<y>(v);
+	}
+
+	inline float get_z(vector_float4 v)
+	{
+		return details::get_component<z>(v);
+	}
+
+	inline float get_w(vector_float4 v)
+	{
+		return details::get_component<w>(v);
+	}
+
 }
 
 

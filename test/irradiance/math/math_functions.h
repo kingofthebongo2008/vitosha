@@ -1,8 +1,5 @@
-#if !defined(__MATH_FUNCTIONS_H__)
+#ifndef __MATH_FUNCTIONS_H__
 #define __MATH_FUNCTIONS_H__
-
-#include <intrin.h>
-#include <cstdint>
 
 #include <tuple>
 
@@ -75,64 +72,64 @@ namespace math
 		}
 	}
 
-	inline math::vector_float4 truncate(math::vector_float4 value)
+	inline vector_float4 truncate(vector_float4 value)
 	{
 		return details::int_part(value);
 	}
 
-	inline math::vector_float4 floor(math::vector_float4 value)
+	inline vector_float4 floor(vector_float4 value)
 	{
-		math::vector_float4 int_part = details::int_part( value );
-		math::vector_float4 frac_part = sub( value, int_part );
-		math::vector_float4 int_part_minus_one = sub( int_part, one() );
+		vector_float4 int_part = details::int_part( value );
+		vector_float4 frac_part = sub( value, int_part );
+		vector_float4 int_part_minus_one = sub( int_part, one() );
 
-		math::vector_float4 mask = compare_ge( frac_part, zero() );
+		vector_float4 mask = compare_ge( frac_part, zero() );
 
-		math::vector_float4 result = select( int_part_minus_one, int_part, mask );
+		vector_float4 result = select( int_part_minus_one, int_part, mask );
 
 		return result;
 	}
 
-	inline math::vector_float4 ceiling(math::vector_float4 value)
+	inline vector_float4 ceiling(vector_float4 value)
 	{
-		math::vector_float4 int_part = details::int_part( value );
-		math::vector_float4 frac_part = sub( value, int_part );
-		math::vector_float4 int_part_plus_one = add( int_part, one() );
+		vector_float4 int_part = details::int_part( value );
+		vector_float4 frac_part = sub( value, int_part );
+		vector_float4 int_part_plus_one = add( int_part, one() );
 
-		math::vector_float4 mask = compare_ge( frac_part, zero() );
-		math::vector_float4 result = select( int_part, int_part_plus_one, mask );
+		vector_float4 mask = compare_ge( frac_part, zero() );
+		vector_float4 result = select( int_part, int_part_plus_one, mask );
 
 		return result;
 	}
 
-	inline math::vector_float4 round(math::vector_float4 value)
+	inline vector_float4 round(vector_float4 value)
 	{
-		math::vector_float4 one_half = splat(0.5f);
-		math::vector_float4 minus_one_half = splat(-0.5f);
+		vector_float4 one_half = splat(0.5f);
+		vector_float4 minus_one_half = splat(-0.5f);
 
-		math::vector_float4 mask = compare_lt( value, zero() );
+		vector_float4 mask = compare_lt( value, zero() );
 
-		math::vector_float4 int_part_1 = details::int_part( add ( value, one_half) );
-		math::vector_float4 int_part_2 = details::int_part( add ( value, minus_one_half) );
+		vector_float4 int_part_1 = details::int_part( add ( value, one_half) );
+		vector_float4 int_part_2 = details::int_part( add ( value, minus_one_half) );
 
 		return select ( int_part_1, int_part_2, mask );
 	}
 	
 	namespace details
 	{
-		inline math::vector_float4 negative_multiply_subtract(math::vector_float4 v_1, math::vector_float4 v_2, math::vector_float4 v_3)
+		inline vector_float4 negative_multiply_subtract(vector_float4 v_1, vector_float4 v_2, vector_float4 v_3)
 		{
-			math::vector_float4 v = mul(v_1, v_2);
+			vector_float4 v = mul(v_1, v_2);
 			return sub(v_3, v);
 		}
 
-		inline math::vector_float4 mod_angles(math::vector_float4 value)
+		inline vector_float4 mod_angles(vector_float4 value)
 		{
-			math::vector_float4 v;
-			math::vector_float4 result;
+			vector_float4 v;
+			vector_float4 result;
 
-			math::vector_float4 reciprocal_two_pi   = {0.159154943f, 0.159154943f, 0.159154943f, 0.159154943f};
-			math::vector_float4 two_pi				= {6.283185307f, 6.283185307f, 6.283185307f, 6.283185307f};
+			vector_float4 reciprocal_two_pi   = {0.159154943f, 0.159154943f, 0.159154943f, 0.159154943f};
+			vector_float4 two_pi				= {6.283185307f, 6.283185307f, 6.283185307f, 6.283185307f};
 
 			// Modulo the range of the given angles such that -XM_PI <= Angles < XM_PI
 			v = mul(value, reciprocal_two_pi);
@@ -144,39 +141,38 @@ namespace math
 		}
 	}
 
-	math::vector_float4	sin_1(math::vector_float4 value);
-	math::vector_float4	cos_1(math::vector_float4 value);
+	//does not perform parameter check. expects input parameters in -pi<=value<pi
+	vector_float4	sin_1(vector_float4 value);
+	vector_float4	cos_1(vector_float4 value);
 
-	inline std::tuple<math::vector_float4, math::vector_float4> sin_cos(math::vector_float4 value)
+	inline std::tuple<vector_float4, vector_float4> sin_cos(vector_float4 value)
 	{
-
-		math::vector_float4 v = details::mod_angles( value );
-		math::vector_float4 v_1 = sin_1(v);
-		math::vector_float4 v_2 = cos_1(v);
+		vector_float4 v = details::mod_angles( value );
+		vector_float4 v_1 = sin_1(v);
+		vector_float4 v_2 = cos_1(v);
 
 		return std::make_tuple( v_1, v_2 );
 	}
 	
-	inline std::tuple<math::vector_float4, math::vector_float4> sin_cos_1(math::vector_float4 value)
+	inline std::tuple<vector_float4, vector_float4> sin_cos_1(vector_float4 value)
 	{
-		math::vector_float4 v_1 = sin_1(value);
-		math::vector_float4 v_2 = cos_1(value);
+		vector_float4 v_1 = sin_1(value);
+		vector_float4 v_2 = cos_1(value);
 
 		return std::make_tuple( v_1, v_2 );
 	}
 
-	inline math::vector_float4	sin(math::vector_float4 value)
+	inline vector_float4	sin(vector_float4 value)
 	{
-		math::vector_float4 v = details::mod_angles(value);
+		vector_float4 v = details::mod_angles(value);
 		return sin_1(v);
 	}
 
-	inline math::vector_float4	cos(math::vector_float4 value)
+	inline vector_float4	cos(vector_float4 value)
 	{
-		math::vector_float4 v = details::mod_angles(value);
+		vector_float4 v = details::mod_angles(value);
 		return cos_1(v);
 	}
-
 }
 
 

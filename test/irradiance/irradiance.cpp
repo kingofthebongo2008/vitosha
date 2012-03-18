@@ -10,6 +10,8 @@
 
 #include <gxu/gxu_entity_factory.h>
 
+#include <math/math_graphics.h>
+
 class entity_world : public fnd::world
 
 {
@@ -39,9 +41,9 @@ std::shared_ptr<gx::scene> universe_bootstrap( dx11::system_context context, std
     auto it = scene->begin();
     auto it_end = scene->end();
 
-    math::matrix_float44 m = math::matrix44_identity();
-    math::matrix_float44 m_1 = math::matrix44_scaling(2.0f, 2.0f, 2.0f);
-    math::matrix_float44 m_2 = math::matrix44_scaling(2.0f, 2.0f, 2.0f);
+    math::matrix_float44 m = math::identity_matrix();
+    math::matrix_float44 m_1 = math::scaling(2.0f, 2.0f, 2.0f);
+    math::matrix_float44 m_2 = math::scaling(2.0f, 2.0f, 2.0f);
 
     std::shared_ptr<gx::scene::node> root = scene->get_root();
 

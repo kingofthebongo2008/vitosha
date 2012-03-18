@@ -83,7 +83,7 @@ namespace gx
 
 	struct depth_render_data
 	{
-		explicit depth_render_data  ( dx11::id3d11device_ptr device ) :
+		explicit depth_render_data  ( ID3D11Device* device ) :
 			m_depth_vertex_shader(device)
 		,   m_depth_constant_buffer(device)
 		{
@@ -99,7 +99,7 @@ namespace gx
 
 	struct screen_space_render_data
 	{
-		explicit screen_space_render_data (dx11::id3d11device_ptr device) :
+		explicit screen_space_render_data (ID3D11Device* device) :
 			m_screen_space_vertex_shader(device)
 			, m_screen_space_constant_buffer(device)
 		{
