@@ -40,9 +40,10 @@ namespace gx
     {
         draw_calls_pipeline_params* in_params = reinterpret_cast<draw_calls_pipeline_params*> (input);
 
-		ID3D11DeviceContext* device_context = m_render_context->get_immediate_context().get();
+		ID3D11DeviceContext* device_context = m_render_context->get_immediate_context();
 
 		m_render_context->clear_buffers(device_context);
+		/*
 		m_render_context->select_depth_pass( device_context );
 
 		gx::draw_call_context draw_call_context = create_draw_call_context( device_context, in_params);
@@ -57,7 +58,7 @@ namespace gx
 
 			enty->execute_draw_calls(&draw_call_context);
 		}
-
+		*/
 		m_render_context->select_back_buffer_target(device_context);
 
 		device_context->PSSetShader(m_render_context->m_test_shader, nullptr, 0);

@@ -195,9 +195,14 @@ namespace gx
 			m_view_port = value;
 		}
 
-		inline dx11::id3d11devicecontext_ptr get_immediate_context()
+		inline ID3D11DeviceContext* get_immediate_context()
 		{
-			return m_system_context.m_immediate_context;
+			return m_system_context.m_immediate_context.get();
+		}
+
+		inline const ID3D11DeviceContext* get_immediate_context() const
+		{
+			return m_system_context.m_immediate_context.get();
 		}
 
 		private:

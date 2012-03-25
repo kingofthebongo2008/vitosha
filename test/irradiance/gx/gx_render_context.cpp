@@ -229,6 +229,8 @@ namespace gx
 		device_context->OMSetDepthStencilState(m_gbuffer_render_data.m_state.m_depth.get(), 0 );
 		device_context->RSSetState(m_gbuffer_render_data.m_state.m_rasterizer.get());
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		select_view_port(device_context);
 	}
 	
 	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
@@ -238,6 +240,8 @@ namespace gx
 		device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		device_context->OMSetRenderTargets( 1, dx11::get_pointer(m_default_render_data.m_render_set.m_back_buffer_render_target), m_default_render_data.m_render_set.m_depth_stencil_target.get() );
+
+		select_view_port(device_context);
 	}
 
 	void render_context::select_depth_pass(ID3D11DeviceContext* device_context)
@@ -254,7 +258,6 @@ namespace gx
 		device_context->RSSetState(m_depth_render_data.m_state.m_rasterizer.get());
 
 		m_depth_render_data.m_depth_vertex_shader.bind(device_context, &m_depth_render_data.m_depth_constant_buffer);
-
 		select_view_port(device_context);
 	}
 
@@ -359,10 +362,10 @@ namespace gx
 	screen_space_quad_render	render_context::create_screen_space_quad_render()
 	{
 		screen_space_quad_render quad_render  = { 
-													m_screen_space_render_data.m_screen_space_vertex_shader.m_shader
-													, m_screen_space_render_data.m_screen_space_vertex_buffer
-													, m_screen_space_render_data.m_screen_space_constant_buffer.m_buffer
-													,m_screen_space_render_data. m_screen_space_input_layout
+													m_screen_space_render_data.m_screen_space_vertex_shader.m_shader.get()
+													, m_screen_space_render_data.m_screen_space_vertex_buffer.get()
+													, m_screen_space_render_data.m_screen_space_constant_buffer.m_buffer.get()
+													,m_screen_space_render_data. m_screen_space_input_layout.get()
 												};
 
 		return quad_render;

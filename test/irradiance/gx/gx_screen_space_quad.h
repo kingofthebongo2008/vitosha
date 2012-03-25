@@ -13,7 +13,6 @@ namespace gx
 {
 	class render_context;
 
-
     struct screen_space_quad_render
     {
         public:
@@ -26,10 +25,10 @@ namespace gx
 		void draw_quad(ID3D11DeviceContext* device_context, math::matrix_float44 transform);
 
 
-		dx11::id3d11vertexshader_ptr				m_vertex_shader;
-		dx11::id3d11buffer_ptr						m_vertex_buffer;
-		dx11::id3d11buffer_ptr						m_cbuffer;
-		dx11::id3d11inputlayout_ptr					m_input_layout;
+		ID3D11VertexShader*							m_vertex_shader;
+		ID3D11Buffer*								m_vertex_buffer;
+		ID3D11Buffer*								m_cbuffer;
+		ID3D11InputLayout*							m_input_layout;
     };
 
 	inline void draw_screen_space_quad(	screen_space_quad_render* render, ID3D11DeviceContext* device_context )
