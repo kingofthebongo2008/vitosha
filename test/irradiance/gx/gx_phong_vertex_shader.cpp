@@ -15,12 +15,12 @@ namespace gx
 		dx11::throw_if_failed<dx11::create_buffer_exception> (device->CreateBuffer(&desc, nullptr, dx11::get_pointer(m_buffer) ));
 	}
 
-	#include "gx_shader_phong.vsh.h"
+	#include "gx_shader_phong_vs_compiled.hlsl"
 
 	phong_vertex_shader::phong_vertex_shader ( ID3D11Device* device )
 	{
-		dx11::throw_if_failed<dx11::create_vertex_shader> (device->CreateVertexShader( gx_shader_phong_vsh, sizeof(gx_shader_phong_vsh), nullptr, dx11::get_pointer(m_shader)));
-		m_code = &gx_shader_phong_vsh[0];
-		m_code_size = sizeof(gx_shader_phong_vsh);
+		dx11::throw_if_failed<dx11::create_vertex_shader> (device->CreateVertexShader( gx_shader_phong_vs, sizeof(gx_shader_phong_vs), nullptr, dx11::get_pointer(m_shader)));
+		m_code = &gx_shader_phong_vs[0];
+		m_code_size = sizeof(gx_shader_phong_vs);
 	}
 }
