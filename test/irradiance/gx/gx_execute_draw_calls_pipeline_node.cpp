@@ -1,6 +1,7 @@
 #include "precompiled.h"
 #include <gx/gx_execute_draw_calls_pipeline_node.h>
 
+#include <gx/gx_color.h>
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
@@ -43,9 +44,9 @@ namespace gx
 		ID3D11DeviceContext* device_context = m_render_context->get_immediate_context();
 
 		m_render_context->clear_buffers(device_context);
-		/*
-		m_render_context->select_depth_pass( device_context );
 
+		//1. Render scene
+		m_render_context->select_back_buffer_target(device_context);
 		gx::draw_call_context draw_call_context = create_draw_call_context( device_context, in_params);
 
 		for (uint32_t j = 0; j < in_params->m_draw_calls->size(); ++j )
@@ -58,10 +59,15 @@ namespace gx
 
 			enty->execute_draw_calls(&draw_call_context);
 		}
-		*/
-		m_render_context->select_back_buffer_target(device_context);
 
-		device_context->PSSetShader(m_render_context->m_test_shader, nullptr, 0);
+		//2. Render test quad
+		m_render_context->select_back_buffer_target(device_context);
+		math::vector_float4 color = color::blue();
+
+		m_render_context->m_color_pixel_shader_cbuffer.update(device_context, color);
+		m_render_context->m_color_pixel_shader_cbuffer.bind_as_pixel_constant_buffer(device_context);
+
+		device_context->PSSetShader(m_render_context->m_color_pixel_shader, nullptr, 0);
 	
 		math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
 		math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);

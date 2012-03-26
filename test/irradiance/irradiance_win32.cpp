@@ -17,6 +17,7 @@
 #include <iostream>
 #include <fstream>
 #include <math/math_functions.h>
+#include <math/math_half.h>
 
 #define MAX_LOADSTRING 100
 
@@ -55,7 +56,7 @@ double GetCounter()
     return double(li.QuadPart-CounterStart) / PCFreq;
 }
 
-extern std::shared_ptr<gx::scene> universe_bootstrap(  dx11::system_context context, std::shared_ptr<fnd::universe> universe );
+extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe );
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -84,6 +85,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	RECT r;
 	::GetClientRect(hwnd, &r);
 
+	math::details2::generate_tables();
+
 	//1. Initialize static graphic data (singletons)
 	gx::initializer			initializer;
 
@@ -97,7 +100,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	application				application;
 
     std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
-    std::shared_ptr<gx::scene> scene = universe_bootstrap( context, universe );
+    std::shared_ptr<gx::scene> scene = universe_bootstrap( &render_context, context, universe );
 
     application.set_universe(universe);
     application.set_scene(scene);

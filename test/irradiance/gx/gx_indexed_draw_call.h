@@ -18,7 +18,8 @@ namespace gx
             uint32_t                m_index_count;
             uint32_t                m_start_index_location;
             uint32_t                m_base_vertex_location;
-            uint32_t                m_vertex_size;
+            uint32_t                m_vertex_size_0;
+			uint32_t                m_vertex_size_1;
         };
 
         indexed_draw_call( index_info info, dx11::id3d11buffer_ptr vertex_buffer, dx11::id3d11buffer_ptr index_buffer );

@@ -141,19 +141,19 @@ namespace math
 		float cos_angle = cosf(angle);
 		return rotation_x(sin_angle, cos_angle);
 	}
-		
+
+	inline matrix_float44 rotation_y(float angle)
+	{
+		float sin_angle = sinf(angle);
+		float cos_angle = cosf(angle);
+		return rotation_y(sin_angle, cos_angle);
+	}
+
 	inline matrix_float44 rotation_z(float angle)
 	{
 		float sin_angle = sinf(angle);
 		float cos_angle = cosf(angle);
 		return rotation_z(sin_angle, cos_angle);
-	}
-
-	inline matrix_float44 matrix44_rotation_y(float angle)
-	{
-		float sin_angle = sinf(angle);
-		float cos_angle = cosf(angle);
-		return rotation_y(sin_angle, cos_angle);
 	}
 
 	inline matrix_float44 view(vector_float4 eye_position, vector_float4 eye_direction, vector_float4 up_direction)

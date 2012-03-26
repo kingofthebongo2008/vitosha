@@ -10,6 +10,7 @@
 #include <dx11/dx11_error.h>
 #include <dx11/dx11_system.h>
 
+#include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_depth_shader.h>
 #include <gx/gx_screen_space_quad.h>
 #include <gx/gx_screen_space_vertex_shader.h>
@@ -205,6 +206,16 @@ namespace gx
 			return m_system_context.m_immediate_context.get();
 		}
 
+		inline ID3D11Device* get_device()
+		{
+			return m_system_context.m_device.get();
+		}
+
+		inline const ID3D11Device* get_device() const
+		{
+			return m_system_context.m_device.get();
+		}
+
 		private:
 
 		render_context();
@@ -235,16 +246,17 @@ namespace gx
 		dx11::id3d11texture2d_ptr								m_depth_stencil;
 		dx11::id3d11depthstencilview_ptr						m_depth_stencil_target;
 
+		public:
+
 		gbuffer_render_data										m_gbuffer_render_data;
 		depth_render_data										m_depth_render_data;
 		default_render_data										m_default_render_data;
 
 		view_port												m_view_port;
-
 		screen_space_render_data								m_screen_space_render_data;
-		public:
-
-		screen_space_pixel_shader								m_test_shader;
+		
+		color_pixel_shader										m_color_pixel_shader;
+		color_pixel_shader_constant_buffer						m_color_pixel_shader_cbuffer;
     };
 }
 

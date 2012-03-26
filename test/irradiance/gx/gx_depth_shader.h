@@ -16,6 +16,7 @@ namespace gx
 	class depth_vertex_shader_constant_buffer 
 	{
 		public:
+
 		depth_vertex_shader_constant_buffer ( ID3D11Device* device );
 
 		void set_wvp(math::matrix_float44 value)

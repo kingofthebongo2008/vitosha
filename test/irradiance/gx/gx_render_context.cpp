@@ -13,7 +13,8 @@ namespace gx
 		, m_depth_render_data( sys_context.m_device.get() )
 		, m_view_port(view_port)
 		, m_screen_space_render_data ( sys_context.m_device.get() )
-		, m_test_shader (sys_context.m_device.get())
+		, m_color_pixel_shader (  sys_context.m_device.get() )
+		, m_color_pixel_shader_cbuffer (sys_context.m_device.get())
     {
         m_render_contexts.reserve(thread_render_context_count);
 
@@ -303,7 +304,7 @@ namespace gx
 
 		D3D11_RASTERIZER_DESC rasterizer = {};
 
-		rasterizer.FillMode = D3D11_FILL_SOLID;
+		rasterizer.FillMode = D3D11_FILL_WIREFRAME;//D3D11_FILL_SOLID;
 		rasterizer.CullMode = D3D11_CULL_BACK;
 		rasterizer.DepthClipEnable = 1;
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateRasterizerState(&rasterizer, dx11::get_pointer(m_gbuffer_render_data.m_state.m_rasterizer)));
@@ -336,7 +337,7 @@ namespace gx
 
 		D3D11_RASTERIZER_DESC rasterizer = {};
 
-		rasterizer.FillMode = D3D11_FILL_SOLID;
+		rasterizer.FillMode = D3D11_FILL_WIREFRAME;//D3D11_FILL_SOLID;
 		rasterizer.CullMode = D3D11_CULL_BACK;
 		rasterizer.DepthClipEnable = 1;
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateRasterizerState(&rasterizer, dx11::get_pointer(m_depth_render_data.m_state.m_rasterizer)));
