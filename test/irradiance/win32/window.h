@@ -29,6 +29,7 @@ namespace wnd
 			, m_swap_chain(swap_chain)
 			, m_render_context(render_context)
 			, m_occluded_by_another_window(false)
+			, m_aspect_ratio( 16.0f/ 9.0f )
 		{
 
 		}
@@ -52,6 +53,7 @@ namespace wnd
 		gx::render_context*			m_render_context;
 		std::shared_ptr<gx::scene>	m_scene;
 		bool						m_occluded_by_another_window;
+		float						m_aspect_ratio;
 
 		void render_frame();
 	};

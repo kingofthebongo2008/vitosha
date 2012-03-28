@@ -27,7 +27,7 @@ namespace gx
 
         math::matrix_float44 get_projection_matrix() const
         {
-            return m_view_matrix;
+            return m_projection_matrix;
         }
 
         private:

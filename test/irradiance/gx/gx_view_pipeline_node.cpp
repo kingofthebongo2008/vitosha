@@ -27,10 +27,10 @@ namespace gx
                                 &m_wvp_matrices, in_params->m_world_matrices, in_params->m_data } ;
 
         math::matrix_float44 vp = math::mul( view_matrix, projection_matrix  );
-        
+
         for (uint32_t i = 0; i < size; ++i)
         {
-            m_wvp_matrices[i] = math::mul( vp, in_params->m_world_matrices->operator[](i) );
+            m_wvp_matrices[i] = math::mul( in_params->m_world_matrices->operator[](i) , vp  );
         }
 
         delete in_params;

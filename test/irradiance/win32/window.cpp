@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include <win32/application.h>
+#include <math/math_graphics.h>
 
 #include <fnd/fnd_universe.h>
 
@@ -19,6 +19,7 @@
 #include <gx/gx_view.h>
 #include <gx/gx_view_pipeline_node.h>
 
+#include <win32/application.h>
 
 
 
@@ -71,7 +72,15 @@ namespace wnd
 	void window::render_frame()
 	{
 		gx::pipeline    pipeline;
-		gx::view        view;
+		
+		math::vector_float4  eye_position = math::set( 0.0f, 1.0f,  -5.5f, 0.0f ); //meters
+		math::vector_float4  eye_look_at  = math::set( 0.0f, 0.0f,  0.0f, 0.0f ); //look along the z
+		math::vector_float4  up_direction = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
+
+		math::matrix_float44 view_matrix = math::look_at_lh(eye_position, eye_look_at , math::normalize3( up_direction ) );
+		math::matrix_float44 perspective_matrix = math::perspective_fov_lh( 3.1415f / 4.0f, m_aspect_ratio, 0.005f, 400.0f);
+
+		gx::view			view(view_matrix, perspective_matrix );
 
 		pipeline.add_node( std::make_shared< gx::scene_pipeline_node>(m_scene.get()) );
 
@@ -92,13 +101,17 @@ namespace wnd
 		width = std::max(width, (uint32_t)(8));
 		height = std::max(height, (uint32_t)(8));
 
+		//release buffers that are window size
 		m_render_context->release_swap_chain_buffers();
 
 		throw_if_failed<d3d11_exception>(m_swap_chain->GetDesc(&desc));
 		throw_if_failed<d3d11_exception>(m_swap_chain->ResizeBuffers(desc.BufferCount, width, height,  desc.BufferDesc.Format, desc.Flags));
 
+		//create a new viewport
 		gx::view_port view_port ( 0, 0, width, height );
 		m_render_context->set_view_port(view_port);
+
+		m_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
 
 		m_render_context->create_swap_chain_buffers();
 	}

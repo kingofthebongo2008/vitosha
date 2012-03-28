@@ -95,7 +95,6 @@ namespace gx
 				
 		m_gbuffer_render_data.m_render_set.reset();
 		m_depth_render_data.m_render_set.reset();
-
 		m_default_render_data.m_render_set.reset();
 	}
 
@@ -236,12 +235,11 @@ namespace gx
 	
 	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
 	{
+		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		device_context->OMSetBlendState(m_default_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_default_render_data.m_state.m_depth.get(), 0 );
-		device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
-		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		device_context->OMSetRenderTargets( 1, dx11::get_pointer(m_default_render_data.m_render_set.m_back_buffer_render_target), m_default_render_data.m_render_set.m_depth_stencil_target.get() );
-
+		device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
 		select_view_port(device_context);
 	}
 
@@ -252,7 +250,7 @@ namespace gx
 
 		device_context->PSSetShader(nullptr, nullptr, 0);
 
-		device_context->OMSetRenderTargets(0, nullptr, m_depth_render_data.m_render_set.m_depth_stencil_target.get());
+		device_context->OMSetRenderTargets(1, nullptr, m_depth_render_data.m_render_set.m_depth_stencil_target.get());
 		device_context->OMSetBlendState(m_depth_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_depth_render_data.m_state.m_depth.get(), 0 );
 

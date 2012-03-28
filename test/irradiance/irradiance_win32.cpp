@@ -28,7 +28,7 @@ static TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 // Forward declarations of functions included in this code module:
 static ATOM				MyRegisterClass(HINSTANCE hInstance);
-static HWND				InitInstance(HINSTANCE, int);
+static HWND				InitInstance(HINSTANCE);
 static LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
@@ -75,7 +75,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LoadString(hInstance, IDC_IRRADIANCE, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-	HWND hwnd = InitInstance (hInstance, nCmdShow);
+	HWND hwnd = InitInstance (hInstance);
 
 	if (hwnd == 0)
 	{
@@ -112,6 +112,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
 	MSG msg = {};
+
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
+
 
 	while (msg.message != WM_QUIT)
 	{
@@ -153,13 +157,13 @@ static ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_IRRADIANCE);
-	wcex.lpszClassName	= szWindowClass;
+	wcex.lpszClassName	= L"irradiance";//szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return RegisterClassEx(&wcex);
 }
 
-static HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
+static HWND InitInstance(HINSTANCE hInstance)
 {
    HWND hWnd;
 
@@ -172,9 +176,6 @@ static HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
       return 0;
    }
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
 
    return hWnd;
 }
@@ -193,14 +194,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		// Parse the menu selections:
 		switch (wmId)
 		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
+			default:
+				return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
 	case WM_PAINT:
@@ -222,11 +223,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		break;
 
 	case WM_DESTROY:
-		if (wnd)
 		{
-			wnd->destroy();
+			if (wnd)
+			{
+				wnd->destroy();
+			}
+			PostQuitMessage(0);
 		}
-		PostQuitMessage(0);
 		break;
 
 	default:

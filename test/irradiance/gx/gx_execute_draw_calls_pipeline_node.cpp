@@ -61,7 +61,7 @@ namespace gx
 		}
 
 		//2. Render test quad
-		m_render_context->select_back_buffer_target(device_context);
+		//m_render_context->select_back_buffer_target(device_context);
 		math::vector_float4 color = color::blue();
 
 		m_render_context->m_color_pixel_shader_cbuffer.update(device_context, color);
@@ -74,7 +74,7 @@ namespace gx
 		math::matrix_float44 m3 = math::mul(m2, m1);
 
 
-		draw_screen_space_quad(device_context, m_render_context, m3);
+		//draw_screen_space_quad(device_context, m_render_context, m3);
 
 		delete in_params;
 		return nullptr;
