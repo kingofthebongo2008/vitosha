@@ -169,15 +169,18 @@ namespace math
 		matrix_float44 m2;
 
 		vector_float4 v0 = cross3(up_direction, eye_direction);
+		v0 = normalize3(v0);
+
 		vector_float4 v1 = cross3(eye_direction, v0);
 		vector_float4 v2 = eye_direction;
 
+		
 		//form the translation
 		vector_float4 negative_eye_position = negate(eye_position);
 
 		vector_float4 d0 = dot3(v0, negative_eye_position);
 		vector_float4 d1 = dot3(v1, negative_eye_position);
-		vector_float4 d2 = dot3(v1, negative_eye_position);
+		vector_float4 d2 = dot3(v2, negative_eye_position);
 
 		//clear all components except the w from the dot product
 		d0 = and( d0, reinterpret_cast< const vector_float4*> (&mask_w)[0] );
@@ -197,12 +200,14 @@ namespace math
 	{
 		vector_float4 v1 = sub(look_at_position, eye_position);
 		vector_float4 v2 = normalize3(v1);
-		return view(eye_position, v2, up_direction);
+		vector_float4 v3 = normalize2(up_direction);
+		return view(eye_position, v2, v3);
 	}
 
 	inline matrix_float44 perspective_lh(float view_width, float view_height, float z_near, float z_far)
 	{
 		static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+		static const uint32_t		mask_y[4] = { 0, 0xFFFFFFFF, 0, 0 };
 		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -219,8 +224,9 @@ namespace math
 		m.r[0] = and(v2, reinterpret_cast< const vector_float4*> (&mask_x)[0] );
 
 		vector_float4 v3 = and(v1, reinterpret_cast< const vector_float4*> (&mask_yzw)[0] );
-			
-		m.r[1] = swizzle<x,y,x,x>(v1);
+
+		v2 = swizzle<x,y,x,x>(v1);
+		m.r[1] = and ( v2, reinterpret_cast< const vector_float4*> (&mask_y)[0] );
 
 		vector_float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
 
@@ -233,13 +239,14 @@ namespace math
 	inline matrix_float44 perspective_fov_lh(float fov, float aspect_ratio, float z_near, float z_far)
 	{
 		static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+		static const uint32_t		mask_y[4] = { 0, 0xFFFFFFFF, 0, 0 };
 		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const vector_float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		float r = z_far / (z_far - z_near);
 
-		float sin = sinf(fov);
-		float cos = cosf(fov);
+		float sin = sinf(fov * 0.5f);
+		float cos = cosf(fov * 0.5f);
 		float height = cos / sin;
 
 		vector_float4 v1 = set( height / aspect_ratio, height, r, -r * z_near );
@@ -250,10 +257,10 @@ namespace math
 		vector_float4 v2 = shuffle<x,y,x,y>(v1, ze);
 		m.r[0] = and(v2, reinterpret_cast< const vector_float4*> (&mask_x)[0] );
 
+		v2 = swizzle<x,y,x,x>(v1);
+		m.r[1] = and ( v2, reinterpret_cast< const vector_float4*> (&mask_y)[0] );
+
 		vector_float4 v3 = and(v1, reinterpret_cast< const vector_float4*> (&mask_yzw)[0] );
-
-		m.r[1] = swizzle<x,y,x,x>(v1);
-
 		vector_float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
 
 		m.r[2] = swizzle<z,z,x,w>(v4);

@@ -393,32 +393,29 @@ namespace math
 	inline vector_float4 normalize2(vector_float4 v)
 	{
 		vector_float4 l = length2(v);
-		vector_float4 l_r = rsqrt(l);
-		vector_float4 n = mul(v, l_r);
+		vector_float4 n = div(v, l);
 		return n;
 	}
 
 	inline vector_float4 normalize3(vector_float4 v)
 	{
 		vector_float4 l = length3(v);
-		vector_float4 l_r = rsqrt(l);
-		vector_float4 n = mul(v, l_r);
+		vector_float4 l_r = rcp(l);
+		vector_float4 n = div(v, l);
 		return n;
 	}
 
 	inline vector_float4 normalize4(vector_float4 v)
 	{
 		vector_float4 l = length4(v);
-		vector_float4 l_r = rsqrt(l);
-		vector_float4 n = mul(v, l_r);
+		vector_float4 n = div(v, l);
 		return n;
 	}
 
 	inline vector_float4 normalize_plane(vector_float4 v)
 	{
 		vector_float4 l = length3(v);
-		vector_float4 l_r = rsqrt(l);
-		vector_float4 n = mul(v, l_r);
+		vector_float4 n = div(v, l);
 		return n;
 	}
 
