@@ -41,6 +41,13 @@ namespace gx
 		type* data = static_cast< type*> (lock.m_mapped_resource.pData);
 		*data = *value;
 	}
+
+	inline	void constant_buffer_update( ID3D11DeviceContext* context, ID3D11Buffer* buffer, void* value, size_t size )
+	{
+		detail::constant_buffer_scope_lock lock(context, buffer);
+		void* data = static_cast< void*> (lock.m_mapped_resource.pData);
+		::memcpy(data, value,  size  );
+	}
 }
 
 #endif

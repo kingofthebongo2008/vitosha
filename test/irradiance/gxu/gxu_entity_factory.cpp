@@ -158,12 +158,13 @@ namespace gxu
 		indices = dx11::create_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
 		info.m_index_count = indices_v.size();
-		info.m_vertex_size_0 = 8;
-		info.m_vertex_size_1 = 12;
+		info.m_vertex_size_0 = 8;	//half4
+		info.m_vertex_size_1 = 12;	//half4 + half2
 
         return gx::indexed_draw_call(info, positions, normals_uvs, indices);
     }
 
+	/*
 	std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, gx::indexed_draw_call draw_call, math::vector_float4 color )
 	{
 		return std::make_shared< gxu::static_mesh_entity<gx::color_material> > ( draw_call , gx::create_color_material(context, color) );
@@ -173,4 +174,5 @@ namespace gxu
     {
 		return create_lat_lon_sphere_entity ( context, create_lat_lon_sphere(context->get_device(), radius, subdivision_count) , color );
     }
+	*/
  }

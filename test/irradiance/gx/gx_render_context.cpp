@@ -17,6 +17,10 @@ namespace gx
 		, m_color_pixel_shader_cbuffer (sys_context.m_device.get())
 		, m_phong_vertex_shader(sys_context.m_device.get())
 		, m_phong_vertex_shader_cbuffer(sys_context.m_device.get())
+		, m_lambert_vertex_shader(sys_context.m_device.get())
+		, m_lambert_vertex_shader_cbuffer(sys_context.m_device.get())
+		, m_lambert_constant_pixel_shader(sys_context.m_device.get())
+		, m_lambert_pixel_cbuffer(sys_context.m_device.get())
     {
         m_render_contexts.reserve(thread_render_context_count);
 
@@ -36,6 +40,7 @@ namespace gx
 
 		create_depth_buffer_layout();
 		create_screen_space_input_layout();
+		create_lambert_input_layout();
 		create_screen_space_vertex_buffer();
 
 		create_default_render_data();
@@ -358,6 +363,18 @@ namespace gx
 		};
 
 		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc[0], 2, m_screen_space_render_data.m_screen_space_vertex_shader.m_code, m_screen_space_render_data.m_screen_space_vertex_shader.m_code_size, dx11::get_pointer(m_screen_space_render_data.m_screen_space_input_layout)));
+	}
+
+	void render_context::create_lambert_input_layout()
+	{
+		D3D11_INPUT_ELEMENT_DESC desc[3] = 
+		{
+			{ "POSITION",	0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",		0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",	0,  DXGI_FORMAT_R16G16_FLOAT, 1, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc[0], 3, m_lambert_vertex_shader.m_code, m_lambert_vertex_shader.m_code_size, dx11::get_pointer(m_lambert_input_layout)));
 	}
 
 	screen_space_quad_render	render_context::create_screen_space_quad_render()

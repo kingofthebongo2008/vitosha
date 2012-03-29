@@ -52,6 +52,7 @@ namespace gx
 		for (uint32_t j = 0; j < in_params->m_draw_calls->size(); ++j )
 		{
 			draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->operator[](j);
+			draw_call_context.m_world_matrix = &in_params->m_world_matrices->operator[](j);
 
 			gx::draw_call_info key = in_params->m_draw_calls->operator[](j);
 
@@ -125,6 +126,7 @@ namespace gx
 			for (uint32_t j = start_item; j < end_item; ++j )
 			{
 				draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->operator[](j);
+				draw_call_context.m_world_matrix = &in_params->m_world_matrices->operator[](j);
 
 				gx::draw_call_info key = in_params->m_draw_calls->operator[](j);
 

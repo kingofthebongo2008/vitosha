@@ -36,6 +36,7 @@ namespace gx
 
 		lambert_texture_set m_texture_set;
 	};
+
 }
 
 #endif

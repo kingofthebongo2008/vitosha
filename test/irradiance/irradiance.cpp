@@ -7,6 +7,7 @@
 
 #include <gx/gx_entity.h>
 #include <gx/gx_color.h>
+#include <gx/gx_lambert_constant_material.h>
 #include <gx/gx_scene.h>
 
 #include <gxu/gxu_entity_factory.h>
@@ -55,7 +56,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
     std::shared_ptr<gx::scene::node> root = scene->get_root();
 
-    std::shared_ptr< gx::entity > entity_1 = gxu::create_lat_lon_sphere_entity( render_context, 1.0f, 20, gx::color::blue() ); 
+    std::shared_ptr< gx::entity > entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_constant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
 	std::shared_ptr<gx::scene::node> node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 
 	//1. add to graphic world

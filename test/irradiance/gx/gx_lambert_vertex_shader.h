@@ -24,14 +24,14 @@ namespace gx
 			m_wvp = value;
 		}
 
-		void update ( ID3D11DeviceContext* context, math::matrix_float44* value)
+		void set_world(math::matrix_float44 value)
 		{
-			constant_buffer_update( context, m_buffer.get(), value);
+			m_world = value;
 		}
 
 		void flush ( ID3D11DeviceContext* context )
 		{
-			update(context, &m_wvp);
+			constant_buffer_update(context, m_buffer.get(), (void*) &m_wvp, size() );
 		}
 
 		void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
@@ -49,11 +49,17 @@ namespace gx
 			return m_buffer.get();
 		}
 
+		inline size_t size() const
+		{
+			 return sizeof(m_wvp) + sizeof(m_world);
+		}
+
 		public:
 
 		dx11::id3d11buffer_ptr	m_buffer;
 
 		math::matrix_float44	m_wvp;
+		math::matrix_float44	m_world;
 	};
 
 	class lambert_vertex_shader

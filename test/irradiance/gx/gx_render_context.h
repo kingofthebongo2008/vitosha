@@ -12,6 +12,9 @@
 
 #include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_depth_shader.h>
+#include <gx/gx_lambert_constant_pixel_shader.h>
+#include <gx/gx_lambert_vertex_shader.h>
+#include <gx/gx_lambert_pixel_shader.h>
 #include <gx/gx_phong_vertex_shader.h>
 #include <gx/gx_screen_space_quad.h>
 #include <gx/gx_screen_space_vertex_shader.h>
@@ -233,6 +236,7 @@ namespace gx
 
 		void create_depth_buffer_layout();
 		void create_screen_space_input_layout();
+		void create_lambert_input_layout();
 		void create_screen_space_vertex_buffer();
 
 		void create_default_render_data();
@@ -261,7 +265,16 @@ namespace gx
 
 		phong_vertex_shader										m_phong_vertex_shader;
 		phong_vertex_shader_constant_buffer						m_phong_vertex_shader_cbuffer;
-		
+
+
+		lambert_vertex_shader									m_lambert_vertex_shader;
+		lambert_vertex_shader_constant_buffer					m_lambert_vertex_shader_cbuffer;
+
+		lambert_constant_pixel_shader							m_lambert_constant_pixel_shader;
+		lambert_constant_pixel_shader_constant_buffer			m_lambert_pixel_cbuffer;
+
+		dx11::id3d11inputlayout_ptr								m_lambert_input_layout;
+
     };
 }
 

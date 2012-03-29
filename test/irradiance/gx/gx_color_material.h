@@ -55,6 +55,16 @@ namespace gx
 	};
 
 	color_material create_color_material( render_context* context, math::vector_float4 color );
+
+	struct color_material_factory
+	{
+		typedef color_material type;
+
+		static color_material create(render_context* context, math::vector_float4 color)
+		{
+			return create_color_material(context, color);
+		}
+	};
 }
 
 #endif

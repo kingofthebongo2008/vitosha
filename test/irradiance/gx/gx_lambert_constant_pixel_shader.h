@@ -19,14 +19,14 @@ namespace gx
 
 		explicit lambert_constant_pixel_shader_constant_buffer ( ID3D11Device* device );
 
-		math::vector_float4 get_color() const
+		math::vector_float4 get_diffuse_albedo() const
 		{
-			return m_color;
+			return m_diffuse_albedo;
 		}
 
-		void set_color(math::vector_float4 value)
+		void set_diffuse_albedo(math::vector_float4 value)
 		{
-			m_color = value;
+			m_diffuse_albedo = value;
 		}
 
 		void update ( ID3D11DeviceContext* context, math::vector_float4* value)
@@ -41,7 +41,7 @@ namespace gx
 
 		void flush ( ID3D11DeviceContext* context )
 		{
-			update(context, &m_color);
+			update(context, &m_diffuse_albedo);
 		}
 
 		void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
@@ -71,7 +71,7 @@ namespace gx
 
 		public:
 
-		math::vector_float4		m_color;
+		math::vector_float4		m_diffuse_albedo;
 		dx11::id3d11buffer_ptr	m_buffer;
 	};
 

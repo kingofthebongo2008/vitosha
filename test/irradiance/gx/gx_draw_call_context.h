@@ -17,6 +17,7 @@ namespace gx
         math::matrix_float44*           m_inverse_view_matrix;
         math::matrix_float44*           m_inverse_projection_matrix;
         math::matrix_float44*           m_wvp_matrix;
+		math::matrix_float44*           m_world_matrix;
     };
 }
 
