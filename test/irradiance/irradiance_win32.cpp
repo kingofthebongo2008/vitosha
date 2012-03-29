@@ -113,9 +113,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
 	MSG msg = {};
 
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
-
+	::ShowWindow(hwnd, nCmdShow);
+	::UpdateWindow(hwnd);
 
 	while (msg.message != WM_QUIT)
 	{
@@ -170,7 +169,7 @@ static HWND InitInstance(HINSTANCE hInstance)
    hInst = hInstance; // Store instance handle in our global variable
 
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+      CW_USEDEFAULT, 1280, CW_USEDEFAULT, 720, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {

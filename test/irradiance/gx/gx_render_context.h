@@ -12,6 +12,7 @@
 
 #include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_depth_shader.h>
+#include <gx/gx_phong_vertex_shader.h>
 #include <gx/gx_screen_space_quad.h>
 #include <gx/gx_screen_space_vertex_shader.h>
 #include <gx/gx_screen_space_pixel_shader.h>
@@ -257,6 +258,10 @@ namespace gx
 		
 		color_pixel_shader										m_color_pixel_shader;
 		color_pixel_shader_constant_buffer						m_color_pixel_shader_cbuffer;
+
+		phong_vertex_shader										m_phong_vertex_shader;
+		phong_vertex_shader_constant_buffer						m_phong_vertex_shader_cbuffer;
+		
     };
 }
 

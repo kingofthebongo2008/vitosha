@@ -39,6 +39,16 @@ namespace gx
 			context->VSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
 		}
 
+		operator ID3D11Buffer*()
+		{
+			return m_buffer.get();
+		}
+
+		operator const ID3D11Buffer*() const
+		{
+			return m_buffer.get();
+		}
+
 		public:
 
 		dx11::id3d11buffer_ptr	m_buffer;

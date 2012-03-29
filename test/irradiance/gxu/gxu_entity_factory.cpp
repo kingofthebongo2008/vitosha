@@ -113,8 +113,8 @@ namespace gxu
 
 				positions_v.push_back( position ( x, y, z, 1.0f) );
 
-				normal n ( x, y, z, 1.0f );
-				uv	   uv( 1.0f, 1.0f ) ;
+				normal n ( dx, dy, dz, 1.0f );
+				uv	   uv( u, v ) ;
 
 				normal_uv nuv = { n, uv };
 

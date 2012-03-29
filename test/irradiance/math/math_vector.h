@@ -400,7 +400,6 @@ namespace math
 	inline vector_float4 normalize3(vector_float4 v)
 	{
 		vector_float4 l = length3(v);
-		vector_float4 l_r = rcp(l);
 		vector_float4 n = div(v, l);
 		return n;
 	}
