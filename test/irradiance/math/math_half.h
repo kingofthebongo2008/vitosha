@@ -427,6 +427,11 @@ namespace math
 			math::stream(  &out_buffer[i], k);
 		}
 	}
+
+	inline void convert_f32_f16_stream(const float* in_buffer, size_t count,  math::half* out_buffer)
+	{
+		convert_f32_f16_stream( in_buffer, static_cast<uint32_t>(count), out_buffer);
+	}
 }
 
 

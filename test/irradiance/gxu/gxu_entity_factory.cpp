@@ -4,7 +4,9 @@
 
 #include <dx11/dx11_helpers.h>
 
+#include <math/math_functions.h>
 #include <math/math_half.h>
+#include <math/math_matrix.h>
 
 #include <gx/gx_color_material.h>
 #include <gx/gx_indexed_draw_call.h>
@@ -23,6 +25,7 @@ namespace gxu
 			float m_z;
 			float m_w;
 			position ( float x, float y, float z, float w) : m_x(x), m_y(y), m_z(z), m_w(w) {}
+			position(){}
 		};
 
 		struct normal
@@ -33,6 +36,7 @@ namespace gxu
 			float m_w;
 
 			normal ( float x, float y, float z, float w) : m_x(x), m_y(y), m_z(z), m_w(w) {}
+			normal() {}
 		};
 
 		struct uv
@@ -41,6 +45,7 @@ namespace gxu
 			float m_v;
 
 			uv ( float u, float v) : m_u(u), m_v(v) {}
+			uv() {}
 		};
 
 		struct normal_uv
@@ -53,9 +58,6 @@ namespace gxu
 
     gx::indexed_draw_call create_lat_lon_sphere( ID3D11Device* device , float radius, uint32_t subdivision_count )
     {
-		subdivision_count;
-		radius;
-		device;
 
 		dx11::id3d11buffer_ptr positions;
         dx11::id3d11buffer_ptr normals_uvs;
@@ -74,11 +76,12 @@ namespace gxu
 		const float pi_div_two		= 1.570796327f;
 		const float pi_div_four		= 0.785398163f;
 
+		uint32_t			  vertex_count = 0;
 		std::vector<position> positions_v;
 		std::vector<normal_uv> normals_uvs_v;
 
-		positions_v.reserve( (vertical_segments + 1 ) * ( horizontal_segments + 1) );
-		normals_uvs_v.reserve( (vertical_segments + 1  ) * ( horizontal_segments + 1 ) );
+		positions_v.resize( (vertical_segments + 1 ) * ( horizontal_segments + 1) );
+		normals_uvs_v.resize( (vertical_segments + 1  ) * ( horizontal_segments + 1 ) );
 
 		for ( uint32_t i = 0; i < vertical_segments + 1 ; ++i)
 		{
@@ -91,7 +94,75 @@ namespace gxu
 			dy = sinf(lattitude);
 			dxz = cosf(lattitude);
 
-			for (uint32_t j = 0 ; j < horizontal_segments + 1 ; ++j )
+			uint32_t horizontal_segments_div_4 = ( (horizontal_segments + 1) / 4) * 4;
+			uint32_t horizontal_segments_remainder = horizontal_segments + 1 - horizontal_segments_div_4;
+
+			//iterate on 4 vertices at the same time
+			for (uint32_t j = 0; j < horizontal_segments_div_4 ; j+=4, vertex_count+=4 )
+			{
+				math::vector_float4 v_1 = math::set(static_cast<float> (j), static_cast<float> (j+1), static_cast<float> (j+2), static_cast<float> (j+3) );
+				math::vector_float4 v_2 = math::splat(static_cast<float> (horizontal_segments) );
+
+				math::vector_float4 u = math::div(v_1, v_2);
+
+				math::vector_float4 v_3 = math::splat( two_pi );
+				math::vector_float4 v_4 = math::splat( static_cast<float> (horizontal_segments) );
+				math::vector_float4 v_5 =  math::splat( pi );
+
+				math::vector_float4 v_6 =  math::mul( v_1, v_3 );
+				math::vector_float4 v_7 =  math::div( v_6, v_4 );
+				math::vector_float4 longitude =  math::sub(v_7, v_5);
+
+				math::vector_float4 dx =  math::sin(longitude);
+				math::vector_float4 dz =  math::cos(longitude);
+
+				math::vector_float4 v_8 =  math::splat( dxz );
+
+				dx = math::mul(dx, v_8);
+				dz = math::mul(dz, v_8);
+
+				math::vector_float4 v_9 =  math::splat( radius );
+				math::vector_float4 v_10 =  math::splat( dy );
+
+				math::vector_float4 x =  math::mul(dx, v_9);
+				math::vector_float4 y =  math::mul(v_10, v_9);
+				math::vector_float4 z =  math::mul(dz, v_9);
+				math::vector_float4 one =  math::one();
+
+				math::vector_float4 v_11 =  math::splat(v);
+
+				math::matrix_float44 p_1;
+
+				p_1.r[0] = x;
+				p_1.r[1] = y;
+				p_1.r[2] = z;
+				p_1.r[3] = one;
+
+				//store positions
+				math::matrix_float44 p_2 = math::transpose(p_1);
+				position* address = &positions_v[vertex_count];
+				math::store44( reinterpret_cast<float*> (address), p_2);
+
+				//sse 1,2,3 requires memory addresses to be 16 byte aligned. we cannot guarantee this, so we store byte by byte
+				normal_uv* uv_address = &normals_uvs_v[vertex_count];
+				uv_address->m_normal = normal( dx.m128_f32[0], v_10.m128_f32[0],  dz.m128_f32[0], 1.0f);
+				uv_address->m_uv = uv( u.m128_f32[0], v );
+
+				uv_address++;
+				uv_address->m_normal = normal(dx.m128_f32[1], v_10.m128_f32[1], dz.m128_f32[1], 1.0f);
+				uv_address->m_uv = uv( u.m128_f32[1], v );
+
+				uv_address++;
+				uv_address->m_normal = normal( dx.m128_f32[2], v_10.m128_f32[2], dz.m128_f32[2], 1.0f);
+				uv_address->m_uv = uv( u.m128_f32[2], v );
+
+				uv_address++;
+				uv_address->m_normal = normal( dx.m128_f32[3], v_10.m128_f32[3], dz.m128_f32[3], 1.0f);
+				uv_address->m_uv = uv( u.m128_f32[3], v );
+			}
+
+			//iterate on the remainder element by element
+			for (uint32_t j = horizontal_segments_div_4 ; j < horizontal_segments + 1 ; ++j, ++vertex_count )
 			{
 				float u = static_cast<float>  (j)  / horizontal_segments;
 				float longitude = ( j * two_pi / horizontal_segments )  - pi; 
@@ -111,20 +182,22 @@ namespace gxu
 				y = dy * radius;
 				z = dz * radius;
 
-				positions_v.push_back( position ( x, y, z, 1.0f) );
+				//store the position
+				position* address = &positions_v[vertex_count];
+				*address = position ( x, y, z, 1.0f);
 
-				normal n ( dx, dy, dz, 1.0f );
-				uv	   uv( u, v ) ;
-
-				normal_uv nuv = { n, uv };
-
-				normals_uvs_v.push_back ( nuv );
+				//store normal and uv
+				normal_uv* uv_address = &normals_uvs_v[vertex_count];
+				uv_address->m_normal = normal(dx, dy, dz, 1.0f );
+				uv_address->m_uv.m_u = u;
+				uv_address->m_uv.m_v = v;
 			}
 		}
 
 		std::vector<uint16_t> indices_v;
 		indices_v.reserve((vertical_segments + 1 ) * ( horizontal_segments +  1 ) * 3 ) ;
 
+		//generate triangles
 		uint32_t stride = horizontal_segments + 1 ;
 
 		for ( uint32_t i = 0 ; i < vertical_segments; ++i)
@@ -134,18 +207,21 @@ namespace gxu
 				uint32_t next_i = i + 1;
 				uint32_t next_j = (j + 1 ) % stride;
 
-				indices_v.push_back( i * stride + j );
-				indices_v.push_back( next_i * stride + j );
-				indices_v.push_back( i * stride + next_j ); 
+				indices_v.push_back( static_cast<uint16_t> (i * stride + j) );
+				indices_v.push_back( static_cast<uint16_t> (next_i * stride + j) );
+				indices_v.push_back( static_cast<uint16_t> (i * stride + next_j) ); 
 
-				indices_v.push_back ( i * stride + next_j );
-				indices_v.push_back ( next_i * stride + j );
-				indices_v.push_back ( next_i * stride + next_j );
+				indices_v.push_back ( static_cast<uint16_t> (i * stride + next_j) );
+				indices_v.push_back ( static_cast<uint16_t> (next_i * stride + j) );
+				indices_v.push_back ( static_cast<uint16_t> (next_i * stride + next_j) );
 			}
 		}
 
+		//convert to half to save memory on the gpu
+		//conversion library operates on elements divisible by 8 to improve speed
+
 		std::vector< math::half > positions_h_v;
-		positions_h_v.resize ( 8 * ( (positions_v.size() * 4 + 7 ) / 8 ) );
+		positions_h_v.resize ( 8 * ( (positions_v.size() * 4 + 7 ) / 8 ) );	//allocate more space than we need
 		math::convert_f32_f16_stream( reinterpret_cast<float*> ( &positions_v[0]) , positions_h_v.size(), &positions_h_v[0] );
 
 		std::vector< math::half > normals_uvs_h_v;
@@ -157,22 +233,10 @@ namespace gxu
 
 		indices = dx11::create_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
-		info.m_index_count = indices_v.size();
+		info.m_index_count = static_cast<uint32_t> ( indices_v.size() );
 		info.m_vertex_size_0 = 8;	//half4
 		info.m_vertex_size_1 = 12;	//half4 + half2
 
         return gx::indexed_draw_call(info, positions, normals_uvs, indices);
     }
-
-	/*
-	std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, gx::indexed_draw_call draw_call, math::vector_float4 color )
-	{
-		return std::make_shared< gxu::static_mesh_entity<gx::color_material> > ( draw_call , gx::create_color_material(context, color) );
-	}
-
-	std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, float radius, uint32_t subdivision_count, math::vector_float4 color )
-    {
-		return create_lat_lon_sphere_entity ( context, create_lat_lon_sphere(context->get_device(), radius, subdivision_count) , color );
-    }
-	*/
  }

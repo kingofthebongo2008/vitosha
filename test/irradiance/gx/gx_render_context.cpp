@@ -422,7 +422,7 @@ namespace gx
 
 		__declspec( align(16) ) math::half h_1 [ 40 ];
 
-		math::convert_f32_f16_stream(reinterpret_cast<const float*> (&v_1[0]), 40, &h_1[0] );
+		math::convert_f32_f16_stream(reinterpret_cast<const float*> (&v_1[0]), static_cast<uint32_t>(40), &h_1[0] );
 
 		desc.ByteWidth = 6 * sizeof(vertex);
 		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;

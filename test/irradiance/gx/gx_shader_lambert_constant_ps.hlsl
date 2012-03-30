@@ -13,7 +13,7 @@ cbuffer per_object
 float3 main( in  vs_output input) : SV_Target
 {
 	const float3		light_direction_ws = { 1.0f, 1.0f, 0.0f } ;
-	const float3		light_power		   = { 3.0f, 3.0f, 3.0f } ;	//watt
+	const float3		light_power		   = { 3.1415f, 3.1415f, 3.1415f } ;	//watt
 
 	float3 light_ws		= normalize(light_direction_ws);
 
