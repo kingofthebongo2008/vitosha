@@ -192,6 +192,7 @@
     <ClInclude Include="gx\gx_phong_material.h" />
     <ClInclude Include="gx\gx_phong_pixel_shader.h" />
     <ClInclude Include="gx\gx_phong_vertex_shader.h" />
+    <ClInclude Include="gx\gx_pinhole_camera.h" />
     <ClInclude Include="gx\gx_pipeline.h" />
     <ClInclude Include="gx\gx_pipeline_params.h" />
     <ClInclude Include="gx\gx_screen_space_pixel_shader.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="gx\gx_phong_material.cpp" />
     <ClCompile Include="gx\gx_phong_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_phong_vertex_shader.cpp" />
+    <ClCompile Include="gx\gx_pinhole_camera.cpp" />
     <ClCompile Include="gx\gx_pipeline.cpp" />
     <ClCompile Include="gx\gx_screen_space_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_screen_space_quad.cpp" />

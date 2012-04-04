@@ -18,9 +18,15 @@ namespace fnd
 
 		}
 
-		void update(float dt)
+
+		void update_pass_one(float dt)
 		{
-			on_update(dt);
+			on_update_pass_one(dt);
+		}
+
+		void update_pass_two(float dt)
+		{
+			on_update_pass_two(dt);
 		}
 
 		void add_world(std::shared_ptr<fnd::world> world)
@@ -39,9 +45,14 @@ namespace fnd
 
         world_container m_worlds;
 
-		virtual void on_update(float dt)
+		virtual void on_update_pass_one(float dt)
 		{
-			std::for_each(begin(m_worlds),end(m_worlds),[=](world_ptr world) { world->update(dt);});
+			std::for_each(begin(m_worlds),end(m_worlds),[=](world_ptr world) { world->update_pass_one(dt);});
+		}
+
+		virtual void on_update_pass_two(float dt)
+		{
+			std::for_each(begin(m_worlds),end(m_worlds),[=](world_ptr world) { world->update_pass_two(dt);});
 		}
 	};
 }

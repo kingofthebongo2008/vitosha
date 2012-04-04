@@ -144,6 +144,8 @@ namespace gx
 
     class thread_render_context;
 
+	//performs management of surfaces, gpu memory buffers, shaders, textures on a higher level than a 3d device
+	//has knowledge about a fixed rendering method and material system
     class render_context : public boost::noncopyable
     {
         public:

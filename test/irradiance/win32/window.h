@@ -11,6 +11,8 @@
 
 #include "fnd/fnd_world.h"
 
+#include "gx/gx_pinhole_camera.h"
+
 namespace gx
 {
 	class scene;
@@ -24,15 +26,7 @@ namespace wnd
 	class window : private boost::noncopyable
 	{
 		public:
-		window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
-			m_application(application)
-			, m_swap_chain(swap_chain)
-			, m_render_context(render_context)
-			, m_occluded_by_another_window(false)
-			, m_aspect_ratio( 16.0f/ 9.0f )
-		{
-
-		}
+		window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context );
 
 		inline void set_scene( std::shared_ptr<gx::scene> scene )
 		{
@@ -53,7 +47,8 @@ namespace wnd
 		gx::render_context*			m_render_context;
 		std::shared_ptr<gx::scene>	m_scene;
 		bool						m_occluded_by_another_window;
-		float						m_aspect_ratio;
+
+		gx::pinhole_camera			m_main_camera;
 
 		void render_frame();
 	};

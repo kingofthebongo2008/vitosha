@@ -12,14 +12,24 @@ namespace fnd
 
 		}
 
-		void update(float dt)
+		void update_pass_one(float dt)
 		{
-			on_update(dt);
+			on_update_pass_one(dt);
+		}
+
+		void update_pass_two(float dt)
+		{
+			on_update_pass_two(dt);
 		}
 
 		private:
 
-		virtual void on_update(float dt)
+		virtual void on_update_pass_one(float dt)
+		{
+			dt;
+		}
+
+		virtual void on_update_pass_two(float dt)
 		{
 			dt;
 		}

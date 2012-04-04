@@ -11,6 +11,7 @@
 #include <gx/gx_create_draw_calls_pipeline_node.h>
 #include <gx/gx_execute_draw_calls_pipeline_node.h>
 #include <gx/gx_final_pipeline_node.h>
+#include <gx/gx_pinhole_camera.h>
 #include <gx/gx_pipeline.h>
 #include <gx/gx_render_context.h>
 #include <gx/gx_scene.h>
@@ -21,10 +22,31 @@
 
 #include <win32/application.h>
 
-
-
 namespace wnd
 {
+	window::window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
+			m_application(application)
+			, m_swap_chain(swap_chain)
+			, m_render_context(render_context)
+			, m_occluded_by_another_window(false)
+	{
+
+		math::vector_float4  view_position = math::set( 0.0f, 1.0f,  -5.5f, 0.0f ); //meters
+		math::vector_float4  view_look_at  = math::set( 0.0f, 0.0f,  0.0f, 0.0f ); //look along the z
+		math::vector_float4  view_up = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
+
+		m_main_camera.set_position(view_position);
+		m_main_camera.set_look_at_direction(view_look_at);
+		m_main_camera.set_up(view_up);
+
+		m_main_camera.set_aspect_ratio(16.0f / 9.0f);
+		m_main_camera.set_fov(3.1415f / 4.0f );
+		m_main_camera.set_near(0.005f);
+		m_main_camera.set_far(400.f); //meters
+	
+		
+	}
+
 	window::~window()
 	{
 
@@ -73,14 +95,10 @@ namespace wnd
 	{
 		gx::pipeline    pipeline;
 		
-		math::vector_float4  eye_position = math::set( 0.0f, 1.0f,  -5.5f, 0.0f ); //meters
-		math::vector_float4  eye_look_at  = math::set( 0.0f, 0.0f,  0.0f, 0.0f ); //look along the z
-		math::vector_float4  up_direction = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
+		math::matrix_float44 view_matrix = gx::create_view_matrix(&m_main_camera);
+		math::matrix_float44 perspective_matrix = gx::create_perspective_matrix(&m_main_camera);
 
-		math::matrix_float44 view_matrix = math::look_at_lh(eye_position, eye_look_at , math::normalize3( up_direction ) );
-		math::matrix_float44 perspective_matrix = math::perspective_fov_lh( 3.1415f / 4.0f, m_aspect_ratio, 0.005f, 400.0f);
-
-		gx::view			view(view_matrix, perspective_matrix );
+		gx::view			 view(view_matrix, perspective_matrix );
 
 		pipeline.add_node( std::make_shared< gx::scene_pipeline_node>(m_scene.get()) );
 
@@ -111,7 +129,7 @@ namespace wnd
 		gx::view_port view_port ( 0, 0, width, height );
 		m_render_context->set_view_port(view_port);
 
-		m_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
+		m_main_camera.set_aspect_ratio ( static_cast<float>(width) / static_cast<float>(height) );
 
 		m_render_context->create_swap_chain_buffers();
 	}
