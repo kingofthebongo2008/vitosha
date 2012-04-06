@@ -7,7 +7,7 @@
 
 namespace gx
 {
-    class pinhole_camera
+    struct pinhole_camera
     {
         public:
 
@@ -123,7 +123,7 @@ namespace gx
 			m_far = value;
 		}
 
-		private:
+		public:
 
 		//view parameters
 		math::vector_float4 m_position;
@@ -135,12 +135,11 @@ namespace gx
 		float				m_aspect_ratio;
 		float				m_near;
 		float				m_far;
-
 	};
 
 	inline math::matrix_float44 create_view_matrix(const pinhole_camera * camera)
 	{
-		return math::look_at_lh(camera->get_position(), camera->get_look_at_direction(), math::normalize3( camera->get_up() ) );
+		return math::view(camera->get_position(), math::normalize3( camera->get_look_at_direction() ) , math::normalize3( camera->get_up() ) );
 	}
 
 	inline math::matrix_float44 create_perspective_matrix(const pinhole_camera * camera)

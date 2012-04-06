@@ -166,6 +166,7 @@
     <ClInclude Include="fnd\fnd_universe.h" />
     <ClInclude Include="fnd\fnd_updater.h" />
     <ClInclude Include="fnd\fnd_world.h" />
+    <ClInclude Include="gxu\gxu_camera_command.h" />
     <ClInclude Include="gxu\gxu_entity_factory.h" />
     <ClInclude Include="gxu\gxu_static_mesh_entity.h" />
     <ClInclude Include="gx\gx_color.h" />
@@ -204,6 +205,7 @@
     <ClInclude Include="gx\gx_thread_render_context.h" />
     <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
+    <ClInclude Include="io\io_mouse.h" />
     <ClInclude Include="math\math_functions.h" />
     <ClInclude Include="math\math_graphics.h" />
     <ClInclude Include="math\math_half.h" />
@@ -221,6 +223,7 @@
     <ClInclude Include="sys\sys_spsc_queue.h" />
     <ClInclude Include="sys\sys_task.h" />
     <ClInclude Include="sys\sys_thread.h" />
+    <ClInclude Include="util\util_bits.h" />
     <ClInclude Include="win32/irradiance.h" />
     <ClInclude Include="win32/resource.h" />
     <ClInclude Include="win32/application.h" />
@@ -233,6 +236,7 @@
     <ClCompile Include="fnd\fnd_universe.cpp" />
     <ClCompile Include="fnd\fnd_updater.cpp" />
     <ClCompile Include="fnd\fnd_world.cpp" />
+    <ClCompile Include="gxu\gxu_camera_command.cpp" />
     <ClCompile Include="gxu\gxu_entity_factory.cpp" />
     <ClCompile Include="gxu\gxu_static_mesh_entity.cpp" />
     <ClCompile Include="gx\gx_color_material.cpp" />
@@ -266,6 +270,7 @@
     <ClCompile Include="gx\gx_thread_render_context.cpp" />
     <ClCompile Include="gx\gx_view_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_scene.cpp" />
+    <ClCompile Include="io\io_mouse.cpp" />
     <ClCompile Include="irradiance.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>
     </ClCompile>

@@ -31,8 +31,8 @@ namespace wnd
 			, m_occluded_by_another_window(false)
 	{
 
-		math::vector_float4  view_position = math::set( 0.0f, 1.0f,  -5.5f, 0.0f ); //meters
-		math::vector_float4  view_look_at  = math::set( 0.0f, 0.0f,  0.0f, 0.0f ); //look along the z
+		math::vector_float4  view_position = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
+		math::vector_float4  view_look_at  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
 		math::vector_float4  view_up = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
 
 		m_main_camera.set_position(view_position);
@@ -43,8 +43,7 @@ namespace wnd
 		m_main_camera.set_fov(3.1415f / 4.0f );
 		m_main_camera.set_near(0.005f);
 		m_main_camera.set_far(400.f); //meters
-	
-		
+
 	}
 
 	window::~window()
@@ -132,5 +131,45 @@ namespace wnd
 		m_main_camera.set_aspect_ratio ( static_cast<float>(width) / static_cast<float>(height) );
 
 		m_render_context->create_swap_chain_buffers();
+	}
+
+	void window::process_user_input()
+	{
+		bool is_l_ = m_mouse_state.is_left_button_down();
+		bool is_r_ = m_mouse_state.is_right_button_down();
+
+		if ( is_l_ )
+		{
+			math::vector_float4 v = math::set(0.0f, 0.0f, 0.02f, 0.0f);
+			m_main_camera.m_position = math::add(v, m_main_camera.m_position);
+		}
+
+		if ( is_r_ )
+		{
+			math::vector_float4 v = math::set(0.0f, 0.0f, -0.02f, 0.0f);
+			m_main_camera.m_position = math::add(v, m_main_camera.m_position);
+		}
+
+		m_mouse_state.swap();
+	}
+
+	void window::on_mouse_down(uint32_t windows_mouse_state)
+	{
+		uint32_t mouse_state = io::create_mouse_state( windows_mouse_state );
+		m_mouse_state.set_mask(mouse_state);
+	}
+
+	void window::on_mouse_up(uint32_t windows_mouse_state)
+	{
+		uint32_t mouse_state = io::create_mouse_state( windows_mouse_state );
+		m_mouse_state.reset_mask(mouse_state);
+	}
+
+	void window::on_mouse_move(uint32_t windows_mouse_state, uint16_t x, uint16_t y)
+	{
+		uint32_t mouse_state = io::create_mouse_state( windows_mouse_state );
+
+		m_mouse_state.set_coordinates(x, y);
+		m_mouse_state.set_state(mouse_state);
 	}
 }

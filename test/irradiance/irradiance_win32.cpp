@@ -2,6 +2,8 @@
 
 #include <win32/irradiance.h>
 
+#include <windowsx.h>
+
 #include <sys/sys_base.h>
 
 #include <dx11/dx11_system.h>
@@ -127,12 +129,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			}
 			else
 			{
+				application.process_user_input();
 				application.update();
 				application.render();
 			}
 		}
 		else
 		{
+				application.process_user_input();
 				application.update();
 				application.render();
 		}
@@ -231,7 +235,76 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		}
 		break;
 
+	case WM_LBUTTONDOWN:
+		{
+			if (wnd)
+			{
+				wnd->on_mouse_down(MK_LBUTTON);
+			}
+
+			break;
+		}
+
+	case WM_LBUTTONUP:
+		{
+			if (wnd)
+			{
+				wnd->on_mouse_up(MK_LBUTTON);
+			}
+
+			break;
+		}
+
+	case WM_RBUTTONDOWN :
+		{
+			if (wnd)
+			{
+				wnd->on_mouse_down(MK_RBUTTON);
+			}
+			break;
+		}
+	case WM_RBUTTONUP :
+		{
+			if (wnd)
+			{
+				wnd->on_mouse_up(MK_RBUTTON);
+			}
+			break;
+		}
+
+	case WM_MBUTTONDOWN :
+		{
+			if (wnd)
+			{
+				wnd->on_mouse_down(MK_MBUTTON);
+			}
+			break;
+		}
+
+	case WM_MBUTTONUP :
+		{
+			if (wnd)
+			{
+				wnd->on_mouse_up(MK_MBUTTON);
+			}
+			break;
+		}
+
+	case WM_MOUSEMOVE :
+		{
+			if (wnd)
+			{
+				WPARAM mouse_state = wParam;
+				WORD xPos = GET_X_LPARAM(lParam); 
+				WORD yPos = GET_Y_LPARAM(lParam); 
+				wnd->on_mouse_move( static_cast<uint32_t> (mouse_state) , xPos, yPos );
+			}
+
+			break;
+		}
+
 	default:
+
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 

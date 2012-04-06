@@ -211,9 +211,8 @@ namespace gx
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
 	{
 		device_context->ClearDepthStencilView( m_depth_stencil_target.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
-
-		float clear_color_1[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-		float clear_color_2[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+		float clear_color_1[4] = { 0.449019607f, 0.449019607f, 0.449019607f, 1.0f };
+		float clear_color_2[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float clear_color_3[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		device_context->ClearRenderTargetView( m_back_buffer_render_target.get(), clear_color_1);

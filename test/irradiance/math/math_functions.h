@@ -173,6 +173,22 @@ namespace math
 		vector_float4 v = details::mod_angles(value);
 		return cos_1(v);
 	}
+
+	//compile time log2
+	template<uint32_t x> struct log2_c
+	{
+		static const uint32_t value = 1 + log2_c< x / 2>::value;
+	};
+
+    template<> struct log2_c<1>
+    {
+		static const uint32_t value = 0;
+	};
+
+	template<> struct log2_c<0>
+    {
+
+    };
 }
 
 

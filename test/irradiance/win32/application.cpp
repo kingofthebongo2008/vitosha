@@ -17,11 +17,22 @@ namespace wnd
 
     application::~application()
     {
+
     }
+
+	void application::process_user_input()
+	{
+		std::for_each(begin(m_windows), end(m_windows), [=](window* wnd)
+		{  
+			wnd->process_user_input();
+		}
+		) ;
+	}
 
 	void application::update()
 	{
-		m_universe->update(0.0f);
+		m_universe->update_pass_one(0.0f);
+		m_universe->update_pass_two(0.0f);
 	}
 
 	void application::render()

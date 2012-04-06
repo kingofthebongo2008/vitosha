@@ -27,6 +27,7 @@ namespace wnd
         application();
         ~application();
 
+		void	process_user_input();
 		void	update();
 		void	render();
 
