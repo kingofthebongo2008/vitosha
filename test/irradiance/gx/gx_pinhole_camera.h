@@ -14,9 +14,9 @@ namespace gx
 		pinhole_camera()
 		{
 			//view parameters
-			m_position = math::set(0.0f, 0.0f, 0.0f, 1.0f);
-			m_look_at_direction = math::set(0.0f, 0.0f, 1.0f, 0.0f);
-			m_up = math::set(0.0f, 1.0f, 0.0f, 0.0f);
+			m_view_position_ws = math::set(0.0f, 0.0f, 0.0f, 1.0f);
+			m_view_direction_ws = math::set(0.0f, 0.0f, 1.0f, 0.0f);
+			m_view_up_ws = math::set(0.0f, 1.0f, 0.0f, 0.0f);
 
 			//perspective parameters
 			m_fov = 3.1415f / 4.0f;
@@ -38,9 +38,9 @@ namespace gx
 
 						:
 
-						m_position( position	)
-						, m_look_at_direction(look_at_direction)
-						, m_up(up)
+						m_view_position_ws( position	)
+						, m_view_direction_ws(look_at_direction)
+						, m_view_up_ws(up)
 						, m_fov(fov)
 						, m_aspect_ratio(aspect_ratio)
 						, m_near(near_z)
@@ -52,17 +52,17 @@ namespace gx
 		//view parameters
 		math::vector_float4 get_position() const
 		{
-			return m_position;
+			return m_view_position_ws;
 		}
 
 		math::vector_float4 get_look_at_direction() const
 		{
-			return m_look_at_direction;
+			return m_view_direction_ws;
 		}
 
 		math::vector_float4 get_up() const
 		{
-			return m_up;
+			return m_view_up_ws;
 		}
 
 		//perspective parameters
@@ -87,19 +87,19 @@ namespace gx
 		}
 
 		//view parameters
-		void set_position( math::vector_float4 position)
+		void set_view_position( math::vector_float4 position_ws)
 		{
-			m_position = position;
+			m_view_position_ws = position_ws;
 		}
 
-		void set_look_at_direction(math::vector_float4 look_at_direction)
+		void set_view_direction(math::vector_float4 view_direction_ws)
 		{
-			m_look_at_direction = look_at_direction;
+			m_view_direction_ws = view_direction_ws;
 		}
 
-		void set_up(math::vector_float4 up)
+		void set_view_up(math::vector_float4 up_ws)
 		{
-			m_up = up;
+			m_view_up_ws = up_ws;
 		}
 
 		//perspective parameters
@@ -126,9 +126,9 @@ namespace gx
 		public:
 
 		//view parameters
-		math::vector_float4 m_position;
-		math::vector_float4 m_look_at_direction;
-		math::vector_float4 m_up;
+		math::vector_float4 m_view_position_ws;
+		math::vector_float4 m_view_direction_ws;
+		math::vector_float4 m_view_up_ws;
 
 		//perspective parameters
 		float				m_fov;

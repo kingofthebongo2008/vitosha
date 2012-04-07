@@ -29,7 +29,7 @@ namespace io
 
 		void swap()
 		{
-			std::swap(m_state, m_shadow_state);
+			m_shadow_state = m_state;
 		}
 
 		difference get_difference() const

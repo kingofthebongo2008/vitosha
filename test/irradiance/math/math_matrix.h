@@ -118,9 +118,9 @@ namespace math
 		matrix_float44 m1 = transpose(m);
 
 		row0 = m1.r[0];
-		row1 = m1.r[1];
+		row1 = swizzle<z,w,x,y>(m1.r[1]);
 		row2 = m1.r[2];
-		row3 = m1.r[3];
+		row3 = swizzle<z,w,x,y>(m1.r[3]);
 
 		//------ 
 		tmp = mul( row2, row3);
@@ -129,7 +129,7 @@ namespace math
 		minor0 = mul(row1, tmp);
 		minor1 = mul(row0, tmp);
 
-		tmp = swizzle<z,w,x,y>(tmp);
+		tmp = swizzle<z,w,x,y>(tmp); //4e
 
 		minor0 = sub(mul(row1, tmp), minor0);
 		minor1 = sub(mul(row0, tmp), minor1);
@@ -189,12 +189,13 @@ namespace math
 
 		//------ 
 		tmp = mul(row0, row2);
-		tmp = swizzle<y,x,z,w>(tmp);
+		tmp = swizzle<y,x,w,z>(tmp);
 
 		minor1 = add( mul(row3, tmp), minor1);
 		minor3 = sub( minor3, mul(row1, tmp));
 
 		tmp = swizzle<z,w,x,y>(tmp);
+
 		minor1 = sub(minor1, mul(row3, tmp));
 		minor3 = add( mul(row1, tmp), minor3);
 		//------ 
