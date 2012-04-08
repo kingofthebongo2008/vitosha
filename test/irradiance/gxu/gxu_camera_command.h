@@ -41,6 +41,42 @@ namespace gxu
 		uint8_t		m_camera_number;
 	};
 
+	struct turn_camera_left
+	{
+		static const uint16_t	id = 2;
+
+		uint16_t	m_command_id;
+		float		m_angle_radians;
+		uint8_t		m_camera_number;
+	};
+
+	struct turn_camera_right
+	{
+		static const uint16_t	id = 3;
+
+		uint16_t	m_command_id;
+		float		m_angle_radians;
+		uint8_t		m_camera_number;
+	};
+
+	struct aim_camera_up
+	{
+		static const uint16_t	id = 4;
+
+		uint16_t	m_command_id;
+		float		m_angle_radians;
+		uint8_t		m_camera_number;
+	};
+
+	struct aim_camera_down
+	{
+		static const uint16_t	id = 5;
+
+		uint16_t	m_command_id;
+		float		m_angle_radians;
+		uint8_t		m_camera_number;
+	};
+
 	struct camera_command_holder
 	{
 		uint16_t m_command_id;
@@ -54,6 +90,10 @@ namespace gxu
 			camera_command_holder	m_description;
 			move_camera_forward		m_forward;
 			move_camera_backward	m_backward;
+			turn_camera_left		m_turn_left;
+			turn_camera_right		m_turn_right;
+			aim_camera_up			m_aim_up;
+			aim_camera_down			m_aim_down;
 		} m_command;
 	};
 
@@ -74,6 +114,43 @@ namespace gxu
 		command.m_command.m_backward.m_camera_number = 0;
 		return command;
 	}
+
+	inline camera_command create_turn_camera_left_command(float m_angle_radians)
+	{
+		camera_command command;
+		command.m_command.m_description.m_command_id = turn_camera_left::id;
+		command.m_command.m_turn_left.m_angle_radians = m_angle_radians;
+		command.m_command.m_turn_left.m_camera_number = 0;
+		return command;
+	}
+
+	inline camera_command create_turn_camera_right_command(float m_angle_radians)
+	{
+		camera_command command;
+		command.m_command.m_description.m_command_id = turn_camera_right::id;
+		command.m_command.m_turn_right.m_angle_radians = m_angle_radians;
+		command.m_command.m_turn_right.m_camera_number = 0;
+		return command;
+	}
+
+	inline camera_command create_aim_camera_up_command(float m_angle_radians)
+	{
+		camera_command command;
+		command.m_command.m_description.m_command_id = aim_camera_up::id;
+		command.m_command.m_aim_up.m_angle_radians = m_angle_radians;
+		command.m_command.m_aim_up.m_camera_number = 0;
+		return command;
+	}
+
+	inline camera_command create_aim_camera_down_command(float m_angle_radians)
+	{
+		camera_command command;
+		command.m_command.m_description.m_command_id = aim_camera_down::id;
+		command.m_command.m_aim_down.m_angle_radians = m_angle_radians;
+		command.m_command.m_aim_down.m_camera_number = 0;
+		return command;
+	}
+
 
 	//processes stream of camera commands and dispatches them
 	//suitable for recording and playback
@@ -96,15 +173,33 @@ namespace gxu
 		virtual void on_move_forward(const move_camera_forward* command)
 		{
 			UNUSED_PARAMETER(command);
-
 		}
 
 		virtual void on_move_backward(const move_camera_backward* command)
 		{
 			UNUSED_PARAMETER(command);
 		}
-	};
 
+		virtual void on_turn_left(const turn_camera_left* command)
+		{
+			UNUSED_PARAMETER(command);
+		}
+
+		virtual void on_turn_right(const turn_camera_right* command)
+		{
+			UNUSED_PARAMETER(command);
+		}
+
+		virtual void on_aim_up(const aim_camera_up* command)
+		{
+			UNUSED_PARAMETER(command);
+		}
+
+		virtual void on_aim_down(const aim_camera_down* command)
+		{
+			UNUSED_PARAMETER(command);
+		}
+	};
 }
 
 #endif

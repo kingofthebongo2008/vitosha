@@ -23,6 +23,30 @@ namespace gxu
 				break;
 			}
 
+			case turn_camera_left::id:
+			{
+				on_turn_left( reinterpret_cast<const turn_camera_left*>(command));
+				break;
+			}
+
+			case turn_camera_right::id:
+			{
+				on_turn_right( reinterpret_cast<const turn_camera_right*>(command));
+				break;
+			}
+
+			case aim_camera_up::id:
+			{
+				on_aim_up( reinterpret_cast<const aim_camera_up*>(command));
+				break;
+			}
+
+			case aim_camera_down::id:
+			{
+				on_aim_down( reinterpret_cast<const aim_camera_down*>(command));
+				break;
+			}
+
 			default:
 
 				break;

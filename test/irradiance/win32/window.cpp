@@ -20,6 +20,8 @@
 #include <gx/gx_view.h>
 #include <gx/gx_view_pipeline_node.h>
 
+#include <gxu/gxu_pinhole_camera_dispatcher.h>
+
 #include <win32/application.h>
 
 namespace wnd
@@ -31,13 +33,13 @@ namespace wnd
 			, m_occluded_by_another_window(false)
 	{
 
-		math::vector_float4  view_position = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
-		math::vector_float4  view_look_at  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
-		math::vector_float4  view_up = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
+		math::vector_float4  view_position_ws = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
+		math::vector_float4  view_direction_ws  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
+		math::vector_float4  view_up_ws = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
 
-		m_main_camera.set_view_position(view_position);
-		m_main_camera.set_view_direction(view_look_at);
-		m_main_camera.set_view_up(view_up);
+		m_main_camera.set_view_position(view_position_ws);
+		m_main_camera.set_view_direction(view_direction_ws);
+		m_main_camera.set_view_up(view_up_ws);
 
 		m_main_camera.set_aspect_ratio(16.0f / 9.0f);
 		m_main_camera.set_fov(3.1415f / 4.0f );
@@ -145,21 +147,23 @@ namespace wnd
 			m_main_camera.m_position = math::add(v, m_main_camera.m_position);
 			*/
 
-			math::vector_float4		view_direction_vs			= math::set(0.0f, 0.0f, 1.0f, 0.0f);
-			math::matrix_float44	rotation					= math::rotation_y( 3.1415f / 10000.0f);
-			math::vector_float4		rotated_view_direction_vs	= math::mul( rotation, math::negate(view_direction_vs) );
-			math::matrix_float44	view_matrix					= gx::create_view_matrix(&m_main_camera);
-			math::matrix_float44	inverse_view_matrix			= math::inverse( view_matrix );
-						
-			math::vector_float4		view_direction_ws			= math::mul ( rotated_view_direction_vs, inverse_view_matrix );
-			m_main_camera.set_view_direction( view_direction_ws );
+			gxu::camera_command turn_left = gxu::create_turn_camera_right_command(3.1415f / 1000.0f);
+			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
+			procesor.process(&turn_left);
+
 
 		}
 
 		if ( is_r_ )
 		{
+			/*
 			math::vector_float4 v = math::set(0.0f, 0.0f, -0.02f, 0.0f);
 			m_main_camera.m_view_position_ws = math::add(v, m_main_camera.m_view_position_ws);
+			*/
+
+			gxu::camera_command aim_up = gxu::create_aim_camera_up_command(3.1415f / 1000.0f);
+			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
+			procesor.process(&aim_up);
 		}
 
 		m_mouse_state.swap();

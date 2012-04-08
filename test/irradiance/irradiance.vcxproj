@@ -168,6 +168,7 @@
     <ClInclude Include="fnd\fnd_world.h" />
     <ClInclude Include="gxu\gxu_camera_command.h" />
     <ClInclude Include="gxu\gxu_entity_factory.h" />
+    <ClInclude Include="gxu\gxu_pinhole_camera_dispatcher.h" />
     <ClInclude Include="gxu\gxu_static_mesh_entity.h" />
     <ClInclude Include="gx\gx_color.h" />
     <ClInclude Include="gx\gx_color_material.h" />
@@ -238,6 +239,7 @@
     <ClCompile Include="fnd\fnd_world.cpp" />
     <ClCompile Include="gxu\gxu_camera_command.cpp" />
     <ClCompile Include="gxu\gxu_entity_factory.cpp" />
+    <ClCompile Include="gxu\gxu_pinhole_camera_dispatcher.cpp" />
     <ClCompile Include="gxu\gxu_static_mesh_entity.cpp" />
     <ClCompile Include="gx\gx_color_material.cpp" />
     <ClCompile Include="gx\gx_color_pixel_shader.cpp" />
