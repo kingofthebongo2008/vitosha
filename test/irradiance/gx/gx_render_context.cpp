@@ -8,7 +8,7 @@
 
 namespace gx
 {
-    render_context::render_context(dx11::system_context sys_context, std::uint32_t thread_render_context_count, view_port view_port) : 
+    render_context::render_context(dx11::system_context sys_context, uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
 		, m_depth_render_data( sys_context.m_device.get() )
 		, m_view_port(view_port)
@@ -24,7 +24,7 @@ namespace gx
     {
         m_render_contexts.reserve(thread_render_context_count);
 
-        for (std::uint32_t i = 0; i < thread_render_context_count; ++i)
+        for (uint32_t i = 0; i < thread_render_context_count; ++i)
         {
 			dx11::id3d11devicecontext_ptr device_context;
 

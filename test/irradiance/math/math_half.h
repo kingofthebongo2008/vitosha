@@ -5,7 +5,7 @@
 
 namespace math
 {
-    typedef std::uint16_t	half;
+    typedef uint16_t	half;
 	typedef __m128i			vector_half4;
 	typedef __m128i			vector_half4_2;		// two half4 vectors in a compact form
 	typedef std::uint64_t	compact_half4;		// half4 vector in a compact form, suitable for storage
@@ -22,7 +22,7 @@ namespace math
 
 	namespace details
 	{
-		template <std::uint32_t gather_group> inline __m128i extract_hi_16( __m128i v_1)
+		template <uint32_t gather_group> inline __m128i extract_hi_16( __m128i v_1)
 		{
 			const uint32_t shuffle_k_0 = _MM_SHUFFLE(0, 2, 1, 3);
 			const uint32_t shuffle_k_1 = _MM_SHUFFLE(1, 3, 0, 2);
@@ -64,12 +64,12 @@ namespace math
                 m_value.f = v;
             }
             
-            explicit convert_float_uint32( std::uint32_t v)
+            explicit convert_float_uint32( uint32_t v)
             {
                 m_value.i = v;
             }
 
-            operator std::uint32_t() const
+            operator uint32_t() const
             {
                 return m_value.i;
             }
@@ -94,12 +94,12 @@ namespace math
         {
             details1::convert_float_uint32 convertor(value);
 
-            std::uint32_t	IValue;
-            std::uint32_t	Sign;
+            uint32_t	IValue;
+            uint32_t	Sign;
             half			Result;
 
-            IValue = static_cast<std::uint32_t> (convertor) & 0x7FFFFFFFU;
-            Sign =  (static_cast<std::uint32_t> (convertor) & 0x80000000U) >> 16U;
+            IValue = static_cast<uint32_t> (convertor) & 0x7FFFFFFFU;
+            Sign =  (static_cast<uint32_t> (convertor) & 0x80000000U) >> 16U;
 
 
             if (IValue > 0x47FFEFFFU)
@@ -113,8 +113,8 @@ namespace math
                 {
                     // The number is too small to be represented as a normalized half.
                     // Convert it to a denormalized value.
-                    std::uint32_t Shift = 113U - (IValue >> 23U); //exponent
-                    std::uint32_t v = (IValue & 0x7FFFFFU); // mantissa
+                    uint32_t Shift = 113U - (IValue >> 23U); //exponent
+                    uint32_t v = (IValue & 0x7FFFFFU); // mantissa
 					
 					v = 0x800000U | v;
 					v = v >> Shift;
@@ -138,15 +138,15 @@ namespace math
 
         inline float convert_f16_f32( half Value )
         {
-			std::uint32_t Mantissa;
-			std::uint32_t Exponent;
-			std::uint32_t Result;
+			uint32_t Mantissa;
+			uint32_t Exponent;
+			uint32_t Result;
 
-			Mantissa = (std::uint32_t)(Value & 0x03FF);
+			Mantissa = (uint32_t)(Value & 0x03FF);
 
 			if ((Value & 0x7C00) != 0)  // The value is normalized
 			{
-				Exponent = (std::uint32_t)((Value >> 10) & 0x1F);
+				Exponent = (uint32_t)((Value >> 10) & 0x1F);
 			}
 			else if (Mantissa != 0)     // The value is denormalized
 			{
@@ -172,7 +172,7 @@ namespace math
 
 			union 
 			{
-				std::uint32_t u;
+				uint32_t u;
 				float		  f;
 			} c = {Result};
 
@@ -223,20 +223,20 @@ namespace math
         inline half convert_f32_f16( float value)
         {
             extern math::half	base_table[512];
-            extern std::uint8_t	shift_table[512];
+            extern uint8_t	shift_table[512];
 
 			union 
 			{
 				float f;
-				std::uint32_t u;
-				std::int32_t  i;
+				uint32_t u;
+				int32_t  i;
 			} c = {value};
 
-			std::uint32_t mask_1 = c.i >> 23;		//remove mantissa
-			std::uint32_t mask_2 = mask_1 & 0x1ff;	
-			std::uint32_t mask_3 = c.i & 0x007fffff;
+			uint32_t mask_1 = c.i >> 23;		//remove mantissa
+			uint32_t mask_2 = mask_1 & 0x1ff;	
+			uint32_t mask_3 = c.i & 0x007fffff;
 
-			std::uint8_t  shift = shift_table[ mask_2 ];
+			uint8_t  shift = shift_table[ mask_2 ];
 			half		  base  = base_table[ mask_2 ] ;
 
 			return static_cast<half> ( base + ( mask_3 >> shift ) ) ;
@@ -244,16 +244,16 @@ namespace math
 
 		inline float convert_f16_f32( half h )
         {
-			extern std::uint32_t	mantissa_table[2048];
-			extern std::uint32_t	exponent_table[64];
-			extern std::uint16_t	offset_table[64];
+			extern uint32_t	mantissa_table[2048];
+			extern uint32_t	exponent_table[64];
+			extern uint16_t	offset_table[64];
 
-			std::uint32_t result = mantissa_table[ offset_table [ h>>10 ] + ( h & 0x3ff ) ] + exponent_table[ h>>10 ];
+			uint32_t result = mantissa_table[ offset_table [ h>>10 ] + ( h & 0x3ff ) ] + exponent_table[ h>>10 ];
 
 			union 
 			{
-				std::uint32_t u;
-				std::int32_t  i;
+				uint32_t u;
+				int32_t  i;
 				float f;
 			} c = {result};
 
@@ -417,7 +417,7 @@ namespace math
 		_mm_stream_si128(reinterpret_cast<__m128i* __restrict>(address), value);
 	}
 
-	inline void convert_f32_f16_stream(const float* in_buffer, std::uint32_t count,  math::half* out_buffer)
+	inline void convert_f32_f16_stream(const float* in_buffer, uint32_t count,  math::half* out_buffer)
 	{
 		for (uint32_t i = 0; i < count ; i+=8 )
 		{

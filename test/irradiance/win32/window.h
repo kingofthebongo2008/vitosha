@@ -36,7 +36,7 @@ namespace wnd
 			m_scene = scene;
 		}
 
-		void resize_window(std::uint32_t width, std::uint32_t height);
+		void resize_window(uint32_t width, uint32_t height);
 
 		void process_user_input();
 

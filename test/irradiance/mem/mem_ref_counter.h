@@ -39,7 +39,7 @@ namespace mem
         ~ref_counter() {};
         void swap(ref_counter&) {};
     private:
-        mutable std::uint32_t counter_;
+        mutable uint32_t counter_;
     };
 
 }

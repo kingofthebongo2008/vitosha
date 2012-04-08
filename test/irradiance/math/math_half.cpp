@@ -8,12 +8,12 @@ namespace math
     namespace details2
     {
         math::half		base_table[512];
-        std::uint8_t	shift_table[512];
+        uint8_t	shift_table[512];
 
         static void generate_tables_1()
         {
-          std::uint32_t	i;
-          std::int32_t	e;
+          uint32_t	i;
+          int32_t	e;
 
           for(i=0; i<256; ++i)
           {
@@ -33,8 +33,8 @@ namespace math
             {             
               base_table [ i | 0x000 ]=(0x0400>>(-e-14));
               base_table [ i | 0x100 ]=(0x0400>>(-e-14)) | 0x8000;
-              shift_table[ i | 0x000 ]=static_cast<std::uint8_t> (-e-1);
-              shift_table[ i | 0x100 ]=static_cast<std::uint8_t> (-e-1);
+              shift_table[ i | 0x000 ]=static_cast<uint8_t> (-e-1);
+              shift_table[ i | 0x100 ]=static_cast<uint8_t> (-e-1);
             }
 
             // Normal numbers just lose precision
@@ -65,14 +65,14 @@ namespace math
           }
         }
 
-		std::uint32_t	mantissa_table[2048];
-		std::uint32_t	exponent_table[64];
-		std::uint16_t	offset_table[64];
+		uint32_t	mantissa_table[2048];
+		uint32_t	exponent_table[64];
+		uint16_t	offset_table[64];
 
-		static std::uint32_t convert_mantissa(std::uint32_t i)
+		static uint32_t convert_mantissa(uint32_t i)
 		{
-			std::uint32_t m=i<<13;				// Zero pad mantissa bits
-			std::uint32_t e=0;					// Zero exponent
+			uint32_t m=i<<13;				// Zero pad mantissa bits
+			uint32_t e=0;					// Zero exponent
 
 			while( ! ( m &0x00800000 ) )		// While not normalized
 			{ 
@@ -91,12 +91,12 @@ namespace math
 			// mantissa table
 			mantissa_table[0] = 0;
 
-			for ( std::uint32_t i = 1; i <= 1023; ++i)
+			for ( uint32_t i = 1; i <= 1023; ++i)
 			{
 				mantissa_table[i] = convert_mantissa(i);
 			}
 
-			for (std::uint32_t i = 1024; i < 2048; ++i)
+			for (uint32_t i = 1024; i < 2048; ++i)
 			{
 				mantissa_table[i] = 0x38000000 + ((i-1024)<<13);
 			}
@@ -105,12 +105,12 @@ namespace math
 			exponent_table[0] = 0;
 			exponent_table[32] = 0x80000000;
 
-			for (std::uint32_t i = 1; i <= 30;++i)
+			for (uint32_t i = 1; i <= 30;++i)
 			{
 				exponent_table[i] = i << 23;
 			}
 
-			for (std::uint32_t i = 33; i <= 62;++i)
+			for (uint32_t i = 33; i <= 62;++i)
 			{
 				exponent_table[i] = 0x80000000 +  ( (i-32) << 23 );
 			}
@@ -119,7 +119,7 @@ namespace math
 			exponent_table[63]= 0xC7800000;
 
 			//offset table
-			for (std::uint32_t i = 0; i < 64;++i)
+			for (uint32_t i = 0; i < 64;++i)
 			{
 				offset_table[i] = 1024;
 			}

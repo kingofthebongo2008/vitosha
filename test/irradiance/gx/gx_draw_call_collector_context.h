@@ -14,7 +14,7 @@ namespace gx
 
         math::matrix_float44*    m_world_matrix;
         math::matrix_float44*    m_wvp;
-		std::uint32_t			 m_entity_index;
+		uint32_t			 m_entity_index;
    };
 
 }

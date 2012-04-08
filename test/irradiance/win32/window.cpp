@@ -111,7 +111,7 @@ namespace wnd
 		pipeline.process();
 	}
 
-	void window::resize_window(std::uint32_t width, std::uint32_t height)
+	void window::resize_window(uint32_t width, uint32_t height)
 	{
 		using namespace dx11;
 		DXGI_SWAP_CHAIN_DESC desc = {};

@@ -85,7 +85,7 @@ namespace gx
 
 		dx11::id3d11vertexshader_ptr						 m_shader;
 		const void*											 m_code;
-		std::uint32_t										 m_code_size;
+		uint32_t										 m_code_size;
     };
 }
 

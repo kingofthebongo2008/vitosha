@@ -151,7 +151,7 @@ namespace gx
         public:
 		typedef  std::vector< std::unique_ptr<thread_render_context> > thread_render_context_container;
 
-		render_context(dx11::system_context sys_context, std::uint32_t render_context_count, view_port view_port);
+		render_context(dx11::system_context sys_context, uint32_t render_context_count, view_port view_port);
 		~render_context();
 
         void begin_frame();

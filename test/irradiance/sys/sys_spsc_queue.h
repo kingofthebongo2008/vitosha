@@ -45,7 +45,7 @@ namespace sys
             }
         };
 
-        template <typename std::uint32_t size>
+        template <typename uint32_t size>
         class __declspec( align(64) ) fast_forward_spsc_queue
         {
             public:
@@ -122,7 +122,7 @@ namespace sys
             __declspec( align(64) ) std::tr1::array<void*,size>	m_queue;		
         };
 
-        template <typename std::uint32_t size, std::uint32_t local_buffer_size>
+        template <typename uint32_t size, uint32_t local_buffer_size>
         class __declspec( align(64) )  mpush_fast_forward_spsc_queue
         {
             public:
@@ -270,7 +270,7 @@ namespace sys
 
         };
 
-        template <typename std::uint32_t size, std::uint32_t write_buffer_size, std::uint32_t read_buffer_size >
+        template <typename uint32_t size, uint32_t write_buffer_size, uint32_t read_buffer_size >
         class __declspec( align(64) )  mc_ring_buffer 
         {
             public:
@@ -456,7 +456,7 @@ namespace sys
             }
         };
 
-        template <typename std::uint32_t size>
+        template <typename uint32_t size>
         class __declspec( align(64) ) batch_queue
         {
             public:
@@ -545,7 +545,7 @@ namespace sys
             std::tr1::array<void*, 2 * size>	m_queue;
         };
 
-        template <typename std::uint32_t size, template<typename t> class allocator = std::allocator>
+        template <typename uint32_t size, template<typename t> class allocator = std::allocator>
         class __declspec( align(64) ) spsc_dynamic_buffer
         {
             private:
@@ -673,7 +673,7 @@ namespace sys
             }
         };
     
-        template <typename spsc_buffer_t, typename std::uint32_t size, template<typename t> class allocator = std::allocator>
+        template <typename spsc_buffer_t, typename uint32_t size, template<typename t> class allocator = std::allocator>
         class __declspec( align(64) ) buffer_pool
         {
             public:
@@ -741,7 +741,7 @@ namespace sys
         };
 
 
-        template <typename std::uint32_t size, typename spsc_buffer_t, template<typename t> class allocator = std::allocator>
+        template <typename uint32_t size, typename spsc_buffer_t, template<typename t> class allocator = std::allocator>
         class __declspec( align(64) ) unbounded_spsc_queue
         {
             public:
@@ -875,24 +875,24 @@ namespace sys
     }
 
 
-    template <typename std::uint32_t size>
+    template <typename uint32_t size>
     class __declspec( align(64) ) fast_forward_spsc_queue : public details::blocking_queue< details::fast_forward_spsc_queue<size>>
     {
 
     };
 
-    template <typename std::uint32_t size, std::uint32_t local_buffer_size>
+    template <typename uint32_t size, uint32_t local_buffer_size>
     class __declspec( align(64) )  mpush_fast_forward_spsc_queue :	public details::blocking_queue< details::mpush_fast_forward_spsc_queue<size, local_buffer_size>>
     {
     };
 
-    template <typename std::uint32_t size, std::uint32_t write_buffer_size, std::uint32_t read_buffer_size >
+    template <typename uint32_t size, uint32_t write_buffer_size, uint32_t read_buffer_size >
     class __declspec( align(64) )  mc_ring_buffer  : public details::blocking_queue< details::mc_ring_buffer<size, write_buffer_size, read_buffer_size> >
     {
 
     };
 
-    template <typename std::uint32_t size, template<typename t> class allocator = std::allocator>
+    template <typename uint32_t size, template<typename t> class allocator = std::allocator>
     class __declspec( align(64) ) unbounded_spsc_queue : public details::unbounded_spsc_queue<size,  mc_ring_buffer<size,32,32>, allocator>
     {
         private:
