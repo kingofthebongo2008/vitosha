@@ -137,38 +137,51 @@ namespace wnd
 
 	void window::process_user_input()
 	{
-		bool is_l_ = m_mouse_state.is_left_button_down();
-		bool is_r_ = m_mouse_state.is_right_button_down();
-
-		if ( is_l_ )
+		if (m_pad_state.is_button_down<io::pad_state::button_0>())
 		{
-			/*
-			math::vector_float4 v = math::set(0.0f, 0.0f, 0.02f, 0.0f);
-			m_main_camera.m_position = math::add(v, m_main_camera.m_position);
-			*/
-
-			gxu::camera_command turn_left = gxu::create_turn_camera_right_command(3.1415f / 1000.0f);
-			gxu::camera_command move_forward = gxu::create_move_forward_command(0.02f);
-
+			gxu::camera_command command = gxu::create_move_forward_command(0.02f);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
-
-			procesor.process(&move_forward);
+			procesor.process(&command);
 		}
 
-		if ( is_r_ )
+		if (m_pad_state.is_button_down<io::pad_state::button_1>())
 		{
-			/*
-			math::vector_float4 v = math::set(0.0f, 0.0f, -0.02f, 0.0f);
-			m_main_camera.m_view_position_ws = math::add(v, m_main_camera.m_view_position_ws);
-			*/
-
-			gxu::camera_command aim_up = gxu::create_aim_camera_up_command(3.1415f / 1000.0f);
-			gxu::camera_command move_backward = gxu::create_move_backward_command(0.02f);
+			gxu::camera_command command = gxu::create_move_backward_command(0.02f);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
-			procesor.process(&move_backward);
+			procesor.process(&command);
 		}
 
+		if (m_pad_state.is_button_down<io::pad_state::button_2>())
+		{
+			gxu::camera_command command = gxu::create_turn_camera_left_command(3.1415f / 1000.0f);
+			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
+			procesor.process(&command);
+		}
+
+		if (m_pad_state.is_button_down<io::pad_state::button_3>())
+		{
+			gxu::camera_command command = gxu::create_turn_camera_right_command(3.1415f / 1000.0f);
+			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
+			procesor.process(&command);
+		}
+
+		if (m_pad_state.is_button_down<io::pad_state::button_4>())
+		{
+			gxu::camera_command command = gxu::create_aim_camera_up_command(3.1415f / 1000.0f);
+			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
+			procesor.process(&command);
+		}
+
+		if (m_pad_state.is_button_down<io::pad_state::button_5>())
+		{
+			gxu::camera_command command = gxu::create_aim_camera_down_command(3.1415f / 1000.0f);
+			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
+			procesor.process(&command);
+		}
+
+		//save history for the previous frame
 		m_mouse_state.swap();
+		m_pad_state.swap();
 	}
 
 	void window::on_mouse_down(uint32_t windows_mouse_state)
@@ -189,5 +202,65 @@ namespace wnd
 
 		m_mouse_state.set_coordinates(x, y);
 		m_mouse_state.set_state(mouse_state);
+	}
+
+	void  window::on_button_0_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_0>();
+	}
+
+	void  window::on_button_1_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_1>();
+	}
+
+	void  window::on_button_2_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_2>();
+	}
+
+	void  window::on_button_3_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_3>();
+	}
+
+	void  window::on_button_4_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_4>();
+	}
+
+	void  window::on_button_5_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_5>();
+	}
+
+	void  window::on_button_0_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_0>();
+	}
+
+	void  window::on_button_1_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_1>();
+	}
+
+	void  window::on_button_2_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_2>();
+	}
+
+	void  window::on_button_3_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_3>();
+	}
+
+	void  window::on_button_4_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_4>();
+	}
+
+	void  window::on_button_5_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_5>();
 	}
 }

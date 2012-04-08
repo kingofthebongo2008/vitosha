@@ -302,6 +302,94 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 			break;
 		}
+	case WM_KEYDOWN:
+		{
+			switch (wParam)
+			{
+				case 'W':
+							if (wnd)
+							{
+								wnd->on_button_0_down();
+								break;
+							}
+				case 'S':
+							if (wnd)
+							{
+								wnd->on_button_1_down();
+								break;
+							}
+				case 'A':
+							if (wnd)
+							{
+								wnd->on_button_2_down();
+								break;
+							}
+				case 'D':
+							if (wnd)
+							{
+								wnd->on_button_3_down();
+								break;
+							}
+				case 'Q':
+							if (wnd)
+							{
+								wnd->on_button_4_down();
+								break;
+							}
+				case 'E':
+							if (wnd)
+							{
+								wnd->on_button_5_down();
+								break;
+							}
+			}
+
+			break;
+		}
+	case WM_KEYUP:
+		{
+			switch (wParam)
+			{
+				case 'W':
+							if (wnd)
+							{
+								wnd->on_button_0_up();
+								break;
+							}
+				case 'S':
+							if (wnd)
+							{
+								wnd->on_button_1_up();
+								break;
+							}
+				case 'A':
+							if (wnd)
+							{
+								wnd->on_button_2_up();
+								break;
+							}
+				case 'D':
+							if (wnd)
+							{
+								wnd->on_button_3_up();
+								break;
+							}
+				case 'Q':
+							if (wnd)
+							{
+								wnd->on_button_4_up();
+								break;
+							}
+				case 'E':
+							if (wnd)
+							{
+								wnd->on_button_5_up();
+								break;
+							}
+			}
+
+			break;
+		}
 
 	default:
 

@@ -70,9 +70,9 @@ namespace gx
 
 		device_context->PSSetShader(m_render_context->m_color_pixel_shader, nullptr, 0);
 	
-		math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
-		math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
-		math::matrix_float44 m3 = math::mul(m2, m1);
+		//math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
+		//math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
+		//math::matrix_float44 m3 = math::mul(m2, m1);
 
 
 		//draw_screen_space_quad(device_context, m_render_context, m3);

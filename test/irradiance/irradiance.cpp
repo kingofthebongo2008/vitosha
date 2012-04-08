@@ -156,7 +156,7 @@ class point_light_world : public fnd::world
 		dt;
 	}
 
-	virtual void on_update_pass_two(float dt)
+	virtual void on_update_pass_two(float)
 	{
 		++m_buffer_counter;
 		m_buffer_counter %= 4;
@@ -194,7 +194,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     auto it = scene->begin();
     auto it_end = scene->end();
 
-    math::matrix_float44 m = math::identity_matrix();
+    //math::matrix_float44 m = math::identity_matrix();
 
 	const float pi_div_two		= 1.570796327f;
 	math::matrix_float44 m_1 = math::rotation_x(-pi_div_two);

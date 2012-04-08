@@ -17,7 +17,7 @@ float3 main( in  vs_output input) : SV_Target
 
 	float3 light_ws		= normalize(light_direction_ws);
 
-	float3 radiance		= light_power * m_diffuse_albedo / 3.1415f * saturate(  ( dot ( light_ws, input.normal_ws ) ) );
+	float3 radiance		= light_power * m_diffuse_albedo.xyz / 3.1415f * saturate(  ( dot ( light_ws, input.normal_ws ) ) );
 
 	return radiance;
 }

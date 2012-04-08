@@ -9,8 +9,11 @@
 #include "dx11/dx11_error.h"
 #include "dx11/dx11_pointers.h"
 
-#include "io/io_mouse.h"
 #include "fnd/fnd_world.h"
+
+#include "io/io_mouse.h"
+#include "io/io_pad.h"
+
 
 #include "gx/gx_pinhole_camera.h"
 
@@ -47,7 +50,21 @@ namespace wnd
 		void on_mouse_up(uint32_t windows_mouse_state);
 		void on_mouse_move(uint32_t windows_mouse_state, uint16_t x, uint16_t y);
 
-		private:
+		void on_button_0_down();
+		void on_button_1_down();
+		void on_button_2_down();
+		void on_button_3_down();
+		void on_button_4_down();
+		void on_button_5_down();
+
+		void on_button_0_up();
+		void on_button_1_up();
+		void on_button_2_up();
+		void on_button_3_up();
+		void on_button_4_up();
+		void on_button_5_up();
+
+	private:
 
 		~window();
 
@@ -60,6 +77,7 @@ namespace wnd
 		gx::pinhole_camera			m_main_camera;
 
 		io::mouse_state				m_mouse_state;
+		io::pad_state				m_pad_state;
 
 		void render_frame();
 	};

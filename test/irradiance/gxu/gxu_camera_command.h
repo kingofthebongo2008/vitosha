@@ -77,6 +77,42 @@ namespace gxu
 		uint8_t		m_camera_number;
 	};
 
+	struct move_camera_up
+	{
+		static const uint16_t	id = 6;
+
+		uint16_t	m_command_id;
+		float		m_distance;
+		uint8_t		m_camera_number;
+	};
+
+	struct move_camera_down
+	{
+		static const uint16_t	id = 7;
+
+		uint16_t	m_command_id;
+		float		m_distance;
+		uint8_t		m_camera_number;
+	};
+
+	struct strafe_camera_left
+	{
+		static const uint16_t	id = 8;
+
+		uint16_t	m_command_id;
+		float		m_distance;
+		uint8_t		m_camera_number;
+	};
+
+	struct strafe_camera_right
+	{
+		static const uint16_t	id = 9;
+
+		uint16_t	m_command_id;
+		float		m_distance;
+		uint8_t		m_camera_number;
+	};
+
 	struct camera_command_holder
 	{
 		uint16_t m_command_id;

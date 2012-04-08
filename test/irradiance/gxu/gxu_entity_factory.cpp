@@ -71,10 +71,10 @@ namespace gxu
 
 		const float pi				= 3.141592654f;
 		const float two_pi			= 6.283185307f;
-		const float one_div_pi		= 0.318309886f;
-		const float one_div_two_pi	= 0.159154943f;
+		//const float one_div_pi		= 0.318309886f;
+		//const float one_div_two_pi	= 0.159154943f;
 		const float pi_div_two		= 1.570796327f;
-		const float pi_div_four		= 0.785398163f;
+		//const float pi_div_four		= 0.785398163f;
 
 		uint32_t			  vertex_count = 0;
 		std::vector<position> positions_v;
@@ -95,7 +95,6 @@ namespace gxu
 			dxz = cosf(lattitude);
 
 			uint32_t horizontal_segments_div_4 = ( (horizontal_segments + 1) / 4) * 4;
-			uint32_t horizontal_segments_remainder = horizontal_segments + 1 - horizontal_segments_div_4;
 
 			//iterate on 4 vertices at the same time
 			for (uint32_t j = 0; j < horizontal_segments_div_4 ; j+=4, vertex_count+=4 )
@@ -128,8 +127,6 @@ namespace gxu
 				math::vector_float4 y =  math::mul(v_10, v_9);
 				math::vector_float4 z =  math::mul(dz, v_9);
 				math::vector_float4 one =  math::one();
-
-				math::vector_float4 v_11 =  math::splat(v);
 
 				math::matrix_float44 p_1;
 

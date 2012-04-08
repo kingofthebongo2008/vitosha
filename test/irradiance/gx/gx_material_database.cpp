@@ -8,7 +8,7 @@ namespace gx
 {
 	struct material_database
 	{
-		material_database() : m_slots(), m_slots_used(0)
+		material_database() 
 		{
 
 		}

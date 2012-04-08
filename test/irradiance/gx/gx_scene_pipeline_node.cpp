@@ -9,7 +9,7 @@
 namespace gx
 {
 
-    void* scene_pipeline_node::do_process(void* input)
+    void* scene_pipeline_node::do_process(void*)
     {
         m_scene->build();
         m_scene->process(this);

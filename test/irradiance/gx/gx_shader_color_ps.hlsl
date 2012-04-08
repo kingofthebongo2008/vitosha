@@ -10,6 +10,6 @@ cbuffer per_object
 
 float3  main( in  vs_output input) : SV_Target
 {
-	return m_color;
+	return m_color.xyz;
 }
 
