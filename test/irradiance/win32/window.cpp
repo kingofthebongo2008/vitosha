@@ -148,10 +148,11 @@ namespace wnd
 			*/
 
 			gxu::camera_command turn_left = gxu::create_turn_camera_right_command(3.1415f / 1000.0f);
+			gxu::camera_command move_forward = gxu::create_move_forward_command(0.02f);
+
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
-			procesor.process(&turn_left);
 
-
+			procesor.process(&move_forward);
 		}
 
 		if ( is_r_ )
@@ -162,8 +163,9 @@ namespace wnd
 			*/
 
 			gxu::camera_command aim_up = gxu::create_aim_camera_up_command(3.1415f / 1000.0f);
+			gxu::camera_command move_backward = gxu::create_move_backward_command(0.02f);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
-			procesor.process(&aim_up);
+			procesor.process(&move_backward);
 		}
 
 		m_mouse_state.swap();

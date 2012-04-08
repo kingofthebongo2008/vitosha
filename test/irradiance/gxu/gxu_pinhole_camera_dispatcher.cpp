@@ -4,16 +4,6 @@
 
 namespace gxu
 {
-	void pinhole_camera_command_dispatcher::on_move_forward(const move_camera_forward* command)
-	{
-		UNUSED_PARAMETER(command);
-	}
-
-	void pinhole_camera_command_dispatcher::on_move_backward(const move_camera_backward* command)
-	{
-		UNUSED_PARAMETER(command);
-	}
-
 	namespace
 	{
 		void turn_pinhole_camera(gx::pinhole_camera* camera, float angle_in_radians)
@@ -74,4 +64,29 @@ namespace gxu
 	{
 		aim_pinhole_camera(m_pinhole_camera, 1.0f * fabsf( command->m_angle_radians ) );
 	}
+
+	void pinhole_camera_command_dispatcher::on_move_forward(const move_camera_forward* command)
+	{
+		math::vector_float4		view_direction_ws				= m_pinhole_camera->get_view_direction();
+		math::vector_float4		normalized_view_direction_ws	= math::normalize3(view_direction_ws);
+
+		float					distance						= fabsf(command->m_distance);
+		math::vector_float4		distance_ws						= math::splat(distance);
+		math::vector_float4		displacement_ws					= math::mul( distance_ws, normalized_view_direction_ws);
+
+		m_pinhole_camera->m_view_position_ws = math::add(m_pinhole_camera->m_view_position_ws, displacement_ws);
+	}
+
+	void pinhole_camera_command_dispatcher::on_move_backward(const move_camera_backward* command)
+	{
+		math::vector_float4		view_direction_ws				= m_pinhole_camera->get_view_direction();
+		math::vector_float4		normalized_view_direction_ws	= math::normalize3(view_direction_ws);
+
+		float					distance						= -1.0f * fabsf(command->m_distance);
+		math::vector_float4		distance_ws						= math::splat(distance);
+		math::vector_float4		displacement_ws					= math::mul( distance_ws, normalized_view_direction_ws);
+
+		m_pinhole_camera->m_view_position_ws = math::add(m_pinhole_camera->m_view_position_ws, displacement_ws);
+	}
+
 }

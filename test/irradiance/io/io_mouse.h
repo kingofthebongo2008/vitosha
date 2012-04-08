@@ -13,7 +13,7 @@ namespace io
 	{
 		public:
 
-		enum mask
+		enum mask : uint8_t
 		{
 			left_button = 0x0,
 			middle_button = 0x1,

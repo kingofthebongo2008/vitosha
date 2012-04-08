@@ -55,7 +55,7 @@ namespace gx
 			return m_view_position_ws;
 		}
 
-		math::vector_float4 get_look_at_direction() const
+		math::vector_float4 get_view_direction() const
 		{
 			return m_view_direction_ws;
 		}
@@ -139,7 +139,7 @@ namespace gx
 
 	inline math::matrix_float44 create_view_matrix(const pinhole_camera * camera)
 	{
-		return math::view(camera->get_position(), math::normalize3( camera->get_look_at_direction() ) , math::normalize3( camera->get_up() ) );
+		return math::view(camera->get_position(), math::normalize3( camera->get_view_direction() ) , math::normalize3( camera->get_up() ) );
 	}
 
 	inline math::matrix_float44 create_perspective_matrix(const pinhole_camera * camera)

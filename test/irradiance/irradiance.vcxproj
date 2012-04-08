@@ -207,6 +207,7 @@
     <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
     <ClInclude Include="io\io_mouse.h" />
+    <ClInclude Include="io\io_pad.h" />
     <ClInclude Include="math\math_functions.h" />
     <ClInclude Include="math\math_graphics.h" />
     <ClInclude Include="math\math_half.h" />
@@ -273,6 +274,7 @@
     <ClCompile Include="gx\gx_view_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_scene.cpp" />
     <ClCompile Include="io\io_mouse.cpp" />
+    <ClCompile Include="io\io_pad.cpp" />
     <ClCompile Include="irradiance.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>
     </ClCompile>
