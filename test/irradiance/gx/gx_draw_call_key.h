@@ -27,6 +27,17 @@ namespace gx
         } type;
     };
 
+	struct view_port_layer
+    {
+        typedef enum
+        {
+            world = 0,
+            sky = 1,
+            effect = 2,
+			debug = 3
+        } type;
+    };
+
     struct full_screen_layer
     {
         typedef enum
@@ -37,17 +48,7 @@ namespace gx
         } type;
     };
 
-    struct view_port_layer
-    {
-        typedef enum
-        {
-            world = 0,
-            sky = 1,
-            effect = 2
-        } type;
-    };
-
-	struct translucency_key_data
+    struct translucency_key_data
 	{
 		uint8_t		m_full_screen_layer	: 2;
 		uint8_t		m_view_port : 3;			
@@ -166,6 +167,14 @@ namespace gx
     inline draw_call_key create_subtractive_key( uint32_t material_id, float depth)
     {
 		return create_gbuffer_opaque_key( material_id, 1.0f - depth);
+    }
+
+	inline draw_call_key create_debug_layer_key( uint32_t material_id, float depth )
+    {
+		draw_call_key key = create_gbuffer_opaque_key( material_id, depth);
+
+		key.m_data.m_opaque.m_view_port_layer = view_port_layer::debug;
+		return key;
     }
 }
 

@@ -9,7 +9,7 @@ namespace gx
 {
 	void screen_space_quad_render::draw_quad(ID3D11DeviceContext* device_context)
 	{
-		math::matrix_float44 identity = math::identity_matrix();
+		auto identity = math::identity_matrix();
 		draw_quad( device_context, identity);
 	}
 
@@ -42,13 +42,13 @@ namespace gx
 
 	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* render_context)
 	{
-		screen_space_quad_render r = create_screen_space_quad_render(render_context);
+		auto r = create_screen_space_quad_render(render_context);
 		draw_screen_space_quad(&r, device_context);
 	}
 
 	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* render_context, math::matrix_float44 transform)
 	{
-		screen_space_quad_render r = create_screen_space_quad_render(render_context);
+		auto r = create_screen_space_quad_render(render_context);
 		draw_screen_space_quad(&r, device_context, transform);
 	}
 

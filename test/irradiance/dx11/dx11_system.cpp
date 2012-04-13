@@ -35,10 +35,10 @@ namespace dx11
     }
     system_context create_system_context(HWND hwnd)
     {
-        UINT flags					= D3D11_CREATE_DEVICE_DEBUG;
+        auto flags					= D3D11_CREATE_DEVICE_DEBUG;
 
-        D3D_FEATURE_LEVEL level		= D3D_FEATURE_LEVEL_11_0;
-        DXGI_SWAP_CHAIN_DESC desc	= create_default_swap_chain_desc(hwnd);
+        auto level					= D3D_FEATURE_LEVEL_11_0;
+        auto desc					= create_default_swap_chain_desc(hwnd);
 
         idxgiadapter_ptr			adapter;
         idxgiswapchain_ptr			swap_chain;
@@ -46,7 +46,7 @@ namespace dx11
         id3d11device_ptr			device;
         id3d11devicecontext_ptr		context;
 
-        HRESULT hr  = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, flags, &level , 1, D3D11_SDK_VERSION, &desc, get_pointer(swap_chain), get_pointer(device), 0, get_pointer(context) );
+        auto hr  = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, flags, &level , 1, D3D11_SDK_VERSION, &desc, get_pointer(swap_chain), get_pointer(device), 0, get_pointer(context) );
 
         throw_if_failed<create_device_exception>(hr);
 

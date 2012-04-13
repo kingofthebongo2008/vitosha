@@ -65,8 +65,8 @@ namespace gxu
 
 		subdivision_count = subdivision_count + 1;
 
-		uint32_t vertical_segments		=  subdivision_count; 
-		uint32_t horizontal_segments	=  subdivision_count * 2;
+		auto vertical_segments		=  subdivision_count; 
+		auto horizontal_segments	=  subdivision_count * 2;
 
 		const float pi				= 3.141592654f;
 		const float two_pi			= 6.283185307f;

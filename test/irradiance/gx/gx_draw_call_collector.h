@@ -14,7 +14,8 @@ namespace gx
     struct draw_call_info
     {
         draw_call_key       m_key;
-        uint32_t            m_entity_index;
+        uint16_t            m_entity_index;
+		uint16_t			m_entity_draw_call_index;
     };
 
 
@@ -28,7 +29,7 @@ namespace gx
         void begin();
         void end();
 
-        void add_draw_call( draw_call_key key, uint32_t entity_index ) ;
+        void add_draw_call( draw_call_key key, uint32_t entity_index, uint32_t entity_draw_call_index ) ;
 
         private:
 

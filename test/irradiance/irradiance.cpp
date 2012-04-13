@@ -146,9 +146,34 @@ class point_lights_entity : public gx::entity
 		}
 	}
 
+	void add_lights( const point_light* begin, const point_light* end)
+	{
+		for (auto i = 0 ; i < 4; ++i)
+		{
+			m_lights[i].reserve ( end - begin );
+			std::copy( begin, end, std::back_inserter(m_lights[i]) );
+		}
+	}
+
 	void update_light_positions( float dt)
 	{
 		dt;
+	}
+
+
+	void on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
+	{
+		uint16_t material_id = 2;
+		gx::draw_call_key key = gx::create_debug_layer_key(material_id, gx::get_perspective_transform3_depth(context) );
+
+		collector->add_draw_call(key, context->m_entity_index, 0 ) ;
+		collector->add_draw_call(key, context->m_entity_index, 1 ) ;
+    }
+
+	void on_execute_draw_calls(gx::draw_call_context* context)
+	{
+		static int k=10;;
+		k++;
 	}
 
 	private:
@@ -164,6 +189,11 @@ struct update_point_lights
 	}
 };
 
+void test(point_lights_entity* entity, float dt)
+{
+
+}
+
 typedef fnd::phase_two_updater<point_lights_entity, update_point_lights >  point_light_updater;
 
 std::shared_ptr< point_light_updater > create_light_entity_updater()
@@ -174,6 +204,7 @@ std::shared_ptr< point_light_updater > create_light_entity_updater()
 
 std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe )
 {
+
     auto scene = std::make_shared<gx::scene>();
     auto entities = std::make_shared<gx::entity_world> ();
 	auto dynamic_entities = std::make_shared<fnd::typed_world> ();

@@ -12,7 +12,7 @@ namespace gx
 {
 	void lambert_constant_material::apply(draw_call_context* draw_call_context)
 	{
-		ID3D11DeviceContext* device_context = draw_call_context->m_device_context;
+		auto device_context = draw_call_context->m_device_context;
 
 		m_vertex_cbuffer.set_wvp(*draw_call_context->m_wvp_matrix);
 		m_vertex_cbuffer.set_world(*draw_call_context->m_world_matrix);

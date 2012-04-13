@@ -8,7 +8,7 @@ namespace gx
 {
     void* final_pipeline_node::do_process(void* input)
     {
-        view_pipeline_params* params = reinterpret_cast<view_pipeline_params*> (input);
+        auto params = reinterpret_cast<view_pipeline_params*> (input);
         delete params;
 
         return nullptr;

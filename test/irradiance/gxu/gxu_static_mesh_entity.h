@@ -45,14 +45,10 @@ namespace gxu
 
         void on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
 		{
-			uint16_t material_id = m_material.get_id();
-			
-			//we assume that (0,0,0) is the center (pivot) of the object. 
-			math::vector_float4 ety_pos_os = math::set(0.0f, 0.0f, 0.0f, 1.0f);
-			math::vector_float4 ety_pos_ss = math::perspective_transform3(ety_pos_os, *context->m_wvp );
-			
-			gx::draw_call_key key = gx::create_gbuffer_opaque_key(material_id, ety_pos_ss.m128_f32[3]);
-		    collector->add_draw_call(key, context->m_entity_index) ;
+			auto material_id = m_material.get_id();
+			auto key = gx::create_gbuffer_opaque_key(material_id, gx::get_perspective_transform3_depth(context) );
+
+		    collector->add_draw_call(key, context->m_entity_index, 0 ) ;
     	}
 
         void on_execute_draw_calls(gx::draw_call_context* context)

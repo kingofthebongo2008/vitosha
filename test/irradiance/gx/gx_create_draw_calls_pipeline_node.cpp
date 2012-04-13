@@ -19,7 +19,7 @@ namespace gx
 
     void*   create_draw_calls_pipeline_node::do_process(void* input)
     {
-        view_pipeline_params* in_params = reinterpret_cast<view_pipeline_params*> (input);
+        auto in_params = reinterpret_cast<view_pipeline_params*> (input);
 
         draw_call_collector_context context = { &in_params->m_view_matrix, &in_params->m_projection_matrix };
 
@@ -27,12 +27,12 @@ namespace gx
 
         collector.begin();
 
-        for(uint32_t i = 0 ; i < in_params->m_data->size(); ++i)
+        for(auto i = static_cast<uint32_t> (0) ; i < in_params->m_data->size(); ++i)
         {
-            context.m_wvp = &in_params->m_wvp_matrices->operator[](i);
-            context.m_world_matrix = &in_params->m_world_matrices->operator[](i);
+            context.m_wvp = &in_params->m_wvp_matrices->at(i);
+            context.m_world_matrix = &in_params->m_world_matrices->at(i);
 			context.m_entity_index = i;
-            entity* enty = reinterpret_cast<entity*> ( in_params->m_data->operator[](i) ) ;
+            entity* enty = reinterpret_cast<entity*> ( in_params->m_data->at(i)) ;
 
             enty->create_draw_calls(&context, &collector);
         }
