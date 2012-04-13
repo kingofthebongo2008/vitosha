@@ -18,7 +18,6 @@ namespace fnd
 
 		}
 
-
 		void update_pass_one(float dt)
 		{
 			on_update_pass_one(dt);
@@ -47,12 +46,18 @@ namespace fnd
 
 		virtual void on_update_pass_one(float dt)
 		{
-			std::for_each(begin(m_worlds),end(m_worlds),[=](world_ptr world) { world->update_pass_one(dt);});
+			for ( auto& world : m_worlds )
+			{
+				world->update_pass_one(dt);
+			}
 		}
 
 		virtual void on_update_pass_two(float dt)
 		{
-			std::for_each(begin(m_worlds),end(m_worlds),[=](world_ptr world) { world->update_pass_two(dt);});
+			for ( auto& world : m_worlds )
+			{
+				world->update_pass_two(dt);
+			}
 		}
 	};
 }

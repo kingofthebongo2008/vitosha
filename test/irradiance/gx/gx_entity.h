@@ -16,7 +16,11 @@ namespace gx
     {
         public:
 
-        entity();
+        entity()
+		{
+
+		}
+
         virtual ~entity();
 
         void create_draw_calls( draw_call_collector_context* context, draw_call_collector* collector );
@@ -33,13 +37,10 @@ namespace gx
         private:
 
         virtual void on_create_draw_calls( draw_call_collector_context* context, draw_call_collector* collector);
-
         virtual void on_create_shadow_draw_calls( draw_call_collector_context* context, draw_call_collector* collector);
         virtual void on_create_visibility_draw_calls( draw_call_collector_context* context, draw_call_collector* collector);
         virtual void on_create_depth_draw_calls( draw_call_collector_context* context, draw_call_collector* collector);
-
         virtual void on_execute_draw_calls(draw_call_context* context);
-
     };
 
 

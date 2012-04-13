@@ -29,7 +29,7 @@ static TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 static TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 // Forward declarations of functions included in this code module:
-static ATOM				MyRegisterClass(HINSTANCE hInstance);
+static ATOM				MyRegisterClass(HINSTANCE hInstance, LPCTSTR szWindowClass);
 static HWND				InitInstance(HINSTANCE);
 static LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
@@ -75,7 +75,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     // Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_IRRADIANCE, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
+	MyRegisterClass(hInstance, szWindowClass);
 
 	HWND hwnd = InitInstance (hInstance);
 
@@ -145,7 +145,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
-static ATOM MyRegisterClass(HINSTANCE hInstance)
+static ATOM MyRegisterClass(HINSTANCE hInstance, LPCTSTR szWindowClass)
 {
 	WNDCLASSEX wcex;
 
@@ -160,7 +160,7 @@ static ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_IRRADIANCE);
-	wcex.lpszClassName	= L"irradiance";//szWindowClass;
+	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return RegisterClassEx(&wcex);
@@ -173,7 +173,7 @@ static HWND InitInstance(HINSTANCE hInstance)
    hInst = hInstance; // Store instance handle in our global variable
 
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 1280, CW_USEDEFAULT, 720, NULL, NULL, hInstance, NULL);
+	   CW_USEDEFAULT, 1280, CW_USEDEFAULT, 720, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
@@ -391,6 +391,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			break;
 		}
 
+	
 	default:
 
 		return DefWindowProc(hWnd, message, wParam, lParam);

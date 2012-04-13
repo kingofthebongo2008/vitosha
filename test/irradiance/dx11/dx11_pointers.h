@@ -20,8 +20,6 @@ namespace dx11
 
     typedef boost::intrusive_ptr<ID3D11Buffer>				id3d11buffer_ptr;
 
-    typedef boost::intrusive_ptr<ID3D11Buffer>				id3d11buffer_ptr;
-
     typedef boost::intrusive_ptr<ID3D11Texture2D>			id3d11texture2d_ptr;
     typedef boost::intrusive_ptr<ID3D11RenderTargetView>	id3d11rendertargetview_ptr;
 

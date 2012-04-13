@@ -58,7 +58,6 @@ namespace gxu
 
     gx::indexed_draw_call create_lat_lon_sphere( ID3D11Device* device , float radius, uint32_t subdivision_count )
     {
-
 		dx11::id3d11buffer_ptr positions;
         dx11::id3d11buffer_ptr normals_uvs;
         dx11::id3d11buffer_ptr indices;
@@ -71,10 +70,7 @@ namespace gxu
 
 		const float pi				= 3.141592654f;
 		const float two_pi			= 6.283185307f;
-		//const float one_div_pi		= 0.318309886f;
-		//const float one_div_two_pi	= 0.159154943f;
 		const float pi_div_two		= 1.570796327f;
-		//const float pi_div_four		= 0.785398163f;
 
 		uint32_t			  vertex_count = 0;
 		std::vector<position> positions_v;
@@ -225,10 +221,10 @@ namespace gxu
 		normals_uvs_h_v.resize (  8 * ( ( normals_uvs_v.size() * 6 + 7) / 8 ) );
 		math::convert_f32_f16_stream( reinterpret_cast<float*> ( &normals_uvs_v[0]) , normals_uvs_h_v.size(), &normals_uvs_h_v[0] );
 		
-		positions = dx11::create_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
-		normals_uvs = dx11::create_vertex_buffer( device, &normals_uvs_h_v[0], normals_uvs_v.size() * 6 * sizeof(math::half) );
+		positions = dx11::create_immutable_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
+		normals_uvs = dx11::create_immutable_vertex_buffer( device, &normals_uvs_h_v[0], normals_uvs_v.size() * 6 * sizeof(math::half) );
 
-		indices = dx11::create_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
+		indices = dx11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
 		info.m_index_count = static_cast<uint32_t> ( indices_v.size() );
 		info.m_vertex_size_0 = 8;	//half4
@@ -236,4 +232,145 @@ namespace gxu
 
         return gx::indexed_draw_call(info, positions, normals_uvs, indices);
     }
+
+	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
+	{
+		dx11::id3d11buffer_ptr positions;
+        dx11::id3d11buffer_ptr indices;
+		gx::indexed_draw_call::index_info info = {};
+
+		subdivision_count = subdivision_count + 1;
+
+		uint32_t vertical_segments		=  subdivision_count; 
+		uint32_t horizontal_segments	=  subdivision_count * 2;
+
+		const float pi				= 3.141592654f;
+		const float two_pi			= 6.283185307f;
+		const float pi_div_two		= 1.570796327f;
+
+		uint32_t			  vertex_count = 0;
+		std::vector<position> positions_v;
+		std::vector<normal_uv> normals_uvs_v;
+
+		positions_v.resize( (vertical_segments + 1 ) * ( horizontal_segments + 1) );
+		normals_uvs_v.resize( (vertical_segments + 1  ) * ( horizontal_segments + 1 ) );
+
+		for ( uint32_t i = 0; i < vertical_segments + 1 ; ++i)
+		{
+			float lattitude = ( i * pi / vertical_segments ) - pi_div_two;
+
+			float dxz;
+			float dy;
+
+			dy = sinf(lattitude);
+			dxz = cosf(lattitude);
+
+			uint32_t horizontal_segments_div_4 = ( (horizontal_segments + 1) / 4) * 4;
+
+			//iterate on 4 vertices at the same time
+			for (uint32_t j = 0; j < horizontal_segments_div_4 ; j+=4, vertex_count+=4 )
+			{
+				math::vector_float4 v_1 = math::set(static_cast<float> (j), static_cast<float> (j+1), static_cast<float> (j+2), static_cast<float> (j+3) );
+				math::vector_float4 v_3 = math::splat( two_pi );
+				math::vector_float4 v_4 = math::splat( static_cast<float> (horizontal_segments) );
+				math::vector_float4 v_5 =  math::splat( pi );
+
+				math::vector_float4 v_6 =  math::mul( v_1, v_3 );
+				math::vector_float4 v_7 =  math::div( v_6, v_4 );
+				math::vector_float4 longitude =  math::sub(v_7, v_5);
+
+				math::vector_float4 dx =  math::sin(longitude);
+				math::vector_float4 dz =  math::cos(longitude);
+
+				math::vector_float4 v_8 =  math::splat( dxz );
+
+				dx = math::mul(dx, v_8);
+				dz = math::mul(dz, v_8);
+
+				math::vector_float4 v_9 =  math::splat( radius );
+				math::vector_float4 v_10 =  math::splat( dy );
+
+				math::vector_float4 x =  math::mul(dx, v_9);
+				math::vector_float4 y =  math::mul(v_10, v_9);
+				math::vector_float4 z =  math::mul(dz, v_9);
+				math::vector_float4 one =  math::one();
+
+				math::matrix_float44 p_1;
+
+				p_1.r[0] = x;
+				p_1.r[1] = y;
+				p_1.r[2] = z;
+				p_1.r[3] = one;
+
+				//store positions
+				math::matrix_float44 p_2 = math::transpose(p_1);
+				position* address = &positions_v[vertex_count];
+				math::store44( reinterpret_cast<float*> (address), p_2);
+			}
+
+			//iterate on the remainder element by element
+			for (uint32_t j = horizontal_segments_div_4 ; j < horizontal_segments + 1 ; ++j, ++vertex_count )
+			{
+				float longitude = ( j * two_pi / horizontal_segments )  - pi; 
+
+				float dx;
+				float dz;
+
+				dx = sinf(longitude);
+				dz = cosf(longitude);
+
+				dx = dx * dxz;
+				dz = dz * dxz;
+
+				float x, y, z;
+
+				x = dx * radius;
+				y = dy * radius;
+				z = dz * radius;
+
+				//store the position
+				position* address = &positions_v[vertex_count];
+				*address = position ( x, y, z, 1.0f);
+			}
+		}
+
+		std::vector<uint16_t> indices_v;
+		indices_v.reserve((vertical_segments + 1 ) * ( horizontal_segments +  1 ) * 3 ) ;
+
+		//generate triangles
+		uint32_t stride = horizontal_segments + 1 ;
+
+		for ( uint32_t i = 0 ; i < vertical_segments; ++i)
+		{
+			for (uint32_t j = 0; j < horizontal_segments + 1; ++j)
+			{
+				uint32_t next_i = i + 1;
+				uint32_t next_j = (j + 1 ) % stride;
+
+				indices_v.push_back( static_cast<uint16_t> (i * stride + j) );
+				indices_v.push_back( static_cast<uint16_t> (next_i * stride + j) );
+				indices_v.push_back( static_cast<uint16_t> (i * stride + next_j) ); 
+
+				indices_v.push_back ( static_cast<uint16_t> (i * stride + next_j) );
+				indices_v.push_back ( static_cast<uint16_t> (next_i * stride + j) );
+				indices_v.push_back ( static_cast<uint16_t> (next_i * stride + next_j) );
+			}
+		}
+
+		//convert to half to save memory on the gpu
+		//conversion library operates on elements divisible by 8 to improve speed
+
+		std::vector< math::half > positions_h_v;
+		positions_h_v.resize ( 8 * ( (positions_v.size() * 4 + 7 ) / 8 ) );	//allocate more space than we need
+		math::convert_f32_f16_stream( reinterpret_cast<float*> ( &positions_v[0]) , positions_h_v.size(), &positions_h_v[0] );
+
+		positions = dx11::create_immutable_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
+		indices = dx11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
+
+		info.m_index_count = static_cast<uint32_t> ( indices_v.size() );
+		info.m_vertex_size_0 = 8;	//half4
+
+		return std::make_tuple( positions, indices );
+    }
+
  }

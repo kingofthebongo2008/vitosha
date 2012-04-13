@@ -111,18 +111,19 @@ namespace gx
             }
 
             private:
+
             friend class const_node_iterator;
             friend class node_iterator;
             friend class scene;
             
             typedef std::vector< std::shared_ptr<node> > children_container;
 
-            math::matrix_float44        m_transform;
+            math::matrix_float44        m_transform;		//transform in scene graph
             void*                       m_data;
             children_container          m_children;
             std::weak_ptr<node>         m_parent;
             node_status*                m_status;
-            math::matrix_float44*       m_node_transform;
+            math::matrix_float44*       m_node_transform;	//pointer to linearized scene graph transform
 
             inline void set_modified()
             {

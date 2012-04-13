@@ -29,7 +29,8 @@ namespace gx
 
 		void draw(ID3D11DeviceContext* device_context);
 
-        private:
+
+        protected:
 
         indexed_draw_call();
         index_info                m_index_info;

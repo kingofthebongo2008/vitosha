@@ -7,11 +7,6 @@
 
 namespace gx
 {
-    entity::entity()
-    {
-
-    }
-
     entity::~entity()
     {
 
