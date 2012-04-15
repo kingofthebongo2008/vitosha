@@ -46,16 +46,6 @@ namespace dx11
 		return create_index_buffer(device, initial_data, size, D3D11_USAGE_DEFAULT, 0);
 	}
 
-	dx11::id3d11buffer_ptr create_dynamic_vertex_buffer(ID3D11Device* device, uint32_t size )
-	{
-		return create_vertex_buffer(device, nullptr, size, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE );
-	}
-
-	dx11::id3d11buffer_ptr create_dynamic_index_buffer(ID3D11Device* device, uint32_t size )
-	{
-		return create_index_buffer(device, nullptr, size, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE );
-	}
-
 	dx11::id3d11buffer_ptr create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
 	{
 		return create_vertex_buffer(device, initial_data, size, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE );

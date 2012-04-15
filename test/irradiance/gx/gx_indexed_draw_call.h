@@ -20,6 +20,7 @@ namespace gx
             uint32_t                m_base_vertex_location;
             uint32_t                m_vertex_size_0;
 			uint32_t                m_vertex_size_1;
+			uint32_t                m_start_instance_location;
         };
 
         indexed_draw_call( index_info info, dx11::id3d11buffer_ptr vertex_buffer, dx11::id3d11buffer_ptr index_buffer );
@@ -28,11 +29,12 @@ namespace gx
         ~indexed_draw_call();
 
 		void draw(ID3D11DeviceContext* device_context);
+		void draw_instanced(ID3D11DeviceContext* device_context, uint32_t instance_count);
 
+		protected:
 
-        protected:
+		indexed_draw_call();
 
-        indexed_draw_call();
         index_info                m_index_info;
 
         dx11::id3d11buffer_ptr    m_vertex_buffer[2];

@@ -95,34 +95,34 @@ namespace gxu
 			//iterate on 4 vertices at the same time
 			for (uint32_t j = 0; j < horizontal_segments_div_4 ; j+=4, vertex_count+=4 )
 			{
-				math::vector_float4 v_1 = math::set(static_cast<float> (j), static_cast<float> (j+1), static_cast<float> (j+2), static_cast<float> (j+3) );
-				math::vector_float4 v_2 = math::splat(static_cast<float> (horizontal_segments) );
+				auto v_1 = math::set(static_cast<float> (j), static_cast<float> (j+1), static_cast<float> (j+2), static_cast<float> (j+3) );
+				auto v_2 = math::splat(static_cast<float> (horizontal_segments) );
 
-				math::vector_float4 u = math::div(v_1, v_2);
+				auto u = math::div(v_1, v_2);
 
-				math::vector_float4 v_3 = math::splat( two_pi );
-				math::vector_float4 v_4 = math::splat( static_cast<float> (horizontal_segments) );
-				math::vector_float4 v_5 =  math::splat( pi );
+				auto v_3 = math::splat( two_pi );
+				auto v_4 = math::splat( static_cast<float> (horizontal_segments) );
+				auto v_5 =  math::splat( pi );
 
-				math::vector_float4 v_6 =  math::mul( v_1, v_3 );
-				math::vector_float4 v_7 =  math::div( v_6, v_4 );
-				math::vector_float4 longitude =  math::sub(v_7, v_5);
+				auto v_6 =  math::mul( v_1, v_3 );
+				auto v_7 =  math::div( v_6, v_4 );
+				auto longitude =  math::sub(v_7, v_5);
 
-				math::vector_float4 dx =  math::sin(longitude);
-				math::vector_float4 dz =  math::cos(longitude);
+				auto dx =  math::sin(longitude);
+				auto dz =  math::cos(longitude);
 
-				math::vector_float4 v_8 =  math::splat( dxz );
+				auto v_8 =  math::splat( dxz );
 
 				dx = math::mul(dx, v_8);
 				dz = math::mul(dz, v_8);
 
-				math::vector_float4 v_9 =  math::splat( radius );
-				math::vector_float4 v_10 =  math::splat( dy );
+				auto v_9 =  math::splat( radius );
+				auto v_10 =  math::splat( dy );
 
-				math::vector_float4 x =  math::mul(dx, v_9);
-				math::vector_float4 y =  math::mul(v_10, v_9);
-				math::vector_float4 z =  math::mul(dz, v_9);
-				math::vector_float4 one =  math::one();
+				auto x =  math::mul(dx, v_9);
+				auto y =  math::mul(v_10, v_9);
+				auto z =  math::mul(dz, v_9);
+				auto one =  math::one();
 
 				math::matrix_float44 p_1;
 
@@ -132,12 +132,12 @@ namespace gxu
 				p_1.r[3] = one;
 
 				//store positions
-				math::matrix_float44 p_2 = math::transpose(p_1);
-				position* address = &positions_v[vertex_count];
+				auto p_2 = math::transpose(p_1);
+				auto address = &positions_v[vertex_count];
 				math::store44( reinterpret_cast<float*> (address), p_2);
 
 				//sse 1,2,3 requires memory addresses to be 16 byte aligned. we cannot guarantee this, so we store byte by byte
-				normal_uv* uv_address = &normals_uvs_v[vertex_count];
+				auto uv_address = &normals_uvs_v[vertex_count];
 				uv_address->m_normal = normal( dx.m128_f32[0], v_10.m128_f32[0],  dz.m128_f32[0], 1.0f);
 				uv_address->m_uv = uv( u.m128_f32[0], v );
 
@@ -157,8 +157,8 @@ namespace gxu
 			//iterate on the remainder element by element
 			for (uint32_t j = horizontal_segments_div_4 ; j < horizontal_segments + 1 ; ++j, ++vertex_count )
 			{
-				float u = static_cast<float>  (j)  / horizontal_segments;
-				float longitude = ( j * two_pi / horizontal_segments )  - pi; 
+				auto u = static_cast<float>  (j)  / horizontal_segments;
+				auto longitude = ( j * two_pi / horizontal_segments )  - pi; 
 
 				float dx;
 				float dz;
@@ -193,9 +193,9 @@ namespace gxu
 		//generate triangles
 		uint32_t stride = horizontal_segments + 1 ;
 
-		for ( uint32_t i = 0 ; i < vertical_segments; ++i)
+		for ( auto i = static_cast<uint32_t>(0) ; i < vertical_segments; ++i)
 		{
-			for (uint32_t j = 0; j < horizontal_segments + 1; ++j)
+			for (auto j = static_cast<uint32_t>(0); j < horizontal_segments + 1; ++j)
 			{
 				uint32_t next_i = i + 1;
 				uint32_t next_j = (j + 1 ) % stride;
@@ -233,7 +233,7 @@ namespace gxu
         return gx::indexed_draw_call(info, positions, normals_uvs, indices);
     }
 
-	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
+	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
 	{
 		dx11::id3d11buffer_ptr positions;
         dx11::id3d11buffer_ptr indices;
@@ -250,10 +250,7 @@ namespace gxu
 
 		uint32_t			  vertex_count = 0;
 		std::vector<position> positions_v;
-		std::vector<normal_uv> normals_uvs_v;
-
 		positions_v.resize( (vertical_segments + 1 ) * ( horizontal_segments + 1) );
-		normals_uvs_v.resize( (vertical_segments + 1  ) * ( horizontal_segments + 1 ) );
 
 		for ( uint32_t i = 0; i < vertical_segments + 1 ; ++i)
 		{
@@ -270,30 +267,30 @@ namespace gxu
 			//iterate on 4 vertices at the same time
 			for (uint32_t j = 0; j < horizontal_segments_div_4 ; j+=4, vertex_count+=4 )
 			{
-				math::vector_float4 v_1 = math::set(static_cast<float> (j), static_cast<float> (j+1), static_cast<float> (j+2), static_cast<float> (j+3) );
-				math::vector_float4 v_3 = math::splat( two_pi );
-				math::vector_float4 v_4 = math::splat( static_cast<float> (horizontal_segments) );
-				math::vector_float4 v_5 =  math::splat( pi );
+				auto v_1 = math::set(static_cast<float> (j), static_cast<float> (j+1), static_cast<float> (j+2), static_cast<float> (j+3) );
+				auto v_3 = math::splat( two_pi );
+				auto v_4 = math::splat( static_cast<float> (horizontal_segments) );
+				auto v_5 =  math::splat( pi );
 
-				math::vector_float4 v_6 =  math::mul( v_1, v_3 );
-				math::vector_float4 v_7 =  math::div( v_6, v_4 );
-				math::vector_float4 longitude =  math::sub(v_7, v_5);
+				auto v_6 =  math::mul( v_1, v_3 );
+				auto v_7 =  math::div( v_6, v_4 );
+				auto longitude =  math::sub(v_7, v_5);
 
-				math::vector_float4 dx =  math::sin(longitude);
-				math::vector_float4 dz =  math::cos(longitude);
+				auto dx =  math::sin(longitude);
+				auto dz =  math::cos(longitude);
 
-				math::vector_float4 v_8 =  math::splat( dxz );
+				auto v_8 =  math::splat( dxz );
 
 				dx = math::mul(dx, v_8);
 				dz = math::mul(dz, v_8);
 
-				math::vector_float4 v_9 =  math::splat( radius );
-				math::vector_float4 v_10 =  math::splat( dy );
+				auto v_9 =  math::splat( radius );
+				auto v_10 =  math::splat( dy );
 
-				math::vector_float4 x =  math::mul(dx, v_9);
-				math::vector_float4 y =  math::mul(v_10, v_9);
-				math::vector_float4 z =  math::mul(dz, v_9);
-				math::vector_float4 one =  math::one();
+				auto x =  math::mul(dx, v_9);
+				auto y =  math::mul(v_10, v_9);
+				auto z =  math::mul(dz, v_9);
+				auto one =  math::one();
 
 				math::matrix_float44 p_1;
 
@@ -304,7 +301,7 @@ namespace gxu
 
 				//store positions
 				math::matrix_float44 p_2 = math::transpose(p_1);
-				position* address = &positions_v[vertex_count];
+				auto address = &positions_v[vertex_count];
 				math::store44( reinterpret_cast<float*> (address), p_2);
 			}
 
@@ -340,9 +337,9 @@ namespace gxu
 		//generate triangles
 		uint32_t stride = horizontal_segments + 1 ;
 
-		for ( uint32_t i = 0 ; i < vertical_segments; ++i)
+		for ( auto i = static_cast<uint32_t> (0) ; i < vertical_segments; ++i)
 		{
-			for (uint32_t j = 0; j < horizontal_segments + 1; ++j)
+			for (auto j = static_cast<uint32_t> (0) ; j < horizontal_segments + 1; ++j)
 			{
 				uint32_t next_i = i + 1;
 				uint32_t next_j = (j + 1 ) % stride;
@@ -370,7 +367,8 @@ namespace gxu
 		info.m_index_count = static_cast<uint32_t> ( indices_v.size() );
 		info.m_vertex_size_0 = 8;	//half4
 
-		return std::make_tuple( positions, indices );
+		//return created positions, sphere indexes and sphere indexes count
+		return std::make_tuple( positions, indices, indices_v.size() );
     }
 
  }

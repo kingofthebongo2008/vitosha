@@ -21,7 +21,7 @@ namespace gx
 			//perspective parameters
 			m_fov = 3.1415f / 4.0f;
 			m_aspect_ratio = 16.0f / 9.0f;
-			m_near = 0.005f; //meters
+			m_near = 0.1f; //meters
 			m_far = 400.0f;	//meters
 		}
 

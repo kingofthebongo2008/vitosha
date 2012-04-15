@@ -153,6 +153,20 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
+    <CustomBuild Include="win32\shader_point_light_sphere_debug_vs.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="win32\shader_point_light_sphere_debug_ps.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
     <None Include="irradiance.ico" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
@@ -233,6 +247,9 @@
     <ClInclude Include="win32/application.h" />
     <ClInclude Include="win32/targetver.h" />
     <ClInclude Include="win32/window.h" />
+    <ClInclude Include="win32\point_lights.h" />
+    <ClInclude Include="win32\point_light_sphere_debug_pixel_shader.h" />
+    <ClInclude Include="win32\point_light_sphere_debug_vertex_shader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dx11\dx11_helpers.cpp" />
@@ -292,6 +309,9 @@
     <ClCompile Include="gx\gx_view.cpp" />
     <ClCompile Include="gx\gx_view_port.cpp" />
     <ClCompile Include="win32\application.cpp" />
+    <ClCompile Include="win32\point_lights.cpp" />
+    <ClCompile Include="win32\point_light_sphere_debug_pixel_shader.cpp" />
+    <ClCompile Include="win32\point_light_sphere_debug_vertex_shader.cpp" />
     <ClCompile Include="win32\window.cpp" />
   </ItemGroup>
   <ItemGroup>
