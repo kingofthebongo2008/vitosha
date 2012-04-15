@@ -14,19 +14,21 @@
 namespace gx
 {
 	class entity;
-    class indexed_draw_call;
 	class render_context;
+
+	template < uint32_t vertex_buffer_count > class indexed_draw_call;
+	typedef indexed_draw_call<2>	indexed_draw_call_2;
 }
 
 namespace gxu
 {
-    gx::indexed_draw_call create_lat_lon_sphere( ID3D11Device* device, float radius, uint32_t subdivision_count );
+    gx::indexed_draw_call_2 create_lat_lon_sphere( ID3D11Device* device, float radius, uint32_t subdivision_count );
 
-	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count );
+	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count );
 
-	template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, gx::indexed_draw_call draw_call, math::vector_float4 color )
+	template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, gx::indexed_draw_call_2 draw_call, math::vector_float4 color )
 	{
-		return std::make_shared< gxu::static_mesh_entity<factory::type> > ( draw_call , factory::create(context, color) );
+		return std::make_shared< gxu::static_mesh_entity<gx::indexed_draw_call_2, factory::type> > ( draw_call , factory::create(context, color) );
 	}
 
 	template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, float radius, uint32_t subdivision_count, math::vector_float4 color )

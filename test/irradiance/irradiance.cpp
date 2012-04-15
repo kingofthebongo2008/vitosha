@@ -40,11 +40,13 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto light_updater = create_light_entity_updater();
 	dynamic_entities->add_type( 0, light_updater );
 
-	point_light light1 ( math::set(0.8f, 0.2f, 0.0f, 0.0f), math::set(0.0f,0.0f,0.0f,1.0f), 1.0f, 0.5f);
+	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), math::set(1.5f,0.0f,0.0f,1.0f), 1.0f, 0.5f);
 	point_light light2 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(0.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
+	point_light light3 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(-1.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
 
 	point_lights->add_light(light1);
 	point_lights->add_light(light2);
+	point_lights->add_light(light3);
 
     auto it = scene->begin();
     auto it_end = scene->end();

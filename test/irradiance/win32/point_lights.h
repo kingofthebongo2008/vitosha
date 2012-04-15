@@ -135,13 +135,34 @@ class point_lights_entity : public gx::entity
 
 	static const uint32_t max_light_count = 1024;
 
+	//workaround for visual studio 11 5 parameters to make_shared
+	struct shader_info
+	{
+		shader_info
+				(
+					point_light_sphere_debug_vertex_shader					debug_vertex_shader,
+					point_light_sphere_debug_pixel_shader					debug_pixel_shader,
+					point_light_sphere_debug_vertex_shader_constant_buffer	cbuffer
+				) :
+						m_debug_vertex_shader(debug_vertex_shader)
+					,	m_debug_pixel_shader(debug_pixel_shader)
+					,	m_cbuffer(cbuffer)
+				{
+
+				}
+
+		point_light_sphere_debug_vertex_shader					m_debug_vertex_shader;
+		point_light_sphere_debug_pixel_shader					m_debug_pixel_shader;
+		point_light_sphere_debug_vertex_shader_constant_buffer	m_cbuffer;
+
+	};
+
 	point_lights_entity
 		( 
-			gx::indexed_draw_call	draw_call,
+			gx::indexed_draw_call_3	draw_call,
 			dx11::id3d11buffer_ptr	transform_color,
 			dx11::id3d11inputlayout_ptr	input_layout,
-			point_light_sphere_debug_vertex_shader	debug_vertex_shader,
-			point_light_sphere_debug_pixel_shader	debug_pixel_shader
+			shader_info info
 		);
 
 	void add_light( point_light light)
@@ -156,16 +177,17 @@ class point_lights_entity : public gx::entity
 	void on_execute_draw_calls(gx::draw_call_context* context);
 
 	private:
-	gx::indexed_draw_call	m_draw_call;		//sphere vertex and index buffer (holds reference to the instance stream inside)
+	gx::indexed_draw_call_3	m_draw_call;		//sphere vertex and index buffer (holds reference to the instance stream inside)
 	dx11::id3d11buffer_ptr	m_transform_color;	//instance stream
 	dx11::id3d11inputlayout_ptr	m_input_layout;
 
-	point_light_sphere_debug_vertex_shader	m_debug_vertex_shader;
-	point_light_sphere_debug_pixel_shader	m_debug_pixel_shader;
+	point_light_sphere_debug_vertex_shader					m_debug_vertex_shader;
+	point_light_sphere_debug_pixel_shader					m_debug_pixel_shader;
+	point_light_sphere_debug_vertex_shader_constant_buffer	m_cbuffer;
 
 	std::vector< point_light >	m_lights;
 
-	void update_instance_stream(ID3D11DeviceContext* device_context, math::matrix_float44 world_matrix, math::matrix_float44 view_matrix, math::matrix_float44 projection_matrix);
+	void update_instance_stream(ID3D11DeviceContext* device_context, math::matrix_float44 world_matrix);
 };
 
 std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* device);

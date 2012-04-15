@@ -4,12 +4,10 @@
 
 #include <sys/sys_base.h>
 
-#include <gx/gx_draw_call_context.h>
-#include <D3D11.h>
-
 
 namespace gx
 {
+	/*
     indexed_draw_call::indexed_draw_call( index_info info, dx11::id3d11buffer_ptr vertex_buffer, dx11::id3d11buffer_ptr index_buffer ) :
         m_index_info(info)
         , m_index_buffer(index_buffer)
@@ -62,4 +60,5 @@ namespace gx
 		device_context->IASetVertexBuffers( 0, m_buffer_count, &buffers[0], &stride[0], &offset[0] );
 		device_context->DrawIndexedInstanced(m_index_info.m_index_count, instance_count, m_index_info.m_start_index_location, m_index_info.m_base_vertex_location, m_index_info.m_start_instance_location);
 	}
+	*/
 }

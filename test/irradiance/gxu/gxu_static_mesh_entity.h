@@ -29,19 +29,18 @@ namespace gxu
 		}
 	};
 
-	template < typename material > 
+	template < typename draw_call, typename material > 
     class static_mesh_entity : public gx::entity
     {
         public:
-		static_mesh_entity(gx::indexed_draw_call draw_call, material material) : m_draw_call(draw_call), m_material(material)
+		static_mesh_entity(draw_call draw_call, material material) : m_draw_call(draw_call), m_material(material)
 		{
 
 		}
 
         private:
-
-		gx::indexed_draw_call   m_draw_call;
-		material				m_material;
+		draw_call   m_draw_call;
+		material	m_material;
 
         void on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
 		{
