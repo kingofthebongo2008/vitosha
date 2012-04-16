@@ -5,16 +5,16 @@ cbuffer per_object
 
 struct vs_input
 {
-	half4	position_os	: POSITION;
-	half4	normal_os	: Normal0;
-	half2	uv			: TexCoord0;
+	half4	position_os	: position;
+	half4	normal_os	: normal;
+	half2	uv			: texcoord;
 };
 
 struct vs_output
 {
-    float4	position_ps	: SV_POSITION; 
-	float3  normal_os	: Normal0;
-	float2	uv			: TexCoord0; 
+    float4	position_ps	: sv_position; 
+	float3  normal_os	: normal;
+	float2	uv			: texcoord; 
 };
 
 vs_output main( in  vs_input input)

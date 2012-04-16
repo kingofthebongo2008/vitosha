@@ -231,7 +231,7 @@ namespace gxu
 
 	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
 	{
-		dx11::id3d11buffer_ptr positions;
+	dx11::id3d11buffer_ptr positions;
         dx11::id3d11buffer_ptr normals_uvs;
         dx11::id3d11buffer_ptr indices;
 		
@@ -399,8 +399,7 @@ namespace gxu
 
 		indices = dx11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
-		//return created positions, normals_uvs, sphere indexes and sphere indexes count
-		return std::make_tuple( positions, normals_uvs, indices, indices_v.size() );
+		return std::make_tuple( positions, normals_uvs, indices, static_cast<uint32_t> (indices_v.size()) );
     }
 
  }

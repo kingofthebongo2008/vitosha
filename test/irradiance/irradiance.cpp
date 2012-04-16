@@ -54,7 +54,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto pi_div_two		= 1.570796327f;
 
 	auto m_1 = math::rotation_x(-pi_div_two);
-	auto m_2 = math::translation(0.0f, 0.0f, 0.0f);
+	auto m_2 = math::translation(-1.0f, 0.0f, 0.0f);
 	auto m_3 = math::mul(m_1, m_2);
 	auto m_4 = math::translation(0.0f, 0.0f, 0.0f);
 	

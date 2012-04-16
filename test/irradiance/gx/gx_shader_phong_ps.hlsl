@@ -1,8 +1,8 @@
 struct vs_output
 {
-    float4	position_ps	: SV_POSITION; 
-	float3  normal_os	: Normal;
-	float2	uv			: TexCoord1; 
+    float4	position_ps	: sv_position; 
+	float3  normal_os	: normal;
+	float2	uv			: texcoord; 
 };
 
 Texture2D		diffuse;

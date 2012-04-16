@@ -5,12 +5,12 @@ cbuffer per_object
 
 struct vs_input
 {
-	half4	position_os	: POSITION;
+	half4	position_os	: position;
 };
 
 struct vs_output
 {
-    float4	position_ps	: SV_POSITION; 
+    float4	position_ps	: sv_position; 
 };
 
 vs_output main( in  vs_input input)

@@ -92,7 +92,7 @@ void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
 std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* device)
 {
 	//create positions and index buffer
-	std::tuple< dx11::id3d11buffer_ptr,  dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t >	sphere = gxu::create_lat_lon_sphere_2(device, 0.2f, 10 );
+	std::tuple< dx11::id3d11buffer_ptr,  dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t >	sphere = gxu::create_lat_lon_sphere_2(device, 0.2f, 20 );
 
 	const uint32_t transform_buffer_size  = ( sizeof(math::matrix_float44) + sizeof(math::vector_float4) )  * point_lights_entity::max_light_count;
 	std::vector<uint8_t> initial_data;
@@ -127,7 +127,7 @@ std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* de
 	dx11::throw_if_failed<dx11::create_input_layout> (device->CreateInputLayout(&desc[0], sizeof(desc) / sizeof(desc[0]) ,debug_vertex_shader.m_code, debug_vertex_shader.m_code_size, dx11::get_pointer(input_layout)));
 
 	return std::make_shared<point_lights_entity>( 
-		gx::create_indexed_draw_call<8, 12,  sizeof(math::matrix_float44) + sizeof(math::vector_float4) > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )
+		gx::create_indexed_draw_call< 8, 12,  sizeof(math::matrix_float44) + sizeof(math::vector_float4) > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )
 		, transform_color
 		, input_layout
 		, info
