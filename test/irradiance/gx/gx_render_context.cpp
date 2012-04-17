@@ -210,7 +210,9 @@ namespace gx
 	
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
 	{
+
 		device_context->ClearDepthStencilView( m_depth_stencil_target.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
+
 		float clear_color_1[4] = { 0.449019607f, 0.449019607f, 0.449019607f, 1.0f };
 		float clear_color_2[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float clear_color_3[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -349,7 +351,7 @@ namespace gx
 
 	void render_context::create_depth_buffer_layout()
 	{
-		D3D11_INPUT_ELEMENT_DESC desc = { "POSITION", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+		D3D11_INPUT_ELEMENT_DESC desc = { "position", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc, 1, m_depth_render_data.m_depth_vertex_shader.m_code,m_depth_render_data.m_depth_vertex_shader.m_code_size, dx11::get_pointer(m_depth_render_data.m_input_layout)));
 	}
 
@@ -357,8 +359,8 @@ namespace gx
 	{
 		D3D11_INPUT_ELEMENT_DESC desc[2] = 
 		{
-			{ "POSITION",	0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD",	0,  DXGI_FORMAT_R16G16_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "position",	0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "texcoord",	0,  DXGI_FORMAT_R16G16_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc[0], 2, m_screen_space_render_data.m_screen_space_vertex_shader.m_code, m_screen_space_render_data.m_screen_space_vertex_shader.m_code_size, dx11::get_pointer(m_screen_space_render_data.m_screen_space_input_layout)));
@@ -368,9 +370,9 @@ namespace gx
 	{
 		D3D11_INPUT_ELEMENT_DESC desc[3] = 
 		{
-			{ "POSITION",	0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL",		0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD",	0,  DXGI_FORMAT_R16G16_FLOAT, 1, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "position",	0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "normal",		0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "texcoord",	0,  DXGI_FORMAT_R16G16_FLOAT, 1, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		dx11::throw_if_failed<dx11::create_input_layout> (m_system_context.m_device->CreateInputLayout(&desc[0], 3, m_lambert_vertex_shader.m_code, m_lambert_vertex_shader.m_code_size, dx11::get_pointer(m_lambert_input_layout)));

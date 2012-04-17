@@ -47,8 +47,8 @@ void point_lights_entity::on_create_draw_calls( gx::draw_call_collector_context*
 {
 	uint16_t material_id = 2;
 
-	gx::draw_call_key key = gx::create_debug_layer_key(material_id, gx::get_perspective_transform3_depth(context) );
-	collector->add_draw_call(key, context->m_entity_index, 0 ) ;
+	gx::draw_call_key key = gx::create_debug_draw_call(material_id, gx::get_perspective_transform3_depth(context) );
+	collector->add_draw_call(key, context->m_entity_index ) ;
 }
 
 void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_context, math::matrix_float44 world_matrix)

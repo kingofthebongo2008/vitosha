@@ -37,6 +37,42 @@ namespace gx
 
 	}
 
+	namespace
+	{
+		void process_command( gx::render_context* render_context, ID3D11DeviceContext* device_context, gx::command::type command ) 
+		{
+			switch (command)
+			{
+				case gx::command::gbuffer_initialize:
+				{
+					render_context->select_back_buffer_target(device_context);
+					break;
+				}
+
+				case gx::command::gbuffer_finalize:
+				{
+					break;
+				}
+
+				case gx::command::debug_initialize:
+				{
+					render_context->select_back_buffer_target(device_context);
+					break;
+				}
+
+				case gx::command::debug_finalize:
+				{
+					break;
+				}
+
+				default:
+				{
+					break;
+				}
+			}
+		}
+	}
+
 	void*   execute_draw_calls_pipeline_node::do_process(void* input)
     {
         draw_calls_pipeline_params* in_params = reinterpret_cast<draw_calls_pipeline_params*> (input);
@@ -45,39 +81,44 @@ namespace gx
 
 		m_render_context->clear_buffers(device_context);
 
-		//1. Render scene
-		m_render_context->select_back_buffer_target(device_context);
 		gx::draw_call_context draw_call_context = create_draw_call_context( device_context, in_params);
 
 		for (uint32_t j = 0; j < in_params->m_draw_calls->size(); ++j )
 		{
-			gx::draw_call_info key = in_params->m_draw_calls->operator[](j);
-			uint16_t		   index = key.m_entity_index;
+			gx::draw_call_info info = in_params->m_draw_calls->at(j);
+			uint16_t		   index = info.m_entity_index;
 
-			draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->operator[](index);
-			draw_call_context.m_world_matrix = &in_params->m_world_matrices->operator[](index);
+			if (index != gx::draw_call_info::invalid_entity)
+			{
+				draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->at(index);
+				draw_call_context.m_world_matrix = &in_params->m_world_matrices->at(index);
 
-			draw_call_context.m_entity_draw_call_index = key.m_entity_draw_call_index;
-			gx::entity* enty = reinterpret_cast<entity*> ( in_params->m_data->operator[](index) );
+				draw_call_context.m_entity_draw_call_index = info.m_entity_draw_call_index;
+				gx::entity* enty = reinterpret_cast<entity*> ( in_params->m_data->at(index) );
 
-			enty->execute_draw_calls(&draw_call_context);
+				enty->execute_draw_calls(&draw_call_context);
+			}
+			else
+			{
+				gx::command::type command = info.m_key.get_command();
+				process_command( m_render_context, device_context, command);
+			}
 		}
 
 		//2. Render test quad
 		//m_render_context->select_back_buffer_target(device_context);
+		/*
 		math::vector_float4 color = color::blue();
-
 		m_render_context->m_color_pixel_shader_cbuffer.update(device_context, color);
 		m_render_context->m_color_pixel_shader_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
 		device_context->PSSetShader(m_render_context->m_color_pixel_shader, nullptr, 0);
 	
-		//math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
-		//math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
-		//math::matrix_float44 m3 = math::mul(m2, m1);
-
-
+		math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
+		math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
+		math::matrix_float44 m3 = math::mul(m2, m1);
 		//draw_screen_space_quad(device_context, m_render_context, m3);
+		*/
 
 		delete in_params;
 		return nullptr;

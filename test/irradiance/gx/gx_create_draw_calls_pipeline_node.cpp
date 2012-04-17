@@ -27,7 +27,16 @@ namespace gx
 
         collector.begin();
 
-        for(auto i = static_cast<uint32_t> (0) ; i < in_params->m_data->size(); ++i)
+		collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_initialize ) );
+		collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_finalize ) );
+
+		collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_lighting_initialize ) );
+		collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_lighting_finalize ) );
+
+		collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_initialize ) );
+		collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_finalize ) );
+
+		for(auto i = static_cast<uint32_t> (0) ; i < in_params->m_data->size(); ++i)
         {
             context.m_wvp = &in_params->m_wvp_matrices->at(i);
             context.m_world_matrix = &in_params->m_world_matrices->at(i);

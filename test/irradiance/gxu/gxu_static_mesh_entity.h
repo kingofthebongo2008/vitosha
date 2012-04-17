@@ -45,9 +45,9 @@ namespace gxu
         void on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
 		{
 			auto material_id = m_material.get_id();
-			auto key = gx::create_gbuffer_opaque_key(material_id, gx::get_perspective_transform3_depth(context) );
+			auto key = gx::create_gbuffer_draw_call(material_id, gx::get_perspective_transform3_depth(context) );
 
-		    collector->add_draw_call(key, context->m_entity_index, 0 ) ;
+		    collector->add_draw_call(key, context->m_entity_index ) ;
     	}
 
         void on_execute_draw_calls(gx::draw_call_context* context)
