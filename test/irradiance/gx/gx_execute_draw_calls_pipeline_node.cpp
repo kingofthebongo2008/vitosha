@@ -45,12 +45,13 @@ namespace gx
 			{
 				case gx::command::gbuffer_initialize:
 				{
-					render_context->select_back_buffer_target(device_context);
+					render_context->select_gbuffer(device_context);
 					break;
 				}
 
 				case gx::command::gbuffer_finalize:
 				{
+					render_context->end_gbuffer(device_context);
 					break;
 				}
 
@@ -106,19 +107,27 @@ namespace gx
 		}
 
 		//2. Render test quad
-		//m_render_context->select_back_buffer_target(device_context);
-		/*
+		
+		m_render_context->select_back_buffer_target(device_context);
+		
 		math::vector_float4 color = color::blue();
 		m_render_context->m_color_pixel_shader_cbuffer.update(device_context, color);
 		m_render_context->m_color_pixel_shader_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-		device_context->PSSetShader(m_render_context->m_color_pixel_shader, nullptr, 0);
+		
+		ID3D11ShaderResourceView* resources[1] = { 
+													m_render_context->m_gbuffer_render_data.m_render_set.m_diffuse_view.get()
+												};
+
+		device_context->PSSetShaderResources(0, 1, resources );
+
+		device_context->PSSetShader(m_render_context->m_color_texture_pixel_shader, nullptr, 0);
 	
 		math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
 		math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
 		math::matrix_float44 m3 = math::mul(m2, m1);
-		//draw_screen_space_quad(device_context, m_render_context, m3);
-		*/
+		draw_screen_space_quad(device_context, m_render_context, m3);
+		
 
 		delete in_params;
 		return nullptr;

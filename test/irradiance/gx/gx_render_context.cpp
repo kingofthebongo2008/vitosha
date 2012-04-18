@@ -1,5 +1,7 @@
 #include "precompiled.h"
 
+#include <array>
+
 #include <gx/gx_render_context.h>
 #include <gx/gx_thread_render_context.h>
 
@@ -15,6 +17,7 @@ namespace gx
 		, m_screen_space_render_data ( sys_context.m_device.get() )
 		, m_color_pixel_shader (  sys_context.m_device.get() )
 		, m_color_pixel_shader_cbuffer (sys_context.m_device.get())
+		, m_color_texture_pixel_shader (  sys_context.m_device.get() )
 		, m_phong_vertex_shader(sys_context.m_device.get())
 		, m_phong_vertex_shader_cbuffer(sys_context.m_device.get())
 		, m_lambert_vertex_shader(sys_context.m_device.get())
@@ -65,7 +68,7 @@ namespace gx
         }
 		
 		dx11::id3d11devicecontext_ptr device_context = m_render_contexts.front()->get_device_context();
-		clear_buffers( device_context.get() );
+		clear_state( device_context.get() );
     }
 
     void render_context::end_frame()
@@ -158,6 +161,7 @@ namespace gx
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( & texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse)));
 		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse_target)));
+		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse_view)));
 	}
 
 	void render_context::create_specular_buffer()
@@ -181,7 +185,8 @@ namespace gx
 		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception > ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular)));
-		dx11::throw_if_failed< dx11::create_render_target_view_exception > ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_target)));
+		dx11::throw_if_failed< dx11::create_render_target_view_exception > ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_specular.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_target)));
+		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_specular.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_view)));
 	}
 
 	void render_context::create_normal_depth_buffer()
@@ -205,12 +210,12 @@ namespace gx
 		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth)));
-		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_target)));
+		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_normal_depth.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_target)));
+		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_normal_depth.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_view) ) );
 	}
 	
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
 	{
-
 		device_context->ClearDepthStencilView( m_depth_stencil_target.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
 
 		float clear_color_1[4] = { 0.449019607f, 0.449019607f, 0.449019607f, 1.0f };
@@ -223,12 +228,22 @@ namespace gx
 		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_render_set.m_specular_target.get(), clear_color_3);
 	}
 
+	void render_context::clear_state(ID3D11DeviceContext* device_context)
+	{
+		clear_buffers(device_context);
+		reset_shader_resources(device_context);
+		reset_render_targets(device_context);
+	}
+
 	void render_context::select_gbuffer(ID3D11DeviceContext* device_context)
 	{
+		reset_render_targets(device_context);
+		reset_shader_resources(device_context);
+
 		ID3D11RenderTargetView* views[3] =
 		{ 
-												m_gbuffer_render_data.m_render_set.m_normal_depth_target.get(),
 												m_gbuffer_render_data.m_render_set.m_diffuse_target.get(),
+												m_gbuffer_render_data.m_render_set.m_normal_depth_target.get(),
 												m_gbuffer_render_data.m_render_set.m_specular_target.get()
 		};
 
@@ -238,21 +253,57 @@ namespace gx
 		device_context->RSSetState(m_gbuffer_render_data.m_state.m_rasterizer.get());
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+		ID3D11SamplerState* samplers[] =	{ 
+												m_gbuffer_render_data.m_state.m_sampler.get(), 
+												m_gbuffer_render_data.m_state.m_sampler.get(), 
+												m_gbuffer_render_data.m_state.m_sampler.get(), 
+												m_gbuffer_render_data.m_state.m_sampler.get()
+											};
+
+		device_context->PSSetSamplers( 0, sizeof(samplers)/sizeof(samplers[0]), &samplers[0] ); 
+
 		select_view_port(device_context);
 	}
-	
+
+	void render_context::end_gbuffer(ID3D11DeviceContext* device_context)
+	{
+		reset_render_targets(device_context);
+		reset_shader_resources(device_context);
+	}
+
 	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
 	{
+		reset_render_targets(device_context);
+		reset_shader_resources(device_context);
+
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		device_context->OMSetBlendState(m_default_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_default_render_data.m_state.m_depth.get(), 0 );
-		device_context->OMSetRenderTargets( 1, dx11::get_pointer(m_default_render_data.m_render_set.m_back_buffer_render_target), m_default_render_data.m_render_set.m_depth_stencil_target.get() );
+
+		ID3D11RenderTargetView* views[1] =
+		{
+			m_default_render_data.m_render_set.m_back_buffer_render_target.get()
+		};
+
+		device_context->OMSetRenderTargets( 1, &views[0], m_default_render_data.m_render_set.m_depth_stencil_target.get() );
 		device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
+
+		ID3D11SamplerState* samplers[] =	{ 
+												m_default_render_data.m_state.m_sampler.get(), 
+												m_default_render_data.m_state.m_sampler.get(), 
+												m_default_render_data.m_state.m_sampler.get(), 
+												m_default_render_data.m_state.m_sampler.get()
+											};
+
+		device_context->PSSetSamplers( 0, sizeof(samplers)/sizeof(samplers[0]), &samplers[0] ); 
 		select_view_port(device_context);
 	}
 
 	void render_context::select_depth_pass(ID3D11DeviceContext* device_context)
 	{
+		reset_render_targets(device_context);
+		reset_shader_resources(device_context);
+
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		device_context->IASetInputLayout(m_depth_render_data.m_input_layout.get());
 
@@ -266,6 +317,40 @@ namespace gx
 
 		m_depth_render_data.m_depth_vertex_shader.bind(device_context, &m_depth_render_data.m_depth_constant_buffer);
 		select_view_port(device_context);
+	}
+
+	void render_context::end_depth_pass(ID3D11DeviceContext* device_context)
+	{
+		reset_shader_resources(device_context);
+		reset_render_targets(device_context);
+	}
+
+	void render_context::reset_shader_resources(ID3D11DeviceContext* device_context)
+	{
+		std::array<ID3D11ShaderResourceView*,6> resources = 
+		{ 
+			nullptr,
+			nullptr,
+			nullptr,
+
+			nullptr,
+			nullptr,
+			nullptr
+		};
+
+		device_context->PSSetShaderResources(0, static_cast<uint32_t> ( resources.size() ), &resources[0] );
+	}
+
+	void render_context::reset_render_targets(ID3D11DeviceContext* device_context)
+	{
+		std::array<ID3D11RenderTargetView*,3> views = 
+		{ 
+												nullptr,
+												nullptr,
+												nullptr
+		};
+
+		device_context->OMSetRenderTargets( static_cast<uint32_t> (views.size() ) , &views[0], nullptr );
 	}
 
 	void render_context::select_view_port(ID3D11DeviceContext* device_context)

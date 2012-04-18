@@ -11,6 +11,7 @@
 #include <dx11/dx11_system.h>
 
 #include <gx/gx_color_pixel_shader.h>
+#include <gx/gx_color_texture_pixel_shader.h>
 #include <gx/gx_depth_shader.h>
 #include <gx/gx_lambert_constant_pixel_shader.h>
 #include <gx/gx_lambert_vertex_shader.h>
@@ -37,6 +38,10 @@ namespace gx
 			m_normal_depth.reset();
 			m_diffuse.reset();
 			m_specular.reset();
+
+			m_normal_depth_view.reset();
+			m_diffuse_view.reset();
+			m_specular_view.reset();
 		}
 
 		dx11::id3d11rendertargetview_ptr		m_normal_depth_target;
@@ -49,6 +54,10 @@ namespace gx
 		dx11::id3d11texture2d_ptr				m_normal_depth;
 		dx11::id3d11texture2d_ptr				m_diffuse;
 		dx11::id3d11texture2d_ptr				m_specular;
+
+		dx11::id3d11shaderresourceview_ptr		m_normal_depth_view;
+		dx11::id3d11shaderresourceview_ptr		m_diffuse_view;
+		dx11::id3d11shaderresourceview_ptr		m_specular_view;
 	};
 
 	struct depth_render_set
@@ -160,10 +169,14 @@ namespace gx
 		void create_swap_chain_buffers();
 		void release_swap_chain_buffers();
 
+		void clear_state( ID3D11DeviceContext* device_context );
 		void clear_buffers( ID3D11DeviceContext* device_context);
 		void select_depth_pass(ID3D11DeviceContext* device_context);
 		void select_gbuffer(ID3D11DeviceContext* device_context);
 		void select_back_buffer_target(ID3D11DeviceContext* device_context);
+
+		void end_depth_pass(ID3D11DeviceContext* device_context);
+		void end_gbuffer(ID3D11DeviceContext* device_context);
 
 		screen_space_quad_render	create_screen_space_quad_render();
 
@@ -245,6 +258,9 @@ namespace gx
 
 		void select_view_port(ID3D11DeviceContext* device_context);
 
+		void reset_shader_resources(ID3D11DeviceContext* device_context);
+		void reset_render_targets(ID3D11DeviceContext* device_context);
+
         dx11::system_context									m_system_context;
         thread_render_context_container							m_render_contexts;
 
@@ -264,6 +280,8 @@ namespace gx
 		
 		color_pixel_shader										m_color_pixel_shader;
 		color_pixel_shader_constant_buffer						m_color_pixel_shader_cbuffer;
+
+		color_texture_pixel_shader								m_color_texture_pixel_shader;
 
 		phong_vertex_shader										m_phong_vertex_shader;
 		phong_vertex_shader_constant_buffer						m_phong_vertex_shader_cbuffer;
