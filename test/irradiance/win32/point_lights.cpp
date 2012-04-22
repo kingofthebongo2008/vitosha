@@ -83,9 +83,10 @@ void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
 	m_cbuffer.bind_as_vertex_constant_buffer(device_context);
 
 	device_context->IASetInputLayout(m_input_layout.get());
-	device_context->VSSetShader(m_debug_vertex_shader, nullptr, 0);
-	device_context->PSSetShader(m_debug_pixel_shader, nullptr, 0 );
 
+    dx11::vs_set_shader(device_context, m_debug_vertex_shader );
+    dx11::ps_set_shader(device_context, m_debug_pixel_shader );
+    
 	m_draw_call.draw_instanced( device_context, static_cast<uint32_t> ( m_lights.size() ) );
 }
 

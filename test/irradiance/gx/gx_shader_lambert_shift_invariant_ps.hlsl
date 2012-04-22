@@ -1,4 +1,4 @@
-#include <gx/gx_shader_brdf.hlsl>
+#include <gx/gx_shader_brdf_hlsl.h>
 
 struct vs_output
 {
@@ -20,6 +20,7 @@ struct specular
 struct ps_output
 {
 	float3	 m_kd			: sv_target0;
+    float4   m_normal_depth : sv_target1;
 	float4	 m_ks_gloss		: sv_target2;
 };
 
@@ -27,8 +28,10 @@ ps_output main( in  vs_output input)
 {
 	ps_output result;
 
-	result.m_kd = m_kd;
+    result.m_kd = m_kd;
+    result.m_normal_depth = float4(input.normal_ws, 0.5f) ;
 	result.m_ks_gloss = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    result.m_ks_gloss = float4(1.0f, 0.0f, 0.0f, 0.0f);
 
 	return result;
 }

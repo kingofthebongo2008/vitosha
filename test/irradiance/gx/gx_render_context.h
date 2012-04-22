@@ -12,6 +12,7 @@
 
 #include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_color_texture_pixel_shader.h>
+#include <gx/gx_color_texture_channel_3_pixel_shader.h>
 #include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
 #include <gx/gx_lambert_pixel_shader.h>
 #include <gx/gx_lambert_shift_invariant_pixel_shader.h>
@@ -297,6 +298,7 @@ namespace gx
 		color_pixel_shader_constant_buffer						m_color_pixel_shader_cbuffer;
 
 		color_texture_pixel_shader								m_color_texture_pixel_shader;
+        color_texture_channel_3_pixel_shader					m_color_texture_channel_3_pixel_shader;
         
 		lambert_shift_invariant_pixel_shader					m_lambert_shift_invariant_pixel_shader;
 		lambert_shift_invariant_pixel_shader_constant_buffer	m_lambert_pixel_cbuffer;

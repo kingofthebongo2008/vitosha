@@ -1,7 +1,7 @@
 #include "precompiled.h"
 #include <gx/gx_execute_draw_calls_pipeline_node.h>
 
-#include <gx/gx_color.h>
+#include <gx/gx_debug_draw.h>
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
@@ -109,23 +109,14 @@ namespace gx
 		//2. Render test quad
 		m_render_context->select_back_buffer_target(device_context);
 
-		ID3D11ShaderResourceView* resources[2] = { 
-													m_render_context->m_gbuffer_render_data.m_render_set.m_diffuse_view.get(),
-													m_render_context->m_gbuffer_render_data.m_render_set.m_specular_view.get()
-												};
+        gx::debug_draw_diffuse_gbuffer( device_context, m_render_context, math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( -0.5f, -0.5f, 0.0f ) ) );
+        gx::debug_draw_normal_gbuffer( device_context, m_render_context, math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( 0.5f, -0.5f, 0.0f ) ) );
+        gx::debug_draw_specular_gbuffer( device_context, m_render_context, math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( 0.5f, 0.5f, 0.0f ) ) );
+        gx::debug_draw_depth_gbuffer( device_context, m_render_context, math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( -0.5f,  0.5f, 0.0f ) ) );
 
-		device_context->PSSetShaderResources(0, 1, &resources[0] );
-		device_context->PSSetShader(m_render_context->m_color_texture_pixel_shader, nullptr, 0);
-		math::matrix_float44 m1 = math::translation(-0.5f, -0.5f, 0.0f);
-		math::matrix_float44 m2 = math::scaling(0.5f, 0.5f, 1.0f);
-		math::matrix_float44 m3 = math::mul(m2, m1);
-		draw_screen_space_quad(device_context, m_render_context, m3);
-		device_context->PSSetShaderResources(0, 1, &resources[1] );
-		m1 = math::translation(-0.5f, 0.5f, 0.0f);
-		m3 = math::mul(m2, m1);
-		draw_screen_space_quad(device_context, m_render_context, m3);
 
 		delete in_params;
+
 		return nullptr;
     }
 

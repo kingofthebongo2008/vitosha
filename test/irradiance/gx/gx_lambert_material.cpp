@@ -2,7 +2,7 @@
 
 #include <gx/gx_lambert_material.h>
 
-#include <dx11/dx11_error.h>
+#include <dx11/dx11_helpers.h>
 
 #include <gx/gx_draw_call_context.h>
 
@@ -26,6 +26,6 @@ namespace gx
 													m_texture_set.m_normal_view.get()
 												};
 
-		draw_call_context->m_device_context->PSSetShaderResources(0, 2, resources );
+        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, resources );
 	}
 }

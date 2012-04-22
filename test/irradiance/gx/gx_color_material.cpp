@@ -20,8 +20,8 @@ namespace gx
 		m_vertex_cbuffer.bind_as_vertex_constant_buffer(device_context);
 		m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-		device_context->VSSetShader(m_vertex_shader, nullptr, 0 );
-		device_context->PSSetShader(m_pixel_shader, nullptr, 0 );
+        dx11::vs_set_shader(device_context, m_vertex_shader );
+		dx11::ps_set_shader(device_context, m_pixel_shader );
 		device_context->IASetInputLayout(m_input_layout);
 	}
 

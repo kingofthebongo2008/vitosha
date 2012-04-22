@@ -24,14 +24,15 @@ namespace gx
 
 	void blinn_phong_material::apply(draw_call_context* draw_call_context)
 	{
-        //set vertex shaders here
+        //set vertex shaders here also
+
 		ID3D11ShaderResourceView* resources[3] = { 
 													m_texture_set.m_diffuse_view.get(),
 													m_texture_set.m_normal_view.get(),
 													m_texture_set.m_specular_view.get()
 												 };
 
-		draw_call_context->m_device_context->PSSetShaderResources(0, 3, resources );
+        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, resources );
 	}
 
 	blinn_phong_material::blinn_phong_material ( blinn_phong_texture_set texture_set, blinn_phong_shader_set shader_set ) : m_texture_set(texture_set), m_shader_set(shader_set)

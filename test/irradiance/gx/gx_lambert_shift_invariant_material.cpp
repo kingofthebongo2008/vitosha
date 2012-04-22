@@ -22,8 +22,8 @@ namespace gx
 		m_pixel_cbuffer.flush(device_context);
 		m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-		device_context->VSSetShader( std::get<0>(m_vertex_pipeline),  nullptr, 0 );
-		device_context->PSSetShader( m_pixel_shader, nullptr, 0 );
+		dx11::vs_set_shader( device_context, std::get<0>(m_vertex_pipeline) );
+		dx11::ps_set_shader( device_context, m_pixel_shader );
 		device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
 
 	}

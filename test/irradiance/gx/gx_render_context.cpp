@@ -31,6 +31,8 @@ namespace gx
 		, m_color_pixel_shader ( sys_context.m_device.get() )
 		, m_color_pixel_shader_cbuffer ( sys_context.m_device.get() )
 		, m_color_texture_pixel_shader (  sys_context.m_device.get() )
+        , m_color_texture_channel_3_pixel_shader (  sys_context.m_device.get() )
+
 		, m_lambert_shift_invariant_pixel_shader(sys_context.m_device.get() )
 		, m_lambert_pixel_cbuffer( sys_context.m_device.get() )
         , m_blinn_phong_shift_invariant_pixel_shader( sys_context.m_device.get()  )
@@ -318,14 +320,14 @@ namespace gx
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		device_context->IASetInputLayout(m_depth_render_data.m_input_layout);
 
-		device_context->PSSetShader(nullptr, nullptr, 0);
+        dx11::ps_set_shader(device_context, nullptr);
 
 		device_context->OMSetRenderTargets(1, nullptr, m_depth_render_data.m_render_set.m_depth_stencil_target.get());
 		device_context->OMSetBlendState(m_depth_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_depth_render_data.m_state.m_depth.get(), 0 );
 
-		device_context->RSSetState(m_depth_render_data.m_state.m_rasterizer.get());
-
+        device_context->RSSetState(m_depth_render_data.m_state.m_rasterizer.get());
+                
         m_depth_render_data.m_depth_constant_buffer.bind_as_vertex_constant_buffer(device_context);
 
 		select_view_port(device_context);
@@ -339,7 +341,7 @@ namespace gx
 
 	void render_context::reset_shader_resources(ID3D11DeviceContext* device_context)
 	{
-		std::array<ID3D11ShaderResourceView*,6> resources = 
+		ID3D11ShaderResourceView* resources[6] = 
 		{ 
 			nullptr,
 			nullptr,
@@ -350,7 +352,7 @@ namespace gx
 			nullptr
 		};
 
-		device_context->PSSetShaderResources(0, static_cast<uint32_t> ( resources.size() ), &resources[0] );
+        dx11::ps_set_shader_resources ( device_context, resources );
 	}
 
 	void render_context::reset_render_targets(ID3D11DeviceContext* device_context)
