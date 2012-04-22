@@ -5,7 +5,7 @@
 #include <math/math_vector.h>
 
 #include <gx/gx_color_pixel_shader.h>
-#include <gx/gx_depth_shader.h>
+#include <gx/gx_transform_position_vertex_shader.h>
 
 namespace gx
 {
@@ -17,11 +17,11 @@ namespace gx
 		public:
 
 		color_material::color_material ( 
-										depth_vertex_shader					vertex_shader,
-										depth_vertex_shader_constant_buffer	vertex_cbuffer,
-										dx11::id3d11inputlayout_ptr			input_layout,
-										color_pixel_shader					pixel_shader,
-										color_pixel_shader_constant_buffer	pixel_cbuffer,
+										transform_position_vertex_shader					        vertex_shader,
+										transform_position_vertex_shader_constant_buffer	        vertex_cbuffer,
+										transform_position_input_layout                 			input_layout,
+										color_pixel_shader					                        pixel_shader,
+										color_pixel_shader_constant_buffer	                        pixel_cbuffer,
 										math::vector_float4 color );
 
 		void apply(draw_call_context* draw_call_context);
@@ -42,15 +42,14 @@ namespace gx
 		}
 
 		private:
-		depth_vertex_shader					m_vertex_shader;
-		depth_vertex_shader_constant_buffer	m_vertex_cbuffer;
-
-		dx11::id3d11inputlayout_ptr			m_input_layout;
+		transform_position_vertex_shader					m_vertex_shader;
+		transform_position_vertex_shader_constant_buffer    m_vertex_cbuffer;
+		transform_position_input_layout             		m_input_layout;
 		
-		color_pixel_shader					m_pixel_shader;
-		color_pixel_shader_constant_buffer	m_pixel_cbuffer;
+		color_pixel_shader					                m_pixel_shader;
+		color_pixel_shader_constant_buffer	                m_pixel_cbuffer;
 
-		uint16_t							m_material_id;
+		uint16_t							                m_material_id;
 
 	};
 

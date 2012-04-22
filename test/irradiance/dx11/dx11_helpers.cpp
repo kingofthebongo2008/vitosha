@@ -36,6 +36,20 @@ namespace dx11
 		}
 	}
 
+	dx11::id3d11buffer_ptr create_constant_buffer(ID3D11Device* device, uint32_t size)
+	{
+		D3D11_BUFFER_DESC desc = {};
+		dx11::id3d11buffer_ptr result;
+
+		desc.ByteWidth = size;
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+		dx11::throw_if_failed<dx11::create_buffer_exception> (device->CreateBuffer(&desc, nullptr, dx11::get_pointer(result) ));
+		return result;
+	}
+
 	dx11::id3d11buffer_ptr create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
 	{
 		return create_vertex_buffer(device, initial_data, size, D3D11_USAGE_DEFAULT, 0);

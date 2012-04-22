@@ -12,14 +12,15 @@
 
 #include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_color_texture_pixel_shader.h>
-#include <gx/gx_depth_shader.h>
-#include <gx/gx_lambert_constant_pixel_shader.h>
-#include <gx/gx_lambert_vertex_shader.h>
+#include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
 #include <gx/gx_lambert_pixel_shader.h>
-#include <gx/gx_phong_vertex_shader.h>
+#include <gx/gx_lambert_shift_invariant_pixel_shader.h>
 #include <gx/gx_screen_space_quad.h>
-#include <gx/gx_screen_space_vertex_shader.h>
-#include <gx/gx_screen_space_pixel_shader.h>
+
+#include <gx/gx_transform_position_vertex_shader.h>
+#include <gx/gx_transform_position_uv_vertex_shader.h>
+#include <gx/gx_transform_position_normal_uv_vertex_shader.h>
+
 #include <gx/gx_view_port.h>
 
 namespace gx
@@ -100,15 +101,16 @@ namespace gx
 		explicit depth_render_data  ( ID3D11Device* device ) :
 			m_depth_vertex_shader(device)
 		,   m_depth_constant_buffer(device)
+        ,   m_input_layout(device, &m_depth_vertex_shader )
 		{
 
 		}
 
 		depth_state												m_state;
 		depth_render_set										m_render_set;
-		dx11::id3d11inputlayout_ptr								m_input_layout;
-		depth_vertex_shader										m_depth_vertex_shader;
-		depth_vertex_shader_constant_buffer						m_depth_constant_buffer;
+		transform_position_vertex_shader						m_depth_vertex_shader;
+        transform_position_vertex_shader_constant_buffer		m_depth_constant_buffer;
+        transform_position_input_layout							m_input_layout;
 	};
 
 	struct screen_space_render_data
@@ -121,9 +123,9 @@ namespace gx
 		}
 
 		dx11::id3d11inputlayout_ptr								m_screen_space_input_layout;
-		screen_space_vertex_shader								m_screen_space_vertex_shader;
-		screen_space_vertex_shader_constant_buffer				m_screen_space_constant_buffer;
-		dx11::id3d11buffer_ptr									m_screen_space_vertex_buffer;
+		transform_position_uv_vertex_shader						m_screen_space_vertex_shader;
+		transform_position_uv_vertex_shader_constant_buffer		m_screen_space_constant_buffer;
+        dx11::id3d11buffer_ptr	                                m_screen_space_vertex_buffer;
 	};
 
 	struct default_render_state : public render_state
@@ -249,9 +251,9 @@ namespace gx
 		void create_gbuffer_state();
 		void create_depth_state();
 
-		void create_depth_buffer_layout();
+        void create_depth_buffer_layout();
 		void create_screen_space_input_layout();
-		void create_lambert_input_layout();
+
 		void create_screen_space_vertex_buffer();
 
 		void create_default_render_data();
@@ -277,23 +279,30 @@ namespace gx
 
 		view_port												m_view_port;
 		screen_space_render_data								m_screen_space_render_data;
-		
+
+        transform_position_vertex_shader						m_transform_position_vertex_shader;
+        transform_position_vertex_shader_constant_buffer        m_transform_position_vertex_shader_cbuffer;
+		transform_position_input_layout                         m_transform_position_input_layout;
+
+        transform_position_uv_vertex_shader						m_transform_position_uv_vertex_shader;
+        transform_position_uv_vertex_shader_constant_buffer     m_transform_position_uv_vertex_shader_cbuffer;
+		transform_position_uv_input_layout                      m_transform_position_uv_input_layout;
+
+        transform_position_normal_uv_vertex_shader						m_transform_position_normal_uv_vertex_shader;
+        transform_position_normal_uv_vertex_shader_constant_buffer      m_transform_position_normal_uv_vertex_shader_cbuffer;
+		transform_position_normal_uv_input_layout                       m_transform_position_normal_uv_input_layout;
+
+
 		color_pixel_shader										m_color_pixel_shader;
 		color_pixel_shader_constant_buffer						m_color_pixel_shader_cbuffer;
 
 		color_texture_pixel_shader								m_color_texture_pixel_shader;
+        
+		lambert_shift_invariant_pixel_shader					m_lambert_shift_invariant_pixel_shader;
+		lambert_shift_invariant_pixel_shader_constant_buffer	m_lambert_pixel_cbuffer;
 
-		phong_vertex_shader										m_phong_vertex_shader;
-		phong_vertex_shader_constant_buffer						m_phong_vertex_shader_cbuffer;
-
-
-		lambert_vertex_shader									m_lambert_vertex_shader;
-		lambert_vertex_shader_constant_buffer					m_lambert_vertex_shader_cbuffer;
-
-		lambert_constant_pixel_shader							m_lambert_constant_pixel_shader;
-		lambert_constant_pixel_shader_constant_buffer			m_lambert_pixel_cbuffer;
-
-		dx11::id3d11inputlayout_ptr								m_lambert_input_layout;
+        blinn_phong_shift_invariant_pixel_shader				    m_blinn_phong_shift_invariant_pixel_shader;
+		blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_blinn_phong_pixel_cbuffer;
 
     };
 }

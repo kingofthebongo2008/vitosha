@@ -5,16 +5,10 @@ namespace gx
 {
 	#include "gx_shader_color_ps_compiled.hlsl"
 
-	color_pixel_shader_constant_buffer::color_pixel_shader_constant_buffer ( ID3D11Device* device )
+	color_pixel_shader_constant_buffer::color_pixel_shader_constant_buffer ( ID3D11Device* device ) :
+        m_buffer( dx11::create_constant_buffer( device, size() )  )
 	{
-		D3D11_BUFFER_DESC desc = {};
 
-		desc.ByteWidth = sizeof(m_color);
-		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		desc.Usage = D3D11_USAGE_DYNAMIC;
-		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-		dx11::throw_if_failed<dx11::create_buffer_exception> (device->CreateBuffer(&desc, nullptr, dx11::get_pointer(m_buffer) ));
 	}
 
 	color_pixel_shader::color_pixel_shader ( ID3D11Device* device )

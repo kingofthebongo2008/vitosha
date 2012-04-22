@@ -1,5 +1,5 @@
-#ifndef __GX_LAMBERT_CONSTANT_PIXEL_SHADER_H__
-#define __GX_LAMBERT_CONSTANT_PIXEL_SHADER_H__
+#ifndef __GX_LAMBERT_SHIFT_INVARIANT_PIXEL_SHADER_H__
+#define __GX_LAMBERT_SHIFT_INVARIANT_PIXEL_SHADER_H__
 
 #include <cstdint>
 #include <memory>
@@ -13,11 +13,11 @@
 
 namespace gx
 {
-	class __declspec(align(16)) lambert_constant_pixel_shader_constant_buffer 
+	class __declspec(align(16)) lambert_shift_invariant_pixel_shader_constant_buffer 
 	{
 		public:
 
-		explicit lambert_constant_pixel_shader_constant_buffer ( ID3D11Device* device );
+		explicit lambert_shift_invariant_pixel_shader_constant_buffer ( ID3D11Device* device );
 
 		math::vector_float4 get_diffuse_albedo() const
 		{
@@ -69,17 +69,22 @@ namespace gx
 			return m_buffer.get();
 		}
 
+        size_t size() const
+        {
+            return sizeof(m_diffuse_albedo);
+        }
+
 		public:
 
 		math::vector_float4		m_diffuse_albedo;
 		dx11::id3d11buffer_ptr	m_buffer;
 	};
 
-	class lambert_constant_pixel_shader
+	class lambert_shift_invariant_pixel_shader
     {
 		public:
 
-		explicit lambert_constant_pixel_shader ( ID3D11Device* device );
+		explicit lambert_shift_invariant_pixel_shader ( ID3D11Device* device );
 
 		operator dx11::id3d11pixelshader_ptr()
 		{

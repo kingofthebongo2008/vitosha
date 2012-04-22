@@ -69,6 +69,11 @@ namespace gx
 			return m_buffer.get();
 		}
 
+        size_t size() const
+        {
+            return sizeof(m_color);
+        }
+
 		public:
 
 		math::vector_float4		m_color;

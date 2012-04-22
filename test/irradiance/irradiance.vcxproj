@@ -90,38 +90,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="gx\gx_shader_depth_vs.hlsl">
+    <CustomBuild Include="gx\gx_shader_transform_position_vs.hlsl">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_screen_space_vs.hlsl">
+    <CustomBuild Include="gx\gx_shader_transform_position_uv_vs.hlsl">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_screen_space_ps.hlsl">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_phong_ps.hlsl">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_phong_vs.hlsl">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
@@ -139,9 +118,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_lambert_constant_ps.hlsl">
+    <CustomBuild Include="gx\gx_shader_lambert_shift_invariant_ps.hlsl">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T ps_5_0 /Vn %(FileName)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
@@ -153,7 +132,28 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_lambert_vs.hlsl">
+    <CustomBuild Include="gx\gx_shader_transform_position_normal_uv_vs.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_blinn_phong_ps.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_blinn_phong_shift_invariant_ps.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_blinn_phong_vs.hlsl">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /T vs_5_0 /Vn %(FileName)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
@@ -192,6 +192,10 @@
     <ClInclude Include="gxu\gxu_entity_factory.h" />
     <ClInclude Include="gxu\gxu_pinhole_camera_dispatcher.h" />
     <ClInclude Include="gxu\gxu_static_mesh_entity.h" />
+    <ClInclude Include="gx\gx_blinn_phong_material.h" />
+    <ClInclude Include="gx\gx_blinn_phong_pixel_shader.h" />
+    <ClInclude Include="gx\gx_blinn_phong_shift_invariant_material.h" />
+    <ClInclude Include="gx\gx_blinn_phong_shift_invariant_pixel_shader.h" />
     <ClInclude Include="gx\gx_color.h" />
     <ClInclude Include="gx\gx_color_material.h" />
     <ClInclude Include="gx\gx_color_pixel_shader.h" />
@@ -209,24 +213,20 @@
     <ClInclude Include="gx\gx_draw_call_key.h" />
     <ClInclude Include="gx\gx_final_pipeline_node.h" />
     <ClInclude Include="gx\gx_initializer.h" />
-    <ClInclude Include="gx\gx_lambert_constant_material.h" />
-    <ClInclude Include="gx\gx_lambert_constant_pixel_shader.h" />
+    <ClInclude Include="gx\gx_lambert_shift_invariant_material.h" />
+    <ClInclude Include="gx\gx_lambert_shift_invariant_pixel_shader.h" />
     <ClInclude Include="gx\gx_lambert_material.h" />
     <ClInclude Include="gx\gx_lambert_pixel_shader.h" />
-    <ClInclude Include="gx\gx_lambert_vertex_shader.h" />
+    <ClInclude Include="gx\gx_transform_position_normal_uv_vertex_shader.h" />
     <ClInclude Include="gx\gx_material_database.h" />
-    <ClInclude Include="gx\gx_phong_material.h" />
-    <ClInclude Include="gx\gx_phong_pixel_shader.h" />
-    <ClInclude Include="gx\gx_phong_vertex_shader.h" />
     <ClInclude Include="gx\gx_pinhole_camera.h" />
     <ClInclude Include="gx\gx_pipeline.h" />
     <ClInclude Include="gx\gx_pipeline_params.h" />
-    <ClInclude Include="gx\gx_screen_space_pixel_shader.h" />
     <ClInclude Include="gx\gx_screen_space_quad.h" />
     <ClInclude Include="gx\gx_render_context.h" />
     <ClInclude Include="gx\gx_scene_pipeline_node.h" />
-    <ClInclude Include="gx\gx_depth_shader.h" />
-    <ClInclude Include="gx\gx_screen_space_vertex_shader.h" />
+    <ClInclude Include="gx\gx_transform_position_vertex_shader.h" />
+    <ClInclude Include="gx\gx_transform_position_uv_vertex_shader.h" />
     <ClInclude Include="gx\gx_thread_render_context.h" />
     <ClInclude Include="gx\gx_view_pipeline_node.h" />
     <ClInclude Include="gx\gx_scene.h" />
@@ -269,6 +269,10 @@
     <ClCompile Include="gxu\gxu_entity_factory.cpp" />
     <ClCompile Include="gxu\gxu_pinhole_camera_dispatcher.cpp" />
     <ClCompile Include="gxu\gxu_static_mesh_entity.cpp" />
+    <ClCompile Include="gx\gx_blinn_phong_material.cpp" />
+    <ClCompile Include="gx\gx_blinn_phong_pixel_shader.cpp" />
+    <ClCompile Include="gx\gx_blinn_phong_shift_invariant_material.cpp" />
+    <ClCompile Include="gx\gx_blinn_phong_shift_invariant_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_color_material.cpp" />
     <ClCompile Include="gx\gx_color_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_color_texture_pixel_shader.cpp" />
@@ -282,23 +286,19 @@
     <ClCompile Include="gx\gx_draw_call_key.cpp" />
     <ClCompile Include="gx\gx_final_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_initializer.cpp" />
-    <ClCompile Include="gx\gx_lambert_constant_material.cpp" />
-    <ClCompile Include="gx\gx_lambert_constant_pixel_shader.cpp" />
+    <ClCompile Include="gx\gx_lambert_shift_invariant_material.cpp" />
+    <ClCompile Include="gx\gx_lambert_shift_invariant_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_lambert_material.cpp" />
     <ClCompile Include="gx\gx_lambert_pixel_shader.cpp" />
-    <ClCompile Include="gx\gx_lambert_vertex_shader.cpp" />
+    <ClCompile Include="gx\gx_transform_position_normal_uv_vertex_shader.cpp" />
+    <ClCompile Include="gx\gx_transform_position_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_material_database.cpp" />
-    <ClCompile Include="gx\gx_phong_material.cpp" />
-    <ClCompile Include="gx\gx_phong_pixel_shader.cpp" />
-    <ClCompile Include="gx\gx_phong_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_pinhole_camera.cpp" />
     <ClCompile Include="gx\gx_pipeline.cpp" />
-    <ClCompile Include="gx\gx_screen_space_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_screen_space_quad.cpp" />
     <ClCompile Include="gx\gx_render_context.cpp" />
     <ClCompile Include="gx\gx_scene_pipeline_node.cpp" />
-    <ClCompile Include="gx\gx_depth_shader.cpp" />
-    <ClCompile Include="gx\gx_screen_space_vertex_shader.cpp" />
+    <ClCompile Include="gx\gx_transform_position_uv_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_thread_render_context.cpp" />
     <ClCompile Include="gx\gx_view_pipeline_node.cpp" />
     <ClCompile Include="gx\gx_scene.cpp" />
@@ -325,6 +325,12 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win32/irradiance.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="gx\gx_shader_brdf.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,13 +22,13 @@ namespace gx
 
 		device_context->VSSetShader(m_vertex_shader, nullptr, 0 );
 		device_context->PSSetShader(m_pixel_shader, nullptr, 0 );
-		device_context->IASetInputLayout(m_input_layout.get());
+		device_context->IASetInputLayout(m_input_layout);
 	}
 
 	color_material::color_material ( 
-										depth_vertex_shader					vertex_shader,
-										depth_vertex_shader_constant_buffer	vertex_cbuffer,
-										dx11::id3d11inputlayout_ptr			input_layout,
+										transform_position_vertex_shader					vertex_shader,
+										transform_position_vertex_shader_constant_buffer	vertex_cbuffer,
+										transform_position_input_layout                     input_layout,
 										color_pixel_shader					pixel_shader,
 										color_pixel_shader_constant_buffer	pixel_cbuffer,
 										math::vector_float4 color

@@ -7,7 +7,6 @@
 #include <dx11/dx11_pointers.h>
 
 #include <gx/gx_indexed_draw_call.h>
-#include <gx/gx_screen_space_vertex_shader.h>
 
 namespace gx
 {
