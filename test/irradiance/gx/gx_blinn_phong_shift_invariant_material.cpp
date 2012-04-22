@@ -21,9 +21,9 @@ namespace gx
         std::get<1>(m_vertex_pipeline).bind_as_vertex_constant_buffer(device_context);
 
 		m_pixel_cbuffer.flush(device_context);
-		m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
+    	m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-		device_context->VSSetShader( std::get<0>(m_vertex_pipeline),  nullptr, 0 );
+        dx11::vs_set_shader(device_context, std::get<0>(m_vertex_pipeline) );
 		dx11::ps_set_shader(device_context, m_pixel_shader );
 		device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
 
@@ -43,6 +43,9 @@ namespace gx
 			 , m_pixel_cbuffer(pixel_cbuffer)
 	{
 		m_material_id = gx::create_material_id ( this );
+
+        set_kd(kd);
+        set_ks_gloss(ks_gloss);
 	}
 
 	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( render_context* context, math::vector_float4 kd, math::vector_float4 ks_gloss )

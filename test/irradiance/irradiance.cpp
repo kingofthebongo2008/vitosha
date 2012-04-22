@@ -9,6 +9,7 @@
 #include <fnd/fnd_updater.h>
 
 #include <gx/gx_color.h>
+#include <gx/gx_blinn_phong_shift_invariant_material.h>
 #include <gx/gx_entity.h>
 #include <gx/gx_entity_world.h>
 #include <gx/gx_lambert_shift_invariant_material.h>
@@ -60,7 +61,8 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	
 	auto root = scene->get_root();
 
-    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
+    //auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
+    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::blue() , math::set(0.6f, 0.0f, 0.0f, 0.8f )  ); 
 	
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );

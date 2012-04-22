@@ -31,12 +31,12 @@ namespace gx
 
 		math::vector_float4 get_ks_gloss() const
 		{
-			return m_kd;
+			return m_ks_gloss;
 		}
 
 		void set_ks_gloss(math::vector_float4 value)
 		{
-			m_kd = value;
+			m_ks_gloss = value;
 		}
 
 		void flush ( ID3D11DeviceContext* context )

@@ -31,9 +31,19 @@ namespace gxu
 		return std::make_shared< gxu::static_mesh_entity<gx::indexed_draw_call_2, factory::type> > ( draw_call , factory::create(context, color) );
 	}
 
+    template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, gx::indexed_draw_call_2 draw_call, math::vector_float4 kd, math::vector_float4 ks_gloss )
+	{
+		return std::make_shared< gxu::static_mesh_entity<gx::indexed_draw_call_2, factory::type> > ( draw_call , factory::create(context, kd, ks_gloss) );
+	}
+
 	template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, float radius, uint32_t subdivision_count, math::vector_float4 color )
     {
 		return create_lat_lon_sphere_entity<factory> ( context, create_lat_lon_sphere(context->get_device(), radius, subdivision_count) , color );
+    }
+
+    template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, float radius, uint32_t subdivision_count, math::vector_float4 kd, math::vector_float4 ks_gloss )
+    {
+		return create_lat_lon_sphere_entity<factory> ( context, create_lat_lon_sphere(context->get_device(), radius, subdivision_count) , kd, ks_gloss );
     }
 }
 
