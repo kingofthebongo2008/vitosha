@@ -32,6 +32,12 @@ namespace gx
 		, m_color_pixel_shader_cbuffer ( sys_context.m_device.get() )
 		, m_color_texture_pixel_shader (  sys_context.m_device.get() )
         , m_color_texture_channel_3_pixel_shader (  sys_context.m_device.get() )
+        
+        , m_debug_view_space_depth_pixel_shader (  sys_context.m_device.get() )
+        , m_debug_view_space_depth_pixel_shader_cbuffer (  sys_context.m_device.get() )
+
+        , m_screen_space_uv_vertex_shader         (  sys_context.m_device.get() )
+        , m_screen_space_uv_vertex_shader_cbuffer (  sys_context.m_device.get() )
 
 		, m_lambert_shift_invariant_pixel_shader(sys_context.m_device.get() )
 		, m_lambert_pixel_cbuffer( sys_context.m_device.get() )
@@ -96,6 +102,7 @@ namespace gx
 		create_diffuse_buffer();
 		create_specular_buffer();
 		create_normal_depth_buffer();
+        create_light_buffer();
 
 		// gbuffer and depth prepass share common depth buffer
 		m_gbuffer_render_data.m_render_set.m_depth_stencil = m_depth_stencil;
@@ -119,6 +126,8 @@ namespace gx
 		m_gbuffer_render_data.m_render_set.reset();
 		m_depth_render_data.m_render_set.reset();
 		m_default_render_data.m_render_set.reset();
+
+        m_light_buffer_render_data.m_render_set.reset();
 	}
 
 	void render_context::create_back_buffer_render_target()
@@ -138,9 +147,9 @@ namespace gx
 		D3D11_TEXTURE2D_DESC texture_description = {};
 
 		texture_description.ArraySize = 1;
-		texture_description.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		texture_description.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE ;
 		texture_description.CPUAccessFlags = 0;
-		texture_description.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		texture_description.Format = DXGI_FORMAT_R24G8_TYPELESS;
 		texture_description.Height = desc.BufferDesc.Height;
 		texture_description.MipLevels = 1;
 		texture_description.MiscFlags = 0;
@@ -149,7 +158,16 @@ namespace gx
 		texture_description.Width = desc.BufferDesc.Width;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_depth_stencil)));
-		dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), 0, dx11::get_pointer(m_depth_stencil_target) ));
+        
+        D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view = {};
+
+        depth_stencil_view.Flags = 0;
+        depth_stencil_view.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depth_stencil_view.Texture2D.MipSlice = 0;
+        depth_stencil_view.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), &depth_stencil_view, dx11::get_pointer(m_depth_stencil_target) ));
+
+
 	}
 
 	void render_context::create_diffuse_buffer()
@@ -226,6 +244,46 @@ namespace gx
 		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_normal_depth.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_target)));
 		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_normal_depth.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_view) ) );
 	}
+
+    void render_context::create_light_buffer()
+    {
+        using namespace dx11;
+		DXGI_SWAP_CHAIN_DESC desc = {};
+
+		throw_if_failed<dx11::d3d11_exception>( m_system_context.m_swap_chain->GetDesc(&desc));
+
+		D3D11_TEXTURE2D_DESC texture_description = {};
+
+		texture_description.ArraySize = 1;
+		texture_description.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+		texture_description.CPUAccessFlags = 0;
+		texture_description.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
+		texture_description.Height = desc.BufferDesc.Height;
+		texture_description.MipLevels = 1;
+		texture_description.MiscFlags = 0;
+		texture_description.SampleDesc = desc.SampleDesc;
+		texture_description.Usage = D3D11_USAGE_DEFAULT;
+		texture_description.Width = desc.BufferDesc.Width;
+        
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer)));
+		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_light_buffer_render_data.m_render_set.m_light_buffer.get(), 0, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer_target)));
+
+
+        D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view = {};
+        depth_stencil_view.Flags = D3D11_DSV_READ_ONLY_DEPTH;
+        depth_stencil_view.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depth_stencil_view.Texture2D.MipSlice = 0;
+        depth_stencil_view.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), &depth_stencil_view, dx11::get_pointer( m_light_buffer_render_data.m_render_set.m_depth_stencil_target) ));
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC depth_stencil_resource_view = {};
+        depth_stencil_resource_view.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+        depth_stencil_resource_view.Texture2D.MostDetailedMip = 0;
+        depth_stencil_resource_view.Texture2D.MipLevels = 1;
+        depth_stencil_resource_view.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+        dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_depth_stencil.get(), &depth_stencil_resource_view, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_depth_stencil_view) ) );
+    }
 	
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
 	{
@@ -298,10 +356,11 @@ namespace gx
 			m_default_render_data.m_render_set.m_back_buffer_render_target.get()
 		};
 
-		device_context->OMSetRenderTargets( 1, &views[0], m_default_render_data.m_render_set.m_depth_stencil_target.get() );
-		device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
+		//device_context->OMSetRenderTargets( 1, &views[0], m_default_render_data.m_render_set.m_depth_stencil_target.get() );
+        device_context->OMSetRenderTargets( 1, &views[0], m_light_buffer_render_data.m_render_set.m_depth_stencil_target.get() );
+        device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
 
-		ID3D11SamplerState* samplers[] =	{ 
+        ID3D11SamplerState* samplers[] =	{ 
 												m_default_render_data.m_state.m_sampler.get(), 
 												m_default_render_data.m_state.m_sampler.get(), 
 												m_default_render_data.m_state.m_sampler.get(), 
@@ -414,6 +473,11 @@ namespace gx
 		rasterizer.DepthClipEnable = 1;
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateRasterizerState(&rasterizer, dx11::get_pointer(m_gbuffer_render_data.m_state.m_rasterizer)));
 	}
+
+    void render_context::create_light_buffer_state()
+    {
+
+    }
 
 	void render_context::create_depth_state()
 	{

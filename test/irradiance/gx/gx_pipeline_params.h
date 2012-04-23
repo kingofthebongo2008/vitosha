@@ -5,6 +5,8 @@
 
 #include <math/math_matrix.h>
 
+#include <gx/gx_view_port.h>
+
 namespace gx
 {
     struct scene_pipeline_params

@@ -5,6 +5,7 @@
 
 #include <math/math_matrix.h>
 #include <gx/gx_draw_call_collector.h>
+#include <gx/gx_view_port.h>
 
 namespace gx
 {

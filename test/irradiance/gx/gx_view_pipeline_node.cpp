@@ -21,6 +21,7 @@ namespace gx
         auto inverse_view_matrix = math::inverse(view_matrix);
         auto inverse_projection_matrix = math::inverse(projection_matrix);
 
+
         view_pipeline_params view_params = {
                                 view_matrix, projection_matrix, 
                                 inverse_view_matrix, inverse_projection_matrix,

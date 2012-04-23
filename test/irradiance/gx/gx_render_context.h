@@ -10,13 +10,19 @@
 #include <dx11/dx11_error.h>
 #include <dx11/dx11_system.h>
 
+#include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
+
 #include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_color_texture_pixel_shader.h>
 #include <gx/gx_color_texture_channel_3_pixel_shader.h>
-#include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
+
+#include <gx/gx_debug_view_space_depth_pixel_shader.h>
+
 #include <gx/gx_lambert_pixel_shader.h>
 #include <gx/gx_lambert_shift_invariant_pixel_shader.h>
 #include <gx/gx_screen_space_quad.h>
+
+#include <gx/gx_screen_space_uv_vertex_shader.h>
 
 #include <gx/gx_transform_position_vertex_shader.h>
 #include <gx/gx_transform_position_uv_vertex_shader.h>
@@ -62,6 +68,47 @@ namespace gx
 		dx11::id3d11shaderresourceview_ptr		m_specular_view;
 	};
 
+
+    struct light_buffer_render_set
+	{
+		inline void reset()
+		{
+			m_normal_depth.reset();
+			m_diffuse.reset();
+			m_specular.reset();
+
+			m_depth_stencil_target.reset();
+			m_depth_stencil.reset();
+            m_depth_stencil_view.reset();
+			
+			m_normal_depth.reset();
+			m_diffuse.reset();
+			m_specular.reset();
+
+            m_light_buffer_target.reset();
+            m_light_buffer.reset();
+		}
+
+        //accumulate lights here
+		dx11::id3d11rendertargetview_ptr		m_light_buffer_target;
+        dx11::id3d11texture2d_ptr				m_light_buffer;
+
+        //depth from the gbuffer pass
+        dx11::id3d11texture2d_ptr				m_depth_stencil;
+		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
+        dx11::id3d11shaderresourceview_ptr		m_depth_stencil_view;
+
+        //sampled light buffer parameters
+		dx11::id3d11texture2d_ptr				m_normal_depth;
+		dx11::id3d11texture2d_ptr				m_diffuse;
+		dx11::id3d11texture2d_ptr				m_specular;
+
+		dx11::id3d11shaderresourceview_ptr		m_normal_depth_view;
+		dx11::id3d11shaderresourceview_ptr		m_diffuse_view;
+		dx11::id3d11shaderresourceview_ptr		m_specular_view;
+
+	};
+
 	struct depth_render_set
 	{
 		void reset()
@@ -91,11 +138,22 @@ namespace gx
 	{
 	};
 
+    struct light_buffer_state : public render_state
+    {
+
+    };
+
 	struct gbuffer_render_data
 	{
-		gbuffer_state m_state;
-		gbuffer_render_set m_render_set;
+		gbuffer_state           m_state;
+		gbuffer_render_set      m_render_set;
 	};
+
+    struct light_buffer_render_data
+    {
+        light_buffer_state      m_state;
+        light_buffer_render_set m_render_set;
+    };
 
 	struct depth_render_data
 	{
@@ -248,9 +306,12 @@ namespace gx
 		void create_diffuse_buffer();
 		void create_specular_buffer();
 		void create_normal_depth_buffer();
+        void create_light_buffer();
 
 		void create_gbuffer_state();
 		void create_depth_state();
+        void create_light_buffer_state();
+       
 
         void create_depth_buffer_layout();
 		void create_screen_space_input_layout();
@@ -277,6 +338,7 @@ namespace gx
 		gbuffer_render_data										m_gbuffer_render_data;
 		depth_render_data										m_depth_render_data;
 		default_render_data										m_default_render_data;
+        light_buffer_render_data                                m_light_buffer_render_data;
 
 		view_port												m_view_port;
 		screen_space_render_data								m_screen_space_render_data;
@@ -294,14 +356,20 @@ namespace gx
 		transform_position_normal_uv_input_layout                       m_transform_position_normal_uv_input_layout;
 
 
-		color_pixel_shader										m_color_pixel_shader;
-		color_pixel_shader_constant_buffer						m_color_pixel_shader_cbuffer;
+		color_pixel_shader										    m_color_pixel_shader;
+		color_pixel_shader_constant_buffer						    m_color_pixel_shader_cbuffer;
 
-		color_texture_pixel_shader								m_color_texture_pixel_shader;
-        color_texture_channel_3_pixel_shader					m_color_texture_channel_3_pixel_shader;
+		color_texture_pixel_shader								    m_color_texture_pixel_shader;
+        color_texture_channel_3_pixel_shader					    m_color_texture_channel_3_pixel_shader;
+
+        debug_view_space_depth_pixel_shader                         m_debug_view_space_depth_pixel_shader;
+        debug_view_space_depth_pixel_shader_constant_buffer         m_debug_view_space_depth_pixel_shader_cbuffer;
+
+        screen_space_uv_vertex_shader                               m_screen_space_uv_vertex_shader;            
+        screen_space_uv_vertex_shader_constant_buffer               m_screen_space_uv_vertex_shader_cbuffer;
         
-		lambert_shift_invariant_pixel_shader					m_lambert_shift_invariant_pixel_shader;
-		lambert_shift_invariant_pixel_shader_constant_buffer	m_lambert_pixel_cbuffer;
+		lambert_shift_invariant_pixel_shader					    m_lambert_shift_invariant_pixel_shader;
+		lambert_shift_invariant_pixel_shader_constant_buffer	    m_lambert_pixel_cbuffer;
 
         blinn_phong_shift_invariant_pixel_shader				    m_blinn_phong_shift_invariant_pixel_shader;
 		blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_blinn_phong_pixel_cbuffer;

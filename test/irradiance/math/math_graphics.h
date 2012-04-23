@@ -1,6 +1,8 @@
 #ifndef __MATH_GRAPHICS_H__
 #define __MATH_GRAPHICS_H__
 
+#include <tuple>
+
 #include <math.h>
 #include <math/math_matrix.h>
 
@@ -396,6 +398,18 @@ namespace math
 
 		return mad(v1, scale, offset );
 	}
+
+    //returns near and far from a projection matrix
+    inline std::tuple<float, float> extract_near_far( math::matrix_float44 p )
+    {
+        float a = p.m[3][2];
+        float b = p.m[2][2];
+
+        float zf = a / ( 1 - b );
+        float zn = - a / b;
+
+        return std::make_tuple<float,float> ( zn, zf );
+    }
 }
 
 

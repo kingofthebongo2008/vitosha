@@ -16,7 +16,6 @@ namespace gx
     {
         public:
 
-		
 		void begin(ID3D11DeviceContext* device_context);
 		void end(ID3D11DeviceContext* device_context);
 		
