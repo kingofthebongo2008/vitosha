@@ -267,6 +267,8 @@ namespace gx
         
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer)));
 		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_light_buffer_render_data.m_render_set.m_light_buffer.get(), 0, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer_target)));
+        dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_light_buffer_render_data.m_render_set.m_light_buffer.get(), nullptr, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer_view) ) );
+        
 
 
         D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view = {};

@@ -87,10 +87,12 @@ namespace gx
 
             m_light_buffer_target.reset();
             m_light_buffer.reset();
+            m_light_buffer_view.reset();
 		}
 
         //accumulate lights here
 		dx11::id3d11rendertargetview_ptr		m_light_buffer_target;
+        dx11::id3d11shaderresourceview_ptr		m_light_buffer_view;
         dx11::id3d11texture2d_ptr				m_light_buffer;
 
         //depth from the gbuffer pass
