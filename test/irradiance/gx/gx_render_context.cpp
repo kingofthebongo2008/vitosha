@@ -442,11 +442,43 @@ namespace gx
 		select_view_port(device_context);
 	}
 
-	void render_context::end_depth_pass(ID3D11DeviceContext* device_context)
+    void render_context::end_depth_pass(ID3D11DeviceContext* device_context)
 	{
 		reset_shader_resources(device_context);
 		reset_render_targets(device_context);
 	}
+
+    void render_context::compose_light_buffer(ID3D11DeviceContext* device_context)
+    {
+        reset_render_targets(device_context);
+		reset_shader_resources(device_context);
+
+		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		device_context->OMSetBlendState(m_default_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetDepthStencilState(m_default_render_data.m_state.m_depth.get(), 0 );
+
+		ID3D11RenderTargetView* views[1] =
+		{
+			m_default_render_data.m_render_set.m_back_buffer_render_target.get()
+		};
+
+        device_context->OMSetRenderTargets( 1, &views[0], nullptr );
+        device_context->RSSetState( m_default_render_data.m_state.m_rasterizer.get() );
+
+        ID3D11SamplerState* samplers[] =	{ 
+												m_default_render_data.m_state.m_sampler.get(), 
+												m_default_render_data.m_state.m_sampler.get(), 
+												m_default_render_data.m_state.m_sampler.get(), 
+												m_default_render_data.m_state.m_sampler.get()
+											};
+
+		device_context->PSSetSamplers( 0, sizeof(samplers)/sizeof(samplers[0]), &samplers[0] ); 
+		select_view_port(device_context);
+
+        dx11::ps_set_shader(device_context, m_color_texture_pixel_shader );
+        dx11::ps_set_shader_resources( device_context ,  m_light_buffer_render_data.m_render_set.m_light_buffer_view.get() );
+        draw_screen_space_quad( device_context, this );
+    }
 
 	void render_context::reset_shader_resources(ID3D11DeviceContext* device_context)
 	{

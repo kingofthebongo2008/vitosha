@@ -33,6 +33,8 @@ namespace gx
 		collector.add_draw_call( gx::create_command_draw_call( gx::command::light_buffer_initialize ) );
 		collector.add_draw_call( gx::create_command_draw_call( gx::command::light_buffer_finalize ) );
 
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::compose_light_buffer ) );
+
 		collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_initialize ) );
 		collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_finalize ) );
 

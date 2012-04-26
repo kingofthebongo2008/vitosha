@@ -233,6 +233,9 @@ namespace gx
 		void end_light_buffer(ID3D11DeviceContext* device_context);
         void end_gbuffer(ID3D11DeviceContext* device_context);
 
+        void compose_light_buffer(ID3D11DeviceContext* device_context);
+
+
         screen_space_quad_render	create_screen_space_quad_render();
 
 		inline thread_render_context_container::iterator begin()

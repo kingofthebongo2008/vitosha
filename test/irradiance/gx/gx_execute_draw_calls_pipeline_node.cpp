@@ -66,6 +66,12 @@ namespace gx
                     render_context->end_light_buffer(device_context);
                     break;
                 }
+                
+                case gx::command::compose_light_buffer:
+				{
+                    render_context->compose_light_buffer(device_context);
+                    break;
+                }
 
 				case gx::command::debug_initialize:
 				{

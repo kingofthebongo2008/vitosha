@@ -61,6 +61,8 @@ namespace gx
 			light_buffer_draw_call,
 			light_buffer_finalize,
 
+            compose_light_buffer,
+
             debug_initialize,
 			debug_draw_call,
 			debug_finalize
