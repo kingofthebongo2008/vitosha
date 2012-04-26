@@ -324,7 +324,7 @@ namespace gx
 		};
 
 		device_context->OMSetRenderTargets( 3, views, m_depth_stencil_target.get() );
-		device_context->OMSetBlendState(m_gbuffer_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetBlendState(m_gbuffer_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_gbuffer_render_data.m_state.m_depth.get(), 0 );
 		device_context->RSSetState(m_gbuffer_render_data.m_state.m_rasterizer.get());
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -352,7 +352,7 @@ namespace gx
 		};
 
         device_context->OMSetRenderTargets( 1, &views[0], m_light_buffer_render_data.m_render_set.m_depth_stencil_target.get() );
-		device_context->OMSetBlendState(m_light_buffer_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetBlendState(m_light_buffer_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_light_buffer_render_data.m_state.m_depth.get(), 0 );
 		device_context->RSSetState(m_light_buffer_render_data.m_state.m_rasterizer.get());
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -398,7 +398,7 @@ namespace gx
 		reset_shader_resources(device_context);
 
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		device_context->OMSetBlendState(m_default_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetBlendState(m_default_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_default_render_data.m_state.m_depth.get(), 0 );
 
 		ID3D11RenderTargetView* views[1] =
@@ -432,7 +432,7 @@ namespace gx
         dx11::ps_set_shader(device_context, nullptr);
 
 		device_context->OMSetRenderTargets(1, nullptr, m_depth_render_data.m_render_set.m_depth_stencil_target.get());
-		device_context->OMSetBlendState(m_depth_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetBlendState(m_depth_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_depth_render_data.m_state.m_depth.get(), 0 );
 
         device_context->RSSetState(m_depth_render_data.m_state.m_rasterizer.get());
@@ -454,8 +454,8 @@ namespace gx
 		reset_shader_resources(device_context);
 
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		device_context->OMSetBlendState(m_default_render_data.m_state.m_blend_opaque.get(), nullptr, 0xFFFFFFFF);
-		device_context->OMSetDepthStencilState(m_default_render_data.m_state.m_depth.get(), 0 );
+		device_context->OMSetBlendState(m_light_buffer_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetDepthStencilState(m_light_buffer_render_data.m_state.m_depth.get(), 0 );
 
 		ID3D11RenderTargetView* views[1] =
 		{
@@ -463,7 +463,7 @@ namespace gx
 		};
 
         device_context->OMSetRenderTargets( 1, &views[0], nullptr );
-        device_context->RSSetState( m_default_render_data.m_state.m_rasterizer.get() );
+        device_context->RSSetState( m_light_buffer_render_data.m_state.m_rasterizer.get() );
 
         ID3D11SamplerState* samplers[] =	{ 
 												m_default_render_data.m_state.m_sampler.get(), 
@@ -539,7 +539,7 @@ namespace gx
 
 		D3D11_BLEND_DESC blend = {};
 		blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_gbuffer_render_data.m_state.m_blend_opaque)));
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_gbuffer_render_data.m_state.m_blend)));
 
 		D3D11_DEPTH_STENCIL_DESC depth_stencil = {};
 		depth_stencil.DepthEnable = true;
@@ -577,7 +577,7 @@ namespace gx
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateSamplerState(&sampler, dx11::get_pointer(m_depth_render_data.m_state.m_sampler)));
 
 		D3D11_BLEND_DESC blend = {};
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_depth_render_data.m_state.m_blend_opaque)));
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_depth_render_data.m_state.m_blend)));
 
 		D3D11_DEPTH_STENCIL_DESC depth_stencil = {};
 		depth_stencil.DepthEnable = true;
@@ -666,10 +666,7 @@ namespace gx
 		m_default_render_data.m_render_set.m_depth_stencil = m_depth_stencil;
 		m_default_render_data.m_render_set.m_depth_stencil_target = m_depth_stencil_target;
 
-		m_default_render_data.m_state.m_blend_opaque = m_gbuffer_render_data.m_state.m_blend_opaque;
-		m_default_render_data.m_state.m_depth = m_gbuffer_render_data.m_state.m_depth;
-		m_default_render_data.m_state.m_rasterizer = m_gbuffer_render_data.m_state.m_rasterizer;
-		m_default_render_data.m_state.m_sampler = m_gbuffer_render_data.m_state.m_sampler;
+        m_default_render_data.m_state = m_gbuffer_render_data.m_state;
 	}
 
     void render_context::create_light_buffer_render_data()
@@ -677,6 +674,7 @@ namespace gx
 		m_light_buffer_render_data.m_state = m_gbuffer_render_data.m_state;
 
         m_light_buffer_render_data.m_state.m_depth.reset();
+        m_light_buffer_render_data.m_state.m_blend.reset();
 
         D3D11_DEPTH_STENCIL_DESC depth_stencil = {};
 		depth_stencil.DepthEnable = false;
@@ -684,6 +682,18 @@ namespace gx
 		depth_stencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateDepthStencilState(&depth_stencil, dx11::get_pointer(m_light_buffer_render_data.m_state.m_depth)));
 
+        //for light accumulation
+        D3D11_BLEND_DESC blend = {};
+        blend.RenderTarget[0].BlendEnable = true;
+        blend.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        blend.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+        blend.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        blend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        blend.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+        blend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_light_buffer_render_data.m_state.m_blend)));
     }
 }
 

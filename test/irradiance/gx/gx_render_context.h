@@ -127,13 +127,14 @@ namespace gx
 	{
 		dx11::id3d11samplerstate_ptr			m_sampler;
 		dx11::id3d11depthstencilstate_ptr		m_depth;
-		dx11::id3d11blendstate_ptr				m_blend_opaque;
+		dx11::id3d11blendstate_ptr				m_blend;
 		dx11::id3d11rasterizerstate_ptr			m_rasterizer;
 	};
 
     typedef render_state gbuffer_state;
     typedef render_state depth_state;
     typedef render_state light_buffer_state;
+
 
 	struct gbuffer_render_data
 	{
@@ -179,11 +180,6 @@ namespace gx
         dx11::id3d11buffer_ptr	                                m_screen_space_vertex_buffer;
 	};
 
-	struct default_render_state : public render_state
-	{
-
-	};
-
 	struct default_render_set
 	{
 		inline void reset()
@@ -197,6 +193,8 @@ namespace gx
 		dx11::id3d11texture2d_ptr				m_depth_stencil;
 		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
 	};
+
+    typedef render_state default_render_state;
 
 	struct default_render_data
 	{
