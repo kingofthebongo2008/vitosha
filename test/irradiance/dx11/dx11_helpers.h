@@ -88,9 +88,9 @@ namespace dx11
         device_context->VSSetShader( vertex_shader, nullptr, 0) ;
     }
 
-    inline void ps_set_shader_resources(ID3D11DeviceContext* device_context, ID3D11ShaderResourceView * const shader_resource_view [] )
+    inline void ps_set_shader_resources(ID3D11DeviceContext* device_context, uint32_t view_count, ID3D11ShaderResourceView * const shader_resource_view [] )
     {
-        device_context->PSSetShaderResources( 0, sizeof(shader_resource_view)/sizeof(shader_resource_view[0]), &shader_resource_view[0]);
+        device_context->PSSetShaderResources( 0, view_count , &shader_resource_view[0]);
     }
 
     inline void ps_set_shader_resources(ID3D11DeviceContext* device_context, ID3D11ShaderResourceView * const shader_resource_view)

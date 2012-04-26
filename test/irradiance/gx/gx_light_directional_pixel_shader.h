@@ -45,14 +45,9 @@ namespace gx
             std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_color[0], 8, 0) );
         }
 
-		void update ( ID3D11DeviceContext* context, math::matrix_float44* value )
+	    void flush ( ID3D11DeviceContext* context )
 		{
-			constant_buffer_update( context, m_buffer.get(), value);
-		}
-
-		void flush ( ID3D11DeviceContext* context )
-		{
-			update(context, &m_inverse_projection);
+			gx::constant_buffer_update(context, m_buffer.get(), (void*) &m_inverse_projection, size() );
 		}
 
 		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context)

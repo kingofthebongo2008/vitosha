@@ -47,8 +47,6 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     auto directional_entity = create_directional_lights_entity( context.m_device.get(), render_context->m_screen_space_render_data.m_screen_space_vertex_buffer, &directional_lights[0], &directional_lights[0] + directional_lights.size()  );
 
     
-
-
 	//create point light entity and insert it into two worlds (for update and render)
 	auto point_lights = create_point_lights_entity( context.m_device.get() );
 	auto light_updater = create_light_entity_updater();
@@ -79,14 +77,17 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );
+    auto node_3 = std::make_shared<gx::scene::node> ( m_4, directional_entity.get() );
 
 	//1. add to graphic world
 	gx::add_node(root, node_1);
 	gx::add_node(root, node_2);
+    gx::add_node(root, node_3);
 	
 	//2. add to entities world
 	entities->add_entity( entity_1);
 	entities->add_entity( point_lights);
+    entities->add_entity( directional_entity );
 
 	scene->rebuild();
 

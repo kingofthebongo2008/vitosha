@@ -26,6 +26,6 @@ namespace gx
 													m_texture_set.m_normal_view.get()
 												};
 
-        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, resources );
+        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, sizeof(resources) / sizeof(resources[2]), resources );
 	}
 }

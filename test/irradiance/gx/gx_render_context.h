@@ -131,19 +131,9 @@ namespace gx
 		dx11::id3d11rasterizerstate_ptr			m_rasterizer;
 	};
 
-	struct gbuffer_state : public render_state
-	{
-
-	};
-
-	struct depth_state : public render_state
-	{
-	};
-
-    struct light_buffer_state : public render_state
-    {
-
-    };
+    typedef render_state gbuffer_state;
+    typedef render_state depth_state;
+    typedef render_state light_buffer_state;
 
 	struct gbuffer_render_data
 	{
@@ -237,11 +227,13 @@ namespace gx
 		void select_depth_pass(ID3D11DeviceContext* device_context);
 		void select_gbuffer(ID3D11DeviceContext* device_context);
 		void select_back_buffer_target(ID3D11DeviceContext* device_context);
+        void select_light_buffer(ID3D11DeviceContext* device_context);
 
-		void end_depth_pass(ID3D11DeviceContext* device_context);
-		void end_gbuffer(ID3D11DeviceContext* device_context);
+        void end_depth_pass(ID3D11DeviceContext* device_context);
+		void end_light_buffer(ID3D11DeviceContext* device_context);
+        void end_gbuffer(ID3D11DeviceContext* device_context);
 
-		screen_space_quad_render	create_screen_space_quad_render();
+        screen_space_quad_render	create_screen_space_quad_render();
 
 		inline thread_render_context_container::iterator begin()
 		{
@@ -321,6 +313,7 @@ namespace gx
 		void create_screen_space_vertex_buffer();
 
 		void create_default_render_data();
+        void create_light_buffer_render_data();
 
 		void select_view_port(ID3D11DeviceContext* device_context);
 

@@ -17,7 +17,7 @@ namespace gx
 	    D3D11_INPUT_ELEMENT_DESC desc[] = 
 	    {
 		    { "position",			0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		    { "texcoord",			0,  DXGI_FORMAT_R16G16_FLOAT,		1, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		    { "texcoord",			0,  DXGI_FORMAT_R16G16_FLOAT,		0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	    };
 
         dx11::throw_if_failed<dx11::create_input_layout> ( device->CreateInputLayout(&desc[0], sizeof(desc)/sizeof(desc[0]), shader->m_code, shader->m_code_size,  dx11::get_pointer(m_input_layout) ) );

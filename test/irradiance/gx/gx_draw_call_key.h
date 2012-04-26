@@ -57,9 +57,9 @@ namespace gx
 			gbuffer_opaque_draw_call,
 			gbuffer_finalize,
 
-			gbuffer_lighting_initialize,
-			gbuffer_lighting_draw_call,
-			gbuffer_lighting_finalize,
+			light_buffer_initialize,
+			light_buffer_draw_call,
+			light_buffer_finalize,
 
             debug_initialize,
 			debug_draw_call,
@@ -116,6 +116,14 @@ namespace gx
 			m_data.m_key[1] = 0;
 
 			m_data.m_opaque = opaque;
+		}
+
+        explicit draw_call_key(command_key_data command)
+		{
+			m_data.m_key[0] = 0;
+			m_data.m_key[1] = 0;
+
+			m_data.m_command = command;
 		}
            
         translucency::type get_translucency_type() const
@@ -185,6 +193,13 @@ namespace gx
 		//setup some default values
 		key.m_data.m_header.m_command = command::debug_draw_call;
 		return key;
+    }
+
+    inline draw_call_key create_light_draw_call()
+    {
+		command_key_data light_key = {};
+		light_key.m_header.m_command = command::light_buffer_draw_call;
+		return draw_call_key(light_key);
     }
 
 	inline draw_call_key create_command_draw_call( command::type command  )

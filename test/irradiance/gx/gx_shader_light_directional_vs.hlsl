@@ -22,7 +22,7 @@ vs_output main( in  vs_input input)
 {
     vs_output output;
 	output.position_ps = float4(input.position_ps);
-    output.uv = input.uv;
+    output.uv = float2(input.uv);
 
     /*
     output.light_direction_vs = rigid_transform_vector ( input.light_direction_ws.xyz, m_view) ;

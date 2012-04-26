@@ -1,4 +1,4 @@
-cbuffer per_draw_call
+cbuffer per_draw_call : register(c0)
 {
     row_major float4x4 m_inverse_projection;
     row_major float4x4 m_view; 
@@ -10,17 +10,16 @@ cbuffer per_draw_call
 
 struct vs_output
 {
-    float4  position_ps	        : sv_position; 
+    float4  position_ps	        : sv_position;
     float2  uv                  : texcoord;
-    float4  light_direction_vs  : light_direction;
-    float4  light_color         : light_color;
 };
 
-Texture2D		diffuse_gbuffer;
-Texture2D		normal_gbuffer;
-Texture2D		specular_gloss_gbuffer;
 
-Texture2D       depth_buffer;
+Texture2D		normal_gbuffer  : register(t0);
+Texture2D		diffuse_gbuffer : register(t1);
+Texture2D		specular_gloss_gbuffer : register(t2);
+Texture2D       depth_buffer : register(t3);;
+
 SamplerState	default_sampler;
 
 
@@ -57,7 +56,10 @@ float4 main( in  vs_output input) : sv_target
 
     float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
 
-    return float4(surface_sample_position_vs.xyz, 1.0f);
+    return float4(surface_sample_position_vs.z, surface_sample_position_vs.z, surface_sample_position_vs.z, 1.0f);
+
+    //return float4(f_2, 1.0f);
+    //return float4(f_3);
 }
 
 

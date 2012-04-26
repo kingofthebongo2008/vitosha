@@ -55,6 +55,18 @@ namespace gx
 					break;
 				}
 
+                case gx::command::light_buffer_initialize:
+                {
+                    render_context->select_light_buffer(device_context);
+                    break;
+                }
+
+                case gx::command::light_buffer_finalize:
+                {
+                    render_context->end_light_buffer(device_context);
+                    break;
+                }
+
 				case gx::command::debug_initialize:
 				{
 					render_context->select_back_buffer_target(device_context);

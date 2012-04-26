@@ -32,7 +32,7 @@ namespace gx
 													m_texture_set.m_specular_view.get()
 												 };
 
-        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, resources );
+        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, sizeof(resources) / sizeof( resources[0]) , resources );
 	}
 
 	blinn_phong_material::blinn_phong_material ( blinn_phong_texture_set texture_set, blinn_phong_shader_set shader_set ) : m_texture_set(texture_set), m_shader_set(shader_set)
