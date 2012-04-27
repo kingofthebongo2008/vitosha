@@ -41,12 +41,11 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
 
-    directional_lights.push_back(  directional_light( math::set( 0.0f, -1.0f, 0.0f, 1.0f ) , gx::color::red() ) );
+    directional_lights.push_back(  directional_light( math::normalize3(math::set( 1.0f, 1.0f, 1.0f, 0.0f )) , gx::color::red() ) );
 
     //should be quad
     auto directional_entity = create_directional_lights_entity( context.m_device.get(), render_context->m_screen_space_render_data.m_screen_space_vertex_buffer, &directional_lights[0], &directional_lights[0] + directional_lights.size()  );
 
-    
 	//create point light entity and insert it into two worlds (for update and render)
 	auto point_lights = create_point_lights_entity( context.m_device.get() );
 	auto light_updater = create_light_entity_updater();
@@ -73,7 +72,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto root = scene->get_root();
 
     //auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
-    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::blue() , math::set(0.6f, 0.0f, 0.0f, 0.8f )  ); 
+    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::green() , math::set(0.6f, 0.0f, 0.0f, 0.9f )  ); 
 	
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );

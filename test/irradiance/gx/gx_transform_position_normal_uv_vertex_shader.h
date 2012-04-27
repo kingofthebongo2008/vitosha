@@ -23,7 +23,7 @@ namespace gx
 			m_wvp = value;
 		}
 
-        void set_world(math::matrix_float44 value)
+        void set_normal_transform(math::matrix_float44 value)
 		{
 			m_world = value;
 		}

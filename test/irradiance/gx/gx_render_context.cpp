@@ -233,7 +233,7 @@ namespace gx
 		texture_description.ArraySize = 1;
 		texture_description.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		texture_description.CPUAccessFlags = 0;
-		texture_description.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
+		texture_description.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		texture_description.Height = desc.BufferDesc.Height;
 		texture_description.MipLevels = 1;
 		texture_description.MiscFlags = 0;
@@ -319,8 +319,8 @@ namespace gx
 		ID3D11RenderTargetView* views[3] =
 		{ 
 												m_gbuffer_render_data.m_render_set.m_diffuse_target.get(),
-												m_gbuffer_render_data.m_render_set.m_normal_depth_target.get(),
-												m_gbuffer_render_data.m_render_set.m_specular_target.get()
+                                                m_gbuffer_render_data.m_render_set.m_specular_target.get(),
+												m_gbuffer_render_data.m_render_set.m_normal_depth_target.get()
 		};
 
 		device_context->OMSetRenderTargets( 3, views, m_depth_stencil_target.get() );
@@ -454,7 +454,7 @@ namespace gx
 		reset_shader_resources(device_context);
 
 		device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		device_context->OMSetBlendState(m_light_buffer_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
+		device_context->OMSetBlendState(m_gbuffer_render_data.m_state.m_blend.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState(m_light_buffer_render_data.m_state.m_depth.get(), 0 );
 
 		ID3D11RenderTargetView* views[1] =
@@ -472,7 +472,7 @@ namespace gx
 												m_default_render_data.m_state.m_sampler.get()
 											};
 
-		device_context->PSSetSamplers( 0, sizeof(samplers)/sizeof(samplers[0]), &samplers[0] ); 
+		device_context->PSSetSamplers( 0, sizeof(samplers) / sizeof(samplers[0]), &samplers[0] ); 
 		select_view_port(device_context);
 
         dx11::ps_set_shader(device_context, m_color_texture_pixel_shader );
@@ -671,10 +671,7 @@ namespace gx
 
     void render_context::create_light_buffer_render_data()
     {
-		m_light_buffer_render_data.m_state = m_gbuffer_render_data.m_state;
-
-        m_light_buffer_render_data.m_state.m_depth.reset();
-        m_light_buffer_render_data.m_state.m_blend.reset();
+		m_light_buffer_render_data.m_state.m_rasterizer = m_gbuffer_render_data.m_state.m_rasterizer;
 
         D3D11_DEPTH_STENCIL_DESC depth_stencil = {};
 		depth_stencil.DepthEnable = false;
@@ -694,6 +691,19 @@ namespace gx
         blend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 
 		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateBlendState(&blend, dx11::get_pointer(m_light_buffer_render_data.m_state.m_blend)));
+
+        D3D11_SAMPLER_DESC sampler = {};
+
+		sampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampler.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		sampler.MaxAnisotropy = 16;
+		sampler.MaxLOD = std::numeric_limits<float>::max();
+		sampler.MinLOD = std::numeric_limits<float>::min();
+		sampler.MipLODBias = 0;
+		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateSamplerState(&sampler, dx11::get_pointer(m_light_buffer_render_data.m_state.m_sampler)));
     }
 }
 

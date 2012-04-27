@@ -27,12 +27,12 @@ m_quad_data (quad_data)
 , m_vertex_pipeline(vertex_pipeline)
 , m_pixel_pipeline(pixel_pipeline)
 {
-    m_light_position_ws.reserve(8);
+    m_light_direction_ws.reserve(8);
     m_light_color.reserve(8);
 
     std::for_each ( begin, end, [= ] ( const directional_light& light ) 
     {
-            m_light_position_ws.push_back( light.get_power() );
+            m_light_direction_ws.push_back( light.get_power() );
             m_light_color.push_back ( light.get_direction() );
     }
     );
@@ -78,8 +78,8 @@ void directional_lights_entity::on_execute_draw_calls( gx::draw_call_context* co
     std::get<1>(m_pixel_pipeline).set_inverse_projection(*context->m_inverse_projection_matrix);
     std::get<1>(m_pixel_pipeline).set_view(*context->m_view_matrix);
 
-    std::get<1>(m_pixel_pipeline).set_light_count( static_cast<uint32_t> ( m_light_position_ws.size() ) );
-    std::get<1>(m_pixel_pipeline).set_light_position_ws( &m_light_position_ws[0], &m_light_position_ws[0] + m_light_position_ws.size() );
+    std::get<1>(m_pixel_pipeline).set_light_count( static_cast<uint32_t> ( m_light_direction_ws.size() ) );
+    std::get<1>(m_pixel_pipeline).set_light_direction_ws( &m_light_direction_ws[0], &m_light_direction_ws[0] + m_light_direction_ws.size() );
     std::get<1>(m_pixel_pipeline).set_light_color( &m_light_color[0], &m_light_color[0] + m_light_color.size() );
 
     std::get<1>(m_pixel_pipeline).flush(device_context);

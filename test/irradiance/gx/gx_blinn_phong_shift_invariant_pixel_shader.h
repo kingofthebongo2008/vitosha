@@ -19,7 +19,7 @@ namespace gx
 
 		explicit blinn_phong_shift_invariant_pixel_shader_constant_buffer ( ID3D11Device* device );
 
-		math::vector_float4 get_kd() const
+        math::vector_float4 get_kd() const
 		{
 			return m_kd;
 		}
@@ -38,6 +38,7 @@ namespace gx
 		{
 			m_ks_gloss = value;
 		}
+
 
 		void flush ( ID3D11DeviceContext* context )
 		{
@@ -71,14 +72,13 @@ namespace gx
 
 		size_t size() const
 		{
-			return sizeof(m_kd) + sizeof(m_ks_gloss) ;
+			return sizeof(m_kd) + sizeof(m_ks_gloss);
 		}
 
 		public:
 
 		math::vector_float4		m_kd;			//diffuse albedo
 		math::vector_float4		m_ks_gloss;		//specular color + gloss
-
 		dx11::id3d11buffer_ptr	m_buffer;
 	};
 

@@ -18,7 +18,7 @@ struct ps_output
 	float4	m_ks_gloss		: sv_target2;
 };
 
-ps_output main( in  vs_output input) : SV_Target
+ps_output main( in  vs_output input)
 {
     ps_output result;
 

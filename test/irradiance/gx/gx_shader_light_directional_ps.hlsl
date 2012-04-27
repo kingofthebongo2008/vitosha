@@ -2,7 +2,7 @@ cbuffer per_draw_call : register(c0)
 {
     row_major float4x4 m_inverse_projection;
     row_major float4x4 m_view; 
-    float4             m_light_position_ws[8];
+    float4             m_light_direction_ws[8];
     float4             m_light_color[8];
     uint               m_light_count;
 };
@@ -20,7 +20,7 @@ Texture2D		diffuse_gbuffer : register(t1);
 Texture2D		specular_gloss_gbuffer : register(t2);
 Texture2D       depth_buffer : register(t3);;
 
-SamplerState	default_sampler;
+SamplerState	default_sampler : register(s0);
 
 
 float3  convert_to_view_space ( float x, float y, float depth_buffer_z)
@@ -44,22 +44,85 @@ float3 convert_to_view_space ( float2 texture_coord, float depth_buffer_z)
     return convert_to_view_space( result.x, result.y, depth_buffer_z );
 }
 
-float4 main( in  vs_output input) : sv_target
+float3 rigid_transform_vector(float4 v, float4x4 m)
 {
-	float3 f_1 = diffuse_gbuffer.Sample(default_sampler, input.uv).xyz;
-    float3 f_2 = normal_gbuffer.Sample(default_sampler, input.uv).xyz;
-    float4 f_3 = specular_gloss_gbuffer.Sample(default_sampler, input.uv);
+    //get rid of translation (assume no scaling)
+    float4x4 m_1 = m;
+	m_1[3] = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    return mul ( v, m_1 ).xyz;
+}  
+
+float3 fresnel_schlick(float3 specular_color, float3 l,float3 n)
+{
+    return specular_color + (1.0f - specular_color) * pow( ( 1.0f - saturate(dot(l, n))) , 5);
+}
+
+float3 half_way_vector(float3 l, float3 n)
+{
+    return normalize( l + n );
+}
+
+float decode_specular_power( float gloss )
+{
+    return pow ( 2, 10 * gloss + 1 );
+}
+
+float decode_specular_power( float4 ks_gloss )
+{
+    return decode_specular_power(ks_gloss.w) ;
+}
+
+float3 decode_specular_color( float4 ks_gloss )
+{
+    return ks_gloss.xyz;
+}
+
+float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3 n)
+{
+    float3 h = half_way_vector(l, n );
+
+    float3 fresnel = fresnel_schlick( specular_color, l, h );
+
+    float  multiplier = ( (power + 2) / 8 )  * pow ( saturate( dot( n, h ) ) , power ) ;
+
+    return multiplier * fresnel * saturate( dot (l, n) );
+}
+
+float3 blinn_phong_diffuse(float3 albedo, float3 l, float3 n )
+{
+    return albedo * saturate(  ( dot ( l, n ) ) );
+}
+
+float3 main( in  vs_output input) : sv_target
+{
+
+	float3 kd               = diffuse_gbuffer.Sample(default_sampler, input.uv).xyz;
+    float3 n_vs             = normal_gbuffer.Sample( default_sampler, input.uv ).xyz;
+    float4 ks_gloss         = specular_gloss_gbuffer.Sample(default_sampler, input.uv);
 
     float depth_buffer_z = depth_buffer.Sample(default_sampler, input.uv).x;
 
     if ( depth_buffer_z == 1.0f ) discard;
 
-    float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
+    //float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
 
-    return float4(surface_sample_position_vs.z, surface_sample_position_vs.z, surface_sample_position_vs.z, 1.0f);
+    //float3 radiance = normal_vs;
+    //return radiance;
 
-    //return float4(f_2, 1.0f);
-    //return float4(f_3);
+    const float3		light_direction_vs = { -1.0f, 1.0f, 1.0f } ;
+	const float3		light_power		   = { 3.1415f, 3.1415f, 3.1415f } ;	//watt
+
+	float3 light_vs1	= normalize(light_direction_vs);
+	float3 normal_vs1	= n_vs;
+
+    float3 diffuse		= blinn_phong_diffuse ( kd, light_vs1, n_vs) ;
+    float3 specular		= blinn_phong_specular ( decode_specular_power( ks_gloss ), decode_specular_power(ks_gloss), light_vs1, n_vs) ;
+
+    float3 radiance		= diffuse + specular;
+
+
+    return radiance;
+    
 }
 
 

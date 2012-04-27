@@ -40,6 +40,35 @@ namespace math
 		return translation(v);
 	}
 
+    inline matrix_float44 translation_x(float v)
+	{
+        return translation( v, 0.0f, 0.0f );
+	}
+
+    inline matrix_float44 translation_y(float v)
+	{
+        return translation( v, 0.0f, 0.0f );
+	}
+
+    inline matrix_float44 translation_z(float v)
+	{
+        return translation( v, 0.0f, 0.0f );
+	}
+
+    inline matrix_float44 translation_xy(float v)
+	{
+        return translation( v, v, 0.0f );
+	}
+
+    inline matrix_float44 translation_xz(float v)
+	{
+        return translation( v, 0.0f, v );
+	}
+
+    inline matrix_float44 translation_yz(float v)
+	{
+        return translation( 0.0f, v, v );
+	}
 
 	inline matrix_float44 scaling(vector_float4 v)
 	{
@@ -59,7 +88,57 @@ namespace math
 		return m;
 	}
 
-	inline matrix_float44 scaling(float x, float y, float z)
+    inline matrix_float44 scaling_x(float x)
+	{
+        return scaling( set ( x, 1.0f, 1.0f, 1.0f ) );
+	}
+
+    inline matrix_float44 scaling_y(float y)
+	{
+        return scaling( set ( 1.0f, y, 1.0f, 1.0f) );
+	}
+
+    inline matrix_float44 scaling_z(float z)
+	{
+        return scaling( set ( 1.0f, 1.0f, z, 1.0f) );
+	}
+
+    inline matrix_float44 scaling_w(float w)
+	{
+        return scaling( set ( 1.0f, 1.0f, 1.0f, w) );
+	}
+
+    inline matrix_float44 scaling_xy(float v)
+	{
+        return scaling( set ( v, v, 1.0f, 1.0f) );
+	}
+
+    inline matrix_float44 scaling_xz(float v)
+	{
+        return scaling( set ( v, 1.0f, v, 1.0f) );
+	}
+
+    inline matrix_float44 scaling_xw(float v)
+	{
+        return scaling( set ( v, 1.0f, z, 1.0f) );
+	}
+
+    inline matrix_float44 scaling_yz(float v)
+	{
+        return scaling( set ( 1.0f, v, v, 1.0f) );
+	}
+
+    inline matrix_float44 scaling_yw(float v)
+	{
+        return scaling( set ( 1.0f, v, 1.0f, v) );
+	}
+
+    inline matrix_float44 scaling_zw(float v)
+	{
+        return scaling( set ( 1.0f, 1.0f, v, v) );
+	}
+    
+    inline matrix_float44 scaling(float x, float y, float z)
 	{
 		vector_float4 v = set(x, y, z, 1.0f);
 		return scaling(v);

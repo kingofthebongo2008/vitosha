@@ -35,9 +35,9 @@ namespace gx
             m_light_count = value;
         }
 
-        void set_light_position_ws( const math::vector_float4* begin, const math::vector_float4* end )
+        void set_light_direction_ws( const math::vector_float4* begin, const math::vector_float4* end )
         {
-            std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_position_ws[0], 8, 0 ) );
+            std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_direction_ws[0], 8, 0 ) );
         }
 
         void set_light_color( const math::vector_float4* begin, const math::vector_float4* end)
@@ -67,7 +67,7 @@ namespace gx
 
         size_t size() const
         {
-            return sizeof(m_inverse_projection) + sizeof(m_view);
+            return ( sizeof(m_inverse_projection) + sizeof(m_view) + sizeof(m_light_direction_ws) + sizeof ( m_light_color ) + sizeof(m_light_count) + (16 - 1) ) & ~(16 - 1) ;
         }
 
 		private:
@@ -76,7 +76,7 @@ namespace gx
 		math::matrix_float44	m_inverse_projection;
         math::matrix_float44	m_view;
 
-        math::vector_float4     m_light_position_ws[8];
+        math::vector_float4     m_light_direction_ws[8];
         math::vector_float4     m_light_color[8];
         uint32_t                m_light_count;
 	};

@@ -70,7 +70,7 @@ class directional_lights_entity : public gx::entity
     gx::light_directional_vertex_pipeline   m_vertex_pipeline;
     gx::light_directional_pixel_pipeline    m_pixel_pipeline;
 
-    std::vector<math::vector_float4>        m_light_position_ws;
+    std::vector<math::vector_float4>        m_light_direction_ws;
     std::vector<math::vector_float4>        m_light_color;
 };
 

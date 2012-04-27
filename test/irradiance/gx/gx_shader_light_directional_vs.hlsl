@@ -10,7 +10,7 @@ struct vs_output
     float2  uv                  : texcoord;
 };
 
-float4 rigid_transform_vector(float3 v, float4x4 m)
+float4 rigid_transform_vector(float4 v, float4x4 m)
 {
     //get rid of translation (assume no scaling)
     float4x4 m_1 = m;
