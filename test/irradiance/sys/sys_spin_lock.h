@@ -1,6 +1,7 @@
 #ifndef __SYS_SPIN_LOCK_H__
 #define __SYS_SPIN_LOCK_H__
 
+
 #include <cstdint>
 #include <intrin.h>
 
