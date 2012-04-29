@@ -44,7 +44,7 @@ namespace wnd
 		m_main_camera.set_aspect_ratio(16.0f / 9.0f);
 		m_main_camera.set_fov(3.1415f / 4.0f );
 		m_main_camera.set_near(1.0f);
-		m_main_camera.set_far(10.f); //meters
+		m_main_camera.set_far(200.f); //meters
 
 	}
 
@@ -137,44 +137,47 @@ namespace wnd
 
 	void window::process_user_input()
 	{
+        const float movement_camera_speed = 0.002f;
+        const float rotation_camera_speed = 0.0001f * 3.1415f;
+
 		if (m_pad_state.is_button_down<io::pad_state::button_0>())
 		{
-			gxu::camera_command command = gxu::create_move_forward_command(0.02f);
+			gxu::camera_command command = gxu::create_move_forward_command(movement_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
 
 		if (m_pad_state.is_button_down<io::pad_state::button_1>())
 		{
-			gxu::camera_command command = gxu::create_move_backward_command(0.02f);
+			gxu::camera_command command = gxu::create_move_backward_command(movement_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
 
 		if (m_pad_state.is_button_down<io::pad_state::button_2>())
 		{
-			gxu::camera_command command = gxu::create_turn_camera_left_command(3.1415f / 1000.0f);
+			gxu::camera_command command = gxu::create_turn_camera_left_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
 
 		if (m_pad_state.is_button_down<io::pad_state::button_3>())
 		{
-			gxu::camera_command command = gxu::create_turn_camera_right_command(3.1415f / 1000.0f);
+			gxu::camera_command command = gxu::create_turn_camera_right_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
 
 		if (m_pad_state.is_button_down<io::pad_state::button_4>())
 		{
-			gxu::camera_command command = gxu::create_aim_camera_up_command(3.1415f / 1000.0f);
+			gxu::camera_command command = gxu::create_aim_camera_up_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
 
 		if (m_pad_state.is_button_down<io::pad_state::button_5>())
 		{
-			gxu::camera_command command = gxu::create_aim_camera_down_command(3.1415f / 1000.0f);
+			gxu::camera_command command = gxu::create_aim_camera_down_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}

@@ -51,13 +51,14 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto light_updater = create_light_entity_updater();
 	dynamic_entities->add_type( 0, light_updater );
 
-	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), math::set(1.5f,0.0f,0.0f,1.0f), 1.0f, 0.5f);
+
+	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), math::set(10.0f, -10.0f, 10.0f,  1.0f), 1.0f, 0.5f);
 	point_light light2 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(0.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
 	point_light light3 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(-1.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
 
 	point_lights->add_light(light1);
-	point_lights->add_light(light2);
-	point_lights->add_light(light3);
+	//point_lights->add_light(light2);
+	//point_lights->add_light(light3);
 
     auto it = scene->begin();
     auto it_end = scene->end();
@@ -72,7 +73,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto root = scene->get_root();
 
     //auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
-    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::green() , math::set(0.6f, 0.0f, 0.0f, 0.9f )  ); 
+    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::red() , math::set(0.05f, 0.05f, 0.05f, 0.66f )  ); 
 	
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );

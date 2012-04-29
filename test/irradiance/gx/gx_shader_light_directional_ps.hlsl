@@ -44,22 +44,20 @@ float3 convert_to_view_space ( float2 texture_coord, float depth_buffer_z)
     return convert_to_view_space( result.x, result.y, depth_buffer_z );
 }
 
-float3 rigid_transform_vector(float4 v, float4x4 m)
+float3 rigid_transform_vector(float3 v, float4x4 m)
 {
     //get rid of translation (assume no scaling)
-    float4x4 m_1 = m;
-	m_1[3] = float4(0.0f, 0.0f, 0.0f, 1.0f);
-    return mul ( v, m_1 ).xyz;
+    return mul ( float4(v.xyz,0.0f ), m );
 }  
 
-float3 fresnel_schlick(float3 specular_color, float3 l,float3 n)
+float3 fresnel_schlick(float3 specular_color, float3 l,float3 h)
 {
-    return specular_color + (1.0f - specular_color) * pow( ( 1.0f - saturate(dot(l, n))) , 5);
+    return specular_color + (1.0f - specular_color) * pow(  1.0f - saturate( dot(l, h) )  , 5);
 }
 
-float3 half_way_vector(float3 l, float3 n)
+float3 half_way_vector(float3 l, float3 v)
 {
-    return normalize( l + n );
+    return normalize( l + v );
 }
 
 float decode_specular_power( float gloss )
@@ -77,9 +75,9 @@ float3 decode_specular_color( float4 ks_gloss )
     return ks_gloss.xyz;
 }
 
-float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3 n)
+float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3 n, float3 v)
 {
-    float3 h = half_way_vector(l, n );
+    float3 h = half_way_vector( l, v );
 
     float3 fresnel = fresnel_schlick( specular_color, l, h );
 
@@ -104,21 +102,19 @@ float3 main( in  vs_output input) : sv_target
 
     if ( depth_buffer_z == 1.0f ) discard;
 
-    //float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
+    float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
 
-    //float3 radiance = normal_vs;
-    //return radiance;
+    float3 v            = surface_sample_position_vs;
 
-    const float3		light_direction_vs = { -1.0f, 1.0f, 1.0f } ;
-	const float3		light_power		   = { 3.1415f, 3.1415f, 3.1415f } ;	//watt
+    const float4		light_position_ws  = { 10.0f, -10.0f, 10.0f,  1.0f }; 
 
-	float3 light_vs1	= normalize(light_direction_vs);
+	float3 light_vs1	= normalize (  mul ( light_position_ws  , m_view ) - surface_sample_position_vs   ) ;//rigid_transform_vector( normalize(light_position_ws) , m_view ) ;   //normalize(light_direction_vs);
 	float3 normal_vs1	= n_vs;
 
     float3 diffuse		= blinn_phong_diffuse ( kd, light_vs1, n_vs) ;
-    float3 specular		= blinn_phong_specular ( decode_specular_power( ks_gloss ), decode_specular_power(ks_gloss), light_vs1, n_vs) ;
+    float3 specular		= blinn_phong_specular ( decode_specular_color( ks_gloss ), decode_specular_power(ks_gloss), light_vs1 , n_vs, normalize(v) ) ;
 
-    float3 radiance		= diffuse + specular;
+    float3 radiance		=  specular + diffuse;
 
 
     return radiance;
