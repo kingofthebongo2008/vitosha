@@ -29,7 +29,7 @@ namespace dx11
         return result;
     }
 
-    inline id3d11rasterizerstate_ptr      create_rasterizer_state(ID3D11Device* device, const D3D11_RASTERIZER_DESC* description )
+    inline id3d11rasterizerstate_ptr      create_raster_state(ID3D11Device* device, const D3D11_RASTERIZER_DESC* description )
     {
         id3d11rasterizerstate_ptr result;
         dx11::throw_if_failed< dx11::create_rasterizer_state_exception> (device->CreateRasterizerState(description, dx11::get_pointer(result) ) );

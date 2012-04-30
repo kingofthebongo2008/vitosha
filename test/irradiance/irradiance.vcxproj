@@ -225,6 +225,7 @@
     <ClInclude Include="dx11\dx11_helpers.h" />
     <ClInclude Include="dx11\dx11_pointers.h" />
     <ClInclude Include="dx11\dx11_system.h" />
+    <ClInclude Include="dx11\dxgi_helpers.h" />
     <ClInclude Include="fnd\fnd_universe.h" />
     <ClInclude Include="fnd\fnd_updater.h" />
     <ClInclude Include="fnd\fnd_world.h" />
@@ -306,6 +307,7 @@
   <ItemGroup>
     <ClCompile Include="dx11\dx11_helpers.cpp" />
     <ClCompile Include="dx11\dx11_system.cpp" />
+    <ClCompile Include="dx11\dxgi_helpers.cpp" />
     <ClCompile Include="fnd\fnd_universe.cpp" />
     <ClCompile Include="fnd\fnd_updater.cpp" />
     <ClCompile Include="fnd\fnd_world.cpp" />
