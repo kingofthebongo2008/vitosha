@@ -58,6 +58,7 @@
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -65,6 +66,9 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -286,11 +290,8 @@
     <ClInclude Include="gx\gx_view.h" />
     <ClInclude Include="gx\gx_view_port.h" />
     <ClInclude Include="sys\sys_base.h" />
-    <ClInclude Include="sys\sys_scheduler.h" />
     <ClInclude Include="sys\sys_spin_lock.h" />
     <ClInclude Include="sys\sys_spsc_queue.h" />
-    <ClInclude Include="sys\sys_task.h" />
-    <ClInclude Include="sys\sys_thread.h" />
     <ClInclude Include="util\util_bits.h" />
     <ClInclude Include="win32/irradiance.h" />
     <ClInclude Include="win32/resource.h" />

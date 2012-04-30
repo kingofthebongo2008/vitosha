@@ -35,6 +35,11 @@ namespace dx11
 
     };
 
+    class create_texture2d_exception : public create_texture_exception
+    {
+
+    };
+
     class create_buffer_exception : public create_resource_exception
     {
 
@@ -55,6 +60,26 @@ namespace dx11
 
     };
 
+    class create_blend_state_exception : public create_state_exception
+    {
+
+    };
+
+    class create_depth_stencil_state_exception : public create_state_exception
+    {
+
+    };
+
+    class create_rasterizer_state_exception : public create_state_exception
+    {
+
+    };
+
+    class create_sampler_state_exception : public create_state_exception
+    {
+
+    };
+
 	class create_deferred_context_exception : public d3d11_exception
     {
 
@@ -71,6 +96,11 @@ namespace dx11
     };
 
 	class create_resource_view_exception : public create_resource_exception
+    {
+
+    };
+
+    class create_shader_resource_view_exception : public create_resource_exception
     {
 
     };

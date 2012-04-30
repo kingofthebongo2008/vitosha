@@ -135,7 +135,8 @@ namespace gx
 	{
 		dx11::id3d11texture2d_ptr	back_buffer;
 		dx11::throw_if_failed< dx11::d3d11_exception> ( m_system_context.m_swap_chain->GetBuffer(0, __uuidof( ID3D11Texture2D ), (void**) dx11::get_pointer(back_buffer) ) );
-		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( back_buffer.get(), 0, dx11::get_pointer(m_back_buffer_render_target) ) );
+
+        m_back_buffer_render_target = dx11::create_render_target_view( m_system_context.m_device.get(), back_buffer.get() );
 	}
 
 	void render_context::create_depth_buffer()
@@ -158,7 +159,7 @@ namespace gx
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
 		texture_description.Width = desc.BufferDesc.Width;
 
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_depth_stencil)));
+		m_depth_stencil = dx11::create_texture_2d( m_system_context.m_device.get(), &texture_description  );
         
         D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view = {};
 
@@ -166,9 +167,8 @@ namespace gx
         depth_stencil_view.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         depth_stencil_view.Texture2D.MipSlice = 0;
         depth_stencil_view.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), &depth_stencil_view, dx11::get_pointer(m_depth_stencil_target) ));
 
-
+        m_depth_stencil_target = dx11::create_depth_stencil_view (  m_system_context.m_device.get(), m_depth_stencil.get(), &depth_stencil_view );
 	}
 
 	void render_context::create_diffuse_buffer()
@@ -191,9 +191,10 @@ namespace gx
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
 		texture_description.Width = desc.BufferDesc.Width;
 
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( & texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse)));
-		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse_target)));
-		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_diffuse.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_diffuse_view)));
+        m_gbuffer_render_data.m_render_set.m_diffuse = dx11::create_texture_2d( m_system_context.m_device.get(), &texture_description);
+        m_gbuffer_render_data.m_render_set.m_diffuse_target = dx11::create_render_target_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_diffuse.get() ) ;
+        m_gbuffer_render_data.m_render_set.m_diffuse_view = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_diffuse.get() ) ;
+
 	}
 
 	void render_context::create_specular_buffer()
@@ -216,9 +217,10 @@ namespace gx
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
 		texture_description.Width = desc.BufferDesc.Width;
 
-		dx11::throw_if_failed< dx11::create_texture_exception > ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular)));
-		dx11::throw_if_failed< dx11::create_render_target_view_exception > ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_specular.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_target)));
-		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_specular.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_specular_view)));
+        m_gbuffer_render_data.m_render_set.m_specular = dx11::create_texture_2d( m_system_context.m_device.get(), &texture_description);
+        m_gbuffer_render_data.m_render_set.m_specular_target = dx11::create_render_target_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_specular.get() ) ;
+        m_gbuffer_render_data.m_render_set.m_specular_view = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_specular.get() ) ;
+
 	}
 
 	void render_context::create_normal_depth_buffer()
@@ -241,10 +243,11 @@ namespace gx
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
 		texture_description.Width = desc.BufferDesc.Width;
 
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth)));
-		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_gbuffer_render_data.m_render_set.m_normal_depth.get(), 0, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_target)));
-		dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_gbuffer_render_data.m_render_set.m_normal_depth.get(), nullptr, dx11::get_pointer(m_gbuffer_render_data.m_render_set.m_normal_depth_view) ) );
-	}
+        m_gbuffer_render_data.m_render_set.m_normal_depth = dx11::create_texture_2d( m_system_context.m_device.get(), &texture_description);
+        m_gbuffer_render_data.m_render_set.m_normal_depth_target = dx11::create_render_target_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_normal_depth.get() ) ;
+        m_gbuffer_render_data.m_render_set.m_normal_depth_view = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_normal_depth.get() ) ;
+ 
+    }
 
     void render_context::create_light_buffer()
     {
@@ -258,7 +261,7 @@ namespace gx
 		texture_description.ArraySize = 1;
 		texture_description.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		texture_description.CPUAccessFlags = 0;
-		texture_description.Format = DXGI_FORMAT_R16G16B16A16_UNORM;//DXGI_FORMAT_R8G8B8A8_UNORM;//DXGI_FORMAT_R16G16B16A16_UNORM;
+		texture_description.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		texture_description.Height = desc.BufferDesc.Height;
 		texture_description.MipLevels = 1;
 		texture_description.MiscFlags = 0;
@@ -266,18 +269,18 @@ namespace gx
 		texture_description.Usage = D3D11_USAGE_DEFAULT;
 		texture_description.Width = desc.BufferDesc.Width;
         
-		dx11::throw_if_failed< dx11::create_texture_exception> ( m_system_context.m_device->CreateTexture2D( &texture_description, 0, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer)));
-		dx11::throw_if_failed< dx11::create_render_target_view_exception> ( m_system_context.m_device->CreateRenderTargetView( m_light_buffer_render_data.m_render_set.m_light_buffer.get(), 0, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer_target)));
-        dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_light_buffer_render_data.m_render_set.m_light_buffer.get(), nullptr, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_light_buffer_view) ) );
-        
-
+        m_light_buffer_render_data.m_render_set.m_light_buffer = dx11::create_texture_2d( m_system_context.m_device.get(), &texture_description);
+        m_light_buffer_render_data.m_render_set.m_light_buffer_target = dx11::create_render_target_view( m_system_context.m_device.get(), m_light_buffer_render_data.m_render_set.m_light_buffer.get() ) ;
+        m_light_buffer_render_data.m_render_set.m_light_buffer_view = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_light_buffer_render_data.m_render_set.m_light_buffer.get() ) ;
+ 
 
         D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view = {};
         depth_stencil_view.Flags = D3D11_DSV_READ_ONLY_DEPTH;
         depth_stencil_view.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         depth_stencil_view.Texture2D.MipSlice = 0;
         depth_stencil_view.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( m_system_context.m_device->CreateDepthStencilView( m_depth_stencil.get(), &depth_stencil_view, dx11::get_pointer( m_light_buffer_render_data.m_render_set.m_depth_stencil_target) ));
+
+        m_light_buffer_render_data.m_render_set.m_depth_stencil_target = dx11::create_depth_stencil_view( m_system_context.m_device.get(), m_depth_stencil.get(), &depth_stencil_view );
 
         D3D11_SHADER_RESOURCE_VIEW_DESC depth_stencil_resource_view = {};
         depth_stencil_resource_view.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
@@ -285,7 +288,7 @@ namespace gx
         depth_stencil_resource_view.Texture2D.MipLevels = 1;
         depth_stencil_resource_view.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 
-        dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_depth_stencil.get(), &depth_stencil_resource_view, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_depth_stencil_view) ) );
+        m_light_buffer_render_data.m_render_set.m_depth_stencil_view = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_depth_stencil.get(), &depth_stencil_resource_view);//dx11::throw_if_failed< dx11::create_resource_view_exception>( m_system_context.m_device->CreateShaderResourceView( m_depth_stencil.get(), &depth_stencil_resource_view, dx11::get_pointer(m_light_buffer_render_data.m_render_set.m_depth_stencil_view) ) );
     }
 	
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
@@ -377,7 +380,6 @@ namespace gx
         };
 
         dx11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view);
-        //device_context->PSSetShaderResources( 0, sizeof(shader_resource_view)/sizeof(shader_resource_view[0]), &shader_resource_view[0]);
     }
 
     void render_context::end_light_buffer(ID3D11DeviceContext* device_context)

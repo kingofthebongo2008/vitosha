@@ -8,51 +8,88 @@
 
 namespace dx11
 {
-	dx11::id3d11buffer_ptr create_constant_buffer(ID3D11Device* device, uint32_t size);
+    inline id3d11blendstate_ptr   create_blend_state(ID3D11Device* device,   const D3D11_BLEND_DESC* description )
+    {
+        dx11::id3d11blendstate_ptr result;
+        dx11::throw_if_failed< dx11::create_blend_state_exception> ( device->CreateBlendState(description, dx11::get_pointer(result) ) );
+        return result;
+    }
+    
+    inline id3d11depthstencilstate_ptr    create_depth_stencil_state(ID3D11Device* device,  const D3D11_DEPTH_STENCIL_DESC* description )
+    {
+        id3d11depthstencilstate_ptr result;
+        dx11::throw_if_failed< dx11::create_depth_stencil_state_exception> ( device->CreateDepthStencilState( description, dx11::get_pointer(result) ) );
+        return result;
+    }
 
-	dx11::id3d11buffer_ptr create_default_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size );
-	dx11::id3d11buffer_ptr create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size );
+    inline id3d11depthstencilview_ptr    create_depth_stencil_view(ID3D11Device* device, ID3D11Resource* resource,  const D3D11_DEPTH_STENCIL_VIEW_DESC* description )
+    {
+        id3d11depthstencilview_ptr result;
+        dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( device->CreateDepthStencilView(resource, description, dx11::get_pointer(result) ) );
+        return result;
+    }
 
-	dx11::id3d11buffer_ptr create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size );
-	dx11::id3d11buffer_ptr create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size );
+    inline id3d11rasterizerstate_ptr      create_rasterizer_state(ID3D11Device* device, const D3D11_RASTERIZER_DESC* description )
+    {
+        id3d11rasterizerstate_ptr result;
+        dx11::throw_if_failed< dx11::create_rasterizer_state_exception> (device->CreateRasterizerState(description, dx11::get_pointer(result) ) );
+        return result;
+    }
+    
+    inline id3d11rendertargetview_ptr    create_render_target_view(ID3D11Device* device, ID3D11Resource* resource, const D3D11_RENDER_TARGET_VIEW_DESC* description )
+    {
+        id3d11rendertargetview_ptr result;
+        dx11::throw_if_failed< dx11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, description, dx11::get_pointer(result) ) );
+        return result;
+    }
 
-	dx11::id3d11buffer_ptr create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size );
-	dx11::id3d11buffer_ptr create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size );
+    inline id3d11rendertargetview_ptr    create_render_target_view(ID3D11Device* device, ID3D11Resource* resource )
+    {
+        id3d11rendertargetview_ptr result;
+        dx11::throw_if_failed< dx11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, nullptr, dx11::get_pointer(result) ) );
+        return result;
+    }
 
-	inline dx11::id3d11buffer_ptr create_constant_buffer(ID3D11Device* device, size_t size)
-	{
-		return create_constant_buffer( device, static_cast<uint32_t> (size) );
-	}
+    inline id3d11samplerstate_ptr        create_sampler_state(ID3D11Device* device, const D3D11_SAMPLER_DESC* description )
+    {
+        id3d11samplerstate_ptr result;
+        dx11::throw_if_failed< dx11::create_sampler_state_exception> (device->CreateSamplerState(description, dx11::get_pointer(result) ) );
+        return result;
+    }
 
-	inline dx11::id3d11buffer_ptr create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
-	{
-		return create_default_vertex_buffer(device, initial_data, static_cast<uint32_t>(size) );
-	}
+    inline id3d11shaderresourceview_ptr        create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource , const D3D11_SHADER_RESOURCE_VIEW_DESC* description)
+    {
+        id3d11shaderresourceview_ptr result;
+        dx11::throw_if_failed< dx11::create_shader_resource_view_exception> ( device->CreateShaderResourceView( resource, description, dx11::get_pointer(result) )  );
+        return result;
+    }
 
-	inline dx11::id3d11buffer_ptr create_default_index_buffer(ID3D11Device* device, const void* initial_data, size_t size )
-	{
-		return create_default_index_buffer(device, initial_data, static_cast<uint32_t>(size) );
-	}
+    inline id3d11shaderresourceview_ptr create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource)
+    {
+        return create_shader_resource_view(device, resource, nullptr);
+    }
 
-	inline dx11::id3d11buffer_ptr create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
-	{
-			return create_dynamic_vertex_buffer(device, initial_data, static_cast<uint32_t>(size) );
-	}
+    inline id3d11texture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description, const D3D11_SUBRESOURCE_DATA* initial_data )
+    {
+        id3d11texture2d_ptr result;
+        dx11::throw_if_failed< dx11::create_texture2d_exception> (device->CreateTexture2D(description, initial_data, dx11::get_pointer(result) ) );
+        return result;
+    }
 
-	inline dx11::id3d11buffer_ptr create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, size_t size )
-	{
-		return create_dynamic_index_buffer(device, initial_data, static_cast<uint32_t>(size) );
-	}
+    inline id3d11texture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description)
+    {
+        return create_texture_2d(device, description, nullptr);
+    }
 
-	inline dx11::id3d11buffer_ptr create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
-	{
-		return create_immutable_vertex_buffer( device, initial_data, static_cast<uint32_t>(size) );
-	}
+    id3d11buffer_ptr              create_constant_buffer(ID3D11Device* device, size_t size);
+	id3d11buffer_ptr              create_default_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	id3d11buffer_ptr              create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
-	inline dx11::id3d11buffer_ptr create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, size_t size )
-	{
-		return create_immutable_index_buffer( device, initial_data, static_cast<uint32_t>(size) );
-	}
+	id3d11buffer_ptr              create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	id3d11buffer_ptr              create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+
+	id3d11buffer_ptr              create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	id3d11buffer_ptr              create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
 	struct d3d11_buffer_scope_lock
 	{
@@ -71,8 +108,6 @@ namespace dx11
 		ID3D11Buffer*				m_buffer;
 	};
 
-
-    
     inline void vs_set_shader_resources(ID3D11DeviceContext* device_context, ID3D11ShaderResourceView * const * shader_resource_view)
     {
         device_context->VSSetShaderResources( 0, 1, shader_resource_view);

@@ -9,11 +9,11 @@ namespace dx11
 {
 	namespace
 	{
-		static dx11::id3d11buffer_ptr create_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size, D3D11_USAGE dx11_bind_flags, uint32_t  cpu_access_flags )
+		static dx11::id3d11buffer_ptr create_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size, D3D11_USAGE dx11_bind_flags, uint32_t  cpu_access_flags )
 		{
 			D3D11_BUFFER_DESC desc = {};
 			dx11::id3d11buffer_ptr result;
-			desc.ByteWidth = size;
+			desc.ByteWidth = static_cast<UINT> (size);
 			desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			desc.CPUAccessFlags = cpu_access_flags;
 			desc.Usage = dx11_bind_flags;
@@ -22,11 +22,11 @@ namespace dx11
 			return result;
 		}
 
-		static dx11::id3d11buffer_ptr create_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size, D3D11_USAGE dx11_bind_flags, uint32_t cpu_access_flags  )
+		static dx11::id3d11buffer_ptr create_index_buffer(ID3D11Device* device, const void* initial_data, size_t size, D3D11_USAGE dx11_bind_flags, uint32_t cpu_access_flags  )
 		{
 			D3D11_BUFFER_DESC desc = {};
 			dx11::id3d11buffer_ptr result;
-			desc.ByteWidth = size;
+			desc.ByteWidth = static_cast<UINT> (size);
 			desc.BindFlags = D3D11_BIND_INDEX_BUFFER ;
 			desc.CPUAccessFlags = cpu_access_flags;
 			desc.Usage = dx11_bind_flags;
@@ -36,12 +36,12 @@ namespace dx11
 		}
 	}
 
-	dx11::id3d11buffer_ptr create_constant_buffer(ID3D11Device* device, uint32_t size)
+	dx11::id3d11buffer_ptr create_constant_buffer(ID3D11Device* device, size_t size)
 	{
 		D3D11_BUFFER_DESC desc = {};
 		dx11::id3d11buffer_ptr result;
 
-		desc.ByteWidth = size;
+		desc.ByteWidth = static_cast<UINT> (size);
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -50,32 +50,32 @@ namespace dx11
 		return result;
 	}
 
-	dx11::id3d11buffer_ptr create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
+	dx11::id3d11buffer_ptr create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
 	{
 		return create_vertex_buffer(device, initial_data, size, D3D11_USAGE_DEFAULT, 0);
 	}
 
-	dx11::id3d11buffer_ptr create_default_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
+	dx11::id3d11buffer_ptr create_default_index_buffer(ID3D11Device* device, const void* initial_data, size_t size )
 	{
 		return create_index_buffer(device, initial_data, size, D3D11_USAGE_DEFAULT, 0);
 	}
 
-	dx11::id3d11buffer_ptr create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
+	dx11::id3d11buffer_ptr create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
 	{
 		return create_vertex_buffer(device, initial_data, size, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE );
 	}
 
-	dx11::id3d11buffer_ptr create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
+	dx11::id3d11buffer_ptr create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, size_t size )
 	{
 		return create_index_buffer(device, initial_data, size, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE );
 	}
 
-	dx11::id3d11buffer_ptr create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
+	dx11::id3d11buffer_ptr create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
 	{
 		return create_vertex_buffer(device, initial_data, size, D3D11_USAGE_IMMUTABLE, 0 );
 	}
 
-	dx11::id3d11buffer_ptr create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, uint32_t size )
+	dx11::id3d11buffer_ptr create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, size_t size )
 	{
 		return create_index_buffer(device, initial_data, size, D3D11_USAGE_IMMUTABLE, 0);
 	}
