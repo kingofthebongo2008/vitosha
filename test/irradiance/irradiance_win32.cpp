@@ -58,6 +58,20 @@ double GetCounter()
     return double(li.QuadPart-CounterStart) / PCFreq;
 }
 
+void myInvalidParameterHandler(const wchar_t* expression,
+   const wchar_t* function, 
+   const wchar_t* file, 
+   unsigned int line, 
+   uintptr_t pReserved)
+{
+   wprintf(L"Invalid parameter detected in function %s."
+            L" File: %s Line: %d\n", function, file, line);
+   wprintf(L"Expression: %s\n", expression);
+   abort();
+}
+
+
+
 extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe );
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -65,6 +79,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
+
+   _invalid_parameter_handler oldHandler, newHandler;
+   newHandler = myInvalidParameterHandler;
+   oldHandler = _set_invalid_parameter_handler(newHandler);
+
     UNUSED_PARAMETER(hInstance);
 	UNUSED_PARAMETER(nCmdShow);
 
@@ -419,4 +438,5 @@ static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	}
 	return (INT_PTR)FALSE;
 }
+
 

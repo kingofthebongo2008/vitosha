@@ -15,13 +15,16 @@
 #include <gx/gx_color_pixel_shader.h>
 #include <gx/gx_color_texture_pixel_shader.h>
 #include <gx/gx_color_texture_channel_3_pixel_shader.h>
+#include <gx/gx_copy_depth_pixel_shader.h>
 
 #include <gx/gx_debug_view_space_depth_pixel_shader.h>
 
 #include <gx/gx_lambert_pixel_shader.h>
 #include <gx/gx_lambert_shift_invariant_pixel_shader.h>
-#include <gx/gx_screen_space_quad.h>
 
+#include <gx/gx_render_resource.h>
+
+#include <gx/gx_screen_space_quad.h>
 #include <gx/gx_screen_space_uv_vertex_shader.h>
 
 #include <gx/gx_transform_position_vertex_shader.h>
@@ -34,93 +37,22 @@ namespace gx
 {
 	struct gbuffer_render_set
 	{
+        explicit gbuffer_render_set ( ID3D11Device* device) : 
+          m_normal( create_normal_resource(device, 320, 240 ) )
+        , m_diffuse( create_diffuse_resource( device, 320, 240 ) )
+        , m_specular( create_specular_resource( device, 320, 240 ) )
+        {
+
+        }
+
 		inline void reset()
 		{
-			m_normal_depth_target.reset();
-			m_diffuse_target.reset();
-			m_specular_target.reset();
 
-			m_depth_stencil_target.reset();
-			m_depth_stencil.reset();
-			
-			m_normal_depth.reset();
-			m_diffuse.reset();
-			m_specular.reset();
-
-			m_normal_depth_view.reset();
-			m_diffuse_view.reset();
-			m_specular_view.reset();
 		}
 
-		dx11::id3d11rendertargetview_ptr		m_normal_depth_target;
-		dx11::id3d11rendertargetview_ptr		m_diffuse_target;
-		dx11::id3d11rendertargetview_ptr		m_specular_target;
-
-		dx11::id3d11texture2d_ptr				m_depth_stencil;
-		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
-
-		dx11::id3d11texture2d_ptr				m_normal_depth;
-		dx11::id3d11texture2d_ptr				m_diffuse;
-		dx11::id3d11texture2d_ptr				m_specular;
-
-		dx11::id3d11shaderresourceview_ptr		m_normal_depth_view;
-		dx11::id3d11shaderresourceview_ptr		m_diffuse_view;
-		dx11::id3d11shaderresourceview_ptr		m_specular_view;
-	};
-
-
-    struct light_buffer_render_set
-	{
-		inline void reset()
-		{
-			m_normal_depth.reset();
-			m_diffuse.reset();
-			m_specular.reset();
-
-			m_depth_stencil_target.reset();
-			m_depth_stencil.reset();
-            m_depth_stencil_view.reset();
-			
-			m_normal_depth.reset();
-			m_diffuse.reset();
-			m_specular.reset();
-
-            m_light_buffer_target.reset();
-            m_light_buffer.reset();
-            m_light_buffer_view.reset();
-		}
-
-        //accumulate lights here
-		dx11::id3d11rendertargetview_ptr		m_light_buffer_target;
-        dx11::id3d11shaderresourceview_ptr		m_light_buffer_view;
-        dx11::id3d11texture2d_ptr				m_light_buffer;
-
-        //depth from the gbuffer pass
-        dx11::id3d11texture2d_ptr				m_depth_stencil;
-		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
-        dx11::id3d11shaderresourceview_ptr		m_depth_stencil_view;
-
-        //sampled light buffer parameters
-		dx11::id3d11texture2d_ptr				m_normal_depth;
-		dx11::id3d11texture2d_ptr				m_diffuse;
-		dx11::id3d11texture2d_ptr				m_specular;
-
-		dx11::id3d11shaderresourceview_ptr		m_normal_depth_view;
-		dx11::id3d11shaderresourceview_ptr		m_diffuse_view;
-		dx11::id3d11shaderresourceview_ptr		m_specular_view;
-
-	};
-
-	struct depth_render_set
-	{
-		void reset()
-		{
-			m_depth_stencil_target.reset();
-			m_depth_stencil.reset();
-		}
-
-		dx11::id3d11texture2d_ptr				m_depth_stencil;
-		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
+        target_render_resource                  m_normal;
+        target_render_resource                  m_diffuse;
+        target_render_resource                  m_specular;
 	};
 
 	struct render_state
@@ -138,14 +70,26 @@ namespace gx
 
 	struct gbuffer_render_data
 	{
+        gbuffer_render_data ( ID3D11Device* device )  : m_render_set(device)
+        {
+
+        }
+
 		gbuffer_state           m_state;
 		gbuffer_render_set      m_render_set;
 	};
 
     struct light_buffer_render_data
     {
-        light_buffer_state      m_state;
-        light_buffer_render_set m_render_set;
+        explicit light_buffer_render_data ( ID3D11Device* device) : m_light_buffer( create_light_buffer_resource(device, 320, 240) )
+        {
+
+        }
+
+        light_buffer_state                      m_state;
+        target_render_resource                  m_light_buffer;
+        dx11::id3d11depthstencilview_ptr		m_depth_stencil_dsv;
+        dx11::id3d11shaderresourceview_ptr		m_depth_stencil_srv;
     };
 
 	struct depth_render_data
@@ -158,8 +102,10 @@ namespace gx
 
 		}
 
-		depth_state												m_state;
-		depth_render_set										m_render_set;
+        dx11::id3d11samplerstate_ptr			                m_sampler;
+		dx11::id3d11blendstate_ptr				                m_blend;
+		dx11::id3d11rasterizerstate_ptr			                m_rasterizer;
+
 		transform_position_vertex_shader						m_depth_vertex_shader;
         transform_position_vertex_shader_constant_buffer		m_depth_constant_buffer;
         transform_position_input_layout							m_input_layout;
@@ -185,21 +131,35 @@ namespace gx
 		inline void reset()
 		{
 			m_back_buffer_render_target.reset();
-			m_depth_stencil.reset();
-			m_depth_stencil_target.reset();
 		}
 
 		dx11::id3d11rendertargetview_ptr		m_back_buffer_render_target;
-		dx11::id3d11texture2d_ptr				m_depth_stencil;
-		dx11::id3d11depthstencilview_ptr		m_depth_stencil_target;
 	};
 
     typedef render_state default_render_state;
+    typedef render_state debug_render_state;
 
 	struct default_render_data
 	{
 		default_render_state					m_state;
 		default_render_set						m_render_set;
+	};
+
+    struct debug_render_data
+	{
+        debug_render_data ( ID3D11Device* device ) : 
+            m_gbuffer_depth_copy( create_target_render_resource( device, 320, 240, DXGI_FORMAT_R32_FLOAT ) ) 
+        {
+
+        }
+
+        inline void reset()
+		{
+
+		}
+
+        //copy of the depth buffer
+        target_render_resource                  m_gbuffer_depth_copy;
 	};
 
     class thread_render_context;
@@ -226,6 +186,7 @@ namespace gx
 		void select_gbuffer(ID3D11DeviceContext* device_context);
 		void select_back_buffer_target(ID3D11DeviceContext* device_context);
         void select_light_buffer(ID3D11DeviceContext* device_context);
+        void select_debug_target(ID3D11DeviceContext* device_context);
 
         void end_depth_pass(ID3D11DeviceContext* device_context);
 		void end_light_buffer(ID3D11DeviceContext* device_context);
@@ -302,6 +263,7 @@ namespace gx
 		void create_specular_buffer();
 		void create_normal_depth_buffer();
         void create_light_buffer();
+        void create_debug_buffer();
 
 		void create_gbuffer_state();
 		void create_depth_state();
@@ -315,26 +277,27 @@ namespace gx
 
 		void create_default_render_data();
         void create_light_buffer_render_data();
+        void create_debug_render_data();
 
 		void select_view_port(ID3D11DeviceContext* device_context);
-
-		void reset_shader_resources(ID3D11DeviceContext* device_context);
-		void reset_render_targets(ID3D11DeviceContext* device_context);
 
         dx11::system_context									m_system_context;
         thread_render_context_container							m_render_contexts;
 
+        public:
+
 		dx11::id3d11rendertargetview_ptr						m_back_buffer_render_target;
+        depth_resource                                          m_depth;
+        dx11::id3d11depthstencilstate_ptr                       m_depth_enable;
+        dx11::id3d11depthstencilstate_ptr                       m_depth_disable;
 
-		dx11::id3d11texture2d_ptr								m_depth_stencil;
-		dx11::id3d11depthstencilview_ptr						m_depth_stencil_target;
-
-		public:
+		
 
 		gbuffer_render_data										m_gbuffer_render_data;
 		depth_render_data										m_depth_render_data;
 		default_render_data										m_default_render_data;
         light_buffer_render_data                                m_light_buffer_render_data;
+        debug_render_data                                       m_debug_render_data;
 
 		view_port												m_view_port;
 		screen_space_render_data								m_screen_space_render_data;
@@ -351,7 +314,7 @@ namespace gx
         transform_position_normal_uv_vertex_shader_constant_buffer      m_transform_position_normal_uv_vertex_shader_cbuffer;
 		transform_position_normal_uv_input_layout                       m_transform_position_normal_uv_input_layout;
 
-
+        copy_depth_pixel_shader                                     m_copy_depth_pixel_shader;
 		color_pixel_shader										    m_color_pixel_shader;
 		color_pixel_shader_constant_buffer						    m_color_pixel_shader_cbuffer;
 
