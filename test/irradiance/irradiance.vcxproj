@@ -293,6 +293,7 @@
     <ClInclude Include="math\math_graphics.h" />
     <ClInclude Include="math\math_half.h" />
     <ClInclude Include="math\math_matrix.h" />
+    <ClInclude Include="math\math_quaternion.h" />
     <ClInclude Include="math\math_vector.h" />
     <ClInclude Include="mem\mem_alloc.h" />
     <ClInclude Include="mem\mem_ref_counter.h" />

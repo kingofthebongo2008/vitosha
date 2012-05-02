@@ -5,6 +5,7 @@
 
 #include <math.h>
 #include <math/math_matrix.h>
+#include <math/math_quaternion.h>
 
 namespace math
 {
@@ -488,6 +489,24 @@ namespace math
         float zn = - a / b;
 
         return std::make_tuple<float,float> ( zn, zf );
+    }
+
+    inline vector_float4 rotate_vector3(vector_float4 v, vector_float4 quaternion )
+    {
+        vector_float4 conjugate = quaternion_conjugate( quaternion );
+
+        vector_float4 result_1  = quaternion_mul( conjugate, v );
+        vector_float4 result_2  = quaternion_mul( result_1, quaternion );
+
+        return result_2;
+    }
+
+    inline vector_float4 reflect_vector3(vector_float4 v, vector_float4 quaternion )
+    {
+        vector_float4 result_1  = quaternion_mul( quaternion, v );
+        vector_float4 result_2  = quaternion_mul( result_1, quaternion );
+
+        return result_2;
     }
 }
 

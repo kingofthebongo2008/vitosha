@@ -20,6 +20,7 @@
 #include <fstream>
 #include <math/math_functions.h>
 #include <math/math_half.h>
+#include <math/math_quaternion.h>
 
 #define MAX_LOADSTRING 100
 
