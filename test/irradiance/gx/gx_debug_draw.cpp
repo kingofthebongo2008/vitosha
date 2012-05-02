@@ -46,7 +46,7 @@ namespace gx
         cbuffer.bind_as_pixel_constant_buffer(device_context);
 
         dx11::ps_set_shader(device_context, render_context->m_debug_view_space_depth_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_depth );
+        dx11::ps_set_shader_resources( device_context,  render_context->m_depth_buffer );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 

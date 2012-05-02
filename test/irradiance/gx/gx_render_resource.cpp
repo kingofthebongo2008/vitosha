@@ -121,5 +121,86 @@ namespace gx
         return dx11::create_depth_stencil_state( device, &dss );
     }
 
+    dx11::id3d11blendstate_ptr  create_gbuffer_opaque_blend_state( ID3D11Device* device )
+    {
+        D3D11_BLEND_DESC blend = {};
+
+        blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        blend.RenderTarget[1].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        blend.RenderTarget[2].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        blend.RenderTarget[3].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+        return dx11::create_blend_state( device, &blend );
+    }
+
+    dx11::id3d11blendstate_ptr  create_opaque_blend_state( ID3D11Device* device )
+    {
+        D3D11_BLEND_DESC blend = {};
+
+        blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+        return dx11::create_blend_state( device, &blend );
+    }
+
+    dx11::id3d11blendstate_ptr          create_additive_blend_state( ID3D11Device* device )
+    {
+        D3D11_BLEND_DESC blend = {};
+
+        blend.RenderTarget[0].BlendEnable = true;
+        blend.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        blend.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+        blend.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        blend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        blend.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+        blend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+
+        return dx11::create_blend_state( device, &blend );
+    }
+
+    dx11::id3d11samplerstate_ptr              create_default_sampler_state( ID3D11Device* device )
+    {
+        D3D11_SAMPLER_DESC sampler = {};
+
+		sampler.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampler.MaxAnisotropy = 1;
+		sampler.MaxLOD = std::numeric_limits<float>::max();
+		sampler.MinLOD = std::numeric_limits<float>::min();
+		sampler.MipLODBias = 0;
+
+        return dx11::create_sampler_state(device, &sampler );
+    }
+
+    dx11::id3d11samplerstate_ptr              create_point_sampler_state( ID3D11Device* device )
+    {
+        D3D11_SAMPLER_DESC sampler = {};
+
+		sampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampler.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		sampler.MaxAnisotropy = 1;
+		sampler.MaxLOD = std::numeric_limits<float>::max();
+		sampler.MinLOD = std::numeric_limits<float>::min();
+		sampler.MipLODBias = 0;
+
+        return dx11::create_sampler_state( device, &sampler );
+    }
+
+    dx11::id3d11rasterizerstate_ptr		create_cull_back_rasterizer_state( ID3D11Device* device )
+    {
+        D3D11_RASTERIZER_DESC rasterizer = {};
+		rasterizer.FillMode = D3D11_FILL_SOLID;
+		rasterizer.CullMode = D3D11_CULL_BACK;
+		rasterizer.DepthClipEnable = 1;
+
+        return dx11::create_raster_state( device, &rasterizer);
+    }
+
 }
 

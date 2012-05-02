@@ -113,19 +113,28 @@ namespace gx
     dx11::id3d11shaderresourceview_ptr  create_depth_resource_view( ID3D11Device* device, ID3D11Resource* resource );
 
     dx11::id3d11depthstencilstate_ptr   create_depth_test_enable_state( ID3D11Device* device);
-    dx11::id3d11depthstencilstate_ptr   create_depth_test_disable_state( ID3D11Device* device);
+    dx11::id3d11depthstencilstate_ptr   create_depth_test_disable_state( ID3D11Device* device );
 
 
-    target_render_resource create_target_render_resource(ID3D11Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format);
-    target_render_resource create_normal_resource(ID3D11Device* device, uint32_t width, uint32_t height);
-    target_render_resource create_diffuse_resource(ID3D11Device* device, uint32_t width, uint32_t height);
-    target_render_resource create_specular_resource(ID3D11Device* device, uint32_t width, uint32_t height);
+    target_render_resource              create_target_render_resource(ID3D11Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format);
+    target_render_resource              create_normal_resource(ID3D11Device* device, uint32_t width, uint32_t height);
+    target_render_resource              create_diffuse_resource(ID3D11Device* device, uint32_t width, uint32_t height);
+    target_render_resource              create_specular_resource(ID3D11Device* device, uint32_t width, uint32_t height);
 
-    target_render_resource create_light_buffer_resource(ID3D11Device* device, uint32_t width, uint32_t height);
+    target_render_resource              create_light_buffer_resource(ID3D11Device* device, uint32_t width, uint32_t height);
 
+    dx11::id3d11blendstate_ptr          create_opaque_blend_state( ID3D11Device* device );
+    dx11::id3d11blendstate_ptr          create_additive_blend_state( ID3D11Device* device );
+    dx11::id3d11blendstate_ptr          create_gbuffer_opaque_blend_state( ID3D11Device* device );
     
 
-    depth_resource  create_depth_resource(ID3D11Device* device, uint32_t width, uint32_t height);
+    depth_resource                      create_depth_resource(ID3D11Device* device, uint32_t width, uint32_t height);
+
+    dx11::id3d11samplerstate_ptr              create_default_sampler_state( ID3D11Device* device );
+    dx11::id3d11samplerstate_ptr              create_point_sampler_state( ID3D11Device* device );
+
+
+    dx11::id3d11rasterizerstate_ptr		create_cull_back_rasterizer_state( ID3D11Device* device );
 }
 
 

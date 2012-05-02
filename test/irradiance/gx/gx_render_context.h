@@ -63,31 +63,34 @@ namespace gx
 		dx11::id3d11rasterizerstate_ptr			m_rasterizer;
 	};
 
-    typedef render_state gbuffer_state;
     typedef render_state depth_state;
     typedef render_state light_buffer_state;
 
 
 	struct gbuffer_render_data
 	{
-        gbuffer_render_data ( ID3D11Device* device )  : m_render_set(device)
+        gbuffer_render_data ( ID3D11Device* device ) : m_render_set(device), m_opaque( create_gbuffer_opaque_blend_state(device) )
         {
 
         }
 
-		gbuffer_state           m_state;
-		gbuffer_render_set      m_render_set;
+        gbuffer_render_set          m_render_set;
+        dx11::id3d11blendstate_ptr  m_opaque;
+	
 	};
 
     struct light_buffer_render_data
     {
-        explicit light_buffer_render_data ( ID3D11Device* device) : m_light_buffer( create_light_buffer_resource(device, 320, 240) )
+        explicit light_buffer_render_data ( ID3D11Device* device) : 
+          m_additive_blend ( create_additive_blend_state(device) ) 
+        , m_light_buffer( create_light_buffer_resource(device, 320, 240) )
         {
 
         }
 
-        light_buffer_state                      m_state;
+        dx11::id3d11blendstate_ptr              m_additive_blend;
         target_render_resource                  m_light_buffer;
+
         dx11::id3d11depthstencilview_ptr		m_depth_stencil_dsv;
         dx11::id3d11shaderresourceview_ptr		m_depth_stencil_srv;
     };
@@ -101,10 +104,6 @@ namespace gx
 		{
 
 		}
-
-        dx11::id3d11samplerstate_ptr			                m_sampler;
-		dx11::id3d11blendstate_ptr				                m_blend;
-		dx11::id3d11rasterizerstate_ptr			                m_rasterizer;
 
 		transform_position_vertex_shader						m_depth_vertex_shader;
         transform_position_vertex_shader_constant_buffer		m_depth_constant_buffer;
@@ -180,7 +179,7 @@ namespace gx
 		void create_swap_chain_buffers();
 		void release_swap_chain_buffers();
 
-		void clear_state( ID3D11DeviceContext* device_context );
+		void reset_state( ID3D11DeviceContext* device_context );
 		void clear_buffers( ID3D11DeviceContext* device_context);
 		void select_depth_pass(ID3D11DeviceContext* device_context);
 		void select_gbuffer(ID3D11DeviceContext* device_context);
@@ -286,12 +285,18 @@ namespace gx
 
         public:
 
-		dx11::id3d11rendertargetview_ptr						m_back_buffer_render_target;
-        depth_resource                                          m_depth;
-        dx11::id3d11depthstencilstate_ptr                       m_depth_enable;
-        dx11::id3d11depthstencilstate_ptr                       m_depth_disable;
+		dx11::id3d11rendertargetview_ptr						m_back_buffer;
+        depth_resource                                          m_depth_buffer;
+        dx11::id3d11depthstencilstate_ptr                       m_depth_enable_state;
+        dx11::id3d11depthstencilstate_ptr                       m_depth_disable_state;
 
-		
+        dx11::id3d11blendstate_ptr                              m_opaque_state;
+        dx11::id3d11blendstate_ptr                              m_additive_state;
+
+        dx11::id3d11samplerstate_ptr                            m_default_sampler_state;
+        dx11::id3d11samplerstate_ptr                            m_point_sampler_state;
+
+        dx11::id3d11rasterizerstate_ptr                         m_cull_back_raster_state;
 
 		gbuffer_render_data										m_gbuffer_render_data;
 		depth_render_data										m_depth_render_data;
