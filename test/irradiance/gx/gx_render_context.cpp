@@ -2,14 +2,13 @@
 
 #include <array>
 
-#include <d3d9.h>
-
 #include <gx/gx_render_context.h>
 
 #include <dx11/dxgi_helpers.h>
 
 #include <math/math_half.h>
 
+#include <gx/gx_profile.h>
 #include <gx/gx_thread_render_context.h>
 
 namespace gx
@@ -230,42 +229,11 @@ namespace gx
 
     void render_context::create_debug_buffer()
     {
-        /*
-        D3D11_TEXTURE2D_DESC desc = {};
+        DXGI_SWAP_CHAIN_DESC desc = dxgi::get_desc( m_system_context.m_swap_chain.get() );
+        m_debug_render_data.m_depth_buffer_copy = create_target_render_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height, DXGI_FORMAT_R32_FLOAT );
 
-        m_gbuffer_render_data.m_depth_stencil->GetDesc(&desc);
-        m_debug_render_data.m_gbuffer_depth_copy = dx11::create_texture_2d( m_system_context.m_device.get(), &desc);
-
-        m_debug_render_data.m_back_buffer_rtv = m_default_render_data.m_render_set.m_back_buffer_render_target;
-        m_debug_render_data.m_depth_stencil_dsv = m_gbuffer_render_data.m_depth_stencil_dsv;
-        m_debug_render_data.m_depth_stencil_dss = m_gbuffer_render_data.m_state.m_depth;
-
-        D3D11_SHADER_RESOURCE_VIEW_DESC gbuffer_depth_srv = {};
-        gbuffer_depth_srv.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-        gbuffer_depth_srv.Texture2D.MostDetailedMip = 0;
-        gbuffer_depth_srv.Texture2D.MipLevels = 1;
-        gbuffer_depth_srv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-
-        D3D11_DEPTH_STENCIL_VIEW_DESC gbuffer_dsv = {};
-
-        gbuffer_dsv.Flags = 0;
-        gbuffer_dsv.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        gbuffer_dsv.Texture2D.MipSlice = 0;
-        gbuffer_dsv.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-
-        m_debug_render_data.m_gbuffer_depth_copy_srv = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_depth, &gbuffer_depth_srv);
-        m_debug_render_data.m_gbuffer_depth_copy_1_srv = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_debug_render_data.m_gbuffer_depth_copy.get(), &gbuffer_depth_srv);
-        m_debug_render_data.m_gbuffer_depth_copy_dsv = dx11::create_depth_stencil_view( m_system_context.m_device.get(), m_debug_render_data.m_gbuffer_depth_copy.get(), &gbuffer_dsv);
-
-        //disable depth or stencil write
-        D3D11_DEPTH_STENCIL_DESC gbuffer_depth_copy_dss = {};
-        gbuffer_depth_copy_dss.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-        m_debug_render_data.m_gbuffer_depth_copy_dss= dx11::create_depth_stencil_state( m_system_context.m_device.get(), &gbuffer_depth_copy_dss );
-        
-        D3D11_BLEND_DESC blend = {};
-        //m_debug_render_data.m_gbuffer_depth_copy_blend = dx11::create_blend_state( m_system_context.m_device.get(), &blend ) ;
-        m_debug_render_data.m_gbuffer_depth_copy_blend = m_gbuffer_render_data.m_state.m_blend;
-        */
+        m_debug_render_data.m_read_depth_dsv = create_read_depth_stencil_view( m_system_context.m_device.get(), m_depth_buffer ) ;
+        m_debug_render_data.m_depth_srv = create_depth_resource_view( m_system_context.m_device.get(), m_depth_buffer );
     }
 
 	void render_context::clear_buffers(ID3D11DeviceContext* device_context)
@@ -298,6 +266,7 @@ namespace gx
 
 	void render_context::select_gbuffer(ID3D11DeviceContext* device_context)
 	{
+        profile p(L"select_gbuffer");
 		reset_render_targets( device_context );
 		reset_shader_resources( device_context );
 
@@ -325,6 +294,7 @@ namespace gx
 
     void render_context::select_light_buffer(ID3D11DeviceContext* device_context)
     {
+        profile p(L"select_light_buffer");
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
 
@@ -362,6 +332,7 @@ namespace gx
 
 	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
 	{
+        profile p(L"select_back_buffer_target");
 		reset_render_targets(device_context);
 		reset_shader_resources(device_context);
 
@@ -389,35 +360,34 @@ namespace gx
 
     void render_context::select_debug_target(ID3D11DeviceContext* device_context)
     {
-        D3DPERF_BeginEvent(0, L"test");
+        profile p(L"select_debug_target");
 
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
 
         device_context->OMSetBlendState( m_opaque_state.get(), nullptr, 0xFFFFFFFF );
 
-        /*
         //copy the depth buffer after draw passes so we can debug it
         ID3D11RenderTargetView* views_1[1] =
 		{
-			m_debug_render_data.m_back_buffer_rtv.get()
+			m_debug_render_data.m_depth_buffer_copy
 		};
 
-        device_context->OMSetRenderTargets( 1, &views_1[0],  m_debug_render_data.m_gbuffer_depth_copy_dsv.get() );
-        device_context->OMSetDepthStencilState(m_debug_render_data.m_gbuffer_depth_copy_dss.get(), 0 );
+        device_context->OMSetRenderTargets( 1, &views_1[0], m_debug_render_data.m_read_depth_dsv.get() );
+        device_context->OMSetDepthStencilState(m_depth_disable_state.get(), 0 );
 
         ID3D11ShaderResourceView * shader_resource_view[] =
         {
-            m_debug_render_data.m_gbuffer_depth_copy_srv.get()
+            m_debug_render_data.m_depth_srv.get()
         };
 
         dx11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view );
         dx11::ps_set_shader( device_context, m_copy_depth_pixel_shader );
-        //draw_screen_space_quad( device_context, this );
+        draw_screen_space_quad( device_context, this );
         
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
-        */
+        
 
         ID3D11RenderTargetView* views_2[1] =
 		{
@@ -436,9 +406,6 @@ namespace gx
         device_context->OMSetRenderTargets( 1, &views_2[0],  m_depth_buffer );
         device_context->OMSetDepthStencilState(m_depth_enable_state.get(), 0 );
         device_context->OMSetBlendState(m_opaque_state.get(), nullptr, 0xFFFFFFFF);
-
-        D3DPERF_EndEvent();
-        
     }
 
 	void render_context::select_depth_pass(ID3D11DeviceContext* device_context)

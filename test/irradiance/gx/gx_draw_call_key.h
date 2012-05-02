@@ -49,9 +49,21 @@ namespace gx
 			visibility_draw_call,
 			visibility_finalize,
 
-			shadows_initialize,
-			shadows_draw_call,
-			shadows_finalize,
+            shadows_cascade_0_initialize,
+			shadows_cascade_0_draw_call,
+			shadows_cascade_0_finalize,
+
+            shadows_cascade_1_initialize,
+			shadows_cascade_1_draw_call,
+			shadows_cascade_1_finalize,
+
+            shadows_cascade_2_initialize,
+			shadows_cascade_2_draw_call,
+			shadows_cascade_2_finalize,
+
+            shadows_cascade_3_initialize,
+			shadows_cascade_3_draw_call,
+			shadows_cascade_3_finalize,
 
 			gbuffer_initialize,
 			gbuffer_opaque_draw_call,
@@ -202,6 +214,13 @@ namespace gx
 		command_key_data light_key = {};
 		light_key.m_header.m_command = command::light_buffer_draw_call;
 		return draw_call_key(light_key);
+    }
+
+    inline draw_call_key create_shadow_draw_call()
+    {
+		command_key_data shadow_key = {};
+		shadow_key.m_header.m_command = command::shadows_cascade_0_draw_call;
+		return draw_call_key(shadow_key);
     }
 
 	inline draw_call_key create_command_draw_call( command::type command  )

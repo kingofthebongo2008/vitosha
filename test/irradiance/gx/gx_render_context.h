@@ -104,7 +104,7 @@ namespace gx
     struct debug_render_data
 	{
         debug_render_data ( ID3D11Device* device ) : 
-            m_gbuffer_depth_copy( create_target_render_resource( device, 320, 240, DXGI_FORMAT_R32_FLOAT ) ) 
+            m_depth_buffer_copy( create_target_render_resource( device, 320, 240, DXGI_FORMAT_R32_FLOAT ) ) 
         {
 
         }
@@ -115,7 +115,10 @@ namespace gx
 		}
 
         //copy of the depth buffer
-        target_render_resource                  m_gbuffer_depth_copy;
+        target_render_resource                  m_depth_buffer_copy;
+
+        dx11::id3d11depthstencilview_ptr		m_read_depth_dsv;
+        dx11::id3d11shaderresourceview_ptr		m_depth_srv;
 	};
 
     class thread_render_context;

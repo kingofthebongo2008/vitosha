@@ -271,6 +271,7 @@
     <ClInclude Include="gx\gx_light_directional_pixel_shader.h" />
     <ClInclude Include="gx\gx_light_directional_vertex_shader.h" />
     <ClInclude Include="gx\gx_light_pixel_shader.h" />
+    <ClInclude Include="gx\gx_profile.h" />
     <ClInclude Include="gx\gx_render_resource.h" />
     <ClInclude Include="gx\gx_screen_space_uv_vertex_shader.h" />
     <ClInclude Include="gx\gx_transform_position_normal_uv_vertex_shader.h" />
@@ -352,6 +353,7 @@
     <ClCompile Include="gx\gx_light_directional_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_light_directional_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_light_pixel_shader.cpp" />
+    <ClCompile Include="gx\gx_profile.cpp" />
     <ClCompile Include="gx\gx_render_resource.cpp" />
     <ClCompile Include="gx\gx_screen_space_uv_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_transform_position_normal_uv_vertex_shader.cpp" />
