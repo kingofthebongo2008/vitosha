@@ -176,8 +176,6 @@ namespace gx
 		create_normal_depth_buffer();
         create_light_buffer();
 
-		m_default_render_data.m_render_set.m_back_buffer_render_target = m_back_buffer;
-
         //must be after the depth stencil
         create_debug_buffer();
 	}
@@ -185,10 +183,6 @@ namespace gx
 	void render_context::release_swap_chain_buffers()
 	{
 		m_back_buffer.reset();
-
-		m_gbuffer_render_data.m_render_set.reset();
-		m_default_render_data.m_render_set.reset();
-
         m_debug_render_data.reset();
 	}
 
@@ -207,20 +201,20 @@ namespace gx
 	void render_context::create_diffuse_buffer()
 	{
         DXGI_SWAP_CHAIN_DESC desc = dxgi::get_desc( m_system_context.m_swap_chain.get() );
-        m_gbuffer_render_data.m_render_set.m_diffuse = create_diffuse_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height);
+        m_gbuffer_render_data.m_diffuse = create_diffuse_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height);
 
 	}
 
 	void render_context::create_specular_buffer()
 	{
         DXGI_SWAP_CHAIN_DESC desc = dxgi::get_desc( m_system_context.m_swap_chain.get() );
-        m_gbuffer_render_data.m_render_set.m_specular = create_specular_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height);
+        m_gbuffer_render_data.m_specular = create_specular_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height);
 	}
 
 	void render_context::create_normal_depth_buffer()
 	{
         DXGI_SWAP_CHAIN_DESC desc = dxgi::get_desc( m_system_context.m_swap_chain.get() );
-        m_gbuffer_render_data.m_render_set.m_normal = create_normal_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height);
+        m_gbuffer_render_data.m_normal = create_normal_resource( m_system_context.m_device.get(), desc.BufferDesc.Width, desc.BufferDesc.Height);
     }
 
     void render_context::create_light_buffer()
@@ -229,8 +223,8 @@ namespace gx
 
         m_light_buffer_render_data.m_light_buffer = create_light_buffer_resource(  m_system_context.m_device.get(),  desc.BufferDesc.Width, desc.BufferDesc.Height );
 
-        m_light_buffer_render_data.m_depth_stencil_dsv = create_read_depth_stencil_view( m_system_context.m_device.get(), m_depth_buffer ) ;
-        m_light_buffer_render_data.m_depth_stencil_srv = create_depth_resource_view( m_system_context.m_device.get(), m_depth_buffer );
+        m_light_buffer_render_data.m_read_depth_dsv = create_read_depth_stencil_view( m_system_context.m_device.get(), m_depth_buffer ) ;
+        m_light_buffer_render_data.m_depth_srv = create_depth_resource_view( m_system_context.m_device.get(), m_depth_buffer );
 
     }
 
@@ -239,11 +233,11 @@ namespace gx
         /*
         D3D11_TEXTURE2D_DESC desc = {};
 
-        m_gbuffer_render_data.m_render_set.m_depth_stencil->GetDesc(&desc);
+        m_gbuffer_render_data.m_depth_stencil->GetDesc(&desc);
         m_debug_render_data.m_gbuffer_depth_copy = dx11::create_texture_2d( m_system_context.m_device.get(), &desc);
 
         m_debug_render_data.m_back_buffer_rtv = m_default_render_data.m_render_set.m_back_buffer_render_target;
-        m_debug_render_data.m_depth_stencil_dsv = m_gbuffer_render_data.m_render_set.m_depth_stencil_dsv;
+        m_debug_render_data.m_depth_stencil_dsv = m_gbuffer_render_data.m_depth_stencil_dsv;
         m_debug_render_data.m_depth_stencil_dss = m_gbuffer_render_data.m_state.m_depth;
 
         D3D11_SHADER_RESOURCE_VIEW_DESC gbuffer_depth_srv = {};
@@ -259,7 +253,7 @@ namespace gx
         gbuffer_dsv.Texture2D.MipSlice = 0;
         gbuffer_dsv.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
-        m_debug_render_data.m_gbuffer_depth_copy_srv = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_render_set.m_depth, &gbuffer_depth_srv);
+        m_debug_render_data.m_gbuffer_depth_copy_srv = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_gbuffer_render_data.m_depth, &gbuffer_depth_srv);
         m_debug_render_data.m_gbuffer_depth_copy_1_srv = dx11::create_shader_resource_view( m_system_context.m_device.get(), m_debug_render_data.m_gbuffer_depth_copy.get(), &gbuffer_depth_srv);
         m_debug_render_data.m_gbuffer_depth_copy_dsv = dx11::create_depth_stencil_view( m_system_context.m_device.get(), m_debug_render_data.m_gbuffer_depth_copy.get(), &gbuffer_dsv);
 
@@ -283,9 +277,9 @@ namespace gx
 		float clear_color_3[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		device_context->ClearRenderTargetView( m_back_buffer.get(), clear_color_1);
-		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_render_set.m_normal, clear_color_2);
-		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_render_set.m_diffuse, clear_color_3);
-		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_render_set.m_specular, clear_color_3);
+		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_normal, clear_color_2);
+		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_diffuse, clear_color_3);
+		device_context->ClearRenderTargetView( m_gbuffer_render_data.m_specular, clear_color_3);
 
         device_context->ClearRenderTargetView( m_light_buffer_render_data.m_light_buffer, clear_color_3);
 	}
@@ -309,9 +303,9 @@ namespace gx
 
 		ID3D11RenderTargetView* views[3] =
 		{ 
-												m_gbuffer_render_data.m_render_set.m_diffuse,
-                                                m_gbuffer_render_data.m_render_set.m_specular,
-												m_gbuffer_render_data.m_render_set.m_normal
+												m_gbuffer_render_data.m_diffuse,
+                                                m_gbuffer_render_data.m_specular,
+												m_gbuffer_render_data.m_normal
 		};
 
 		device_context->OMSetRenderTargets( 3, views, m_depth_buffer );
@@ -339,16 +333,16 @@ namespace gx
             m_light_buffer_render_data.m_light_buffer
 		};
 
-        device_context->OMSetRenderTargets( 1, &views[0], m_light_buffer_render_data.m_depth_stencil_dsv.get() );
+        device_context->OMSetRenderTargets( 1, &views[0], m_light_buffer_render_data.m_read_depth_dsv.get() );
 		device_context->OMSetBlendState( m_additive_state.get(), nullptr, 0xFFFFFFFF);
 		device_context->OMSetDepthStencilState( m_depth_disable_state.get() , 0 );
 
         ID3D11ShaderResourceView * shader_resource_view[] =
         {
-                         m_gbuffer_render_data.m_render_set.m_normal,  
-                         m_gbuffer_render_data.m_render_set.m_diffuse,
-                         m_gbuffer_render_data.m_render_set.m_specular,
-                         m_light_buffer_render_data.m_depth_stencil_srv.get() //depth buffer from the gbuffer pass
+                         m_gbuffer_render_data.m_normal,  
+                         m_gbuffer_render_data.m_diffuse,
+                         m_gbuffer_render_data.m_specular,
+                         m_light_buffer_render_data.m_depth_srv.get() //depth buffer from the gbuffer pass
         };
 
         dx11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view);
@@ -376,17 +370,17 @@ namespace gx
 
 		ID3D11RenderTargetView* views[1] =
 		{
-			m_default_render_data.m_render_set.m_back_buffer_render_target.get()
+			m_back_buffer.get()
 		};
 
         device_context->OMSetRenderTargets( 1, &views[0], m_depth_buffer );
-        device_context->RSSetState(m_default_render_data.m_state.m_rasterizer.get());
+        device_context->RSSetState(m_cull_back_raster_state.get());
 
         ID3D11SamplerState* samplers[] =	{ 
-												m_default_render_data.m_state.m_sampler.get(), 
-												m_default_render_data.m_state.m_sampler.get(), 
-												m_default_render_data.m_state.m_sampler.get(), 
-												m_default_render_data.m_state.m_sampler.get()
+												m_default_sampler_state.get(), 
+												m_default_sampler_state.get(), 
+												m_default_sampler_state.get(), 
+												m_default_sampler_state.get(), 
 											};
 
 		device_context->PSSetSamplers( 0, sizeof(samplers)/sizeof(samplers[0]), &samplers[0] ); 

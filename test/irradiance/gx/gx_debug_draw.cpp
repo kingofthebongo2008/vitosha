@@ -12,28 +12,28 @@ namespace gx
     void debug_draw_diffuse_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::matrix_float44 screen_space_transform )
     {
 		dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_render_set.m_diffuse );
+        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_diffuse );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_normal_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::matrix_float44 screen_space_transform )
     {
         dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_render_set.m_normal );
+        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_normal );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_specular_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::matrix_float44 screen_space_transform )
     {
         dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context ,  render_context->m_gbuffer_render_data.m_render_set.m_specular );
+        dx11::ps_set_shader_resources( device_context ,  render_context->m_gbuffer_render_data.m_specular );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_gloss_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::matrix_float44 screen_space_transform )
     {
         dx11::ps_set_shader(device_context, render_context->m_color_texture_channel_3_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_render_set.m_specular );
+        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_specular );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 

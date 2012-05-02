@@ -35,48 +35,24 @@
 
 namespace gx
 {
-	struct gbuffer_render_set
+	struct gbuffer_render_data
 	{
-        explicit gbuffer_render_set ( ID3D11Device* device) : 
+        explicit gbuffer_render_data ( ID3D11Device* device) : 
           m_normal( create_normal_resource(device, 320, 240 ) )
         , m_diffuse( create_diffuse_resource( device, 320, 240 ) )
         , m_specular( create_specular_resource( device, 320, 240 ) )
+        , m_opaque( create_gbuffer_opaque_blend_state(device) )
         {
 
         }
 
-		inline void reset()
-		{
 
-		}
+        target_render_resource  m_normal;
+        target_render_resource  m_diffuse;
+        target_render_resource  m_specular;
 
-        target_render_resource                  m_normal;
-        target_render_resource                  m_diffuse;
-        target_render_resource                  m_specular;
-	};
-
-	struct render_state
-	{
-		dx11::id3d11samplerstate_ptr			m_sampler;
-		dx11::id3d11depthstencilstate_ptr		m_depth;
-		dx11::id3d11blendstate_ptr				m_blend;
-		dx11::id3d11rasterizerstate_ptr			m_rasterizer;
-	};
-
-    typedef render_state depth_state;
-    typedef render_state light_buffer_state;
-
-
-	struct gbuffer_render_data
-	{
-        gbuffer_render_data ( ID3D11Device* device ) : m_render_set(device), m_opaque( create_gbuffer_opaque_blend_state(device) )
-        {
-
-        }
-
-        gbuffer_render_set          m_render_set;
         dx11::id3d11blendstate_ptr  m_opaque;
-	
+
 	};
 
     struct light_buffer_render_data
@@ -91,8 +67,8 @@ namespace gx
         dx11::id3d11blendstate_ptr              m_additive_blend;
         target_render_resource                  m_light_buffer;
 
-        dx11::id3d11depthstencilview_ptr		m_depth_stencil_dsv;
-        dx11::id3d11shaderresourceview_ptr		m_depth_stencil_srv;
+        dx11::id3d11depthstencilview_ptr		m_read_depth_dsv;
+        dx11::id3d11shaderresourceview_ptr		m_depth_srv;
     };
 
 	struct depth_render_data
@@ -123,25 +99,6 @@ namespace gx
 		transform_position_uv_vertex_shader						m_screen_space_vertex_shader;
 		transform_position_uv_vertex_shader_constant_buffer		m_screen_space_constant_buffer;
         dx11::id3d11buffer_ptr	                                m_screen_space_vertex_buffer;
-	};
-
-	struct default_render_set
-	{
-		inline void reset()
-		{
-			m_back_buffer_render_target.reset();
-		}
-
-		dx11::id3d11rendertargetview_ptr		m_back_buffer_render_target;
-	};
-
-    typedef render_state default_render_state;
-    typedef render_state debug_render_state;
-
-	struct default_render_data
-	{
-		default_render_state					m_state;
-		default_render_set						m_render_set;
 	};
 
     struct debug_render_data
@@ -300,7 +257,6 @@ namespace gx
 
 		gbuffer_render_data										m_gbuffer_render_data;
 		depth_render_data										m_depth_render_data;
-		default_render_data										m_default_render_data;
         light_buffer_render_data                                m_light_buffer_render_data;
         debug_render_data                                       m_debug_render_data;
 
