@@ -47,7 +47,7 @@ float3 convert_to_view_space ( float2 texture_coord, float depth_buffer_z)
 float3 rigid_transform_vector(float3 v, float4x4 m)
 {
     //get rid of translation (assume no scaling)
-    return mul ( float4(v.xyz,0.0f ), m );
+    return mul ( float4(v.xyz,0.0f ), m ).xyz;
 }  
 
 float3 fresnel_schlick(float3 specular_color, float3 l,float3 h)
@@ -106,9 +106,9 @@ float3 main( in  vs_output input) : sv_target
 
     float3 v            = surface_sample_position_vs;
 
-    const float4		light_position_ws  = { 10.0f, -10.0f, 10.0f,  1.0f }; 
+    const float4		light_position_ws  = { 10.0f, 10.0f, 10.0f,  1.0f }; 
 
-	float3 light_vs1	= normalize (  mul ( light_position_ws  , m_view ) - surface_sample_position_vs   ) ;//rigid_transform_vector( normalize(light_position_ws) , m_view ) ;   //normalize(light_direction_vs);
+	float3 light_vs1	= normalize (  mul ( light_position_ws  , m_view ).xyz - surface_sample_position_vs   ) ;//rigid_transform_vector( normalize(light_position_ws) , m_view ) ;   //normalize(light_direction_vs);
 	float3 normal_vs1	= n_vs;
 
     float3 diffuse		= blinn_phong_diffuse ( kd, light_vs1, n_vs) ;

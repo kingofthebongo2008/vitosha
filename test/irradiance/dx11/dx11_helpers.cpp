@@ -79,4 +79,19 @@ namespace dx11
 	{
 		return create_index_buffer(device, initial_data, size, D3D11_USAGE_IMMUTABLE, 0);
 	}
+
+    dx11::id3d11buffer_ptr create_stream_out_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size )
+	{
+        D3D11_BUFFER_DESC desc = {};
+		dx11::id3d11buffer_ptr result;
+		desc.ByteWidth = static_cast<UINT> (size);
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT ;
+		desc.CPUAccessFlags = 0;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		D3D11_SUBRESOURCE_DATA initial_data_dx = { initial_data, 0, 0};
+		dx11::throw_if_failed<dx11::create_buffer_exception> (device->CreateBuffer(&desc, &initial_data_dx, dx11::get_pointer(result)));
+		return result;
+	}
+
+    
 }

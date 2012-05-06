@@ -28,8 +28,9 @@
 #include <gx/gx_screen_space_uv_vertex_shader.h>
 
 #include <gx/gx_transform_position_vertex_shader.h>
-#include <gx/gx_transform_position_uv_vertex_shader.h>
+#include <gx/gx_transform_position_normal_vertex_shader.h>
 #include <gx/gx_transform_position_normal_uv_vertex_shader.h>
+#include <gx/gx_transform_position_uv_vertex_shader.h>
 
 #include <gx/gx_view_port.h>
 
@@ -274,9 +275,13 @@ namespace gx
         transform_position_uv_vertex_shader_constant_buffer     m_transform_position_uv_vertex_shader_cbuffer;
 		transform_position_uv_input_layout                      m_transform_position_uv_input_layout;
 
-        transform_position_normal_uv_vertex_shader						m_transform_position_normal_uv_vertex_shader;
-        transform_position_normal_uv_vertex_shader_constant_buffer      m_transform_position_normal_uv_vertex_shader_cbuffer;
-		transform_position_normal_uv_input_layout                       m_transform_position_normal_uv_input_layout;
+        transform_position_normal_vertex_shader					m_transform_position_normal_vertex_shader;
+        transform_position_normal_vertex_shader_constant_buffer m_transform_position_normal_vertex_shader_cbuffer;
+		transform_position_normal_input_layout                  m_transform_position_normal_input_layout;
+
+        transform_position_normal_uv_vertex_shader				    m_transform_position_normal_uv_vertex_shader;
+        transform_position_normal_uv_vertex_shader_constant_buffer  m_transform_position_normal_uv_vertex_shader_cbuffer;
+		transform_position_normal_uv_input_layout                   m_transform_position_normal_uv_input_layout;
 
         copy_depth_pixel_shader                                     m_copy_depth_pixel_shader;
 		color_pixel_shader										    m_color_pixel_shader;

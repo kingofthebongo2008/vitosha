@@ -115,7 +115,12 @@ namespace dx11
 
     };
 
-	class create_input_layout : public create_resource_exception
+    class create_geometry_shader : public create_resource_exception
+    {
+
+    };
+
+    class create_input_layout : public create_resource_exception
     {
 
     };

@@ -17,6 +17,7 @@
 
 #include <gxu/gxu_entity_factory.h>
 
+#include "win32/floor.h"
 #include "win32/point_lights.h"
 #include "win32/directional_lights.h"
 
@@ -37,6 +38,9 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	universe->add_world(scene);
 
 
+    //floor
+    auto floor_entity = create_floor_entity( context.m_device.get(), render_context, 20, 20, 30 );
+
     //directional light
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
@@ -52,7 +56,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	dynamic_entities->add_type( 0, light_updater );
 
 
-	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), math::set(10.0f, -10.0f, 10.0f,  1.0f), 1.0f, 0.5f);
+	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), math::set(10.0f, 10.0f, 10.0f,  1.0f), 1.0f, 0.5f);
 	point_light light2 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(0.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
 	point_light light3 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(-1.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
 
@@ -78,16 +82,19 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );
     auto node_3 = std::make_shared<gx::scene::node> ( m_4, directional_entity.get() );
+    auto node_4 = std::make_shared<gx::scene::node> ( math::translation(0.0f, -2.0f, 0.0f) , floor_entity.get() );
 
 	//1. add to graphic world
 	gx::add_node(root, node_1);
 	gx::add_node(root, node_2);
     gx::add_node(root, node_3);
+    gx::add_node(root, node_4);
 	
 	//2. add to entities world
 	entities->add_entity( entity_1);
 	entities->add_entity( point_lights);
     entities->add_entity( directional_entity );
+    entities->add_entity( floor_entity );
 
 	scene->rebuild();
 

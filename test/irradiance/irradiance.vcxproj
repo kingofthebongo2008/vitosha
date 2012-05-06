@@ -108,10 +108,24 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_transform_position_normal_vs.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T vs_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /I $(ProjectDir) /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
     <CustomBuild Include="gx\gx_shader_color_ps.hlsl">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T ps_5_0 /Vn %(FileName)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /I $(ProjectDir) /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_grid_gs.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T gs_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /I $(ProjectDir) /T gs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
@@ -259,6 +273,7 @@
     <ClInclude Include="gx\gx_draw_call_context.h" />
     <ClInclude Include="gx\gx_entity_world.h" />
     <ClInclude Include="gx\gx_execute_draw_calls_pipeline_node.h" />
+    <ClInclude Include="gx\gx_grid_geometry_shader.h" />
     <ClInclude Include="gx\gx_indexed_draw_call.h" />
     <ClInclude Include="gx\gx_entity.h" />
     <ClInclude Include="gx\gx_draw_call_key.h" />
@@ -282,6 +297,7 @@
     <ClInclude Include="gx\gx_screen_space_quad.h" />
     <ClInclude Include="gx\gx_render_context.h" />
     <ClInclude Include="gx\gx_scene_pipeline_node.h" />
+    <ClInclude Include="gx\gx_transform_position_normal_vertex_shader.h" />
     <ClInclude Include="gx\gx_transform_position_vertex_shader.h" />
     <ClInclude Include="gx\gx_transform_position_uv_vertex_shader.h" />
     <ClInclude Include="gx\gx_thread_render_context.h" />
@@ -311,6 +327,7 @@
     <ClInclude Include="win32/targetver.h" />
     <ClInclude Include="win32/window.h" />
     <ClInclude Include="win32\directional_lights.h" />
+    <ClInclude Include="win32\floor.h" />
     <ClInclude Include="win32\point_lights.h" />
     <ClInclude Include="win32\point_light_sphere_debug_pixel_shader.h" />
     <ClInclude Include="win32\point_light_sphere_debug_vertex_shader.h" />
@@ -342,6 +359,7 @@
     <ClCompile Include="gx\gx_draw_call_collector_context.cpp" />
     <ClCompile Include="gx\gx_entity_world.cpp" />
     <ClCompile Include="gx\gx_execute_draw_calls_pipeline_node.cpp" />
+    <ClCompile Include="gx\gx_grid_geometry_shader.cpp" />
     <ClCompile Include="gx\gx_indexed_draw_call.cpp" />
     <ClCompile Include="gx\gx_entity.cpp" />
     <ClCompile Include="gx\gx_draw_call_key.cpp" />
@@ -358,6 +376,7 @@
     <ClCompile Include="gx\gx_render_resource.cpp" />
     <ClCompile Include="gx\gx_screen_space_uv_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_transform_position_normal_uv_vertex_shader.cpp" />
+    <ClCompile Include="gx\gx_transform_position_normal_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_transform_position_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_material_database.cpp" />
     <ClCompile Include="gx\gx_pinhole_camera.cpp" />
@@ -386,6 +405,7 @@
     <ClCompile Include="gx\gx_view_port.cpp" />
     <ClCompile Include="win32\application.cpp" />
     <ClCompile Include="win32\directional_lights.cpp" />
+    <ClCompile Include="win32\floor.cpp" />
     <ClCompile Include="win32\point_lights.cpp" />
     <ClCompile Include="win32\point_light_sphere_debug_pixel_shader.cpp" />
     <ClCompile Include="win32\point_light_sphere_debug_vertex_shader.cpp" />

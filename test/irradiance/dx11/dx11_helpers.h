@@ -85,6 +85,8 @@ namespace dx11
 	id3d11buffer_ptr              create_default_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 	id3d11buffer_ptr              create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
+    id3d11buffer_ptr              create_stream_out_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+
 	id3d11buffer_ptr              create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 	id3d11buffer_ptr              create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
@@ -107,6 +109,21 @@ namespace dx11
 		ID3D11DeviceContext*		m_context;
 		ID3D11Buffer*				m_buffer;
 	};
+
+    inline void gs_set_shader_resources(ID3D11DeviceContext* device_context, ID3D11ShaderResourceView * const * shader_resource_view)
+    {
+        device_context->GSSetShaderResources( 0, 1, shader_resource_view);
+    }
+
+    inline void gs_set_shader_resources(ID3D11DeviceContext* device_context, uint32_t num_views, ID3D11ShaderResourceView * const * shader_resource_view)
+    {
+        device_context->GSSetShaderResources( 0, num_views, shader_resource_view);
+    }
+
+    inline void gs_set_shader(ID3D11DeviceContext* device_context, ID3D11GeometryShader * vertex_shader )
+    {
+        device_context->GSSetShader( vertex_shader, nullptr, 0) ;
+    }
 
     inline void vs_set_shader_resources(ID3D11DeviceContext* device_context, ID3D11ShaderResourceView * const * shader_resource_view)
     {
@@ -133,11 +150,16 @@ namespace dx11
         device_context->PSSetShaderResources( 0, 1, &shader_resource_view);
     }
 
+    inline void ps_set_shader_resources(ID3D11DeviceContext* device_context, ID3D11ShaderResourceView * const resource_0, ID3D11ShaderResourceView * const resource_1)
+    {
+        ID3D11ShaderResourceView * const resources[2] = { resource_0 , resource_1};
+        ps_set_shader_resources(device_context, 2, resources);
+    }
+
     inline void ps_set_shader(ID3D11DeviceContext* device_context, ID3D11PixelShader * pixel_shader )
     {
         device_context->PSSetShader( pixel_shader, nullptr, 0) ;
     }
-
 }
 
 

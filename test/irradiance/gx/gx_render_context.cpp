@@ -78,6 +78,10 @@ namespace gx
         , m_transform_position_uv_vertex_shader_cbuffer( sys_context.m_device.get() )
 		, m_transform_position_uv_input_layout( sys_context.m_device.get(), &m_transform_position_uv_vertex_shader )
 
+        , m_transform_position_normal_vertex_shader( sys_context.m_device.get() )
+        , m_transform_position_normal_vertex_shader_cbuffer( sys_context.m_device.get() )
+        , m_transform_position_normal_input_layout ( sys_context.m_device.get(), &m_transform_position_normal_vertex_shader )
+
         , m_transform_position_normal_uv_vertex_shader( sys_context.m_device.get() )
         , m_transform_position_normal_uv_vertex_shader_cbuffer( sys_context.m_device.get() )
 		, m_transform_position_normal_uv_input_layout ( sys_context.m_device.get(), &m_transform_position_normal_uv_vertex_shader )
@@ -260,7 +264,7 @@ namespace gx
 		reset_render_targets(device_context);
         reset_constant_buffers(device_context);
 
-        device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        //device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 
