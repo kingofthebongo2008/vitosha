@@ -44,32 +44,6 @@ void directional_lights_entity::on_create_draw_calls( gx::draw_call_collector_co
 	collector->add_draw_call(key, context->m_entity_index ) ;
 }
 
-/*
-        void set_inverse_projection(math::matrix_float44 value)
-		{
-			m_inverse_projection = value;
-		}
-
-        void set_view(math::matrix_float44 value)
-		{
-			m_view = value;
-		}
-
-        void set_light_count(uint32_t value)
-        {
-            m_light_count = value;
-        }
-
-        void set_light_position_ws( const math::vector_float4* begin, const math::vector_float4* end )
-        {
-            std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_position_ws[0], 8, 0 ) );
-        }
-
-        void set_light_color( const math::vector_float4* begin, const math::vector_float4* end)
-        {
-            std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_color[0], 8, 0) );
-        }
-*/
 
 void directional_lights_entity::on_execute_draw_calls( gx::draw_call_context* context )
 {

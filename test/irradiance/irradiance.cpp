@@ -45,7 +45,10 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
 
-    directional_lights.push_back(  directional_light( math::normalize3(math::set( 1.0f, 1.0f, 1.0f, 0.0f )) , gx::color::red() ) );
+    math::vector_float4 light_position = math::set( 10.0f, 1.0f, 10.0f, 1.0f );
+
+    //directional_lights.push_back(  directional_light( math::normalize3( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
+    directional_lights.push_back(  directional_light( ( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
 
     //should be quad
     auto directional_entity = create_directional_lights_entity( context.m_device.get(), render_context->m_screen_space_render_data.m_screen_space_vertex_buffer, &directional_lights[0], &directional_lights[0] + directional_lights.size()  );
@@ -56,13 +59,9 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	dynamic_entities->add_type( 0, light_updater );
 
 
-	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), math::set(10.0f, 10.0f, 10.0f,  1.0f), 1.0f, 0.5f);
-	point_light light2 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(0.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
-	point_light light3 ( math::set(0.5f, 0.2f, 0.5f, 0.0f), math::set(-1.0f,1.0f,6.0f,1.0f), 1.0f, 0.5f);
+	point_light light1 ( math::set(0.3f, 0.2f, 0.0f, 0.0f), light_position, 1.0f, 0.5f);
 
-	point_lights->add_light(light1);
-	//point_lights->add_light(light2);
-	//point_lights->add_light(light3);
+    point_lights->add_light(light1);
 
     auto it = scene->begin();
     auto it_end = scene->end();

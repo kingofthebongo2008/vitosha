@@ -106,9 +106,9 @@ float3 main( in  vs_output input) : sv_target
 
     float3 v            = surface_sample_position_vs;
 
-    const float4		light_position_ws  = { 10.0f, 10.0f, 10.0f,  1.0f }; 
+    const float4		light_position_ws  =  m_light_direction_ws[0];//float4( 10.0f, 1.0f, 10.0f, 1.0f ) ;// m_light_direction_ws[0];
 
-	float3 light_vs1	= normalize (  mul ( light_position_ws  , m_view ).xyz - surface_sample_position_vs   ) ;//rigid_transform_vector( normalize(light_position_ws) , m_view ) ;   //normalize(light_direction_vs);
+	float3 light_vs1	= normalize (  mul ( light_position_ws  , m_view ).xyz - surface_sample_position_vs   ) ;
 	float3 normal_vs1	= n_vs;
 
     float3 diffuse		= blinn_phong_diffuse ( kd, light_vs1, n_vs) ;

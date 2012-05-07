@@ -30,7 +30,7 @@ namespace gx
 			}
 		}
 
-		void indexed_draw_call::draw(ID3D11DeviceContext* device_context)
+		void indexed_draw_call::draw(ID3D11DeviceContext* device_context) const
 		{
 			ID3D11Buffer*	buffers[vertex_buffer_count];
 			uint32_t		offset[vertex_buffer_count];
@@ -46,7 +46,7 @@ namespace gx
 			device_context->DrawIndexed( m_index_info.m_index_count, m_index_info.m_start_index_location, m_index_info.m_base_vertex_location);
 		}
 
-		void indexed_draw_call::draw_instanced(ID3D11DeviceContext* device_context, uint32_t instance_count)
+		void indexed_draw_call::draw_instanced(ID3D11DeviceContext* device_context, uint32_t instance_count) const
 		{
 			ID3D11Buffer*	buffers[vertex_buffer_count];
 			uint32_t		offset[vertex_buffer_count];
