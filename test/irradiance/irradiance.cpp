@@ -45,9 +45,11 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
 
-    math::vector_float4 light_position = math::set( 10.0f, 1.0f, 10.0f, 1.0f );
+    math::vector_float4 light_position = math::set( -1.0f, 5.0f, 0.0f, 1.0f );
 
     //directional_lights.push_back(  directional_light( math::normalize3( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
+
+    //directional_lights.push_back(  directional_light( ( math::sub(math::set(0.0f, 0.0f, 0.0f, 1.0f), light_position) )  , gx::color::red()));
     directional_lights.push_back(  directional_light( ( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
 
     //should be quad
