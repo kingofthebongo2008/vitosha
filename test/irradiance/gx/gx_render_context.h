@@ -300,7 +300,7 @@ namespace gx
 		lambert_shift_invariant_pixel_shader_constant_buffer	    m_lambert_pixel_cbuffer;
 
         blinn_phong_shift_invariant_pixel_shader				    m_blinn_phong_shift_invariant_pixel_shader;
-		blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_blinn_phong_pixel_cbuffer;
+		blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_blinn_phong_shift_invariant_pixel_cbuffer;
 
     };
 }

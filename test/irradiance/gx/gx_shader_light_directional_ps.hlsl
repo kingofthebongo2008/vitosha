@@ -43,7 +43,7 @@ float3 convert_to_view_space ( float2 texture_coord, float depth_buffer_z)
 {
     //texture_coord is in[0;1] should go in [-1 ; 1]
     float2 scale     = float2(-2.0f, -2.0f);
-    float2 translate = float2(1.0f, 1.0f);
+    float2 translate = float2( 1.0f, 1.0f);
 
     float2 result = texture_coord * scale + translate;
 
@@ -86,18 +86,14 @@ float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3
 
     float3 fresnel = fresnel_schlick( specular_color, l, h );
 
-    float  multiplier = ( (power + 2) / 8 )  * pow ( saturate( dot( n, h ) ) , power ) ;
+    float  multiplier = ( (power + 2.0f) / 8.0f )  * pow ( saturate( dot( n, h ) ) , power ) ;
 
     return multiplier * fresnel * n_dot_l;
-
-    //return saturate( dot (n,h) );
 }
 
 float3 blinn_phong_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l )
 {
-    //return albedo * saturate(  ( dot ( l, n ) ) );
-    return n_dot_l;
-    //return float3(0.0f,0.0f,0.0f);
+    return albedo * n_dot_l;
 }
 
 blinn_phong_surface blinn_phong(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
@@ -121,8 +117,7 @@ blinn_phong_surface blinn_phong(float3 albedo, float3 specular_color, float powe
 
 float3 main( in  vs_output input) : sv_target
 {
-    float2 scale            = float2(1.0f, 1.0f);
-    float2 uv               = scale * input.uv;
+    float2 uv               = input.uv;
 
 	float3 kd               = diffuse_gbuffer.Sample(default_sampler, uv).xyz;
     float3 n_vs             = normal_gbuffer.Sample( default_sampler, uv ).xyz;
@@ -138,13 +133,13 @@ float3 main( in  vs_output input) : sv_target
 
     const float4		light_direction_1_ws = normalize( m_light_direction_ws[0] );
 
-	float3 light_vs1	= normalize( mul ( light_direction_1_ws, m_view ).xyz );
-	float3 normal_vs1	= n_vs;
+	float3 light_vs_1	= normalize( mul ( light_direction_1_ws, m_view ).xyz );
+	float3 normal_vs_1	= n_vs;
 
     float3 specular_color = decode_specular_color( ks_gloss );
-    float  specular_power = decode_specular_power(ks_gloss);
+    float  specular_power = decode_specular_power( ks_gloss );
 
-    blinn_phong_surface surface = blinn_phong(kd, specular_color, specular_power,  light_vs1 , normal_vs1, normalize(v) );
+    blinn_phong_surface surface = blinn_phong(kd, specular_color, specular_power,  light_vs_1 , normal_vs_1, normalize(v) );
 
     float3 radiance		=  surface.m_kd + surface.m_ks;
 

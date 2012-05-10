@@ -9,6 +9,6 @@ SamplerState	default_sampler;
 
 float4 main( in  vs_output input) : sv_target
 {
-	float4 f_1 = sampled_texture.Sample(default_sampler, input.uv);
+	float4 f_1 = sampled_texture.Sample(default_sampler, input.uv);//.wwww;
 	return f_1;
 }

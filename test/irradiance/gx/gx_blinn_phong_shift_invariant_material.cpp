@@ -59,7 +59,7 @@ namespace gx
                                     context->m_transform_position_normal_uv_input_layout
                                 ) ,
 								context->m_blinn_phong_shift_invariant_pixel_shader,
-								context->m_blinn_phong_pixel_cbuffer,
+								context->m_blinn_phong_shift_invariant_pixel_cbuffer,
 								kd,
                                 ks_gloss
                                 );

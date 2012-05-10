@@ -101,7 +101,7 @@ namespace gx
 		, m_lambert_shift_invariant_pixel_shader(sys_context.m_device.get() )
 		, m_lambert_pixel_cbuffer( sys_context.m_device.get() )
         , m_blinn_phong_shift_invariant_pixel_shader( sys_context.m_device.get()  )
-		, m_blinn_phong_pixel_cbuffer( sys_context.m_device.get() )
+		, m_blinn_phong_shift_invariant_pixel_cbuffer( sys_context.m_device.get() )
 
     {
         m_render_contexts.reserve(thread_render_context_count);
@@ -537,13 +537,13 @@ namespace gx
 
 		const vertex_float v_1[ 6 + 2 ] =
 		{ 
-			 { {-1.0f,	-1.0f,	0.0f, 1.0f},  {0.0f, 0.0f}},
-			 { {-1.0f,	 1.0f,	0.0f, 1.0f},  {0.0f, 1.0f}},
-			 { {1.0f,	 1.0f,	0.0f, 1.0f},  {1.0f, 1.0f}},
+			 { {-1.0f,	-1.0f,	0.0f, 1.0f},  {0.0f, 1.0f}},
+			 { {-1.0f,	 1.0f,	0.0f, 1.0f},  {0.0f, 0.0f}},
+			 { {1.0f,	 1.0f,	0.0f, 1.0f},  {1.0f, 0.0f}},
 
-			 { {1.0f,	 1.0f,	0.0f, 1.0f} , {1.0f, 1.0f}},
-			 { {1.0f,	-1.0f,	0.0f, 1.0f} , {1.0f, 0.0f}},
-			 { {-1.0f,	-1.0f,	0.0f, 1.0f} , {0.0f,0.0f}},
+			 { {1.0f,	 1.0f,	0.0f, 1.0f} , {1.0f, 0.0f}},
+			 { {1.0f,	-1.0f,	0.0f, 1.0f} , {1.0f, 1.0f}},
+			 { {-1.0f,	-1.0f,	0.0f, 1.0f} , {0.0f, 1.0f}},
 
 			 { {0.0f,	0.0f,	0.0f, 0.0f} , {0.0f,0.0f}},	//padding
 			 { {0.0f,	0.0f,	0.0f, 0.0f} , {0.0f,0.0f}},	//padding

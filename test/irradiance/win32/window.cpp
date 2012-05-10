@@ -35,7 +35,7 @@ namespace wnd
 
 		math::vector_float4  view_position_ws = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
 		math::vector_float4  view_direction_ws  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
-		math::vector_float4  view_up_ws = math::set( 1.0f, 1.0f, 0.0f, 0.0f );  //up vector
+		math::vector_float4  view_up_ws = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
 
 		m_main_camera.set_view_position(view_position_ws);
 		m_main_camera.set_view_direction(view_direction_ws);

@@ -25,7 +25,7 @@ vs_output main( in  vs_input input)
 	normal_transform[3] = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	output.position_ps	=	mul ( float4(input.position_os), m_wvp )  ;	
-	output.normal_ws	=	mul ( float4(input.normal_os.xyz, 1.0f), normal_transform ).xyz;
+	output.normal_ws	=	mul ( float4(input.normal_os.xyz, 0.0f), normal_transform ).xyz;
     
 	return output;
 }

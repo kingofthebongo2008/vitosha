@@ -45,11 +45,8 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
 
-    math::vector_float4 light_position = math::set( -1.0f, 5.0f, 0.0f, 1.0f );
+    math::vector_float4 light_position = math::set( 5.0f, 5.0f, 0.0f, 1.0f );
 
-    //directional_lights.push_back(  directional_light( math::normalize3( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
-
-    //directional_lights.push_back(  directional_light( ( math::sub(math::set(0.0f, 0.0f, 0.0f, 1.0f), light_position) )  , gx::color::red()));
     directional_lights.push_back(  directional_light( ( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
 
     //should be quad
@@ -78,7 +75,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto root = scene->get_root();
 
     //auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
-    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::red() , math::set(0.05f, 0.05f, 0.05f, 0.66f )  ); 
+    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::red() , math::set(0.05f, 0.05f, 0.05f, 0.12f )  ); 
 	
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );

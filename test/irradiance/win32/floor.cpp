@@ -19,7 +19,6 @@ void floor_entity::on_create_draw_calls( gx::draw_call_collector_context* contex
     auto key = gx::create_gbuffer_draw_call(material_id, gx::get_perspective_transform3_depth(context) );
 
     collector->add_draw_call(key, context->m_entity_index ) ;
-
 }
 
 void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_context )
@@ -32,8 +31,8 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
     std::get<1>(m_vertex_pipeline).flush(device_context);
     std::get<1>(m_vertex_pipeline).bind_as_geometry_constant_buffer(device_context);
 
-    m_pixel_cbuffer.set_ks_gloss( math::set( 0.5f, 0.05f, 0.05f, 0.66f ) );
-    m_pixel_cbuffer.set_kd( math::zero() );
+    m_pixel_cbuffer.set_ks_gloss( math::set( 1.0f, 0.3f, 1.0f, 0.2f ) );
+    m_pixel_cbuffer.set_kd( math::set( 0.2f, 0.3f, 1.0f, 1.0f ) );
 	m_pixel_cbuffer.flush(device_context);
     m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
@@ -57,7 +56,7 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 
 std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::render_context* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
 {
-    math::half half[8];
+    math::half half[8] = {};
 
     dx11::id3d11buffer_ptr point = dx11::create_immutable_vertex_buffer(device, &half[0], sizeof(half) );
     dx11::id3d11buffer_ptr out  = dx11::create_stream_out_vertex_buffer(device, &half[0], 6 * sizeof(half) );
@@ -73,11 +72,9 @@ std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::ren
                                 ),
                                 gx::grid_geometry_shader(device) ,
 								context->m_blinn_phong_shift_invariant_pixel_shader,
-								context->m_blinn_phong_pixel_cbuffer,
+								context->m_blinn_phong_shift_invariant_pixel_cbuffer,
                                 std::make_tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr > ( point,  out)
                                 );
-
-
 }
 
 

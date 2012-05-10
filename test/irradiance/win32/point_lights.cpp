@@ -12,6 +12,7 @@
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
+#include <gx/gx_profile.h>
 
 #include <gxu/gxu_entity_factory.h>
 
@@ -71,6 +72,7 @@ void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_con
 
 void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
 {
+    gx::profile p(L"point_lights_entity");
 	ID3D11DeviceContext* device_context = context->m_device_context;
 
 	//execute debug draw call for all lights
