@@ -27,9 +27,9 @@ namespace gx
 
 
 		pinhole_camera(
-						math::vector_float4 position
-						, math::vector_float4 look_at_direction
-						, math::vector_float4 up
+						math::float4 position
+						, math::float4 look_at_direction
+						, math::float4 up
 
 						, float				fov
 						, float				aspect_ratio
@@ -50,17 +50,17 @@ namespace gx
 						}
 
 		//view parameters
-		math::vector_float4 get_position() const
+		math::float4 get_position() const
 		{
 			return m_view_position_ws;
 		}
 
-		math::vector_float4 get_view_direction() const
+		math::float4 get_view_direction() const
 		{
 			return m_view_direction_ws;
 		}
 
-		math::vector_float4 get_up() const
+		math::float4 get_up() const
 		{
 			return m_view_up_ws;
 		}
@@ -87,17 +87,17 @@ namespace gx
 		}
 
 		//view parameters
-		void set_view_position( math::vector_float4 position_ws)
+		void set_view_position( math::float4 position_ws)
 		{
 			m_view_position_ws = position_ws;
 		}
 
-		void set_view_direction(math::vector_float4 view_direction_ws)
+		void set_view_direction(math::float4 view_direction_ws)
 		{
 			m_view_direction_ws = view_direction_ws;
 		}
 
-		void set_view_up(math::vector_float4 up_ws)
+		void set_view_up(math::float4 up_ws)
 		{
 			m_view_up_ws = up_ws;
 		}
@@ -126,9 +126,9 @@ namespace gx
 		public:
 
 		//view parameters
-		math::vector_float4 m_view_position_ws;
-		math::vector_float4 m_view_direction_ws;
-		math::vector_float4 m_view_up_ws;
+		math::float4 m_view_position_ws;
+		math::float4 m_view_direction_ws;
+		math::float4 m_view_up_ws;
 
 		//perspective parameters
 		float				m_fov;
@@ -137,17 +137,17 @@ namespace gx
 		float				m_far;
 	};
 
-	inline math::matrix_float44 create_view_matrix(const pinhole_camera * camera)
+	inline math::float4x4 create_view_matrix(const pinhole_camera * camera)
 	{
 		return math::view(camera->get_position(), math::normalize3( camera->get_view_direction() ) , math::normalize3( camera->get_up() ) );
 	}
 
-	inline math::matrix_float44 create_perspective_matrix(const pinhole_camera * camera)
+	inline math::float4x4 create_perspective_matrix(const pinhole_camera * camera)
 	{
 		return math::perspective_fov_lh(camera->get_fov(), camera->get_aspect_ratio(), camera->get_near(), camera->get_far() );
 	}
 
-	inline math::matrix_float44 create_wvp_matrix(const pinhole_camera * camera)
+	inline math::float4x4 create_wvp_matrix(const pinhole_camera * camera)
 	{
 		return math::mul( create_view_matrix(camera), create_perspective_matrix(camera) );
 	}

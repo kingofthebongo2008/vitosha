@@ -19,22 +19,22 @@ namespace gx
 
 		explicit color_pixel_shader_constant_buffer ( ID3D11Device* device );
 
-		math::vector_float4 get_color() const
+		math::float4 get_color() const
 		{
 			return m_color;
 		}
 
-		void set_color(math::vector_float4 value)
+		void set_color(math::float4 value)
 		{
 			m_color = value;
 		}
 
-		void update ( ID3D11DeviceContext* context, math::vector_float4* value)
+		void update ( ID3D11DeviceContext* context, math::float4* value)
 		{
 			constant_buffer_update( context, m_buffer.get(), value);
 		}
 
-		void update ( ID3D11DeviceContext* context, math::vector_float4 value)
+		void update ( ID3D11DeviceContext* context, math::float4 value)
 		{
 			constant_buffer_update( context, m_buffer.get(), value);
 		}
@@ -76,7 +76,7 @@ namespace gx
 
 		public:
 
-		math::vector_float4		m_color;
+		math::float4		m_color;
 		dx11::id3d11buffer_ptr	m_buffer;
 	};
 

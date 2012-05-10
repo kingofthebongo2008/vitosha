@@ -18,12 +18,12 @@ namespace gx
 
 		explicit transform_position_normal_vertex_shader_constant_buffer ( ID3D11Device* device );
 
-        void set_wvp(math::matrix_float44 value)
+        void set_wvp(math::float4x4 value)
 		{
 			m_wvp = value;
 		}
 
-        void set_normal_transform(math::matrix_float44 value)
+        void set_normal_transform(math::float4x4 value)
 		{
 			m_world = value;
 		}
@@ -63,8 +63,8 @@ namespace gx
 
 		dx11::id3d11buffer_ptr	m_buffer;
 
-		math::matrix_float44	m_wvp;
-		math::matrix_float44	m_world;
+		math::float4x4	m_wvp;
+		math::float4x4	m_world;
 	};
 
 	class transform_position_normal_vertex_shader

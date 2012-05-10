@@ -124,7 +124,7 @@ namespace gxu
 				auto z =  math::mul(dz, v_9);
 				auto one =  math::one();
 
-				math::matrix_float44 p_1;
+				math::float4x4 p_1;
 
 				p_1.r[0] = x;
 				p_1.r[1] = y;
@@ -297,7 +297,7 @@ namespace gxu
 				auto z =  math::mul(dz, v_9);
 				auto one =  math::one();
 
-				math::matrix_float44 p_1;
+				math::float4x4 p_1;
 
 				p_1.r[0] = x;
 				p_1.r[1] = y;

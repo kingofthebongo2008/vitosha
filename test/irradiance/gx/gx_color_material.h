@@ -22,7 +22,7 @@ namespace gx
 										transform_position_input_layout                 			input_layout,
 										color_pixel_shader					                        pixel_shader,
 										color_pixel_shader_constant_buffer	                        pixel_cbuffer,
-										math::vector_float4 color );
+										math::float4 color );
 
 		void apply(draw_call_context* draw_call_context);
 
@@ -31,12 +31,12 @@ namespace gx
 			return m_material_id;
 		}
 
-		math::vector_float4 get_color() const
+		math::float4 get_color() const
 		{
 			return m_pixel_cbuffer.get_color();
 		}
 
-		void set_color(math::vector_float4 value)
+		void set_color(math::float4 value)
 		{
 			m_pixel_cbuffer.set_color(value);
 		}
@@ -53,13 +53,13 @@ namespace gx
 
 	};
 
-	color_material create_color_material( render_context* context, math::vector_float4 color );
+	color_material create_color_material( render_context* context, math::float4 color );
 
 	struct color_material_factory
 	{
 		typedef color_material type;
 
-		static color_material create(render_context* context, math::vector_float4 color)
+		static color_material create(render_context* context, math::float4 color)
 		{
 			return create_color_material(context, color);
 		}

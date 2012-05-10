@@ -10,11 +10,11 @@ namespace gx
 {
    struct draw_call_collector_context
    {
-        math::matrix_float44*    m_view_matrix;
-        math::matrix_float44*    m_projection_matrix;
+        math::float4x4*    m_view_matrix;
+        math::float4x4*    m_projection_matrix;
 
-        math::matrix_float44*    m_world_matrix;
-        math::matrix_float44*    m_wvp;
+        math::float4x4*    m_world_matrix;
+        math::float4x4*    m_wvp;
 		uint32_t			 m_entity_index;
    };
 

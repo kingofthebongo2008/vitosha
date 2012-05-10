@@ -20,13 +20,13 @@ class __declspec(align(16)) point_light
 {
 	public:
 
-	point_light( math::vector_float4 power, math::vector_float4 position, float radius, float cut_off_distance ) : m_power(power), m_position(position)
+	point_light( math::float4 power, math::float4 position, float radius, float cut_off_distance ) : m_power(power), m_position(position)
 	{
 		set_radius(radius);
 		set_cut_off_distance(cut_off_distance);
 	}
 
-	math::vector_float4 get_power() const
+	math::float4 get_power() const
 	{
 		const uint32_t __declspec(align(16)) mask[4] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0 };
 
@@ -35,7 +35,7 @@ class __declspec(align(16)) point_light
 		return math::and( m_power, v );
 	}
 
-	math::vector_float4 set_power(math::vector_float4 value)
+	math::float4 set_power(math::float4 value)
 	{
 		using namespace math;
 
@@ -47,17 +47,17 @@ class __declspec(align(16)) point_light
 		m_power = select(value, m_power, v_1);
 	}
 
-	math::vector_float4 get_position() const
+	math::float4 get_position() const
 	{
 		const uint32_t __declspec(align(16)) mask[4] = {0, 0, 0, 0xFFFFFFFF };
-		static const math::vector_float4 identity_r4  = {0.0f, 0.0f, 0.0f, 1.0f};
+		static const math::float4 identity_r4  = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		auto v = math::load4( reinterpret_cast<const float* __restrict> (&mask[0]) );
 
 		return math::select( m_position, identity_r4, v );
 	}
 
-	math::vector_float4 set_position(math::vector_float4 value)
+	math::float4 set_position(math::float4 value)
 	{
 		using namespace math;
 
@@ -86,7 +86,7 @@ class __declspec(align(16)) point_light
 	{
 		using namespace math;
 
-		vector_float4 v = splat(value);
+		float4 v = splat(value);
 
 		const uint32_t __declspec(align(16)) mask[4] = {0,0,0,0xFFFFFFFF};
 
@@ -124,8 +124,8 @@ class __declspec(align(16)) point_light
 
 	private:
 
-	math::vector_float4 m_power;
-	math::vector_float4	m_position;
+	math::float4 m_power;
+	math::float4	m_position;
 
 };
 
@@ -187,7 +187,7 @@ class point_lights_entity : public gx::entity
 
 	std::vector< point_light >	m_lights;
 
-	void update_instance_stream(ID3D11DeviceContext* device_context, math::matrix_float44 world_matrix);
+	void update_instance_stream(ID3D11DeviceContext* device_context, math::float4x4 world_matrix);
 };
 
 std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* device);

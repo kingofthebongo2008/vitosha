@@ -13,7 +13,7 @@ namespace gx
 		draw_quad( device_context, identity);
 	}
 
-	void screen_space_quad_render::draw_quad(ID3D11DeviceContext* device_context, math::matrix_float44 transform)
+	void screen_space_quad_render::draw_quad(ID3D11DeviceContext* device_context, math::float4x4 transform)
 	{
 		constant_buffer_update( device_context, m_cbuffer, transform);
 		device_context->VSSetConstantBuffers(0, 1, &m_cbuffer );
@@ -46,7 +46,7 @@ namespace gx
 		draw_screen_space_quad(&r, device_context);
 	}
 
-	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* render_context, math::matrix_float44 transform)
+	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* render_context, math::float4x4 transform)
 	{
 		auto r = create_screen_space_quad_render(render_context);
 		draw_screen_space_quad(&r, device_context, transform);

@@ -11,13 +11,13 @@ namespace gx
 {
     struct draw_calls_pipeline_params
     {
-        math::matrix_float44                    m_view_matrix;
-        math::matrix_float44                    m_projection_matrix;
-        math::matrix_float44                    m_inverse_view_matrix;
-        math::matrix_float44                    m_inverse_projection_matrix;
+        math::float4x4                    m_view_matrix;
+        math::float4x4                    m_projection_matrix;
+        math::float4x4                    m_inverse_view_matrix;
+        math::float4x4                    m_inverse_projection_matrix;
 
-        std::vector< math::matrix_float44 >*    m_wvp_matrices;
-        std::vector< math::matrix_float44 >*    m_world_matrices;
+        std::vector< math::float4x4 >*    m_wvp_matrices;
+        std::vector< math::float4x4 >*    m_world_matrices;
         std::vector < draw_call_info >*         m_draw_calls;
         std::vector< void* >*                   m_data;
     };

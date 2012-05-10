@@ -20,7 +20,7 @@ namespace gx
 		void end(ID3D11DeviceContext* device_context);
 		
 		void draw_quad(ID3D11DeviceContext* device_context);
-		void draw_quad(ID3D11DeviceContext* device_context, math::matrix_float44 transform);
+		void draw_quad(ID3D11DeviceContext* device_context, math::float4x4 transform);
 
 
 		ID3D11VertexShader*							m_vertex_shader;
@@ -36,7 +36,7 @@ namespace gx
 		render->end(device_context);
 	}
 
-	inline void draw_screen_space_quad(	screen_space_quad_render* render, ID3D11DeviceContext* device_context, math::matrix_float44 transform )
+	inline void draw_screen_space_quad(	screen_space_quad_render* render, ID3D11DeviceContext* device_context, math::float4x4 transform )
 	{
 		render->begin(device_context);
 		render->draw_quad(device_context, transform);
@@ -44,7 +44,7 @@ namespace gx
 	}
 
 	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* context);
-	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* context, math::matrix_float44 transform);
+	void draw_screen_space_quad(ID3D11DeviceContext* device_context, render_context* context, math::float4x4 transform);
 
 	screen_space_quad_render	create_screen_space_quad_render(render_context* context);
 

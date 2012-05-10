@@ -18,7 +18,7 @@ namespace gx
     }
 
     
-    void scene_pipeline_node::submit( const std::vector< math::matrix_float44>* world_matrices, const std::vector<void*>* data )
+    void scene_pipeline_node::submit( const std::vector< math::float4x4>* world_matrices, const std::vector<void*>* data )
     {
         m_world_matrices.reserve( world_matrices->size() );
         m_data.reserve( data->size() );
@@ -27,7 +27,7 @@ namespace gx
         m_data.clear();
 
         //skip the root node
-        std::copy( std::begin(*world_matrices) + 1 , std::end(*world_matrices), std::back_inserter< std::vector< math::matrix_float44>> (m_world_matrices) );
+        std::copy( std::begin(*world_matrices) + 1 , std::end(*world_matrices), std::back_inserter< std::vector< math::float4x4>> (m_world_matrices) );
         std::copy( std::begin(*data) + 1 , std::end(*data), std::back_inserter< std::vector<void*>> (m_data) );
     }
 }

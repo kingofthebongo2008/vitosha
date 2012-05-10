@@ -27,7 +27,7 @@ namespace gx
                                 inverse_view_matrix, inverse_projection_matrix,
                                 &m_wvp_matrices, in_params->m_world_matrices, in_params->m_data } ;
 
-        math::matrix_float44 vp = math::mul( view_matrix, projection_matrix  );
+        math::float4x4 vp = math::mul( view_matrix, projection_matrix  );
 
         for (auto i = static_cast<uint32_t> (0); i < size; ++i)
         {

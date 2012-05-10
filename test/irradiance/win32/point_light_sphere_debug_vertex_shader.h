@@ -17,7 +17,7 @@ class point_light_sphere_debug_vertex_shader_constant_buffer
 
 	explicit point_light_sphere_debug_vertex_shader_constant_buffer ( ID3D11Device* device );
 
-	void set_vp(math::matrix_float44 value)
+	void set_vp(math::float4x4 value)
 	{
 		m_vp = value;
 	}
@@ -50,7 +50,7 @@ class point_light_sphere_debug_vertex_shader_constant_buffer
 	public:
 
 	dx11::id3d11buffer_ptr	m_buffer;
-	math::matrix_float44	m_vp;		//view projection
+	math::float4x4	m_vp;		//view projection
 };
 
 

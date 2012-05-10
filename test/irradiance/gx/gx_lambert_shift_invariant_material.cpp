@@ -33,7 +33,7 @@ namespace gx
                                         transform_position_normal_uv_vertex_pipeline            vertex_pipeline,
                                         lambert_shift_invariant_pixel_shader					pixel_shader,
 										lambert_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
-										math::vector_float4								diffuse_albedo
+										math::float4								diffuse_albedo
 		
 		) :   m_vertex_pipeline(vertex_pipeline)
 			 , m_pixel_shader(pixel_shader)
@@ -43,7 +43,7 @@ namespace gx
 		m_pixel_cbuffer.set_diffuse_albedo(diffuse_albedo);
 	}
 
-	lambert_shift_invairant_material create_lambert_shift_invairant_material( render_context* context, math::vector_float4 diffuse_albedo )
+	lambert_shift_invairant_material create_lambert_shift_invairant_material( render_context* context, math::float4 diffuse_albedo )
 	{
 		return lambert_shift_invairant_material(
                                 std::make_tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer,  transform_position_normal_uv_input_layout > 

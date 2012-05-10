@@ -52,10 +52,10 @@ void point_lights_entity::on_create_draw_calls( gx::draw_call_collector_context*
 	collector->add_draw_call(key, context->m_entity_index ) ;
 }
 
-void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_context, math::matrix_float44 world_matrix)
+void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_context, math::float4x4 world_matrix)
 {
 	dx11::d3d11_buffer_scope_lock buffer ( device_context, m_transform_color.get() );
-	auto	buffer_data = reinterpret_cast< math::vector_float4* > (buffer.m_mapped_resource.pData );
+	auto	buffer_data = reinterpret_cast< math::float4* > (buffer.m_mapped_resource.pData );
 
 	//transform lights into world space and upload matrices and color
 	for ( auto& light : m_lights)
@@ -97,7 +97,7 @@ std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* de
 	//create positions and index buffer
 	std::tuple< dx11::id3d11buffer_ptr,  dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t >	sphere = gxu::create_lat_lon_sphere_2(device, 0.2f, 20 );
 
-	const uint32_t transform_buffer_size  = ( sizeof(math::matrix_float44) + sizeof(math::vector_float4) )  * point_lights_entity::max_light_count;
+	const uint32_t transform_buffer_size  = ( sizeof(math::float4x4) + sizeof(math::float4) )  * point_lights_entity::max_light_count;
 	std::vector<uint8_t> initial_data;
 	initial_data.resize(transform_buffer_size);
 	
@@ -130,7 +130,7 @@ std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* de
 	dx11::throw_if_failed<dx11::create_input_layout> (device->CreateInputLayout(&desc[0], sizeof(desc) / sizeof(desc[0]) ,debug_vertex_shader.m_code, debug_vertex_shader.m_code_size, dx11::get_pointer(input_layout)));
 
 	return std::make_shared<point_lights_entity>( 
-		gx::create_indexed_draw_call< 8, 12,  sizeof(math::matrix_float44) + sizeof(math::vector_float4) > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )
+		gx::create_indexed_draw_call< 8, 12,  sizeof(math::float4x4) + sizeof(math::float4) > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )
 		, transform_color
 		, input_layout
 		, info

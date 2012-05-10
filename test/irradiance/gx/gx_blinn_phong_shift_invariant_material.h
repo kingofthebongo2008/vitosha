@@ -22,8 +22,8 @@ namespace gx
 											blinn_phong_shift_invariant_pixel_shader					pixel_shader,
 											blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
 
-											math::vector_float4	kd,
-											math::vector_float4	ks_gloss
+											math::float4	kd,
+											math::float4	ks_gloss
 
 										);
 
@@ -34,22 +34,22 @@ namespace gx
 			return m_material_id;
 		}
 
-		math::vector_float4 get_kd() const
+		math::float4 get_kd() const
 		{
 			return m_pixel_cbuffer.get_kd();
 		}
 
-		void set_kd(math::vector_float4 value)
+		void set_kd(math::float4 value)
 		{
 			m_pixel_cbuffer.set_kd(value);
 		}
 
-		math::vector_float4 get_ks_gloss() const
+		math::float4 get_ks_gloss() const
 		{
 			return m_pixel_cbuffer.get_kd();
 		}
 
-		void set_ks_gloss(math::vector_float4 value)
+		void set_ks_gloss(math::float4 value)
 		{
 			m_pixel_cbuffer.set_ks_gloss(value);
 		}
@@ -65,13 +65,13 @@ namespace gx
 
 	};
 
-	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( render_context* context, math::vector_float4 kd, math::vector_float4 ks_gloss );
+	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( render_context* context, math::float4 kd, math::float4 ks_gloss );
 
 	struct blinn_phong_shift_invairant_material_factory
 	{
 		typedef blinn_phong_shift_invairant_material type;
 
-		static blinn_phong_shift_invairant_material create(render_context* context, math::vector_float4 kd, math::vector_float4 ks_gloss )
+		static blinn_phong_shift_invairant_material create(render_context* context, math::float4 kd, math::float4 ks_gloss )
 		{
 			return create_blinn_phong_shift_invairant_material(context, kd, ks_gloss);
 		}

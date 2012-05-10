@@ -33,9 +33,9 @@ namespace wnd
 			, m_occluded_by_another_window(false)
 	{
 
-		math::vector_float4  view_position_ws = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
-		math::vector_float4  view_direction_ws  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
-		math::vector_float4  view_up_ws = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
+		math::float4  view_position_ws = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
+		math::float4  view_direction_ws  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
+		math::float4  view_up_ws = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
 
 		m_main_camera.set_view_position(view_position_ws);
 		m_main_camera.set_view_direction(view_direction_ws);
@@ -96,8 +96,8 @@ namespace wnd
 	{
 		gx::pipeline    pipeline;
 		
-		math::matrix_float44 view_matrix = gx::create_view_matrix(&m_main_camera);
-		math::matrix_float44 perspective_matrix = gx::create_perspective_matrix(&m_main_camera);
+		math::float4x4 view_matrix = gx::create_view_matrix(&m_main_camera);
+		math::float4x4 perspective_matrix = gx::create_perspective_matrix(&m_main_camera);
 
 		gx::view			 view( view_matrix, perspective_matrix );
 

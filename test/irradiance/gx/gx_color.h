@@ -9,27 +9,27 @@ namespace gx
 {
 	namespace color
 	{
-		inline math::vector_float4 red()
+		inline math::float4 red()
 		{
 			return math::set(1.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		inline math::vector_float4 green()
+		inline math::float4 green()
 		{
 			return math::set(0.0f, 1.0f, 0.0f, 1.0f);
 		}
 
-		inline math::vector_float4 blue()
+		inline math::float4 blue()
 		{
 			return math::set(0.0f, 0.0f, 1.0f, 1.0f);
 		}
 
-        inline math::vector_float4 black()
+        inline math::float4 black()
 		{
 			return math::set(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-        inline math::vector_float4 white()
+        inline math::float4 white()
 		{
 			return math::set(1.0f, 1.0f, 1.0f, 1.0f);
 		}

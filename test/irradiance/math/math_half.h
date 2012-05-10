@@ -6,16 +6,16 @@
 namespace math
 {
     typedef uint16_t	half;
-	typedef __m128i			vector_half4;
-	typedef __m128i			vector_half4_2;		// two half4 vectors in a compact form
+	typedef __m128i			half4;
+	typedef __m128i			half4_2;		// two half4 vectors in a compact form
 	typedef std::uint64_t	compact_half4;		// half4 vector in a compact form, suitable for storage
 
-	struct vector_half2
+	struct half2
 	{
 		half	r[2];
 	};
 
-	struct vector_half3
+	struct half3
 	{
 		half	r[2];
 	};
@@ -179,7 +179,7 @@ namespace math
 			return c.f;
         }
 
-		inline math::vector_half4_2 convert_f32_f16(math::vector_float4 v1, math::vector_float4 v2)
+		inline math::half4_2 convert_f32_f16(math::float4 v1, math::float4 v2)
 		{
 			static __declspec( align(16) ) const uint32_t sign_mask[4]			= { 0x80008000,	0x80008000,	0x80008000,	0x80008000 };
 			static __declspec( align(16) ) const uint32_t exponent_offset[4]	= { 0x38003800,	0x38003800,	0x38003800,	0x38003800 };	//112
@@ -276,7 +276,7 @@ namespace math
 			return _mm_or_si128(v1, v2);
 		}
 
-		inline math::vector_half4_2 convert_f32_f16(math::vector_float4 v1, math::vector_float4 v2)
+		inline math::half4_2 convert_f32_f16(math::float4 v1, math::float4 v2)
 		{
 			static __declspec( align(16) ) const uint32_t sign_mask[4]			= { 0x80008000,	0x80008000,	0x80008000,	0x80008000 };
 			static __declspec( align(16) ) const uint32_t exponent_offset[4]	= { 0x38003800,	0x38003800,	0x38003800,	0x38003800 };	// greater than 112
@@ -313,7 +313,7 @@ namespace math
         return details1::convert_f16_f32(h);
     }
 
-    inline vector_half4 convert_f32_f16(vector_float4 value)
+    inline half4 convert_f32_f16(float4 value)
     {
 		static __declspec( align(16) ) const uint32_t exponent_mask[4]	= { 0xff,	0xff,	0xff,	0xff };
 		static __declspec( align(16) ) const uint32_t sign_mask[4]		= { 0x8000,	0x8000, 0x8000, 0x8000 };
@@ -362,12 +362,12 @@ namespace math
 		return result;
     }
 
-	inline math::vector_half4_2 convert_f32_f16(math::vector_float4 v1, math::vector_float4 v2)
+	inline math::half4_2 convert_f32_f16(math::float4 v1, math::float4 v2)
 	{
 		return details2::convert_f32_f16(v1, v2);
 	}
 
-	inline compact_half4 compact(vector_half4 value)
+	inline compact_half4 compact(half4 value)
 	{
 		const uint32_t shuffle_k = _MM_SHUFFLE(3, 0, 2, 1);
 		const uint32_t shuffle_k_1 = _MM_SHUFFLE(0, 3, 1, 2);
@@ -382,14 +382,14 @@ namespace math
 		return s;
 	}
 
-	inline void store1(half* __restrict address, vector_half4 value)
+	inline void store1(half* __restrict address, half4 value)
 	{
 		compact_half4 s = compact(value);
 		half* __restrict h = reinterpret_cast<half* __restrict> (&s);		
 		*address++ = *h++;
 	}
 
-	inline void store2(half* __restrict address, vector_half4 value)
+	inline void store2(half* __restrict address, half4 value)
 	{
 		compact_half4 s = compact(value);
 		half* __restrict h = reinterpret_cast<half* __restrict> (&s);		
@@ -397,7 +397,7 @@ namespace math
 		*address++ = *h++;
 	}
 
-	inline void store3(half* __restrict address, vector_half4 value)
+	inline void store3(half* __restrict address, half4 value)
 	{
 		compact_half4 s = compact(value);
 		half* __restrict h = reinterpret_cast<half* __restrict> (&s);		
@@ -406,13 +406,13 @@ namespace math
 		*address++ = *h++;
 	}
 
-	inline void store4(half* __restrict address, vector_half4 value)
+	inline void store4(half* __restrict address, half4 value)
 	{
 		compact_half4 s = compact(value);
 		* ( reinterpret_cast<compact_half4*> ( address ) ) = s;
 	}
 
-	inline void stream(half* __restrict address, vector_half4_2 value)
+	inline void stream(half* __restrict address, half4_2 value)
 	{
 		_mm_stream_si128(reinterpret_cast<__m128i* __restrict>(address), value);
 	}
@@ -421,9 +421,9 @@ namespace math
 	{
 		for (uint32_t i = 0; i < count ; i+=8 )
 		{
-			math::vector_float4 v_1 = math::load4(&in_buffer[i]);
-			math::vector_float4 v_2 = math::load4(&in_buffer[i+4]);
-			math::vector_half4  k = math::convert_f32_f16( v_1, v_2 ) ;
+			math::float4 v_1 = math::load4(&in_buffer[i]);
+			math::float4 v_2 = math::load4(&in_buffer[i+4]);
+			math::half4  k = math::convert_f32_f16( v_1, v_2 ) ;
 			math::stream(  &out_buffer[i], k);
 		}
 	}

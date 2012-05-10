@@ -22,7 +22,7 @@ namespace gx
 										lambert_shift_invariant_pixel_shader					pixel_shader,
 										lambert_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
 
-										math::vector_float4	diffuse_albedo
+										math::float4	diffuse_albedo
 
         );
 
@@ -33,12 +33,12 @@ namespace gx
 			return m_material_id;
 		}
 
-		math::vector_float4 get_diffuse_albedo() const
+		math::float4 get_diffuse_albedo() const
 		{
 			return m_pixel_cbuffer.get_diffuse_albedo();
 		}
 
-		void set_diffuse_albedo(math::vector_float4 value)
+		void set_diffuse_albedo(math::float4 value)
 		{
 			m_pixel_cbuffer.set_diffuse_albedo(value);
 		}
@@ -52,13 +52,13 @@ namespace gx
         uint16_t										        m_material_id;
 	};
 
-	lambert_shift_invairant_material create_lambert_shift_invairant_material( render_context* context, math::vector_float4 diffuse_albedo );
+	lambert_shift_invairant_material create_lambert_shift_invairant_material( render_context* context, math::float4 diffuse_albedo );
 
 	struct lambert_shift_invairant_material_factory
 	{
 		typedef lambert_shift_invairant_material type;
 
-		static lambert_shift_invairant_material create(render_context* context, math::vector_float4 color)
+		static lambert_shift_invairant_material create(render_context* context, math::float4 color)
 		{
 			return create_lambert_shift_invairant_material(context, color);
 		}

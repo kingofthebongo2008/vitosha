@@ -4,16 +4,16 @@
 
 namespace math
 {
-	math::vector_float4	sin_1(math::vector_float4 value)
+	math::float4	sin_1(math::float4 value)
 	{
-		vector_float4 sin_coefficients0    = {1.0f, -0.166666667f, 8.333333333e-3f, -1.984126984e-4f};
-		vector_float4 sin_coefficients1    = {2.755731922e-6f, -2.505210839e-8f, 1.605904384e-10f, -7.647163732e-13f};
-		vector_float4 sin_coefficients2    = {2.811457254e-15f, -8.220635247e-18f, 1.957294106e-20f, -3.868170171e-23f};
+		float4 sin_coefficients0    = {1.0f, -0.166666667f, 8.333333333e-3f, -1.984126984e-4f};
+		float4 sin_coefficients1    = {2.755731922e-6f, -2.505210839e-8f, 1.605904384e-10f, -7.647163732e-13f};
+		float4 sin_coefficients2    = {2.811457254e-15f, -8.220635247e-18f, 1.957294106e-20f, -3.868170171e-23f};
 
 
-	    vector_float4 v_1, v_2, v_3, v_5, v_7, v_9, v_11, v_13, v_15, v_17, v_19, v_21, v_23;
-		vector_float4 s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8, s_9, s_10, s_11;
-		vector_float4 result;
+	    float4 v_1, v_2, v_3, v_5, v_7, v_9, v_11, v_13, v_15, v_17, v_19, v_21, v_23;
+		float4 s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8, s_9, s_10, s_11;
+		float4 result;
 
 		v_1 = value;
 
@@ -60,15 +60,15 @@ namespace math
 		return result;
 	}
 
-	math::vector_float4	cos_1(math::vector_float4 value)
+	math::float4	cos_1(math::float4 value)
 	{
-		vector_float4 cos_coefficients0    = {1.0f, -0.5f, 4.166666667e-2f, -1.388888889e-3f};
-		vector_float4 cos_coefficients1    = {2.480158730e-5f, -2.755731922e-7f, 2.087675699e-9f, -1.147074560e-11f};
-		vector_float4 cos_coefficients2    = {4.779477332e-14f, -1.561920697e-16f, 4.110317623e-19f, -8.896791392e-22f};
+		float4 cos_coefficients0    = {1.0f, -0.5f, 4.166666667e-2f, -1.388888889e-3f};
+		float4 cos_coefficients1    = {2.480158730e-5f, -2.755731922e-7f, 2.087675699e-9f, -1.147074560e-11f};
+		float4 cos_coefficients2    = {4.779477332e-14f, -1.561920697e-16f, 4.110317623e-19f, -8.896791392e-22f};
 
-		vector_float4 v_1, v_2, v_4, v_6, v_8, v_10, v_12, v_14, v_16, v_18, v_20, v_22;
-		vector_float4 c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, c_9, c_10, c_11;
-		vector_float4 result;
+		float4 v_1, v_2, v_4, v_6, v_8, v_10, v_12, v_14, v_16, v_18, v_20, v_22;
+		float4 c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, c_9, c_10, c_11;
+		float4 result;
 
 		v_1 = value;
 

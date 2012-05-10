@@ -19,22 +19,22 @@ namespace gx
 
 		explicit lambert_shift_invariant_pixel_shader_constant_buffer ( ID3D11Device* device );
 
-		math::vector_float4 get_diffuse_albedo() const
+		math::float4 get_diffuse_albedo() const
 		{
 			return m_diffuse_albedo;
 		}
 
-		void set_diffuse_albedo(math::vector_float4 value)
+		void set_diffuse_albedo(math::float4 value)
 		{
 			m_diffuse_albedo = value;
 		}
 
-		void update ( ID3D11DeviceContext* context, math::vector_float4* value)
+		void update ( ID3D11DeviceContext* context, math::float4* value)
 		{
 			constant_buffer_update( context, m_buffer.get(), value);
 		}
 
-		void update ( ID3D11DeviceContext* context, math::vector_float4 value)
+		void update ( ID3D11DeviceContext* context, math::float4 value)
 		{
 			constant_buffer_update( context, m_buffer.get(), value);
 		}
@@ -76,7 +76,7 @@ namespace gx
 
 		public:
 
-		math::vector_float4		m_diffuse_albedo;
+		math::float4		m_diffuse_albedo;
 		dx11::id3d11buffer_ptr	m_buffer;
 	};
 

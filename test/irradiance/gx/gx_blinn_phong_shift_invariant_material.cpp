@@ -35,8 +35,8 @@ namespace gx
                 transform_position_normal_uv_vertex_pipeline                vertex_pipeline,
                 blinn_phong_shift_invariant_pixel_shader					pixel_shader,
                 blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
-				math::vector_float4                                         kd,
-				math::vector_float4                                         ks_gloss
+				math::float4                                         kd,
+				math::float4                                         ks_gloss
 		
 		) :  
              m_vertex_pipeline(vertex_pipeline)
@@ -49,7 +49,7 @@ namespace gx
         set_ks_gloss(ks_gloss);
 	}
 
-	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( render_context* context, math::vector_float4 kd, math::vector_float4 ks_gloss )
+	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( render_context* context, math::float4 kd, math::float4 ks_gloss )
 	{
 		    return blinn_phong_shift_invairant_material(
                                 std::make_tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer,  transform_position_normal_uv_input_layout > 

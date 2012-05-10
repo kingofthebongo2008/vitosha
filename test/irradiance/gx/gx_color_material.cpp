@@ -31,7 +31,7 @@ namespace gx
 										transform_position_input_layout                     input_layout,
 										color_pixel_shader					pixel_shader,
 										color_pixel_shader_constant_buffer	pixel_cbuffer,
-										math::vector_float4 color
+										math::float4 color
 		
 		) :   m_vertex_shader(vertex_shader)
 			 , m_vertex_cbuffer(vertex_cbuffer)
@@ -43,7 +43,7 @@ namespace gx
 		m_pixel_cbuffer.set_color(color);
 	}
 
-	color_material create_color_material( render_context* context, math::vector_float4 color )
+	color_material create_color_material( render_context* context, math::float4 color )
 	{
 		return color_material( 
 								context->m_depth_render_data.m_depth_vertex_shader,

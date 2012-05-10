@@ -15,25 +15,25 @@ namespace gx
 
         }
 
-        view(math::matrix_float44 view, math::matrix_float44 projection) : m_view_matrix(view), m_projection_matrix(projection)
+        view(math::float4x4 view, math::float4x4 projection) : m_view_matrix(view), m_projection_matrix(projection)
         {
 
         }
 
-        math::matrix_float44 get_view_matrix() const
+        math::float4x4 get_view_matrix() const
         {
             return m_view_matrix;
         }
 
-        math::matrix_float44 get_projection_matrix() const
+        math::float4x4 get_projection_matrix() const
         {
             return m_projection_matrix;
         }
 
         private:
 
-        math::matrix_float44  m_view_matrix;
-        math::matrix_float44  m_projection_matrix;
+        math::float4x4  m_view_matrix;
+        math::float4x4  m_projection_matrix;
     };
 }
 

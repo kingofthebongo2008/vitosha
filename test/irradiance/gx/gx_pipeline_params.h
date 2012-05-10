@@ -11,18 +11,18 @@ namespace gx
 {
     struct scene_pipeline_params
     {
-        std::vector< math::matrix_float44 >* m_world_matrices;
+        std::vector< math::float4x4 >* m_world_matrices;
         std::vector< void* >*                m_data;
     };
 
     struct view_pipeline_params
     {
-        math::matrix_float44                 m_view_matrix;
-        math::matrix_float44                 m_projection_matrix;
-        math::matrix_float44                 m_inverse_view_matrix;
-        math::matrix_float44                 m_inverse_projection_matrix;
-        std::vector< math::matrix_float44 >* m_wvp_matrices;
-        std::vector< math::matrix_float44 >* m_world_matrices;
+        math::float4x4                 m_view_matrix;
+        math::float4x4                 m_projection_matrix;
+        math::float4x4                 m_inverse_view_matrix;
+        math::float4x4                 m_inverse_projection_matrix;
+        std::vector< math::float4x4 >* m_wvp_matrices;
+        std::vector< math::float4x4 >* m_world_matrices;
         std::vector< void* >*                m_data;
     };
 }

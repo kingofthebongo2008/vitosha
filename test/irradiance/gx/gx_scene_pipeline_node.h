@@ -19,7 +19,7 @@ namespace gx
 
         }
 
-        void scene_pipeline_node::submit( const std::vector< math::matrix_float44>* world_matrices, const std::vector<void*>* data );
+        void scene_pipeline_node::submit( const std::vector< math::float4x4>* world_matrices, const std::vector<void*>* data );
 
         private:
 
@@ -27,7 +27,7 @@ namespace gx
 
         scene*                             m_scene;
 
-        std::vector< math::matrix_float44> m_world_matrices;
+        std::vector< math::float4x4> m_world_matrices;
         std::vector< void* >               m_data;
     };
 }

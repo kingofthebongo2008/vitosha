@@ -61,7 +61,7 @@ namespace gx
         }
 
 		public:
-        math::vector_float4     m_zn_zf;
+        math::float4     m_zn_zf;
 		dx11::id3d11buffer_ptr	m_buffer;
 	};
 

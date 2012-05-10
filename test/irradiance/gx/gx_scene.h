@@ -35,7 +35,7 @@ namespace gx
                 m_children.reserve(16);
             }
 
-            node( math::matrix_float44 transform, void* data) : 
+            node( math::float4x4 transform, void* data) : 
                 m_transform(transform)
                 , m_data(data)
                 , m_status(nullptr)
@@ -43,12 +43,12 @@ namespace gx
                 m_children.reserve(16);
             }
 
-            inline math::matrix_float44 get_transform() const
+            inline math::float4x4 get_transform() const
             {
                 return m_transform;
             }
 
-            inline void set_transform(math::matrix_float44 transform)
+            inline void set_transform(math::float4x4 transform)
             {
                 m_transform = transform;
 
@@ -80,7 +80,7 @@ namespace gx
                 m_status = status;
             }
 
-            inline void set_node_transform(math::matrix_float44* node_transform)
+            inline void set_node_transform(math::float4x4* node_transform)
             {
                 m_node_transform = node_transform;
             }
@@ -118,12 +118,12 @@ namespace gx
             
             typedef std::vector< std::shared_ptr<node> > children_container;
 
-            math::matrix_float44        m_transform;		//transform in scene graph
+            math::float4x4        m_transform;		//transform in scene graph
             void*                       m_data;
             children_container          m_children;
             std::weak_ptr<node>         m_parent;
             node_status*                m_status;
-            math::matrix_float44*       m_node_transform;	//pointer to linearized scene graph transform
+            math::float4x4*       m_node_transform;	//pointer to linearized scene graph transform
 
             inline void set_modified()
             {
@@ -379,8 +379,8 @@ namespace gx
         typedef uint32_t flat_node_parent_info;
 
 
-        std::vector< math::matrix_float44 >                 m_world_matrices;
-        std::vector< math::matrix_float44 >                 m_matrices;
+        std::vector< math::float4x4 >                 m_world_matrices;
+        std::vector< math::float4x4 >                 m_matrices;
         std::vector< void* >                                m_data;
         std::vector< flat_node_parent_info >                m_flat_nodes;
 
