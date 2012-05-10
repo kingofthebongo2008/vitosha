@@ -47,7 +47,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
     math::vector_float4 light_position = math::set( 5.0f, 5.0f, 0.0f, 1.0f );
 
-    directional_lights.push_back(  directional_light( ( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::red()));
+    directional_lights.push_back(  directional_light( ( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::white()));
 
     //should be quad
     auto directional_entity = create_directional_lights_entity( context.m_device.get(), render_context->m_screen_space_render_data.m_screen_space_vertex_buffer, &directional_lights[0], &directional_lights[0] + directional_lights.size()  );

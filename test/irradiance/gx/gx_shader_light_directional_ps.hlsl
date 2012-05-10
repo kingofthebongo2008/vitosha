@@ -80,6 +80,11 @@ float3 decode_specular_color( float4 ks_gloss )
     return ks_gloss.xyz;
 }
 
+float3 decode_light_power( float4 light)
+{
+    return light.xyz;
+}
+
 float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float3 n_dot_l)
 {
     float3 h = half_way_vector( l, v );
@@ -131,17 +136,22 @@ float3 main( in  vs_output input) : sv_target
 
     float3 v            = surface_sample_position_vs;
 
-    const float4		light_direction_1_ws = normalize( m_light_direction_ws[0] );
-
-	float3 light_vs_1	= normalize( mul ( light_direction_1_ws, m_view ).xyz );
-	float3 normal_vs_1	= n_vs;
-
     float3 specular_color = decode_specular_color( ks_gloss );
     float  specular_power = decode_specular_power( ks_gloss );
 
-    blinn_phong_surface surface = blinn_phong(kd, specular_color, specular_power,  light_vs_1 , normal_vs_1, normalize(v) );
+    float3 radiance		  =  float3(0.0f,0.0f,0.0f);
 
-    float3 radiance		=  surface.m_kd + surface.m_ks;
+    for (uint i = 0 ; i < m_light_count;++i)
+    {
+        const float4		light_direction_1_ws = normalize( m_light_direction_ws[0] );
+
+	    const float3 light_vs_1	= normalize( mul ( light_direction_1_ws, m_view ).xyz );
+	    const float3 normal_vs_1	= n_vs;
+
+        blinn_phong_surface surface = blinn_phong(kd, specular_color, specular_power,  light_vs_1 , normal_vs_1, normalize(v) );
+        
+        radiance		            =  radiance +  decode_light_power ( m_light_color[i] ) * ( surface.m_kd + surface.m_ks) ;
+    }
 
     return radiance;
 }
