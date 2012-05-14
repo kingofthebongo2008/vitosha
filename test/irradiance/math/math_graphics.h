@@ -508,6 +508,17 @@ namespace math
 
         return result_2;
     }
+
+    inline float4 point3(float x, float y, float z)
+    {
+        return math::set(x,y,z, 1.0f);
+    }
+
+    inline float4 vector3(float x, float y, float z)
+    {
+        return math::set(x,y,z, 0.0f);
+    }
+
 }
 
 
