@@ -75,9 +75,9 @@ namespace math
 	{
 		float4x4 m;
 
-		static const uint32_t mask_x[4] = { 0xFFFFFFFF, 0x0, 0, 0};
-		static const uint32_t mask_y[4] = { 0, 0xFFFFFFFF, 0, 0};
-		static const uint32_t mask_z[4] = { 0, 0, 0xFFFFFFFF, 0};
+		static const uint32_t __declspec( align(16) ) mask_x[4] = { 0xFFFFFFFF, 0x0, 0, 0};
+		static const uint32_t __declspec( align(16) ) mask_y[4] = { 0, 0xFFFFFFFF, 0, 0};
+		static const uint32_t __declspec( align(16) ) mask_z[4] = { 0, 0, 0xFFFFFFFF, 0};
 
 		static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -238,13 +238,14 @@ namespace math
 		return rotation_z(sin_angle, cos_angle);
 	}
 
+    //creates left handed view matrix
 	inline float4x4 view(float4 eye_position, float4 eye_direction, float4 up_direction)
 	{
 		//eye_direction and up_direction should be normalized;
 		//eye_direction and up_direction w components should be zero
 
-		static const uint32_t		mask_w[4] = { 0, 0, 0, 0xFFFFFFFF};
-		static const uint32_t		mask_xyz[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+		static const uint32_t   __declspec( align(16) ) mask_w[4] = { 0, 0, 0, 0xFFFFFFFF};
+		static const uint32_t	__declspec( align(16) ) mask_xyz[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
 		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		float4x4 m1;
@@ -278,6 +279,7 @@ namespace math
 		return m2;
 	}
 
+    //creates left handed view matrix
 	inline float4x4 look_at_lh(float4 eye_position, float4 look_at_position, float4 up_direction)
 	{
 		float4 v1 = sub(look_at_position, eye_position);
@@ -286,11 +288,12 @@ namespace math
 		return view(eye_position, v2, v3);
 	}
 
+    //creates left handed perspective projection matrix
 	inline float4x4 perspective_lh(float view_width, float view_height, float z_near, float z_far)
 	{
-		static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
-		static const uint32_t		mask_y[4] = { 0, 0xFFFFFFFF, 0, 0 };
-		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+		static const uint32_t	__declspec( align(16) )	mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+		static const uint32_t	__declspec( align(16) )	mask_y[4] = { 0, 0xFFFFFFFF, 0, 0 };
+		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		float a = 2 * z_near;
@@ -318,11 +321,12 @@ namespace math
 		return m;
 	}
 
+    //creates left handed perspective projection matrix
 	inline float4x4 perspective_fov_lh(float fov, float aspect_ratio, float z_near, float z_far)
 	{
-		static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
-		static const uint32_t		mask_y[4] = { 0, 0xFFFFFFFF, 0, 0 };
-		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+		static const uint32_t	__declspec( align(16) )	mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+		static const uint32_t	__declspec( align(16) )	mask_y[4] = { 0, 0xFFFFFFFF, 0, 0 };
+		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		float r = z_far / (z_far - z_near);
@@ -351,10 +355,11 @@ namespace math
 		return m;
 	}
 
+    //creates left handed orthographic projection matrix
 	inline float4x4 orthographic_lh(float view_width, float view_height, float z_near, float z_far)
 	{
-		static const uint32_t		mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
-		static const uint32_t		mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+		static const uint32_t	__declspec( align(16) )	mask_x[4] = { 0xFFFFFFFF, 0, 0, 0};
+		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		float a = 2.0f;
@@ -381,6 +386,7 @@ namespace math
 		return m;
 	}
 
+    //extracts view frusutm from world view projection matrix
 	inline void extract_view_frustum(float4x4 wvp, float frustum[24])
 	{
 		float4 v1;
@@ -491,6 +497,7 @@ namespace math
         return std::make_tuple<float,float> ( zn, zf );
     }
 
+    //performs vector rotation with quaternion
     inline float4 rotate_vector3(float4 v, float4 quaternion )
     {
         float4 conjugate = quaternion_conjugate( quaternion );
@@ -501,6 +508,7 @@ namespace math
         return result_2;
     }
 
+    //reflects a vector around a quaternion
     inline float4 reflect_vector3(float4 v, float4 quaternion )
     {
         float4 result_1  = quaternion_mul( quaternion, v );
@@ -509,11 +517,95 @@ namespace math
         return result_2;
     }
 
+    //creates quaternion that aligns vector s with vector t
+    //todo parallel s and t
+    inline float4 quaternion_rotate_vector3(float4 s, float4 t )
+    {
+        float4  e        = dot3(s , t);
+        float4  cross    = cross3(s, t);
+        float   v_1      = sqrtf( 2.0f * (1 + get_x(e) ) );
+
+        float4 m         = splat ( 1.0f / v_1 );
+
+        float4 v          = mul(m , cross );
+        float4 w          = splat( v_1 / 2.0f);
+
+        static const uint32_t __declspec( align(16) )   mask_w[4] = { 0, 0, 0, 0xFFFFFFFF };
+        return select( v, w, reinterpret_cast< const float4*> (&mask_w)[0] ) ;
+    }
+
+    //creates matrix that aligns vector s with vector t
+    //todo parallel s and t
+    inline float4x4 matrix_rotate_vector3(float4 s, float4 t )
+    {
+        //  e + hvx^2, hvxvy - vz, hvxvz + vy, 0
+        //  hvxvy + vz, e + hvy^2, hvyvz - vx, 0
+        //  hvxvz - vy, hvyvz + vx, e + hvz^2, 0
+        //  0         , 0         , 0        , 1
+
+        //  v = sxt
+        //  e = s.t;
+        //  h = 1 / ( 1 + e)
+
+
+        float4 v = cross3( s, t);
+        float4 e = quaternion_dot(s, t);
+        float4  h = splat ( 1.0f / (1.0f + get_x(e) ) ) ;
+
+        float4 vx = mul ( h, mul ( v, splat_x(v) ) ); // hvx^2, hvxvy, hvxvz
+        float4 vy = mul ( h, mul ( v, splat_y(v) ) ); // hvxvy, hvy^2, hvyvz
+        float4 vz = mul ( h, mul ( v, splat_z(v) ) ); // hvxvz, hvyvz, hvz^2
+
+        static const uint32_t __declspec( align(16) )   mask_x[4] = { 0xFFFFFFFF, 0, 0, 0  };
+        static const uint32_t __declspec( align(16) )   mask_y[4] = { 0, 0xFFFFFFFF, 0, 0  };
+        static const uint32_t __declspec( align(16) )   mask_z[4] = { 0, 0, 0xFFFFFFFF, 0  };
+        static const uint32_t __declspec( align(16) )   mask_w[4] = { 0, 0, 0, 0xFFFFFFFF  };
+
+        static const float4	m_1 = {1.0f, -1.0f, 1.0f, 0.0f};
+        static const float4	m_2 = {1.0f,  1.0f, -1.0f, 0.0f};
+        static const float4	m_3 = {-1.0f, 1.0f, 1.0f, 0.0f};
+
+
+        float4 v_1 = swizzle<x,z,y,w>(v);
+        v_1 = select( v_1, e, load4(reinterpret_cast< const float*> (&mask_x[0])) );
+        v_1 = mul (v_1, m_1);   // e, -vy, +vz, 0
+
+        float4 v_2 = swizzle<z, y, x, w> (v);
+        v_2 = select( v_2, e, load4(reinterpret_cast< const float*> (&mask_y[0])) );
+        v_2 = mul (v_2, m_2);   // vz, e, -vx, 0
+
+        float4 v_3 = swizzle<y, x, z, w> (v);
+        v_3 = select( v_3, e, load4(reinterpret_cast< const float*> (&mask_y[0])) );
+        v_3 = mul (v_3, m_3);   // -vy, vx, e, 0
+
+        float4 v_x = add( vx, v_1);
+        float4 v_y = add( vy, v_2);
+        float4 v_z = add( vz, v_3);
+        float4 mask = load4(reinterpret_cast< const float*> (&mask_w[0]));
+
+        v_x = select ( v_x, zero(), mask) ;
+        v_y = select ( v_y, zero(), mask) ;
+        v_z = select ( v_z, zero(), mask) ;
+
+        float4x4 m;
+
+		static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
+		
+		m.r[0] = v_x;
+		m.r[1] = v_y;
+		m.r[2] = v_z;
+		m.r[3] = identity_r3;
+
+        return m;
+    }
+
+    //creates a point in 3d
     inline float4 point3(float x, float y, float z)
     {
         return math::set(x,y,z, 1.0f);
     }
 
+    //creates a vector in 3d
     inline float4 vector3(float x, float y, float z)
     {
         return math::set(x,y,z, 0.0f);

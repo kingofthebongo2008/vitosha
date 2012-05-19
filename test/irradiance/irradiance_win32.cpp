@@ -21,6 +21,7 @@
 #include <math/math_functions.h>
 #include <math/math_half.h>
 #include <math/math_quaternion.h>
+#include <math/xnamath.h>
 
 #define MAX_LOADSTRING 100
 
@@ -71,7 +72,8 @@ void myInvalidParameterHandler(const wchar_t* expression,
    abort();
 }
 
-
+math::float4x4 m_g;
+math::float4x4 m_g_1;
 
 extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe );
 
@@ -80,6 +82,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
+    math::float4 axis = math::set(1.0f, 2.0f, 3.0f, 0.0f);
+    float angle         = 3.1415f / 2.0f;
+
+    math::float4 q1 = math::quaternion_axis_angle(  axis, angle );
+
+    m_g = math::quaternion_2_matrix_ref(q1);
+    m_g_1 = math::quaternion_2_matrix(q1);
+
 
    _invalid_parameter_handler oldHandler, newHandler;
    newHandler = myInvalidParameterHandler;

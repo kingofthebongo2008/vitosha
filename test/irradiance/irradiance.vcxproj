@@ -393,7 +393,9 @@
     <ClCompile Include="irradiance.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>
     </ClCompile>
-    <ClCompile Include="irradiance_win32.cpp" />
+    <ClCompile Include="irradiance_win32.cpp">
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyCode</AssemblerOutput>
+    </ClCompile>
     <ClCompile Include="math\math_functions.cpp" />
     <ClCompile Include="math\math_half.cpp" />
     <ClCompile Include="precompiled.cpp">
