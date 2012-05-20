@@ -536,11 +536,37 @@ namespace math
 
     //creates matrix that aligns vector s with vector t
     //todo parallel s and t
+    inline float4x4 matrix_rotate_vector3_ref(float4 s, float4 t )
+    {
+        float4 v = cross3( s, t);
+        float4 e_v = dot4(s, t);
+        float  e = get_x(e_v);
+        float  h = 1.0f / ( 1.0f + e );
+
+        float v_x = get_x(v);
+        float v_y = get_y(v);
+        float v_z = get_z(v);
+
+        static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
+
+        float4x4 m;
+
+        m.r[0] = set ( e + h * v_x * v_x    , h * v_x * v_y + v_z   , h * v_x * v_z - v_y    , 0.0f );
+        m.r[1] = set ( h * v_x * v_y - v_z  , e + h * v_y * v_y     , h * v_y * v_z  + v_x   , 0.0f );
+        m.r[2] = set ( h * v_x * v_z + v_y  , h * v_y * v_z  - v_x  , e + h * v_z * v_z      , 0.0f );
+        m.r[3] = identity_r3;
+
+        return m;
+
+    }
+
+    //creates matrix that aligns vector s with vector t. usage :  v = mul (v , m );
+    //todo or parallel s and t
     inline float4x4 matrix_rotate_vector3(float4 s, float4 t )
     {
-        //  e + hvx^2, hvxvy - vz, hvxvz + vy, 0
-        //  hvxvy + vz, e + hvy^2, hvyvz - vx, 0
-        //  hvxvz - vy, hvyvz + vx, e + hvz^2, 0
+        //  e + hvx^2, hvxvy + vz, hvxvz - vy, 0
+        //  hvxvy - vz, e + hvy^2, hvyvz + vx, 0
+        //  hvxvz + vy, hvyvz - vx, e + hvz^2, 0
         //  0         , 0         , 0        , 1
 
         //  v = sxt
@@ -548,52 +574,41 @@ namespace math
         //  h = 1 / ( 1 + e)
 
 
-        float4 v = cross3( s, t);
+        float4 v = cross3( s, t );
         float4 e = quaternion_dot(s, t);
-        float4  h = splat ( 1.0f / (1.0f + get_x(e) ) ) ;
+        float4 h = splat ( 1.0f / (1.0f + get_x(e) ) ) ;
 
-        float4 vx = mul ( h, mul ( v, splat_x(v) ) ); // hvx^2, hvxvy, hvxvz
-        float4 vy = mul ( h, mul ( v, splat_y(v) ) ); // hvxvy, hvy^2, hvyvz
-        float4 vz = mul ( h, mul ( v, splat_z(v) ) ); // hvxvz, hvyvz, hvz^2
+        float4 vx = mul ( h, mul ( v, splat_x(v) ) ); // hvxvx, hvxvy, hvxvz
+        float4 vy = mul ( h, mul ( v, splat_y(v) ) ); // hvxvy, hvyvy, hvyvz
+        float4 vz = mul ( h, mul ( v, splat_z(v) ) ); // hvxvz, hvyvz, hvzvz
 
-        static const uint32_t __declspec( align(16) )   mask_x[4] = { 0xFFFFFFFF, 0, 0, 0  };
-        static const uint32_t __declspec( align(16) )   mask_y[4] = { 0, 0xFFFFFFFF, 0, 0  };
-        static const uint32_t __declspec( align(16) )   mask_z[4] = { 0, 0, 0xFFFFFFFF, 0  };
-        static const uint32_t __declspec( align(16) )   mask_w[4] = { 0, 0, 0, 0xFFFFFFFF  };
+		static const float4 identity_r3                             = { 0.0f, 0.0f, 0.0f, 1.0f};
+        static const float4 masks                                   = { 1.0f, -1.0f, 0.0f, 0.0f};
+        static const uint32_t	__declspec( align(16) )	mask_w[4]   = { 0,      0, 0, 0xFFFFFFFF };
 
-        static const float4	m_1 = {1.0f, -1.0f, 1.0f, 0.0f};
-        static const float4	m_2 = {1.0f,  1.0f, -1.0f, 0.0f};
-        static const float4	m_3 = {-1.0f, 1.0f, 1.0f, 0.0f};
+        float4  v_mask_w = load4( reinterpret_cast<const float*> ( &mask_w[0] )  )  ;
+        float4  mask = masks;
 
+        float4 v_p = select( v, e, v_mask_w);
+        float4 v_px = swizzle<x,x,x,z>(mask);
 
-        float4 v_1 = swizzle<x,z,y,w>(v);
-        v_1 = select( v_1, e, load4(reinterpret_cast< const float*> (&mask_x[0])) );
-        v_1 = mul (v_1, m_1);   // e, -vy, +vz, 0
+        float4 v_1 = swizzle<w,z,y,w>(v_p);     //e, vz, vy, ?
+        float4 v_2 = swizzle<z,w,x,w>(v_p);     //vz, e, vx, ?
+        float4 v_3 = swizzle<y,x,w,w>(v_p);     //vy, vx, e, ? 
 
-        float4 v_2 = swizzle<z, y, x, w> (v);
-        v_2 = select( v_2, e, load4(reinterpret_cast< const float*> (&mask_y[0])) );
-        v_2 = mul (v_2, m_2);   // vz, e, -vx, 0
+        v_1 = mul(v_1, swizzle<x,x,y,z> ( mask) );  //e, +vz, -vy, 0
+        v_2 = mul(v_2, swizzle<y,x,x,z> ( mask) );  //-vz, e, +vx, 0
+        v_3 = mul(v_3, swizzle<x,y,x,z> ( mask) );  //+vy, -vx, e, 0
 
-        float4 v_3 = swizzle<y, x, z, w> (v);
-        v_3 = select( v_3, e, load4(reinterpret_cast< const float*> (&mask_y[0])) );
-        v_3 = mul (v_3, m_3);   // -vy, vx, e, 0
-
-        float4 v_x = add( vx, v_1);
-        float4 v_y = add( vy, v_2);
-        float4 v_z = add( vz, v_3);
-        float4 mask = load4(reinterpret_cast< const float*> (&mask_w[0]));
-
-        v_x = select ( v_x, zero(), mask) ;
-        v_y = select ( v_y, zero(), mask) ;
-        v_z = select ( v_z, zero(), mask) ;
+        vx = mul ( vx, v_px); // hvxvx, hvxvy, hvxvz, 0
+        vy = mul ( vy, v_px); // hvxvy, hvyvy, hvyvz, 0
+        vz = mul ( vz, v_px); // hvxvz, hvyvz, hvzvz, 0
 
         float4x4 m;
 
-		static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
-		
-		m.r[0] = v_x;
-		m.r[1] = v_y;
-		m.r[2] = v_z;
+		m.r[0] = add( vx, v_1);
+		m.r[1] = add( vy, v_2);
+		m.r[2] = add( vz, v_3);
 		m.r[3] = identity_r3;
 
         return m;

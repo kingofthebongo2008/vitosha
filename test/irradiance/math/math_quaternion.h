@@ -109,6 +109,7 @@ namespace math
         return one();
     }
 
+    //converts quaterion to matrix. expects normalized quaternion
     inline float4x4 quaternion_2_matrix_ref(float4 quaternion )
     {
         static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -132,14 +133,15 @@ namespace math
 
         float4x4 m;
 
-        m.r[0] = set ( 1.0f - 2.0f*( yy + zz ), 2.0f * ( xy - zw ), 2.0f *( xz + yw), 0.0f );
-        m.r[1] = set ( 2.0f*( xy + zw ), 1.0f - 2.0f * (xx + zz), 2.0f *( yz - xw), 0.0f );
-        m.r[2] = set ( 2.0f *( xz - yw ), 2.0f * ( yz + xw), 1.0f - 2.0f *( xx + yy ), 0.0f );
+        m.r[0] = set ( 1.0f - 2.0f*( yy + zz ), 2.0f * ( xy + zw ), 2.0f * ( xz - yw), 0.0f );
+        m.r[1] = set ( 2.0f * ( xy - zw ), 1.0f - 2.0f * (xx + zz), 2.0f * ( yz + xw ), 0.0f );
+        m.r[2] = set ( 2.0f * ( xz + yw ), 2.0f * ( yz - xw), 1.0f - 2.0f * ( xx + yy ), 0.0f );
         m.r[3] = identity_r3;
 
         return m;
     }
 
+    //converts quaterion to matrix. expects normalized quaternion
     inline float4x4 quaternion_2_matrix(float4 quaternion )
     {
         float4 v_1 = mul ( quaternion, splat_x(quaternion) );
@@ -166,9 +168,9 @@ namespace math
         float4 mask = masks;
         float4 mask_1 = masks_1;
 
-        float4 m_2 = swizzle<x,y,x,w>(mask_1);
-        float4 m_4 = swizzle<x,x,y,w>(mask_1);
-        float4 m_6 = swizzle<y,x,x,w>(mask_1);
+        float4 m_2 = swizzle<x,x,y,w>(mask_1);  
+        float4 m_4 = swizzle<y,x,x,w>(mask_1);
+        float4 m_6 = swizzle<x,y,x,w>(mask_1);
 
         float4 n_1 = swizzle<y,x,x,w>(mask);
         float4 n_2 = swizzle<x,y,x,w>(mask);
