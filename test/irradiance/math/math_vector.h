@@ -112,6 +112,11 @@ namespace math
 		return _mm_load_ps(address);
 	}
 
+    inline float4 load4(const uint32_t* __restrict const address)
+	{
+		return _mm_load_ps( reinterpret_cast< const float* __restrict> (address) );
+	}
+
 	inline void store1(float* __restrict address, float4 value)
 	{
 		_mm_store_ss(address, value);	
