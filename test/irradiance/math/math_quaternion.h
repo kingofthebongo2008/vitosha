@@ -366,6 +366,7 @@ namespace math
         {
             float4 k = swizzle<w,w,w,w>(q);
             float4 xyz = div( b, k );
+            xyz = mul ( xyz, mask_quarter );
             float4 w = mul (k, mask_half );
             return select ( xyz, w, v_mask_w) ;
         }
@@ -514,7 +515,7 @@ namespace math
         //calucate q3 if qw is the largest       
         float4 q_3 = div ( b, swizzle<w,w,w,w>(q) );
         
-        q_3 = mul ( q_3, mask_half );
+        q_3 = mul ( q_3, mask_quarter );
         q_3 = select( q_3, swizzle<w,w,w,w>(q), v_mask_w );
 
         //select q_0, q_1, q_2, q_3 based on the largest_component
