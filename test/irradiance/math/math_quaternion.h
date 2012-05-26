@@ -193,6 +193,7 @@ namespace math
         return m;
     }
 
+    // generates quaternion from rotational matrix reference implementation
     inline float4 matrix_2_quaternion_ref(float4x4 m)
     {
         float X = get_x( m.r[0] );
@@ -318,7 +319,8 @@ namespace math
         }
    }
 
-    inline float4 matrix_2_quaternion_ref2(float4x4 m)
+   // generates quaternion from rotational matrix
+    inline float4 matrix_2_quaternion(float4x4 m)
     {
         static const uint32_t	__declspec( align(16) )	mask_x[4]   = { 0xFFFFFFFF, 0, 0, 0 };
         static const float4 mask_one                                = { 1.0f, -1.0f, 0.0f, 0.0f};
@@ -435,7 +437,8 @@ namespace math
         }
    }
 
-    inline float4 matrix_2_quaternion(float4x4 m) throw()
+    // generates quaternion from rotational matrix, does not use branches
+    inline float4 matrix_2_quaternion_simd(float4x4 m)
     {
         static const uint32_t	__declspec( align(16) )	mask_x[4]   = { 0xFFFFFFFF, 0, 0, 0 };
         static const float4 mask_one                                = { 1.0f, -1.0f, 0.0f, 0.0f};
@@ -539,6 +542,58 @@ namespace math
         float4 q_0123 = select ( q_23, q_01, mask_2);
 
         return q_0123;
+    }
+
+    //given random variables in [0;1] generates random quaternion
+    inline float4 random_quaternion( float4 uniform_variables )
+    {
+        // z : x;
+        // theta : 2piy;
+        // r : sqrt( 1- z^2)
+        // omega : piw;
+        // graphic gems 2
+
+
+        const float pi				= 3.141592654f;
+        const float4 scale          = { 0.0f, 1.0f, 2.0f, 0.0f };
+        static const uint32_t	__declspec( align(16) )	mask_x[4]   = { 0xFFFFFFFF, 0, 0, 0 };
+
+        float4  v_mask_x = load4( reinterpret_cast<const float*> ( &mask_x[0] )  )  ;
+        float4  v_mask_y = swizzle<y,x,y,y>(v_mask_x);
+        float4  v_mask_w = swizzle<y,y,y,x>(v_mask_x);
+
+        float4 pi_v = splat( pi );
+        float4 omega_theta = mul ( uniform_variables, pi_v);
+
+        omega_theta = mul ( omega_theta, scale );
+
+        float4 z_x = swizzle<x,x,x,x>(uniform_variables);
+
+        float4 r = z_x;
+        r = mul ( r, r ) ;
+        r = negate ( r );
+        r = add ( one(), r ) ;
+        r = sqrt( r );
+       
+        float4 sin_omega_theta = sin(omega_theta);
+        float4 cos_omega_theta = cos(omega_theta);
+
+        const float4 one_ = one() ;
+
+        float4 a_1 = shuffle< z, y, z, z > ( cos_omega_theta, sin_omega_theta );            //cos(w), cos(t), sin(w), sin(w)
+        float4 a_2 = select ( one_, sin_omega_theta, v_mask_y ) ;                           // 1.0f, sin(w), 1.0f, 1.0f
+        float4 a_3 = select ( one_, z_x, v_mask_w ) ;                                       // 1.0f, 1.0f, 1.0f, z;
+        float4 a_4 = select ( one_, r, swizzle<y,x,x,y>(v_mask_x) ) ;                       // 1.0f, r, r, 1.0f
+
+        float4 a_12 = mul ( a_1, a_2 );
+        float4 a_34 = mul ( a_3, a_4 );
+
+        float4 a = mul ( a_12, a_34);
+
+        a = math::quaternion_normalize(a);
+
+        return a;
+
     }
 }
 
