@@ -2,6 +2,7 @@
 
 #include <gxu/gxu_pinhole_camera_dispatcher.h>
 
+
 namespace gxu
 {
 	namespace
@@ -11,8 +12,8 @@ namespace gxu
 			//use matrix computations, since we do not have quaternion library still
 			auto	view_direction_vs			= math::set(0.0f, 0.0f, 1.0f, 0.0f);
 			auto	up_direction_vs				= math::set(0.0f, 1.0f, 0.0f, 0.0f);
-			auto	rotation					= math::rotation_y( angle_in_radians );
-			auto	rotated_view_direction_vs	= math::mul( rotation, math::negate(view_direction_vs) );
+			auto	rotation					= math::rotation_y( angle_in_radians ); 
+			auto	rotated_view_direction_vs	= math::mul( rotation, view_direction_vs);
 			auto	rotated_up_direction_vs		= math::mul( rotation,up_direction_vs );
 			auto	view_matrix					= gx::create_view_matrix(camera);
 			auto	inverse_view_matrix			= math::inverse( view_matrix );
