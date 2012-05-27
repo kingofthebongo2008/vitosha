@@ -1,7 +1,9 @@
 #ifndef __MATH_GRAPHICS_H__
 #define __MATH_GRAPHICS_H__
 
+#include <limits>
 #include <tuple>
+
 
 #include <math.h>
 #include <math/math_matrix.h>
@@ -180,14 +182,14 @@ namespace math
 		float4 v1 = _mm_set_ss(cos_angle);
 		float4 v2 = _mm_set_ss(sin_angle);
 
-		float4 v3 = shuffle<x,y,x,y>(v1, v2);
+		float4 v3 = shuffle<x,y,x,y>(v2, v1);
 		float4 v4 = swizzle<z,y,x,w>(v3);
 		float4 v5 = negate_z;
 		float4 v6 = mul(v4, v5);
 
-		m.r[0] = v3;
+		m.r[0] = v6;
 		m.r[1] = identity_r1;
-		m.r[2] = v6;
+        m.r[2] = v3;
 		m.r[3] = identity_r3;
 
 		return m;
@@ -538,6 +540,7 @@ namespace math
     //todo parallel s and t
     inline float4x4 matrix_rotate_vector3_ref(float4 s, float4 t )
     {
+
         float4 v = cross3( s, t);
         float4 e_v = dot4(s, t);
         float  e = get_x(e_v);
@@ -626,6 +629,117 @@ namespace math
         return math::set(x,y,z, 0.0f);
     }
 
+    // see ken shoemake in graphic gems 4
+    // http://www.talisman.org/~erlkonig/misc/shoemake92-arcball.pdf
+    // x, y : screen coordinates
+    // c    : arcball center ( 2d )
+    // r    : arcball radius
+
+    inline float4 arc_ball_point_on_unit_sphere( float x_, float y_, float r, float4 c )
+    {
+        static const uint32_t	__declspec( align(16) )	mask_z[4]   = { 0, 0, 0xFFFFFFFF, 0 };
+        static const uint32_t	__declspec( align(16) )	mask_w[4]   = { 0, 0, 0, 0xFFFFFFFF };
+
+        float4 s0       = point3( x_, y_, 0.0f );
+        float4 v0       = div ( sub ( s0, c ), splat(r) ); // v0 = (s0-c) / r
+        float4 dot      = dot2( v0, v0 );
+
+        float4 v0_1     = mul ( v0, rsqrt( dot ) );     //normalize v0
+        float4 z_       = sqrt ( sub ( one() , dot ) );
+        
+        float4 v_mask_z = load4( mask_z );
+        float4 v0_2     = select ( v0, z_, v_mask_z ) ; // v0.x, v0.y,  sqrt( 1 - (vx * vy)^2), 0
+
+        float4 cmp      = swizzle<x,x,x,x>(dot);
+        float4 mask     = compare_gt ( cmp , one() );   // dot > 1.0f  
+
+        float4 result   = select ( v0_2, v0_1, mask ); // select of two points, depending on the coordinates. snap on the ball
+
+        // make point
+        float4 v_mask_w = load4(mask_w); 
+        result = select ( result, one(), v_mask_w) ;
+        return result;
+    }
+
+    //create a rotation quaternion from v_0 to v_1 on the 3 sphere
+    inline float4 arc_ball_quaternion( float4 v_0, float4 v_1)
+    {
+        static const uint32_t	__declspec( align(16) )	mask_w[4]   = { 0, 0, 0, 0xFFFFFFFF };
+
+        float4 dot      = dot3 ( v_0, v_1 );
+        float4 cross    = cross3(v_0, v_1 );
+
+        // make point
+        float4 v_mask_w = load4(mask_w); 
+        float4 result = select ( cross, dot, v_mask_w) ;
+        return result;
+    }
+
+
+    //given a point on the 3 sphere and a constraint axis, returns a point on the 3 sphere and plane perpendicular to the axis and through the center
+    inline float4 arc_ball_constraint_on_axis( float4 sphere_point, float4 axis )
+    {
+        const  float4 dot       = dot3( sphere_point, axis);
+        float4 projected_point  = sub( sphere_point, mul ( axis, dot ) );
+        const  float4 norm      = dot3(projected_point, projected_point);
+
+        const float4 result_1   = {1.0f, 0.0f, 0.0f, 1.0f };    
+        const float4 mask_res_2 = {-1.0f, 1.0f, 0.0f, 0.0f };
+        const float4 mask_res_3 = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+        static const uint32_t	__declspec( align(16) )	mask_w[4]   = { 0, 0, 0, 0xFFFFFFFF };
+
+        float4 result_2 = swizzle< y, x, w, w> ( axis );        
+        result_2 = mad( result_2, mask_res_2, mask_res_3);  // -axis.y, axis.x, 0, 0
+
+        float4 s = rcp(norm);
+
+        float4 one_     = one();
+        float4 zero_    = zero();
+
+        float4 mask = compare_lt ( swizzle<z,z,z,z> ( projected_point), zero_ );
+        float4 invert = select( one_, minus_one(), mask );
+
+        s = mul ( s, invert );
+        float4 result_3 = mul ( projected_point, s );
+
+        float4 axis_z = swizzle<z,z,z,z>(axis);
+
+        // if axis.z == 1.0f
+        float4 mask_axis_z = compare_eq ( axis_z, one_ );
+        float4 result_12 = select( result_2, result_1, mask_axis_z ) ;
+
+        // if norm > 0.0f
+        float4 mask_dot = compare_gt( norm, zero_) ;
+        float4 result_123 = select( result_12, result_3, mask_dot) ;
+
+        
+        // set w= 1.0f;
+        return select( result_123, one(), load4(mask_w) );
+    }
+
+    inline float4 arc_ball_closest_axis( float4 sphere_point, const float4* axis, uint32_t axis_count)
+    {
+        const float  negative_infinity_float = -1.0f * std::numeric_limits<float>::infinity();
+        const float4 negative_infinity = { negative_infinity_float, negative_infinity_float, negative_infinity_float, negative_infinity_float  };
+
+        float4 result  = zero();
+        float4 max_dot = negative_infinity;
+
+        for (uint32_t i = 0; i < axis_count; ++i)
+        {
+            float4 closest_point = arc_ball_constraint_on_axis( sphere_point, axis[i] );
+
+            float4 dot  = dot3(closest_point, sphere_point);
+
+            float4 mask = compare_gt(dot, max_dot);
+
+            result      = select( result, axis[i], mask );
+            max_dot     = select( max_dot, dot, mask);
+        }
+
+        return result;
+    }
 }
 
 
