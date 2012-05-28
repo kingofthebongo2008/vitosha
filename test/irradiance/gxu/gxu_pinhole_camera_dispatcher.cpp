@@ -2,6 +2,8 @@
 
 #include <gxu/gxu_pinhole_camera_dispatcher.h>
 
+#include <math/math_quaternion.h>
+#include <math/math_graphics.h>
 
 namespace gxu
 {
@@ -9,50 +11,39 @@ namespace gxu
 	{
 		void turn_pinhole_camera(gx::pinhole_camera* camera, float angle_in_radians)
 		{
-			//use matrix computations, since we do not have quaternion library still
-			auto	view_direction_vs			= math::set(0.0f, 0.0f, 1.0f, 0.0f);
-			auto	up_direction_vs				= math::set(0.0f, 1.0f, 0.0f, 0.0f);
-			auto	rotation					= math::rotation_y( angle_in_radians ); 
-			auto	rotated_view_direction_vs	= math::mul( rotation, view_direction_vs);
-			auto	rotated_up_direction_vs		= math::mul( rotation,up_direction_vs );
-			auto	view_matrix					= gx::create_view_matrix(camera);
-			auto	inverse_view_matrix			= math::inverse( view_matrix );
-						
-			auto	view_direction_ws			= math::mul ( rotated_view_direction_vs, inverse_view_matrix );
-			auto	up_direction_ws				= math::mul ( rotated_up_direction_vs, inverse_view_matrix );
+            auto    view_direction_ws           = camera->get_view_direction();
+            auto    up_direction_ws             = camera->get_up();
 
-			camera->set_view_direction( view_direction_ws );
-			camera->set_view_up( up_direction_ws );
+            auto    quaternion                  = math::quaternion_axis_angle( up_direction_ws, angle_in_radians);
+            auto    view_direction_ws_2         = math::rotate_vector3( view_direction_ws, quaternion );
+
+            camera->set_view_direction( view_direction_ws_2 );
 		}
 
 		void aim_pinhole_camera(gx::pinhole_camera* camera, float angle_in_radians)
 		{
-			//rotate view_direction and up direction, since they can get aligned
-			auto	view_direction_vs			= math::set(0.0f, 0.0f, 1.0f, 0.0f);
-			auto	up_direction_vs				= math::set(0.0f, 1.0f, 0.0f, 0.0f);
-			auto	rotation					= math::rotation_x( angle_in_radians );
-			auto	rotated_view_direction_vs	= math::mul( view_direction_vs, rotation );
-			auto	rotated_up_direction_vs		= math::mul( rotation, up_direction_vs );
-			auto	view_matrix					= gx::create_view_matrix(camera);
-			auto	inverse_view_matrix			= math::inverse( view_matrix );
-						
-			auto	view_direction_ws			= math::mul ( rotated_view_direction_vs, inverse_view_matrix );
-			auto	up_direction_ws				= math::mul ( rotated_up_direction_vs, inverse_view_matrix );
+            auto    view_direction_ws_1         = camera->get_view_direction();
+            auto    up_direction_ws_1           = camera->get_up();
+            auto    cross                       = math::cross3(view_direction_ws_1, math::negate(up_direction_ws_1) );
 
-			camera->set_view_direction( view_direction_ws );
-			camera->set_view_up( up_direction_ws );
+            auto    quaternion                  = math::quaternion_axis_angle( cross, angle_in_radians);
+            auto    view_direction_ws_2         = math::rotate_vector3( view_direction_ws_1, quaternion );
+            auto    up_direction_ws_2           = math::rotate_vector3( up_direction_ws_1, quaternion );
+
+            camera->set_view_direction( view_direction_ws_2 );
+			camera->set_view_up( up_direction_ws_2 );
 		}
 
 	}
 
 	void pinhole_camera_command_dispatcher::on_turn_left(const turn_camera_left* command)
 	{
-		turn_pinhole_camera(m_pinhole_camera, 1.0f * fabsf( command->m_angle_radians ) );
+		turn_pinhole_camera(m_pinhole_camera, -1.0f * fabsf( command->m_angle_radians ) );
 	}
 
 	void pinhole_camera_command_dispatcher::on_turn_right(const turn_camera_right* command)
 	{
-		turn_pinhole_camera(m_pinhole_camera, -1.0f * fabsf( command->m_angle_radians ) );
+		turn_pinhole_camera(m_pinhole_camera, 1.0f * fabsf( command->m_angle_radians ) );
 	}
 
 	void pinhole_camera_command_dispatcher::on_aim_up(const aim_camera_up* command)
