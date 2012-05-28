@@ -259,7 +259,6 @@ namespace math
 		float4 v1 = cross3(eye_direction, v0);
 		float4 v2 = eye_direction;
 
-		
 		//form the translation
 		float4 negative_eye_position = negate(eye_position);
 
@@ -267,15 +266,12 @@ namespace math
 		float4 d1 = dot3(v1, negative_eye_position);
 		float4 d2 = dot3(v2, negative_eye_position);
 
-		//clear all components except the w from the dot product
-		d0 = and( d0, reinterpret_cast< const float4*> (&mask_w)[0] );
-		d1 = and( d1, reinterpret_cast< const float4*> (&mask_w)[0] );
-		d2 = and( d2, reinterpret_cast< const float4*> (&mask_w)[0] );
-
-		m1.r[0] = or( v0, d0 );
-		m1.r[1] = or( v1, d1 ); 
-		m1.r[2] = or( v2, d2 ); 
+        float4  mask = load4(mask_w);
+        m1.r[0] = select( v0, d0, mask );
+		m1.r[1] = select( v1, d1, mask ); 
+		m1.r[2] = select( v2, d2, mask ); 
 		m1.r[3] = identity_r3;
+
 
 		m2 = transpose(m1);
 		return m2;
