@@ -24,7 +24,7 @@ namespace gxu
 		{
             auto    view_direction_ws_1         = camera->get_view_direction();
             auto    up_direction_ws_1           = camera->get_up();
-            auto    cross                       = math::cross3(view_direction_ws_1, math::negate(up_direction_ws_1) );
+            auto    cross                       = math::cross3(view_direction_ws_1, up_direction_ws_1) ;
 
             auto    quaternion                  = math::quaternion_axis_angle( cross, angle_in_radians);
             auto    view_direction_ws_2         = math::rotate_vector3( view_direction_ws_1, quaternion );
@@ -48,12 +48,12 @@ namespace gxu
 
 	void pinhole_camera_command_dispatcher::on_aim_up(const aim_camera_up* command)
 	{
-		aim_pinhole_camera(m_pinhole_camera, -1.0f * fabsf( command->m_angle_radians ) );
+		aim_pinhole_camera(m_pinhole_camera, 1.0f * fabsf( command->m_angle_radians ) );
 	}
 
 	void pinhole_camera_command_dispatcher::on_aim_down(const aim_camera_down* command)
 	{
-		aim_pinhole_camera(m_pinhole_camera, 1.0f * fabsf( command->m_angle_radians ) );
+		aim_pinhole_camera(m_pinhole_camera, -1.0f * fabsf( command->m_angle_radians ) );
 	}
 
 	void pinhole_camera_command_dispatcher::on_move_forward(const move_camera_forward* command)
