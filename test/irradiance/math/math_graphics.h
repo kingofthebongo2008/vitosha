@@ -489,10 +489,10 @@ namespace math
         float a = p.m[3][2];
         float b = p.m[2][2];
 
-        float zf = a / ( 1 - b );
-        float zn = - a / b;
+        //float zf = a / ( 1.0f - b );
+        //float zn = - a / b;
 
-        return std::make_tuple<float,float> ( zn, zf );
+        return std::make_tuple<float,float> ( -a / b , a / (1.0f - b) );
     }
 
     //performs vector rotation with quaternion

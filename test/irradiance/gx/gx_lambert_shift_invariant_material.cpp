@@ -48,9 +48,9 @@ namespace gx
 		return lambert_shift_invairant_material(
                                 std::make_tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer,  transform_position_normal_uv_input_layout > 
                                 ( 
-                                    context->m_transform_position_normal_uv_vertex_shader,
-                                    context->m_transform_position_normal_uv_vertex_shader_cbuffer,
-                                    context->m_transform_position_normal_uv_input_layout
+                                    std::move(context->m_transform_position_normal_uv_vertex_shader),
+                                    std::move(context->m_transform_position_normal_uv_vertex_shader_cbuffer),
+                                    std::move(context->m_transform_position_normal_uv_input_layout)
                                 ) ,
 								context->m_lambert_shift_invariant_pixel_shader,
 								context->m_lambert_pixel_cbuffer,

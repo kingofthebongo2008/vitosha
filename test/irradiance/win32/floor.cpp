@@ -66,14 +66,14 @@ std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::ren
     (  
         std::make_tuple< gx::transform_position_normal_vertex_shader, gx::transform_position_normal_vertex_shader_constant_buffer,  gx::transform_position_normal_input_layout > 
                                 ( 
-                                    context->m_transform_position_normal_vertex_shader,
-                                    context->m_transform_position_normal_vertex_shader_cbuffer,
-                                    context->m_transform_position_normal_input_layout
+                                    std::move(context->m_transform_position_normal_vertex_shader),
+                                    std::move(context->m_transform_position_normal_vertex_shader_cbuffer),
+                                    std::move(context->m_transform_position_normal_input_layout)
                                 ),
                                 gx::grid_geometry_shader(device) ,
 								context->m_blinn_phong_shift_invariant_pixel_shader,
 								context->m_blinn_phong_shift_invariant_pixel_cbuffer,
-                                std::make_tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr > ( point,  out)
+                                std::make_tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr > ( std::move(point),  std::move(out) )
                                 );
 }
 

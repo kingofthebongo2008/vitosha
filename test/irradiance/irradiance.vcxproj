@@ -318,6 +318,7 @@
     <ClInclude Include="gx\gx_view.h" />
     <ClInclude Include="gx\gx_view_port.h" />
     <ClInclude Include="sys\sys_base.h" />
+    <ClInclude Include="sys\sys_profile_timer.h" />
     <ClInclude Include="sys\sys_spin_lock.h" />
     <ClInclude Include="sys\sys_spsc_queue.h" />
     <ClInclude Include="util\util_bits.h" />

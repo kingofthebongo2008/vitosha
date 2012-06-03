@@ -90,7 +90,7 @@ namespace io
 
 		std::tuple<uint32_t, uint32_t> get_coordinates() const
 		{
-			return std::make_tuple<uint32_t, uint32_t> ( m_x, m_y);
+			return std::make_tuple<uint32_t, uint32_t> ( static_cast<uint32_t> (m_x) , static_cast<uint32_t> (m_y) );
 		}
 
 		void set_state(uint32_t state)

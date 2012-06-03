@@ -77,116 +77,59 @@ math::float4x4 m_g_1;
 math::float4   m_q;
 math::float4   m_q_1;
 math::float4   m_q_2;
+math::float4   m_q_3;
+math::float4   m_q_4;
+math::float4   m_q_5;
 
 extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe );
 
 
-/// Create a Timer, which will immediately begin counting
-/// up from 0.0 seconds.
-/// You can call reset() to make it start over.
-class Timer {
-  public:
-    Timer() {
-      reset();
-    }
-    /// reset() makes the timer start over counting from 0.0 seconds.
-    void reset() {
-      unsigned __int64 pf;
-      QueryPerformanceFrequency( (LARGE_INTEGER *)&pf );
-      freq_ = 1.0 / (double)pf;
-      QueryPerformanceCounter( (LARGE_INTEGER *)&baseTime_ );
-    }
-    /// seconds() returns the number of seconds (to very high resolution)
-    /// elapsed since the timer was last created or reset().
-    double seconds() {
-      unsigned __int64 val;
-      QueryPerformanceCounter( (LARGE_INTEGER *)&val );
-      return (val - baseTime_) * freq_;
-    }
-    /// seconds() returns the number of milliseconds (to very high resolution)
-    /// elapsed since the timer was last created or reset().
-    double milliseconds() {
-      return seconds() * 1000.0;
-    }
-  private:
-    double freq_;
-    unsigned __int64 baseTime_;
-};
+std::tuple<float, float> k1()
+{
+	float a = 1.0f;
+	float b = 2.0f;
+	return std::make_tuple<float, float> ( std::move(a), std::move(b) );		
+}
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-    
-    math::float4 axis = math::set(0.2f, -1.0f, 0.0f, 0.0f);
-    float angle         = - 3.1415f / 20.0f;
 
-    math::float4 q1 = math::quaternion_axis_angle(  axis, angle );
+	std::tuple<float, float> t = k1();
 
-    q1 = math::quaternion_normalize(q1);
+    auto	rotation					= math::rotation_y( 0.5f );    //math::rotation_y( angle_in_radians );
+    auto    rotation_1                  = XMMatrixRotationY(0.5f);
+
+    math::float4 center = math::point3(0.0f, 0.0f, 0.0f );
+    math::float4 point = math::arc_ball_point_on_unit_sphere ( 0.0f, 0.0f, 1.0f, center);
+
+    math::float4 axis = math::set(0.0f, 1.0f, 0.0f, 0.0f);
+    math::float4 constraint_point = math::arc_ball_constraint_on_axis ( point, axis) ;
+
+
+    math::float4 axes[3] = 
+    {
+                            math::set(1.0f, 0.0f, 0.0f, 0.0f),
+                            math::set(0.0f, 1.0f, 0.0f, 0.0f),
+                            math::set(0.0f, 0.0f, 1.0f, 0.0f)
+    };
+
+    math::float4 closest_axis = math::arc_ball_closest_axis( point, &axes[0], 3);
+
 
     /*
-    m_g = math::quaternion_2_matrix_ref(q1);
-    m_g_1 = math::quaternion_2_matrix(q1);
-
-    math::float4 s = math::normalize3( math::vector3(-1.0f, 1.0f, 1.0f) ) ;
-    math::float4 t = math::normalize3( math::vector3(0.0f, -0.5f, 1.0f) ) ;
-
-    math::float4 rotate = math::quaternion_rotate_vector3( s, t);
-    math::float4 rotated_v = math::rotate_vector3(s, rotate);
-
-    const math::float4 v = {0.0000001f, 0.0000001f, 0.0000001f, 0.0000001f};
-
-    math::float4x4 m = math::matrix_rotate_vector3(s, t);
-    math::float4x4 m_1 = math::matrix_rotate_vector3_ref(s, t);
-    math::float4  rotated_v_1 = math::mul( s, m );
-
-
-    rotated_v_1 = math::add(rotated_v_1,v);
-    rotated_v_1 = math::sub(rotated_v_1, v);
-
-    rotated_v = math::add(rotated_v, v);
-    rotated_v = math::sub(rotated_v, v);
-
-    */
-
-    //math::float4x4 m = math::quaternion_2_matrix( q1 );
-
-    math::float4x4 m;
-
-    m.r[0] = math::set(-1.0f, -1.0f, 1.5f, 0.0f);
-    m.r[1] = math::set(0.0f, -1.5f, 1.5f, 0.0f);
-    m.r[2] = math::set(0.2f, -1.1f, 0.0f, 0.0f);
-    m.r[3] = math::set(0.0f, 0.0f, 0.0f, 1.0f);
-
-    XMMATRIX m2;
-    m2.r[0] = m.r[0];
-    m2.r[1] = m.r[1];
-    m2.r[2] = m.r[2];
-    m2.r[3] = m.r[3];
-
-
-    math::float4  q2 = math::matrix_2_quaternion_ref( m );
-    math::float4  q4 = math::matrix_2_quaternion_ref2( m );
-    math::float4  q5 = math::matrix_2_quaternion( m );
-
-    math::float4  q3 = XMQuaternionRotationMatrix(m2);
-
-
     std::ofstream f("result.txt");
-    /*
-    f<<"ref:"<< result<<std::endl;
-    f<<"ref2:"<<result_1<<std::endl;
-    f<<"simd:"<<result_2<<std::endl;
-    f<<"dx:"<<result_21<<std::endl;
+
     
+    f<<"ref:"<< result2 <<std::endl;
+    f<<"ref2:"<<result3<<std::endl;
+    f<<"simd:"<<result4<<std::endl;
+    f<<"dx:"<<result5<<std::endl;
 
-    f<<"q2m_ref:"<<result_3<<std::endl;
-    f<<"q2m:"<<result_4<<std::endl;
-    */
     f.close();
-
+    */
 
 
    _invalid_parameter_handler oldHandler, newHandler;

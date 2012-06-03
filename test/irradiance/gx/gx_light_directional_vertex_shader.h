@@ -58,7 +58,7 @@ namespace gx
         light_directional_vertex_shader shader(device);
         return std::make_tuple<  light_directional_vertex_shader, light_directional_vertex_shader_input_layout >
             (
-                shader,
+                std::move(shader),
                 light_directional_vertex_shader_input_layout(device, &shader)
             ); 
     }
