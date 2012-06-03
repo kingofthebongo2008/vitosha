@@ -1,0 +1,22 @@
+# Compiled Object files
+*.obj
+*.o
+*.tlog
+
+# Generated HLSL
+*_compiled.hlsl
+
+x64/
+win32/
+ipch/
+
+# Visual Studio Files
+*.suo
+*.vcxproj.user
+*.vcxproj.filters
+*.sdf
+*.opensdf
+
+
+
+
