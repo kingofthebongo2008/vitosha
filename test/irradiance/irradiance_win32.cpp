@@ -310,7 +310,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
-				wnd->on_mouse_down(MK_LBUTTON);
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
+				wnd->on_mouse_down( MK_LBUTTON );
 			}
 
 			break;
@@ -320,6 +329,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
 				wnd->on_mouse_up(MK_LBUTTON);
 			}
 
@@ -330,6 +348,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
 				wnd->on_mouse_down(MK_RBUTTON);
 			}
 			break;
@@ -338,6 +365,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
 				wnd->on_mouse_up(MK_RBUTTON);
 			}
 			break;
@@ -347,6 +383,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
 				wnd->on_mouse_down(MK_MBUTTON);
 			}
 			break;
@@ -356,6 +401,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
 				wnd->on_mouse_up(MK_MBUTTON);
 			}
 			break;
@@ -365,6 +419,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+
+				if ( MK_CONTROL & wParam)
+				{
+					wnd->on_button_6_down();
+				}
+				else
+				{
+					wnd->on_button_6_up();
+				}
+
 				WPARAM mouse_state = wParam;
 				WORD xPos = GET_X_LPARAM(lParam); 
 				WORD yPos = GET_Y_LPARAM(lParam); 

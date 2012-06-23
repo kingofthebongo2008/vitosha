@@ -34,7 +34,7 @@ namespace io
 
 		difference get_difference() const
 		{
-			return m_state ^ m_shadow_state;
+			return ( m_state ^ m_shadow_state );
 		}
 
 		bool is_left_button_down() const
@@ -91,6 +91,11 @@ namespace io
 		std::tuple<uint32_t, uint32_t> get_coordinates() const
 		{
 			return std::make_tuple<uint32_t, uint32_t> ( static_cast<uint32_t> (m_x) , static_cast<uint32_t> (m_y) );
+		}
+
+		uint8_t get_state() const
+		{
+			return m_state;
 		}
 
 		void set_state(uint32_t state)

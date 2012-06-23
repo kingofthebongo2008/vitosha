@@ -35,7 +35,7 @@ float3  convert_to_view_space ( float x, float y, float depth_buffer_z)
 
     float4 ps = float4(x, y, depth_buffer_z, 1.0f);
     float4 v = mul( m_inverse_projection, ps );
-    float4 result = ps / ps.w;
+    float4 result = v / v.w;
     return result.xyz;
 }
 

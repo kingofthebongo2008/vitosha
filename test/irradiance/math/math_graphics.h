@@ -463,25 +463,45 @@ namespace math
 		float4  v9 = add(v7, v8);
 
 		//do perspective divide
-		float4  v10 = rcp(v4);
-		float4  v11 = mul(v9, v10 );
+		float4  v10 = div(v9, v4 );
 
-		return v11;
+		return v10;
 	}
 
 	//projects a point on the screen and applies the view port transform. the result is in window coordinates
-	inline float4 project( float4 v, float4x4 wvp, view_port view_port)
+	//maps from 3d space -> view port
+	inline float4 project( float4 v, float4x4 wvp, const view_port view_port)
 	{
 		float4  v1	= perspective_transform3(v, wvp);
 
 		float	half_height	= (view_port.m_bottom - view_port.m_top) * 0.5f;
 		float	half_width	= (view_port.m_right - view_port.m_left) * 0.5f;
 
-		float4  scale	= set( half_width,  -half_height, view_port.m_max_z - view_port.m_min_z, 0.0f);
+		float4  scale	= set( half_width,  -half_height, view_port.m_max_z - view_port.m_min_z, 1.0f);
 		float4  offset	= set( view_port.m_left + half_width, view_port.m_top + half_height, view_port.m_min_z, 0.0f);
 
-		return mad(v1, scale, offset );
+		return	mad(v1, scale, offset );
 	}
+
+	//unprojects a point on the screen coordinates, removes the view port transform
+	//maps from view port -> 3d space
+	inline float4 unproject( float4 v, float4x4 inverse_wvp, const view_port view_port)
+	{
+		float	half_height	= (view_port.m_bottom - view_port.m_top) * 0.5f;
+		float	half_width	= (view_port.m_right - view_port.m_left) * 0.5f;
+
+		float4  scale	= set( half_width,  -half_height, view_port.m_max_z - view_port.m_min_z, 1.0f);
+		float4  offset	= set( view_port.m_left + half_width, view_port.m_top + half_height, view_port.m_min_z, 0.0f);
+
+		//undo the view port transform
+		float4  v1 = sub ( v, offset );
+		float4	v2 = div ( v1, scale );
+
+		float4  v3 = perspective_transform3(v2, inverse_wvp);
+
+		return	v3;
+	}
+
 
     //returns near and far from a projection matrix
     inline std::tuple<float, float> extract_near_far( math::float4x4 p )

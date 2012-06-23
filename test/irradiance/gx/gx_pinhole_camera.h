@@ -147,7 +147,7 @@ namespace gx
 		return math::perspective_fov_lh(camera->get_fov(), camera->get_aspect_ratio(), camera->get_near(), camera->get_far() );
 	}
 
-	inline math::float4x4 create_wvp_matrix(const pinhole_camera * camera)
+	inline math::float4x4 create_vp_matrix(const pinhole_camera * camera)
 	{
 		return math::mul( create_view_matrix(camera), create_perspective_matrix(camera) );
 	}

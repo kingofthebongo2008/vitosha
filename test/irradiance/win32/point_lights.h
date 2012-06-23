@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include <util/util_memory.h>
+
 #include <math/math_vector.h>
 #include <dx11/dx11_pointers.h>
 

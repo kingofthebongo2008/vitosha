@@ -16,6 +16,7 @@
 
 
 #include "gx/gx_pinhole_camera.h"
+#include "gx/gx_view_port.h"
 
 namespace gx
 {
@@ -56,6 +57,7 @@ namespace wnd
 		void on_button_3_down();
 		void on_button_4_down();
 		void on_button_5_down();
+		void on_button_6_down();
 
 		void on_button_0_up();
 		void on_button_1_up();
@@ -63,6 +65,7 @@ namespace wnd
 		void on_button_3_up();
 		void on_button_4_up();
 		void on_button_5_up();
+		void on_button_6_up();
 
 	private:
 
@@ -75,6 +78,7 @@ namespace wnd
 		bool						m_occluded_by_another_window;
 
 		gx::pinhole_camera			m_main_camera;
+		gx::view_port				m_view_port;
 
 		io::mouse_state				m_mouse_state;
 		io::pad_state				m_pad_state;

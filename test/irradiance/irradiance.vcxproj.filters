@@ -1,0 +1,582 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="gx\gx_shader_blinn_phong_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_blinn_phong_shift_invariant_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_color_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_color_texture_channel_3_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_color_texture_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_debug_view_space_depth_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_lambert_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_lambert_shift_invariant_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_light_directional_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_light_directional_vs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_light_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_screen_space_uv_vs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_transform_position_normal_uv_vs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_transform_position_uv_vs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="win32\shader_point_light_sphere_debug_ps.hlsl">
+      <Filter>irradiance</Filter>
+    </CustomBuild>
+    <CustomBuild Include="win32\shader_point_light_sphere_debug_vs.hlsl">
+      <Filter>irradiance</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_copy_depth_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_grid_gs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_transform_position_vs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_transform_position_normal_vs.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="irradiance.ico" />
+    <None Include="ReadMe.txt" />
+    <None Include="small.ico" />
+    <None Include="util\util_iterator.h" />
+    <None Include="gx\gx_debug_draw.h">
+      <Filter>gx</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="precompiled.h" />
+    <ClInclude Include="util\util_bits.h" />
+    <ClInclude Include="win32/resource.h" />
+    <ClInclude Include="win32/targetver.h" />
+    <ClInclude Include="win32/window.h" />
+    <ClInclude Include="dx11\dx11_system.h">
+      <Filter>dx11</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11\dx11_error.h">
+      <Filter>dx11</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11\dx11_exception.h">
+      <Filter>dx11</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11\dx11_helpers.h">
+      <Filter>dx11</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11\dx11_pointers.h">
+      <Filter>dx11</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_blinn_phong_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_blinn_phong_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_blinn_phong_shift_invariant_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_blinn_phong_shift_invariant_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_color.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_color_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_color_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_color_texture_channel_3_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_color_texture_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_constant_buffer_helper.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_create_draw_calls_pipeline_node.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_debug_view_space_depth_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_draw_call_collector.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_draw_call_collector_context.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_draw_call_context.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_draw_call_key.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_draw_calls_pipeline_params.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_entity.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_entity_world.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_execute_draw_calls_pipeline_node.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_final_pipeline_node.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_indexed_draw_call.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_initializer.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_lambert_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_lambert_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_lambert_shift_invariant_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_lambert_shift_invariant_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_light_directional_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_light_directional_vertex_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_light_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_material_database.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_pinhole_camera.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_pipeline.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_pipeline_params.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_render_context.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_scene.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_scene_pipeline_node.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_screen_space_quad.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_screen_space_uv_vertex_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_thread_render_context.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_transform_position_normal_uv_vertex_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_transform_position_uv_vertex_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_transform_position_vertex_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_view.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_view_pipeline_node.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_view_port.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gxu\gxu_camera_command.h">
+      <Filter>gxu</Filter>
+    </ClInclude>
+    <ClInclude Include="gxu\gxu_entity_factory.h">
+      <Filter>gxu</Filter>
+    </ClInclude>
+    <ClInclude Include="gxu\gxu_pinhole_camera_dispatcher.h">
+      <Filter>gxu</Filter>
+    </ClInclude>
+    <ClInclude Include="gxu\gxu_static_mesh_entity.h">
+      <Filter>gxu</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_mouse.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_pad.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_functions.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_graphics.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_half.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_vector.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\mem_alloc.h">
+      <Filter>mem</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\mem_ref_counter.h">
+      <Filter>mem</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\mem_streamflow.h">
+      <Filter>mem</Filter>
+    </ClInclude>
+    <ClInclude Include="fnd\fnd_universe.h">
+      <Filter>fnd</Filter>
+    </ClInclude>
+    <ClInclude Include="fnd\fnd_updater.h">
+      <Filter>fnd</Filter>
+    </ClInclude>
+    <ClInclude Include="fnd\fnd_world.h">
+      <Filter>fnd</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\point_light_sphere_debug_pixel_shader.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\point_light_sphere_debug_vertex_shader.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\point_lights.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="win32/application.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\directional_lights.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="win32/irradiance.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="sys\sys_base.h">
+      <Filter>sys</Filter>
+    </ClInclude>
+    <ClInclude Include="sys\sys_spin_lock.h">
+      <Filter>sys</Filter>
+    </ClInclude>
+    <ClInclude Include="sys\sys_spsc_queue.h">
+      <Filter>sys</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11\dxgi_helpers.h">
+      <Filter>dx11</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_copy_depth_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_render_resource.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_profile.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_quaternion.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\floor.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_grid_geometry_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_transform_position_normal_vertex_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="sys\sys_profile_timer.h">
+      <Filter>sys</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="precompiled.cpp" />
+    <ClCompile Include="win32\window.cpp" />
+    <ClCompile Include="dx11\dx11_helpers.cpp">
+      <Filter>dx11</Filter>
+    </ClCompile>
+    <ClCompile Include="dx11\dx11_system.cpp">
+      <Filter>dx11</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_blinn_phong_material.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_blinn_phong_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_blinn_phong_shift_invariant_material.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_blinn_phong_shift_invariant_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_color_material.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_color_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_color_texture_channel_3_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_color_texture_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_create_draw_calls_pipeline_node.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_debug_draw.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_debug_view_space_depth_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_draw_call_collector.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_draw_call_collector_context.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_draw_call_key.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_entity.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_entity_world.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_execute_draw_calls_pipeline_node.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_final_pipeline_node.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_indexed_draw_call.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_initializer.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_lambert_material.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_lambert_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_lambert_shift_invariant_material.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_lambert_shift_invariant_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_light_directional_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_light_directional_vertex_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_light_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_material_database.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_pinhole_camera.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_pipeline.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_render_context.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_scene.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_scene_pipeline_node.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_screen_space_quad.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_screen_space_uv_vertex_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_thread_render_context.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_transform_position_normal_uv_vertex_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_transform_position_uv_vertex_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_transform_position_vertex_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_view.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_view_pipeline_node.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_view_port.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gxu\gxu_camera_command.cpp">
+      <Filter>gxu</Filter>
+    </ClCompile>
+    <ClCompile Include="gxu\gxu_entity_factory.cpp">
+      <Filter>gxu</Filter>
+    </ClCompile>
+    <ClCompile Include="gxu\gxu_pinhole_camera_dispatcher.cpp">
+      <Filter>gxu</Filter>
+    </ClCompile>
+    <ClCompile Include="gxu\gxu_static_mesh_entity.cpp">
+      <Filter>gxu</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_mouse.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_pad.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="math\math_functions.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\math_half.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="fnd\fnd_universe.cpp">
+      <Filter>fnd</Filter>
+    </ClCompile>
+    <ClCompile Include="fnd\fnd_updater.cpp">
+      <Filter>fnd</Filter>
+    </ClCompile>
+    <ClCompile Include="fnd\fnd_world.cpp">
+      <Filter>fnd</Filter>
+    </ClCompile>
+    <ClCompile Include="irradiance_win32.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\point_light_sphere_debug_pixel_shader.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\point_light_sphere_debug_vertex_shader.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\point_lights.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\application.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\directional_lights.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="irradiance.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="dx11\dxgi_helpers.cpp">
+      <Filter>dx11</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_copy_depth_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_render_resource.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_profile.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\floor.cpp">
+      <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_grid_geometry_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_transform_position_normal_vertex_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="win32/irradiance.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="dx11">
+      <UniqueIdentifier>{9227faa3-9975-4799-a4b5-9fdfb17cf952}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gx">
+      <UniqueIdentifier>{ac70448c-ee20-4c5d-8436-ecdf1aa71440}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gxu">
+      <UniqueIdentifier>{9bcc8fe9-eb0d-49cb-aee2-84c83c75f703}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{27d0d753-d3e3-42c7-9055-b8bee20e53fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{39c64ba3-5e55-444a-a60b-1d4373ee7613}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mem">
+      <UniqueIdentifier>{e9dd8837-0349-4a3f-ba44-d6a6fd2a43d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fnd">
+      <UniqueIdentifier>{0f8b31be-3e17-4e84-95ac-e722f4bd4b7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="irradiance">
+      <UniqueIdentifier>{d9126746-cb2a-4afc-bc7b-716dafaed39d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sys">
+      <UniqueIdentifier>{60ff5101-81c8-48a3-a4a7-867c33407c8c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

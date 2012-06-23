@@ -24,6 +24,8 @@
 
 #include <win32/application.h>
 
+#include <math/xnamath.h>
+
 namespace wnd
 {
 	window::window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
@@ -129,6 +131,7 @@ namespace wnd
 		//create a new viewport
 		gx::view_port view_port ( 0, 0, width, height );
 		m_render_context->set_view_port(view_port);
+		m_view_port = view_port;
 
 		m_main_camera.set_aspect_ratio ( static_cast<float>(width) / static_cast<float>(height) );
 
@@ -140,41 +143,79 @@ namespace wnd
         const float movement_camera_speed = 0.002f;
         const float rotation_camera_speed = 0.0001f * 3.1415f;
 
+		if (m_pad_state.is_button_down<io::pad_state::button_6>())
+		{
+			io::mouse_state::difference	differences = m_mouse_state.get_difference();
+			
+			math::float4x4		p = gx::create_perspective_matrix(&m_main_camera);
+			math::float4x4		m = math::inverse( p );
+			std::tuple<uint32_t, uint32_t> mouse_coordinates = m_mouse_state.get_coordinates();
+			math::float4		point = math::set( std::get<0>( mouse_coordinates ),  std::get<1>( mouse_coordinates ) , 0.0f, 1.0f );
+			math::float4		point_vs = math::unproject( point, m, m_view_port );
+
+			XMMATRIX p_1;
+			p_1.r[0] = p.r[0];
+			p_1.r[1] = p.r[1];
+			p_1.r[2] = p.r[2];
+			p_1.r[3] = p.r[3];
+
+			XMMATRIX m_1 = XMMatrixIdentity();
+
+			math::float4		p_2 = XMVector3Unproject(point,
+				m_view_port.get_left(),
+				m_view_port.get_top(),
+				m_view_port.get_width(),
+				m_view_port.get_height(),
+				m_view_port.get_min_z(),
+				m_view_port.get_max_z(),
+				p_1,
+				m_1,
+				m_1);
+
+
+
+
+			static int k=0;
+			k++;
+
+
+		}
+		else
 		if (m_pad_state.is_button_down<io::pad_state::button_0>())
 		{
 			gxu::camera_command command = gxu::create_move_forward_command(movement_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
-
+		else
 		if (m_pad_state.is_button_down<io::pad_state::button_1>())
 		{
 			gxu::camera_command command = gxu::create_move_backward_command(movement_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
-
+		else
 		if (m_pad_state.is_button_down<io::pad_state::button_2>())
 		{
 			gxu::camera_command command = gxu::create_turn_camera_left_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
-
+		else
 		if (m_pad_state.is_button_down<io::pad_state::button_3>())
 		{
 			gxu::camera_command command = gxu::create_turn_camera_right_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
-
+		else
 		if (m_pad_state.is_button_down<io::pad_state::button_4>())
 		{
 			gxu::camera_command command = gxu::create_aim_camera_up_command(rotation_camera_speed);
 			gxu::pinhole_camera_command_dispatcher procesor(&m_main_camera);
 			procesor.process(&command);
 		}
-
+		else
 		if (m_pad_state.is_button_down<io::pad_state::button_5>())
 		{
 			gxu::camera_command command = gxu::create_aim_camera_down_command(rotation_camera_speed);
@@ -237,6 +278,11 @@ namespace wnd
 		m_pad_state.button_down<io::pad_state::button_5>();
 	}
 
+	void  window::on_button_6_down()
+	{
+		m_pad_state.button_down<io::pad_state::button_6>();
+	}
+
 	void  window::on_button_0_up()
 	{
 		m_pad_state.button_up<io::pad_state::button_0>();
@@ -265,5 +311,10 @@ namespace wnd
 	void  window::on_button_5_up()
 	{
 		m_pad_state.button_up<io::pad_state::button_5>();
+	}
+
+	void  window::on_button_6_up()
+	{
+		m_pad_state.button_up<io::pad_state::button_6>();
 	}
 }

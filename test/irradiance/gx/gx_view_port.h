@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "math/math_graphics.h"
+
 namespace gx
 {
     class view_port
@@ -82,6 +84,20 @@ namespace gx
             m_min_z = min_z;
             m_max_z = max_z;
         }
+
+		operator math::view_port()  const
+		{
+			const math::view_port v =
+							{ 
+									static_cast<float> ( m_left ), 
+									static_cast<float> ( m_top ),
+									static_cast<float> ( m_left	+ m_width ),
+									static_cast<float> ( m_top	+ m_height ),
+														 m_min_z, 
+														 m_max_z
+							};
+			return v;
+		}
         
         private:
 
