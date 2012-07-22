@@ -135,9 +135,9 @@ namespace dx11
         device_context->VSSetShaderResources( 0, num_views, shader_resource_view);
     }
 
-    inline void vs_set_shader(ID3D11DeviceContext* device_context, ID3D11VertexShader * vertex_shader )
+    inline void vs_set_shader(ID3D11DeviceContext* device_context, const ID3D11VertexShader * const vertex_shader )
     {
-        device_context->VSSetShader( vertex_shader, nullptr, 0) ;
+        device_context->VSSetShader( const_cast< ID3D11VertexShader* > (vertex_shader), nullptr, 0) ;
     }
 
     inline void ps_set_shader_resources(ID3D11DeviceContext* device_context, uint32_t view_count, ID3D11ShaderResourceView * const shader_resource_view [] )
@@ -156,9 +156,9 @@ namespace dx11
         ps_set_shader_resources(device_context, 2, resources);
     }
 
-    inline void ps_set_shader(ID3D11DeviceContext* device_context, ID3D11PixelShader * pixel_shader )
+    inline void ps_set_shader(ID3D11DeviceContext* device_context, const ID3D11PixelShader * const pixel_shader )
     {
-        device_context->PSSetShader( pixel_shader, nullptr, 0) ;
+        device_context->PSSetShader( const_cast<ID3D11PixelShader *> (pixel_shader), nullptr, 0) ;
     }
 }
 

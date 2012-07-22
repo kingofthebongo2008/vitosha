@@ -23,7 +23,7 @@ namespace gx
 		void draw_quad(ID3D11DeviceContext* device_context, math::float4x4 transform);
 
 
-		ID3D11VertexShader*							m_vertex_shader;
+		const ID3D11VertexShader*					m_vertex_shader;
 		ID3D11Buffer*								m_vertex_buffer;
 		ID3D11Buffer*								m_cbuffer;
 		ID3D11InputLayout*							m_input_layout;

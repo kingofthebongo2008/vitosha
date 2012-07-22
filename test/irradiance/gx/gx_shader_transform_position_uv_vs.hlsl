@@ -15,7 +15,7 @@ struct vs_output
 	float2	uv			: texcoord; 
 };
 
-vs_output main( in  vs_input input)
+vs_output main( in vs_input input )
 {
 	vs_output output;
 	output.position_ps = mul ( float4(input.position_ps), m_wvp )  ;	

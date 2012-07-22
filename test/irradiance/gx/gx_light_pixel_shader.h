@@ -86,16 +86,6 @@ namespace gx
 
 		explicit light_pixel_shader ( ID3D11Device* device );
 
-		operator dx11::id3d11pixelshader_ptr()
-		{
-			return m_shader;
-		}
-
-		operator ID3D11PixelShader*()
-		{
-			return m_shader.get();
-		}
-
 		operator const ID3D11PixelShader*() const
 		{
 			return m_shader.get();

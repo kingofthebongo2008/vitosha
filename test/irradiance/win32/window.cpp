@@ -145,13 +145,30 @@ namespace wnd
 
 		if (m_pad_state.is_button_down<io::pad_state::button_6>())
 		{
-			io::mouse_state::difference	differences = m_mouse_state.get_difference();
+			const io::mouse_state::difference	differences = m_mouse_state.get_difference();
 			
-			math::float4x4		p = gx::create_perspective_matrix(&m_main_camera);
-			math::float4x4		m = math::inverse( p );
-			std::tuple<uint32_t, uint32_t> mouse_coordinates = m_mouse_state.get_coordinates();
-			math::float4		point = math::set( std::get<0>( mouse_coordinates ),  std::get<1>( mouse_coordinates ) , 0.0f, 1.0f );
-			math::float4		point_vs = math::unproject( point, m, m_view_port );
+			const math::float4x4		p = gx::create_perspective_matrix(&m_main_camera);
+			const math::float4x4		m = math::inverse( p );
+			const std::tuple<uint32_t, uint32_t> mouse_coordinates = m_mouse_state.get_coordinates();
+			const math::float4			point = math::set( std::get<0>( mouse_coordinates ),  std::get<1>( mouse_coordinates ) , 0.0f, 1.0f );
+			const math::float4			point_vs = math::unproject( point, m, m_view_port );
+
+			const math::float4x4		v_0 = gx::create_view_matrix(&m_main_camera);
+			const math::float4x4		v_1 = gx::create_inverse_view_matrix(&m_main_camera);
+			const math::float4x4		v_2 = math::inverse(v_0);
+
+			const math::float4x4		vx = math::mul(v_0, v_1);
+			const math::float4x4		vy = math::mul(v_0, v_2);
+
+			const math::float4x4		vxxx = math::mul(vx, math::mul(vx,vx) );
+			const math::float4x4		vyyy = math::mul(vy, math::mul(vy,vy) );
+
+			const math::float4			p1 = math::set(1.0f, 1.0f, 1.0f, 1.0f);
+			const math::float4			p2 = math::transform3(p1, v_0);
+			const math::float4			p3 = math::transform3(p2, v_1);
+			const math::float4			p4 = math::transform3(p2, v_2);
+
+
 
 			XMMATRIX p_1;
 			p_1.r[0] = p.r[0];

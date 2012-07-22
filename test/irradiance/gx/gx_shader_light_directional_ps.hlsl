@@ -23,7 +23,7 @@ struct blinn_phong_surface
 
 Texture2D		normal_gbuffer  : register(t0);
 Texture2D		diffuse_gbuffer : register(t1);
-Texture2D		specular_gloss_gbuffer : register(t2);
+Texture2D		specular_gloss_gbuffer : register(t2);                                       
 Texture2D       depth_buffer : register(t3);;
 
 SamplerState	default_sampler : register(s0);

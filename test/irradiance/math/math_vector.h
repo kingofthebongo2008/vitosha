@@ -33,6 +33,26 @@ namespace math
 		return _mm_set_ps(-1.0f, -1.0f, -1.0f, -1.0f);
 	}
 
+	inline float4 identity_r0()
+	{
+		return _mm_set_ps(1.0f, 0.0f, 0.0f, 0.0f);
+	}
+
+	inline float4 identity_r1()
+	{
+		return _mm_set_ps(0.0f, 1.0f, 0.0f, 0.0f);
+	}
+
+	inline float4 identity_r2()
+	{
+		return _mm_set_ps(0.0f, 0.0f, 1.0f, 0.0f);
+	}
+
+	inline float4 identity_r3()
+	{
+		return _mm_set_ps(0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
 	template <uint32_t v1, uint32_t v2, uint32_t v3, uint32_t v4> inline float4 shuffle(float4 value1, float4 value2)
 	{
 		const uint32_t shuffle_k = _MM_SHUFFLE(v4, v3, v2, v1);
@@ -491,6 +511,31 @@ namespace math
 	inline float get_w(float4 v)
 	{
 		return details::get_component<w>(v);
+	}
+
+
+	inline float4 mask_x()
+	{
+		static const uint32_t __declspec( align(16) ) mask_x[4] = { 0xFFFFFFFF, 0x0, 0x0, 0x0};
+		return load4(&mask_x[0] );
+	}
+
+	inline float4 mask_y()
+	{
+		static const uint32_t __declspec( align(16) ) mask_y[4] = { 0x0, 0xFFFFFFFF, 0x0, 0x0};
+		return load4(&mask_y[0] );
+	}
+
+	inline float4 mask_z()
+	{
+		static const uint32_t __declspec( align(16) ) mask_z[4] = { 0x0, 0x0, 0xFFFFFFFF, 0x0};
+		return load4(&mask_z[0] );
+	}
+
+	inline float4 mask_w()
+	{
+		static const uint32_t __declspec( align(16) ) mask_w[4] = { 0x0, 0x0, 0x0, 0xFFFFFFFF};
+		return load4(&mask_w[0] );
 	}
 
 }

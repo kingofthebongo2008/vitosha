@@ -6,7 +6,7 @@
 #include <dx11/dx11_error.h>
 #include <dx11/dx11_pointers.h>
 
-class point_light_sphere_debug_pixel_shader
+class point_light_sphere_debug_pixel_shader 
 {
 	public:
 
@@ -15,11 +15,6 @@ class point_light_sphere_debug_pixel_shader
 	operator dx11::id3d11pixelshader_ptr()
 	{
 		return m_shader;
-	}
-
-	operator ID3D11PixelShader*()
-	{
-		return m_shader.get();
 	}
 
 	operator const ID3D11PixelShader*() const

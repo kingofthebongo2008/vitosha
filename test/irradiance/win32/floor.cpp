@@ -41,7 +41,7 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 	dx11::ps_set_shader(device_context, m_pixel_shader );
 
     device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
-    //device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+    device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
     ID3D11Buffer* buffers[] = { m_point.get() };
 	uint32_t stride = 8;
@@ -49,7 +49,7 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 	device_context->IASetVertexBuffers( 0, 1, buffers, &stride, &offset );
 	device_context->Draw( 1, 0 );
    
-    //device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     dx11::gs_set_shader(device_context, nullptr );
 }

@@ -12,7 +12,7 @@
 
 namespace gx
 {
-	class transform_position_normal_vertex_shader_constant_buffer 
+	class transform_position_normal_vertex_shader_constant_buffer final
 	{
 		public:
 
@@ -67,21 +67,11 @@ namespace gx
 		math::float4x4	m_world;
 	};
 
-	class transform_position_normal_vertex_shader
+	class transform_position_normal_vertex_shader final
     {
 		public:
 
 		explicit transform_position_normal_vertex_shader ( ID3D11Device* device );
-
-		operator dx11::id3d11vertexshader_ptr()
-		{
-			return m_shader;
-		}
-
-		operator ID3D11VertexShader*()
-		{
-			return m_shader.get();
-		}
 
 		operator const ID3D11VertexShader*() const
 		{
@@ -93,7 +83,7 @@ namespace gx
 		uint32_t						m_code_size;
     };
 
-	class transform_position_normal_input_layout
+	class transform_position_normal_input_layout final
 	{
 		public:
 

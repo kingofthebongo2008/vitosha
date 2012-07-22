@@ -11,7 +11,7 @@
 
 namespace gx
 {
-	class transform_position_vertex_shader_constant_buffer 
+	class transform_position_vertex_shader_constant_buffer final
 	{
 		public:
 
@@ -55,19 +55,14 @@ namespace gx
 		private:
 
 		dx11::id3d11buffer_ptr	m_buffer;
-		math::float4x4	m_wvp;
+		math::float4x4			m_wvp;
 	};
 
-	class transform_position_vertex_shader
+	class transform_position_vertex_shader final
     {
 		public:
 
 		explicit transform_position_vertex_shader ( ID3D11Device* device );
-
-		operator ID3D11VertexShader*()
-		{
-			return m_shader.get();
-		}
 
 		operator const ID3D11VertexShader*() const
 		{

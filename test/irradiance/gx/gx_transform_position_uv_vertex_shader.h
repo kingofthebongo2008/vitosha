@@ -64,11 +64,6 @@ namespace gx
 
 		explicit transform_position_uv_vertex_shader ( ID3D11Device* device );
 
-		operator ID3D11VertexShader*()
-		{
-			return m_shader.get();
-		}
-
 		operator const ID3D11VertexShader*() const
 		{
 			return m_shader.get();

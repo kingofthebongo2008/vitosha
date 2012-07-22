@@ -161,7 +161,7 @@ namespace gx
 		dx11::id3d11devicecontext_ptr device_context = m_render_contexts.front()->get_device_context();
 		reset_state( device_context.get() );
 
-        //device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         device_context->RSSetState(m_cull_back_raster_state.get());
     }
 
@@ -264,7 +264,7 @@ namespace gx
 		reset_render_targets(device_context);
         reset_constant_buffers(device_context);
 
-        //device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 
@@ -429,7 +429,7 @@ namespace gx
 
 		select_view_port(device_context);
 
-        //device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 

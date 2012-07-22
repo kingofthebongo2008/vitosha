@@ -142,14 +142,31 @@ namespace gx
 		return math::view(camera->get_position(), math::normalize3( camera->get_view_direction() ) , math::normalize3( camera->get_up() ) );
 	}
 
+	inline math::float4x4 create_inverse_view_matrix(const pinhole_camera * camera)
+	{
+		return math::identity_matrix();//mamath::inverse_view(camera->get_position(), math::normalize3( camera->get_view_direction() ) , math::normalize3( camera->get_up() ) );
+	}
+
 	inline math::float4x4 create_perspective_matrix(const pinhole_camera * camera)
 	{
 		return math::perspective_fov_lh(camera->get_fov(), camera->get_aspect_ratio(), camera->get_near(), camera->get_far() );
 	}
 
+	inline math::float4x4 create_inverse_perspective_matrix(const pinhole_camera * camera)
+	{
+		camera;
+		//todo
+		return math::identity_matrix();
+	}
+
 	inline math::float4x4 create_vp_matrix(const pinhole_camera * camera)
 	{
 		return math::mul( create_view_matrix(camera), create_perspective_matrix(camera) );
+	}
+
+	inline math::float4x4 create_inverse_vp_matrix(const pinhole_camera * camera)
+	{
+		return math::mul( create_inverse_perspective_matrix(camera), create_inverse_view_matrix(camera) );
 	}
 
 }

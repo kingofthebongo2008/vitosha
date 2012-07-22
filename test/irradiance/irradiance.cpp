@@ -21,7 +21,6 @@
 #include "win32/point_lights.h"
 #include "win32/directional_lights.h"
 
-
 std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe )
 {
 
