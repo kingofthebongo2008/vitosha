@@ -18,15 +18,10 @@ namespace math
 	{
 		float4x4 m;
 
-		static const float4 identity_r0  = {1.0f, 0.0f, 0.0f, 0.0f};
-		static const float4 identity_r1  = {0.0f, 1.0f, 0.0f, 0.0f};
-		static const float4 identity_r2  = {0.0f, 0.0f, 1.0f, 0.0f};
-		static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
-
-		m.r[0] = identity_r0;
-		m.r[1] = identity_r1;
-		m.r[2] = identity_r2;
-		m.r[3] = identity_r3;
+		m.r[0] = identity_r0();
+		m.r[1] = identity_r1();
+		m.r[2] = identity_r2();
+		m.r[3] = identity_r3();
 
 		return m;
 	}
@@ -59,12 +54,10 @@ namespace math
 	{
 		float4x4 m;
 
-		static const float4 identity_r3  = {0.0f, 0.0f, 0.0f, 1.0f};
-
 		m.r[0] = load4(address);
 		m.r[1] = load4(address+4);
 		m.r[2] = load4(address+8);
-		m.r[3] = identity_r3;
+		m.r[3] = identity_r3();
 
 		return m;
 	}
