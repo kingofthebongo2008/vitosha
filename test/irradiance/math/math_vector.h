@@ -35,22 +35,26 @@ namespace math
 
 	inline float4 identity_r0()
 	{
-		return _mm_set_ps(1.0f, 0.0f, 0.0f, 0.0f);
+		static const float4 r0  = {1.0f, 0.0f, 0.0f, 0.0f};
+		return r0;
 	}
 
 	inline float4 identity_r1()
 	{
-		return _mm_set_ps(0.0f, 1.0f, 0.0f, 0.0f);
+		static const float4 r1  = {0.0f, 1.0f, 0.0f, 0.0f};
+		return r1;
 	}
 
 	inline float4 identity_r2()
 	{
-		return _mm_set_ps(0.0f, 0.0f, 1.0f, 0.0f);
+		static const float4 r2  = {0.0f, 0.0f, 1.0f, 0.0f};
+		return r2;
 	}
 
 	inline float4 identity_r3()
 	{
-		return _mm_set_ps(0.0f, 0.0f, 0.0f, 1.0f);
+		static const float4 r3  = {0.0f, 0.0f, 0.0f, 1.0f};
+		return r3;
 	}
 
 	template <uint32_t v1, uint32_t v2, uint32_t v3, uint32_t v4> inline float4 shuffle(float4 value1, float4 value2)
