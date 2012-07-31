@@ -179,7 +179,7 @@ namespace math
 			return c.f;
         }
 
-		inline math::half4_2 convert_f32_f16(math::float4 v1, math::float4 v2)
+		inline half4_2 convert_f32_f16(float4 v1, float4 v2)
 		{
 			static __declspec( align(16) ) const uint32_t sign_mask[4]			= { 0x80008000,	0x80008000,	0x80008000,	0x80008000 };
 			static __declspec( align(16) ) const uint32_t exponent_offset[4]	= { 0x38003800,	0x38003800,	0x38003800,	0x38003800 };	//112
@@ -362,7 +362,7 @@ namespace math
 		return result;
     }
 
-	inline math::half4_2 convert_f32_f16(math::float4 v1, math::float4 v2)
+	inline half4_2 convert_f32_f16(math::float4 v1, float4 v2)
 	{
 		return details2::convert_f32_f16(v1, v2);
 	}
@@ -421,9 +421,9 @@ namespace math
 	{
 		for (uint32_t i = 0; i < count ; i+=8 )
 		{
-			math::float4 v_1 = math::load4(&in_buffer[i]);
-			math::float4 v_2 = math::load4(&in_buffer[i+4]);
-			math::half4  k = math::convert_f32_f16( v_1, v_2 ) ;
+			float4 v_1 = math::load4(&in_buffer[i]);
+			float4 v_2 = math::load4(&in_buffer[i+4]);
+			half4  k = math::convert_f32_f16( v_1, v_2 ) ;
 			math::stream(  &out_buffer[i], k);
 		}
 	}

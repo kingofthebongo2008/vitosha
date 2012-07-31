@@ -139,12 +139,14 @@ namespace gx
 
 	inline math::float4x4 create_view_matrix(const pinhole_camera * camera)
 	{
-		return math::view(camera->get_position(), math::normalize3( camera->get_view_direction() ) , math::normalize3( camera->get_up() ) );
+		using namespace math;
+		return view(camera->get_position(), normalize3( camera->get_view_direction() ) , normalize3( camera->get_up() ) );
 	}
 
 	inline math::float4x4 create_inverse_view_matrix(const pinhole_camera * camera)
 	{
-		return math::identity_matrix();//mamath::inverse_view(camera->get_position(), math::normalize3( camera->get_view_direction() ) , math::normalize3( camera->get_up() ) );
+		using namespace math;
+		return inverse_view(camera->get_position(), normalize3( camera->get_view_direction() ) , normalize3( camera->get_up() ) );
 	}
 
 	inline math::float4x4 create_perspective_matrix(const pinhole_camera * camera)

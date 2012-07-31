@@ -4,7 +4,7 @@
 
 namespace math
 {
-	math::float4	sin_1(math::float4 value)
+	float4	sin_1(float4 value)
 	{
 		float4 sin_coefficients0    = {1.0f, -0.166666667f, 8.333333333e-3f, -1.984126984e-4f};
 		float4 sin_coefficients1    = {2.755731922e-6f, -2.505210839e-8f, 1.605904384e-10f, -7.647163732e-13f};
@@ -60,7 +60,7 @@ namespace math
 		return result;
 	}
 
-	math::float4	cos_1(math::float4 value)
+	float4	cos_1(float4 value)
 	{
 		float4 cos_coefficients0    = {1.0f, -0.5f, 4.166666667e-2f, -1.388888889e-3f};
 		float4 cos_coefficients1    = {2.480158730e-5f, -2.755731922e-7f, 2.087675699e-9f, -1.147074560e-11f};
