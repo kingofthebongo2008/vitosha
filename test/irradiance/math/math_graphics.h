@@ -306,7 +306,7 @@ namespace math
 		return view(eye_position, v2, v3);
 	}
 
-	//creates left handed view matrix
+	//creates left handed inverse view matrix
 	inline float4x4 inverse_look_at_lh(float4 eye_position, float4 look_at_position, float4 up_direction)
 	{
 		float4 v1 = sub(look_at_position, eye_position);
@@ -315,44 +315,13 @@ namespace math
 		return inverse_view(eye_position, v2, v3);
 	}
 
-	//creates left handed perspective projection matrix
-	inline float4x4 inverse_perspective_lh(float view_width, float view_height, float z_near, float z_far)
-	{
-		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
-
-		float a = 2 * z_near;
-
-		float r = z_far / (z_far - z_near);
-
-		float4 v1 = set( a / view_width, a / view_height, r, -r * z_near );
-		float4 ze = zero();
-
-		float4x4 m;
-
-		float4 v2 = shuffle<x,y,x,y>(v1, ze);
-		m.r[0] = and(v2, mask_x() );
-
-		float4 v3 = and(v1, reinterpret_cast< const float4*> (&mask_yzw)[0] );
-
-		v2 = swizzle<x,y,x,x>(v1);
-		m.r[1] = and ( v2, mask_y());
-
-		float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
-
-		m.r[2] = swizzle<z,z,x,w>(v4);
-		m.r[3] = swizzle<z,z,y,z>(v4);
-
-		return m;
-	}
-
     //creates left handed perspective projection matrix
 	inline float4x4 perspective_lh(float view_width, float view_height, float z_near, float z_far)
 	{
 		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
 
-		float a = 2 * z_near;
+		float a = 2.0f * z_near;
 
 		float r = z_far / (z_far - z_near);
 
@@ -373,6 +342,37 @@ namespace math
 
 		m.r[2] = swizzle<z,z,x,w>(v4);
 		m.r[3] = swizzle<z,z,y,z>(v4);
+
+		return m;
+	}
+
+	//creates left handed inverse perspective projection matrix
+	inline float4x4 inverse_perspective_lh(float view_width, float view_height, float z_near, float z_far)
+	{
+		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		float a = 2.0f / z_near;
+
+		float r =  (z_near - z_far) / ( z_near * z_far) ;
+
+		float4 v1 = set( view_width / a , view_height / a, r , 1.0f / z_near );
+		float4 ze = zero();
+
+		float4x4 m;
+
+		float4 v2 = shuffle<x,y,x,y>(v1, ze);
+		m.r[0] = and(v2, mask_x() );
+
+		float4 v3 = and(v1, reinterpret_cast< const float4*> (&mask_yzw)[0] );
+
+		v2 = swizzle<x,y,x,x>(v1);
+		m.r[1] = and ( v2, mask_y());
+
+		float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
+
+		m.r[2] = swizzle<z,z,z,x>(v4);
+		m.r[3] = swizzle<z,z,w,y>(v4);
 
 		return m;
 	}
@@ -409,6 +409,39 @@ namespace math
 		return m;
 	}
 
+	//creates left handed inverse perspective projection matrix
+	inline float4x4 inverse_perspective_fov_lh(float fov, float aspect_ratio, float z_near, float z_far)
+	{
+		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		float r =  (z_near - z_far) / ( z_near * z_far) ;
+
+		float sin = sinf(fov * 0.5f);
+		float cos = cosf(fov * 0.5f);
+		float height = sin / cos;
+
+		float4 v1 = set( height * aspect_ratio , height, r , 1.0f / z_near  );
+		float4 ze = zero();
+
+		float4x4 m;
+
+		float4 v2 = shuffle<x,y,x,y>(v1, ze);
+		m.r[0] = and(v2, mask_x() );
+
+		float4 v3 = and(v1, reinterpret_cast< const float4*> (&mask_yzw)[0] );
+
+		v2 = swizzle<x,y,x,x>(v1);
+		m.r[1] = and ( v2, mask_y());
+
+		float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
+
+		m.r[2] = swizzle<z,z,z,x>(v4);
+		m.r[3] = swizzle<z,z,w,y>(v4);
+
+		return m;
+	}
+
     //creates left handed orthographic projection matrix
 	inline float4x4 orthographic_lh(float view_width, float view_height, float z_near, float z_far)
 	{
@@ -427,14 +460,45 @@ namespace math
 		float4 v2 = shuffle<x,y,x,y>(v1, ze);
 		m.r[0] = and(v2, mask_x());
 
+		v2 = swizzle<x,y,x,x>(v1);
+		m.r[1] = and ( v2, mask_y());
+
 		float4 v3 = and(v1, reinterpret_cast< const float4*> (&mask_yzw)[0] );
-
-		m.r[1] = swizzle<x,y,x,x>(v1);
-
 		float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
 
 		m.r[2] = swizzle<z,z,x,w>(v4);
 		m.r[3] = swizzle<z,z,y,z>(v4);
+
+		return m;
+	}
+
+	    //creates left handed orthographic projection matrix
+	inline float4x4 inverse_orthographic_lh(float view_width, float view_height, float z_near, float z_far)
+	{
+		static const uint32_t	__declspec( align(16) )	mask_yzw[4] = { 0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+		static const float4	identity_r3 = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		float a = 2.0f;
+
+		float r = (z_far - z_near);
+
+		float4 v1 = set( view_width / a, view_height / a, -r / z_near, 1.0f / z_near );
+		float4 ze = zero();
+
+		float4x4 m;
+
+		float4 v2 = shuffle<x,y,x,y>(v1, ze);
+		m.r[0] = and(v2, mask_x() );
+
+		float4 v3 = and(v1, reinterpret_cast< const float4*> (&mask_yzw)[0] );
+
+		v2 = swizzle<x,y,x,x>(v1);
+		m.r[1] = and ( v2, mask_y());
+
+		float4 v4 = shuffle<z,w,z,w>(v3, identity_r3);
+
+		m.r[2] = swizzle<z,z,z,x>(v4);
+		m.r[3] = swizzle<z,z,w,y>(v4);
 
 		return m;
 	}
@@ -558,7 +622,7 @@ namespace math
 	}
 
     //returns near and far from a projection matrix
-    inline std::tuple<float, float> extract_near_far( math::float4x4 p )
+    inline std::tuple<float, float> extract_near_far( float4x4 p )
     {
         float a = p.m[3][2];
         float b = p.m[2][2];
