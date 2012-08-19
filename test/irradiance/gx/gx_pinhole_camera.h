@@ -156,9 +156,7 @@ namespace gx
 
 	inline math::float4x4 create_inverse_perspective_matrix(const pinhole_camera * camera)
 	{
-		camera;
-		//todo
-		return math::identity_matrix();
+		return math::inverse_perspective_fov_lh(camera->get_fov(), camera->get_aspect_ratio(), camera->get_near(), camera->get_far() );
 	}
 
 	inline math::float4x4 create_vp_matrix(const pinhole_camera * camera)
@@ -169,6 +167,15 @@ namespace gx
 	inline math::float4x4 create_inverse_vp_matrix(const pinhole_camera * camera)
 	{
 		return math::mul( create_inverse_perspective_matrix(camera), create_inverse_view_matrix(camera) );
+	}
+
+	inline void rotate(pinhole_camera* camera, math::float4 quaternion)
+	{
+		auto up = camera->get_up();
+		auto direction = camera->get_view_direction();
+
+		camera->set_view_up( math::rotate_vector3(up, quaternion));
+		camera->set_view_direction( math::rotate_vector3(direction, quaternion));
 	}
 
 }
