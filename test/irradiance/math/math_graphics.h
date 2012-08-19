@@ -761,16 +761,16 @@ namespace math
         return math::set(x,y,z, 0.0f);
     }
 
-    // see ken shoemake in graphic gems 4
+	// see ken shoemake in graphic gems 4
     // http://www.talisman.org/~erlkonig/misc/shoemake92-arcball.pdf
-    // x, y : screen coordinates
+    // x, y : screen coordinates (2d)
+	// r    : arcball radius
     // c    : arcball center ( 2d )
-    // r    : arcball radius
-
-    inline float4 arc_ball_point_on_unit_sphere( float x_, float y_, float r, float4 c )
+    inline float4 arc_ball_point_on_unit_sphere( float4 xy, float r, float4 c )
     {
-
-        const float4 s0       = point3( x_, y_, 0.0f );
+		static const uint32_t __declspec( align(16) )   mask_xy[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0, 0  };
+		const float4 xy_	  = select( zero(), xy, load4(mask_xy));
+        const float4 s0       = xy_;
         const float4 v0       = div ( sub ( s0, c ), splat(r) ); // v0 = (s0-c) / r
         const float4 dot      = dot2( v0, v0 );
 
@@ -790,6 +790,19 @@ namespace math
         result = select ( result, one(), v_mask_w) ;
         return result;
     }
+
+	// see ken shoemake in graphic gems 4
+    // http://www.talisman.org/~erlkonig/misc/shoemake92-arcball.pdf
+    // x, y : screen coordinates
+    // c    : arcball center ( 2d )
+    // r    : arcball radius
+    inline float4 arc_ball_point_on_unit_sphere( float x_, float y_, float r, float4 c )
+    {
+		const float4 v = point3( x_, y_, 0.0f );
+
+		return arc_ball_point_on_unit_sphere(v, r, c);
+    }
+
 
     //create a rotation quaternion from v_0 to v_1 on the 3 sphere
     inline float4 arc_ball_quaternion( float4 v_0, float4 v_1)
