@@ -366,9 +366,11 @@ namespace math
 
         if ( T > 0.0f )
         {
-            float4 k = swizzle<w,w,w,w>(q);
+			float4 t = math::set(T, T, T, T);
+            float4 k_ = swizzle<w,w,w,w>(q);
+			float4 k = sqrt( add(k_,t) );
             float4 xyz = div( b, k );
-            xyz = mul ( xyz, mask_quarter );
+            xyz = mul ( xyz, mask_half );
             float4 w = mul (k, mask_half );
             return select ( xyz, w, v_mask_w) ;
         }
