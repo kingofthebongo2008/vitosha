@@ -22,19 +22,19 @@ namespace io
 
 		typedef uint8_t difference;
 
-		mouse_state() : m_state(0), m_shadow_state(0)
+		mouse_state() : m_state(0), m_old_state(0)
 		{
 
 		}
 
 		void swap()
 		{
-			m_shadow_state = m_state;
+			m_old_state = m_state;
 		}
 
 		difference get_difference() const
 		{
-			return ( m_state ^ m_shadow_state );
+			return ( m_old_state ^ m_state );
 		}
 
 		bool is_left_button_down() const
@@ -119,7 +119,7 @@ namespace io
 		uint16_t m_y;
 
 		uint8_t	m_state;
-		uint8_t m_shadow_state;
+		uint8_t m_old_state;
 	};
 
 	namespace details
@@ -142,6 +142,11 @@ namespace io
 		result = result | details::create_button_state<mouse_state::middle_button, MK_MBUTTON> (windows_mouse_state);
 
 		return result;
+	}
+
+	template <uint32_t bit> inline bool has_difference( mouse_state::difference difference)
+	{
+		return util::bit_is_set<bit, uint8_t>(difference);
 	}
 
 };

@@ -310,6 +310,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				::SetCapture(hWnd);
 				if ( MK_CONTROL & wParam)
 				{
 					wnd->on_button_6_down();
@@ -329,6 +330,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				::ReleaseCapture();
 				if ( MK_CONTROL & wParam)
 				{
 					wnd->on_button_6_down();
@@ -348,6 +350,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				::SetCapture(hWnd);
 				if ( MK_CONTROL & wParam)
 				{
 					wnd->on_button_6_down();
@@ -365,6 +368,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				::ReleaseCapture();
 				if ( MK_CONTROL & wParam)
 				{
 					wnd->on_button_6_down();
@@ -383,6 +387,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				::SetCapture(hWnd);
 				if ( MK_CONTROL & wParam)
 				{
 					wnd->on_button_6_down();
@@ -401,6 +406,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			if (wnd)
 			{
+				::ReleaseCapture();
 				if ( MK_CONTROL & wParam)
 				{
 					wnd->on_button_6_down();
@@ -435,6 +441,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				wnd->on_mouse_move( static_cast<uint32_t> (mouse_state) , xPos, yPos );
 			}
 
+			break;
+		}
+	case WM_CAPTURECHANGED:
+		{
+            if( ( HWND )lParam != hWnd )
+            {
+                ReleaseCapture();
+			}
 			break;
 		}
 	case WM_KEYDOWN:

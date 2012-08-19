@@ -147,55 +147,62 @@ namespace wnd
 		{
 			const io::mouse_state::difference	differences = m_mouse_state.get_difference();
 			
-			const math::float4x4		p = gx::create_perspective_matrix(&m_main_camera);
-			const math::float4x4		m = math::inverse( p );
-			const std::tuple<uint32_t, uint32_t> mouse_coordinates = m_mouse_state.get_coordinates();
-			const math::float4			point = math::set( std::get<0>( mouse_coordinates ),  std::get<1>( mouse_coordinates ) , 0.0f, 1.0f );
-			const math::float4			point_vs = math::unproject( point, m, m_view_port );
+			auto		m = gx::create_inverse_perspective_matrix(&m_main_camera);
+			auto		mouse_coordinates = m_mouse_state.get_coordinates();
+			auto		point = math::set( static_cast<float> (std::get<0>( mouse_coordinates ) ),  static_cast<float> ( std::get<1>( mouse_coordinates ) ) , 0.0f, 1.0f );
+			auto		point_vs = math::unproject( point, m, m_view_port );
+			auto		radius = 0.25f;
+			auto		center = math::unproject( math::identity_r3(), m, m_view_port );
 
-			const math::float4x4		v_0 = gx::create_view_matrix(&m_main_camera);
-			const math::float4x4		v_1 = gx::create_inverse_view_matrix(&m_main_camera);
-			const math::float4x4		v_2 = math::inverse(v_0);
+			if ( m_mouse_state.is_left_button_down() &&
+				io::has_difference<io::mouse_state::left_button>(differences) )
+			{
+				//down
+				auto	down = math::arc_ball_point_on_unit_sphere(point_vs, radius, center );
 
-			const math::float4x4		vx = math::mul(v_0, v_1);
-			const math::float4x4		vy = math::mul(v_0, v_2);
+				m_arcball_state.dragging = true;
+				
+				m_arcball_state.initial_rotation = math::identity_r3();
+				m_arcball_state.initial_point = down;
 
-			const math::float4x4		vxxx = math::mul(vx, math::mul(vx,vx) );
-			const math::float4x4		vyyy = math::mul(vy, math::mul(vy,vy) );
+				m_arcball_state.initial_camera_up	= m_main_camera.get_up();
+				m_arcball_state.initial_camera_direction = m_main_camera.get_view_direction();
+				m_arcball_state.initial_center = center;
 
-			const math::float4			p1 = math::set(1.0f, 1.0f, 1.0f, 1.0f);
-			const math::float4			p2 = math::transform3(p1, v_0);
-			const math::float4			p3 = math::transform3(p2, v_1);
-			const math::float4			p4 = math::transform3(p2, v_2);
+				m_arcball_state.initial_rotation = math::identity_r3();
 
+			}
+			else
+			if ( !m_mouse_state.is_left_button_down() &&
+				io::has_difference<io::mouse_state::left_button>(differences) )
+			{
+				//up
+				m_arcball_state.dragging = false;
+			}
+			else
+			{
+				//move
+				if (m_arcball_state.dragging)
+				{
+					auto center = m_arcball_state.initial_center;
+					auto down = math::arc_ball_point_on_unit_sphere(point_vs, radius, center );
+					
+					//create rotation from 2 points on the sphere
+					auto rotation = math::arc_ball_quaternion(m_arcball_state.initial_point, down);
 
+					auto new_rotation = math::quaternion_mul(m_arcball_state.initial_rotation, rotation);
 
-			XMMATRIX p_1;
-			p_1.r[0] = p.r[0];
-			p_1.r[1] = p.r[1];
-			p_1.r[2] = p.r[2];
-			p_1.r[3] = p.r[3];
+					//rotate
+					m_arcball_state.current_rotation = new_rotation;
 
-			XMMATRIX m_1 = XMMatrixIdentity();
+					auto	up = math::rotate_vector3(m_arcball_state.initial_camera_up, new_rotation);
+					auto	direction = math::rotate_vector3(m_arcball_state.initial_camera_direction, new_rotation);
 
-			math::float4		p_2 = XMVector3Unproject(point,
-				m_view_port.get_left(),
-				m_view_port.get_top(),
-				m_view_port.get_width(),
-				m_view_port.get_height(),
-				m_view_port.get_min_z(),
-				m_view_port.get_max_z(),
-				p_1,
-				m_1,
-				m_1);
-
-
-
-
-			static int k=0;
-			k++;
-
-
+					m_main_camera.set_view_up(up);
+					m_main_camera.set_view_direction(direction);
+					
+				}
+			}
 		}
 		else
 		if (m_pad_state.is_button_down<io::pad_state::button_0>())

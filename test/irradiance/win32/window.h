@@ -28,6 +28,30 @@ namespace wnd
 {
     class application;
 
+	struct arcball_rotation_state
+	{
+			math::float4 initial_rotation;
+			math::float4 initial_point;
+			math::float4 current_rotation;
+			math::float4 initial_camera_up;
+			math::float4 initial_camera_direction;
+			math::float4 initial_center;
+			bool		 dragging;
+
+			arcball_rotation_state()
+			{
+				initial_rotation = math::identity_r3();
+				current_rotation = math::identity_r3();
+				initial_point	 = math::identity_r3();
+
+				initial_camera_up	= math::zero();
+				initial_camera_direction = math::zero();
+				initial_center = math::identity_r3();
+
+				dragging = false;
+			}
+	};
+
 
 	class window : private boost::noncopyable
 	{
@@ -82,6 +106,8 @@ namespace wnd
 
 		io::mouse_state				m_mouse_state;
 		io::pad_state				m_pad_state;
+
+		arcball_rotation_state		m_arcball_state;
 
 		void render_frame();
 	};
