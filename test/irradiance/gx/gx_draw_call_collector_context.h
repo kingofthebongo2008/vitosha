@@ -15,7 +15,7 @@ namespace gx
 
         math::float4x4*    m_world_matrix;
         math::float4x4*    m_wvp;
-		uint32_t			 m_entity_index;
+		uint32_t		   m_entity_index;
    };
 
    inline float get_perspective_transform3_depth( const draw_call_collector_context* const context )
