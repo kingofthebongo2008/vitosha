@@ -335,6 +335,12 @@
     <ClInclude Include="sys\sys_profile_timer.h">
       <Filter>sys</Filter>
     </ClInclude>
+    <ClInclude Include="io\io_console.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_std_console_notifier.h">
+      <Filter>io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -545,6 +551,12 @@
     </ClCompile>
     <ClCompile Include="gx\gx_transform_position_normal_vertex_shader.cpp">
       <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_console.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_std_console_notifier.cpp">
+      <Filter>io</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

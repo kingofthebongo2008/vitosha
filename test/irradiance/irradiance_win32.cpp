@@ -22,6 +22,9 @@
 #include <math/math_half.h>
 #include <math/math_quaternion.h>
 #include <math/xnamath.h>
+#include <iostream>
+#include <io/io_console.h>
+#include <io/io_std_console_notifier.h>
 
 #define MAX_LOADSTRING 100
 
@@ -40,6 +43,9 @@ using namespace wnd;
 
 double PCFreq = 0.0;
 __int64 CounterStart = 0;
+
+
+
 
 void StartCounter()
 {
@@ -91,46 +97,18 @@ std::tuple<float, float> k1()
 	return std::make_tuple<float, float> ( std::move(a), std::move(b) );		
 }
 
+
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
+	io::console::runner runner;
+	io::console::register_thread_info_helper helper_i;
+	io::console::register_notifier_helper helper_n ( std::make_shared<io::console::std_notifier>() );
+	
 
-	std::tuple<float, float> t = k1();
-
-    auto	rotation					= math::rotation_y( 0.5f );    //math::rotation_y( angle_in_radians );
-    auto    rotation_1                  = XMMatrixRotationY(0.5f);
-
-    math::float4 center = math::point3(0.0f, 0.0f, 0.0f );
-    math::float4 point = math::arc_ball_point_on_unit_sphere ( 0.0f, 0.0f, 1.0f, center);
-
-    math::float4 axis = math::set(0.0f, 1.0f, 0.0f, 0.0f);
-    math::float4 constraint_point = math::arc_ball_constraint_on_axis ( point, axis) ;
-
-
-    math::float4 axes[3] = 
-    {
-                            math::set(1.0f, 0.0f, 0.0f, 0.0f),
-                            math::set(0.0f, 1.0f, 0.0f, 0.0f),
-                            math::set(0.0f, 0.0f, 1.0f, 0.0f)
-    };
-
-    math::float4 closest_axis = math::arc_ball_closest_axis( point, &axes[0], 3);
-
-
-    /*
-    std::ofstream f("result.txt");
-
-    
-    f<<"ref:"<< result2 <<std::endl;
-    f<<"ref2:"<<result3<<std::endl;
-    f<<"simd:"<<result4<<std::endl;
-    f<<"dx:"<<result5<<std::endl;
-
-    f.close();
-    */
-
+	io::console::write(L"test");
 
    _invalid_parameter_handler oldHandler, newHandler;
    newHandler = myInvalidParameterHandler;
@@ -181,7 +159,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	window* wnd = new window( application, context.m_swap_chain, &render_context );
 	application.new_window(wnd);
 	wnd->set_scene(scene);
-	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG>(wnd) );
+	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wnd) );
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
 	MSG msg = {};
