@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <dx11/dx11_system.h>
+#include <d3d11/d3d11_system.h>
 #include <math/math_graphics.h>
 
 #include <fnd/fnd_universe.h>
@@ -21,7 +21,7 @@
 #include "win32/point_lights.h"
 #include "win32/directional_lights.h"
 
-std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe )
+std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_context, d3d11::system_context context, std::shared_ptr<fnd::universe> universe )
 {
 
     auto scene = std::make_shared<gx::scene>();

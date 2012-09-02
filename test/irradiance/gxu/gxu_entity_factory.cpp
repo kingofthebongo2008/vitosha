@@ -2,7 +2,7 @@
 
 #include <gxu/gxu_entity_factory.h>
 
-#include <dx11/dx11_helpers.h>
+#include <d3d11/d3d11_helpers.h>
 
 #include <math/math_functions.h>
 #include <math/math_half.h>
@@ -58,9 +58,9 @@ namespace gxu
 
     gx::indexed_draw_call_2 create_lat_lon_sphere( ID3D11Device* device , float radius, uint32_t subdivision_count )
     {
-		dx11::id3d11buffer_ptr positions;
-        dx11::id3d11buffer_ptr normals_uvs;
-        dx11::id3d11buffer_ptr indices;
+		d3d11::ibuffer_ptr positions;
+        d3d11::ibuffer_ptr normals_uvs;
+        d3d11::ibuffer_ptr indices;
 		
 
 		subdivision_count = subdivision_count + 1;
@@ -221,19 +221,19 @@ namespace gxu
 		normals_uvs_h_v.resize (  8 * ( ( normals_uvs_v.size() * 6 + 7) / 8 ) );
 		math::convert_f32_f16_stream( reinterpret_cast<float*> ( &normals_uvs_v[0]) , normals_uvs_h_v.size(), &normals_uvs_h_v[0] );
 		
-		positions = dx11::create_immutable_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
-		normals_uvs = dx11::create_immutable_vertex_buffer( device, &normals_uvs_h_v[0], normals_uvs_v.size() * 6 * sizeof(math::half) );
+		positions = d3d11::create_immutable_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
+		normals_uvs = d3d11::create_immutable_vertex_buffer( device, &normals_uvs_h_v[0], normals_uvs_v.size() * 6 * sizeof(math::half) );
 
-		indices = dx11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
+		indices = d3d11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
 		return gx::create_indexed_draw_call<8,12> ( static_cast<uint32_t> ( indices_v.size() ), positions, normals_uvs, indices ) ;
     }
 
-	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
+	std::tuple< d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
 	{
-	dx11::id3d11buffer_ptr positions;
-        dx11::id3d11buffer_ptr normals_uvs;
-        dx11::id3d11buffer_ptr indices;
+	d3d11::ibuffer_ptr positions;
+        d3d11::ibuffer_ptr normals_uvs;
+        d3d11::ibuffer_ptr indices;
 		
 
 		subdivision_count = subdivision_count + 1;
@@ -394,10 +394,10 @@ namespace gxu
 		normals_uvs_h_v.resize (  8 * ( ( normals_uvs_v.size() * 6 + 7) / 8 ) );
 		math::convert_f32_f16_stream( reinterpret_cast<float*> ( &normals_uvs_v[0]) , normals_uvs_h_v.size(), &normals_uvs_h_v[0] );
 		
-		positions = dx11::create_immutable_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
-		normals_uvs = dx11::create_immutable_vertex_buffer( device, &normals_uvs_h_v[0], normals_uvs_v.size() * 6 * sizeof(math::half) );
+		positions = d3d11::create_immutable_vertex_buffer( device, &positions_h_v[0], positions_v.size() * 4 * sizeof(math::half) );
+		normals_uvs = d3d11::create_immutable_vertex_buffer( device, &normals_uvs_h_v[0], normals_uvs_v.size() * 6 * sizeof(math::half) );
 
-		indices = dx11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
+		indices = d3d11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
 		return std::make_tuple( positions, normals_uvs, indices, static_cast<uint32_t> (indices_v.size()) );
     }

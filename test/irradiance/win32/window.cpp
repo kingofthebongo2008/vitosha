@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include <dx/dxgi_pointers.h>
+
 #include <math/math_graphics.h>
 
 #include <fnd/fnd_universe.h>
@@ -28,7 +30,7 @@
 
 namespace wnd
 {
-	window::window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
+	window::window(application& application, dxgi::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
 			m_application(application)
 			, m_swap_chain(swap_chain)
 			, m_render_context(render_context)
@@ -74,7 +76,7 @@ namespace wnd
 
 			if (hr != DXGI_STATUS_OCCLUDED)
 			{
-				dx11::throw_if_failed<dx11::d3d11_exception>(hr);		
+				dx::throw_if_failed<d3d11::d3d11_exception>(hr);		
 			}
 		}
 		else
@@ -89,7 +91,7 @@ namespace wnd
 			}
 			else
 			{
-				dx11::throw_if_failed<dx11::d3d11_exception>(hr);		
+				dx::throw_if_failed<d3d11::d3d11_exception>(hr);		
 			}
 		}
 	}
@@ -115,7 +117,7 @@ namespace wnd
 
 	void window::resize_window(uint32_t width, uint32_t height)
 	{
-		using namespace dx11;
+		using namespace d3d11;
 		DXGI_SWAP_CHAIN_DESC desc = {};
 
 		//disable dxgi errors
@@ -125,8 +127,8 @@ namespace wnd
 		//release buffers that are window size
 		m_render_context->release_swap_chain_buffers();
 
-		throw_if_failed<d3d11_exception>(m_swap_chain->GetDesc(&desc));
-		throw_if_failed<d3d11_exception>(m_swap_chain->ResizeBuffers(desc.BufferCount, width, height,  desc.BufferDesc.Format, desc.Flags));
+		dx::throw_if_failed<d3d11_exception>(m_swap_chain->GetDesc(&desc));
+		dx::throw_if_failed<d3d11_exception>(m_swap_chain->ResizeBuffers(desc.BufferCount, width, height,  desc.BufferDesc.Format, desc.Flags));
 
 		//create a new viewport
 		gx::view_port view_port ( 0, 0, width, height );

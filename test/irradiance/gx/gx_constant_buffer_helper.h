@@ -3,14 +3,14 @@
 
 #include <cstdint>
 
-#include <dx11/dx11_helpers.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_helpers.h>
+#include <d3d11/d3d11_pointers.h>
 
 namespace gx
 {
 	namespace detail
 	{
-		typedef dx11::d3d11_buffer_scope_lock constant_buffer_scope_lock;
+		typedef d3d11::d3d11_buffer_scope_lock constant_buffer_scope_lock;
 	}
 
 	template <typename type> void constant_buffer_update( ID3D11DeviceContext* context, ID3D11Buffer* buffer, type value )

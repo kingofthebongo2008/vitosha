@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <math/math_matrix.h>
 
@@ -27,7 +27,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		dx11::id3d11vertexshader_ptr	m_shader;
+		d3d11::ivertexshader_ptr	m_shader;
 		const void*						m_code;
 		uint32_t						m_code_size;
     };
@@ -48,7 +48,7 @@ namespace gx
 			return m_input_layout.get();
 		}
 
-		dx11::id3d11inputlayout_ptr	m_input_layout;
+		d3d11::iinputlayout_ptr	m_input_layout;
 	};
 
     typedef std::tuple < light_directional_vertex_shader, light_directional_vertex_shader_input_layout  > light_directional_vertex_pipeline;

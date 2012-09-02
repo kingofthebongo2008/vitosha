@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <math/math_matrix.h>
 
@@ -29,7 +29,7 @@ class point_light_sphere_debug_vertex_shader_constant_buffer
 
 	void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
 	{
-		context->VSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
+		context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
 	}
 
 	operator ID3D11Buffer*()
@@ -49,7 +49,7 @@ class point_light_sphere_debug_vertex_shader_constant_buffer
 
 	public:
 
-	dx11::id3d11buffer_ptr	m_buffer;
+	d3d11::ibuffer_ptr	m_buffer;
 	math::float4x4	m_vp;		//view projection
 };
 
@@ -60,7 +60,7 @@ class point_light_sphere_debug_vertex_shader
 
 	explicit point_light_sphere_debug_vertex_shader ( ID3D11Device* device );
 
-	operator dx11::id3d11vertexshader_ptr()
+	operator d3d11::ivertexshader_ptr()
 	{
 		return m_shader;
 	}
@@ -75,7 +75,7 @@ class point_light_sphere_debug_vertex_shader
 		return m_shader.get();
 	}
 
-	dx11::id3d11vertexshader_ptr	m_shader;
+	d3d11::ivertexshader_ptr	m_shader;
 	const void*						m_code;
 	uint32_t						m_code_size;
 };

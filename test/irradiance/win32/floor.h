@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <math/math_vector.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
 #include <gx/gx_entity.h>
@@ -27,7 +27,7 @@ class floor_entity : public gx::entity
                     gx::grid_geometry_shader                                        geometry_shader,
                     gx::blinn_phong_shift_invariant_pixel_shader				    pixel_shader,
 					gx::blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
-                    std::tuple<dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr>      buffers
+                    std::tuple<d3d11::ibuffer_ptr, d3d11::ibuffer_ptr>      buffers
                     ) : 
     m_vertex_pipeline(vertex_pipeline)
     ,m_geometry_shader( geometry_shader)
@@ -48,8 +48,8 @@ class floor_entity : public gx::entity
     gx::grid_geometry_shader                                        m_geometry_shader;
     gx::blinn_phong_shift_invariant_pixel_shader					m_pixel_shader;
 	gx::blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_pixel_cbuffer;
-    dx11::id3d11buffer_ptr                                          m_point;    
-    dx11::id3d11buffer_ptr                                          m_stream_out;    
+    d3d11::ibuffer_ptr                                          m_point;    
+    d3d11::ibuffer_ptr                                          m_stream_out;    
 
     uint16_t                                                        m_material_id;
 };

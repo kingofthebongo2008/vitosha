@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 class point_light_sphere_debug_pixel_shader 
 {
@@ -12,7 +12,7 @@ class point_light_sphere_debug_pixel_shader
 
 	explicit point_light_sphere_debug_pixel_shader ( ID3D11Device* device );
 
-	operator dx11::id3d11pixelshader_ptr()
+	operator d3d11::ipixelshader_ptr()
 	{
 		return m_shader;
 	}
@@ -22,7 +22,7 @@ class point_light_sphere_debug_pixel_shader
 		return m_shader.get();
 	}
 
-	dx11::id3d11pixelshader_ptr	m_shader;
+	d3d11::ipixelshader_ptr	m_shader;
 	const void*					m_code;
 	uint32_t					m_code_size;
 };

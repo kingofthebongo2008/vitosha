@@ -1,7 +1,7 @@
 #ifndef __GX_LAMBERT_MATERIAL_H__
 #define __GX_LAMBERT_MATERIAL_H__
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 namespace gx
 {
@@ -11,15 +11,15 @@ namespace gx
 	{
 		lambert_texture_set (
 							ID3D11Device*				device,
-							dx11::id3d11texture2d_ptr	diffuse,
-							dx11::id3d11texture2d_ptr	normal
+							d3d11::itexture2d_ptr	diffuse,
+							d3d11::itexture2d_ptr	normal
 					   );
 
-		dx11::id3d11texture2d_ptr			m_diffuse;
-		dx11::id3d11texture2d_ptr			m_normal;
+		d3d11::itexture2d_ptr			m_diffuse;
+		d3d11::itexture2d_ptr			m_normal;
 
-		dx11::id3d11shaderresourceview_ptr	m_diffuse_view;
-		dx11::id3d11shaderresourceview_ptr	m_normal_view;
+		d3d11::ishaderresourceview_ptr	m_diffuse_view;
+		d3d11::ishaderresourceview_ptr	m_normal_view;
 	};
 
 	class lambert_material

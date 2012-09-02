@@ -1,7 +1,7 @@
 #ifndef __GX_BLINN_PHONG_SHIFT_INVARIANT_MATERIAL_H__
 #define __GX_BLINN_PHONG_SHIFT_INVARIANT_MATERIAL_H__
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 #include <math/math_vector.h>
 
 #include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>

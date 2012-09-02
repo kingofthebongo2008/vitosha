@@ -1,9 +1,9 @@
-#ifndef __dx11_EXCEPTION_H__
-#define __dx11_EXCEPTION_H__
+#ifndef __d3d11_EXCEPTION_H__
+#define __d3d11_EXCEPTION_H__
 
 #include <exception>
 
-namespace dx11
+namespace d3d11
 {
     class d3d11_exception : public std::exception
     {

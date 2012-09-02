@@ -24,7 +24,7 @@ namespace gxu
 {
     gx::indexed_draw_call_2 create_lat_lon_sphere( ID3D11Device* device, float radius, uint32_t subdivision_count );
 
-	std::tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count );
+	std::tuple< d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count );
 
 	template <typename factory> inline std::shared_ptr<gx::entity> create_lat_lon_sphere_entity( gx::render_context* context, gx::indexed_draw_call_2 draw_call, math::float4 color )
 	{

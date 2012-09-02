@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <tuple>
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <math/math_matrix.h>
 
@@ -35,12 +35,12 @@ namespace gx
 
         void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
 		{
-			context->VSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
+			context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
 		}
 
         void bind_as_geometry_constant_buffer(ID3D11DeviceContext* context)
 		{
-			context->GSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
+			context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
 		}
 
         inline size_t size() const
@@ -61,7 +61,7 @@ namespace gx
 
 		private:
 
-		dx11::id3d11buffer_ptr	m_buffer;
+		d3d11::ibuffer_ptr	m_buffer;
 
 		math::float4x4	m_wvp;
 		math::float4x4	m_world;
@@ -78,7 +78,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		dx11::id3d11vertexshader_ptr	m_shader;
+		d3d11::ivertexshader_ptr	m_shader;
 		const void*						m_code;
 		uint32_t						m_code_size;
     };
@@ -89,7 +89,7 @@ namespace gx
 
 		transform_position_normal_input_layout( ID3D11Device* device, transform_position_normal_vertex_shader* shader);
 
-		operator dx11::id3d11inputlayout_ptr()
+		operator d3d11::iinputlayout_ptr()
 		{
 			return m_input_layout;
 		}
@@ -104,7 +104,7 @@ namespace gx
 			return m_input_layout.get();
 		}
 
-		dx11::id3d11inputlayout_ptr	m_input_layout;
+		d3d11::iinputlayout_ptr	m_input_layout;
 	};
 
     typedef std::tuple < transform_position_normal_vertex_shader, transform_position_normal_vertex_shader_constant_buffer,  transform_position_normal_input_layout  > transform_position_normal_vertex_pipeline;

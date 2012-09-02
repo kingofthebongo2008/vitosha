@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <math/math_vector.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <gx/gx_entity.h>
 
@@ -51,7 +51,7 @@ class directional_lights_entity : public gx::entity
 
     directional_lights_entity
     ( 
-        dx11::id3d11buffer_ptr                  quad_data,
+        d3d11::ibuffer_ptr                  quad_data,
 
         gx::light_directional_vertex_pipeline   vertex_pipeline,
         gx::light_directional_pixel_pipeline    pixel_pipeline,
@@ -65,7 +65,7 @@ class directional_lights_entity : public gx::entity
 
     private:
 
-    dx11::id3d11buffer_ptr                  m_quad_data;
+    d3d11::ibuffer_ptr                  m_quad_data;
 
     gx::light_directional_vertex_pipeline   m_vertex_pipeline;
     gx::light_directional_pixel_pipeline    m_pixel_pipeline;
@@ -74,7 +74,7 @@ class directional_lights_entity : public gx::entity
     std::vector<math::float4>        m_light_color;
 };
 
-std::shared_ptr<directional_lights_entity> create_directional_lights_entity(    ID3D11Device* device,  dx11::id3d11buffer_ptr quad_data, const directional_light* begin, const directional_light* end  );
+std::shared_ptr<directional_lights_entity> create_directional_lights_entity(    ID3D11Device* device,  d3d11::ibuffer_ptr quad_data, const directional_light* begin, const directional_light* end  );
 
 
 #endif

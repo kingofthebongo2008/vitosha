@@ -4,7 +4,7 @@
 
 #include <gx/gx_render_context.h>
 
-#include <dx11/dxgi_helpers.h>
+#include <d3d11/dxgi_helpers.h>
 
 #include <math/math_half.h>
 
@@ -24,8 +24,8 @@ namespace gx
                 resources[i] = nullptr;
             }
 
-            dx11::ps_set_shader_resources ( device_context, sizeof(resources) / sizeof(resources[0] ) , resources );
-            dx11::vs_set_shader_resources ( device_context, sizeof(resources) / sizeof(resources[0] ) , resources );
+            d3d11::ps_set_shader_resources ( device_context, sizeof(resources) / sizeof(resources[0] ) , resources );
+            d3d11::vs_set_shader_resources ( device_context, sizeof(resources) / sizeof(resources[0] ) , resources );
 	    }
 
         void reset_constant_buffers(ID3D11DeviceContext* device_context)
@@ -60,7 +60,7 @@ namespace gx
 	    }
     }
 
-    render_context::render_context(dx11::system_context sys_context, uint32_t thread_render_context_count, view_port view_port) : 
+    render_context::render_context(d3d11::system_context sys_context, uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
         , m_depth_buffer( create_depth_resource( sys_context.m_device.get(), 320, 240 ) )
         , m_gbuffer_render_data ( sys_context.m_device.get() ) 
@@ -108,9 +108,9 @@ namespace gx
 
         for (uint32_t i = 0; i < thread_render_context_count; ++i)
         {
-			dx11::id3d11devicecontext_ptr device_context;
+			d3d11::idevicecontext_ptr device_context;
 
-			dx11::throw_if_failed<dx11::create_deferred_context_exception> ( sys_context.m_device->CreateDeferredContext(0, dx11::get_pointer(device_context)));
+			dx::throw_if_failed<d3d11::create_deferred_context_exception> ( sys_context.m_device->CreateDeferredContext(0, dx::get_pointer(device_context)));
 
 			std::unique_ptr<thread_render_context> ptr(new thread_render_context(this, device_context) );
             m_render_contexts.push_back( std::move(ptr) );
@@ -158,7 +158,7 @@ namespace gx
             (*it)->swap();
         }
 		
-		dx11::id3d11devicecontext_ptr device_context = m_render_contexts.front()->get_device_context();
+		d3d11::idevicecontext_ptr device_context = m_render_contexts.front()->get_device_context();
 		reset_state( device_context.get() );
 
         device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -191,8 +191,8 @@ namespace gx
 
 	void render_context::create_back_buffer_render_target()
 	{
-		dx11::id3d11texture2d_ptr	back_buffer = dxgi::get_buffer( m_system_context.m_swap_chain.get() );
-        m_back_buffer = dx11::create_render_target_view( m_system_context.m_device.get(), back_buffer.get() );
+		d3d11::itexture2d_ptr	back_buffer = dxgi::get_buffer( m_system_context.m_swap_chain.get() );
+        m_back_buffer = d3d11::create_render_target_view( m_system_context.m_device.get(), back_buffer.get() );
 	}
 
 	void render_context::create_depth_buffer()
@@ -319,7 +319,7 @@ namespace gx
                          m_light_buffer_render_data.m_depth_srv.get() //depth buffer from the gbuffer pass
         };
 
-        dx11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view);
+        d3d11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view);
     }
 
     void render_context::end_light_buffer(ID3D11DeviceContext* device_context)
@@ -385,8 +385,8 @@ namespace gx
             m_debug_render_data.m_depth_srv.get()
         };
 
-        dx11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view );
-        dx11::ps_set_shader( device_context, m_copy_depth_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view );
+        d3d11::ps_set_shader( device_context, m_copy_depth_pixel_shader );
         draw_screen_space_quad( device_context, this );
         
         reset_render_targets(device_context);
@@ -419,7 +419,7 @@ namespace gx
 
 		device_context->IASetInputLayout(m_depth_render_data.m_input_layout);
 
-        dx11::ps_set_shader(device_context, nullptr);
+        d3d11::ps_set_shader(device_context, nullptr);
 
 		device_context->OMSetRenderTargets(1, nullptr, m_depth_buffer );
 		device_context->OMSetBlendState(m_opaque_state.get(), nullptr, 0xFFFFFFFF);
@@ -463,8 +463,8 @@ namespace gx
 
 		device_context->PSSetSamplers( 0, sizeof(samplers) / sizeof(samplers[0]), &samplers[0] );
 
-        dx11::ps_set_shader(device_context, m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  m_light_buffer_render_data.m_light_buffer );
+        d3d11::ps_set_shader(device_context, m_color_texture_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context,  m_light_buffer_render_data.m_light_buffer );
         draw_screen_space_quad( device_context, this );
     }
 
@@ -553,7 +553,7 @@ namespace gx
 
 		math::convert_f32_f16_stream(reinterpret_cast<const float*> (&v_1[0]), static_cast<uint32_t>(40), &h_1[0] );
 
-		m_screen_space_render_data.m_screen_space_vertex_buffer = dx11::create_immutable_vertex_buffer( m_system_context.m_device.get(), &h_1[0],  6 * sizeof(vertex) );
+		m_screen_space_render_data.m_screen_space_vertex_buffer = d3d11::create_immutable_vertex_buffer( m_system_context.m_device.get(), &h_1[0],  6 * sizeof(vertex) );
 	}
 
 	void render_context::create_default_render_data()

@@ -2,7 +2,7 @@
 
 #include <gx/gx_lambert_shift_invariant_material.h>
 
-#include <dx11/dx11_error.h>
+#include <d3d11/d3d11_error.h>
 
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_material_database.h>
@@ -22,8 +22,8 @@ namespace gx
 		m_pixel_cbuffer.flush(device_context);
 		m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-		dx11::vs_set_shader( device_context, std::get<0>(m_vertex_pipeline) );
-		dx11::ps_set_shader( device_context, m_pixel_shader );
+		d3d11::vs_set_shader( device_context, std::get<0>(m_vertex_pipeline) );
+		d3d11::ps_set_shader( device_context, m_pixel_shader );
 		device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
 
 	}

@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <memory>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <math/math_matrix.h>
 
@@ -21,7 +21,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		dx11::id3d11pixelshader_ptr	m_shader;
+		d3d11::ipixelshader_ptr	m_shader;
 		const void*					m_code;
 		uint32_t					m_code_size;
     };

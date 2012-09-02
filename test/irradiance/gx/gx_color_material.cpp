@@ -2,7 +2,7 @@
 
 #include <gx/gx_color_material.h>
 
-#include <dx11/dx11_error.h>
+#include <d3d11/d3d11_error.h>
 
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_material_database.h>
@@ -20,8 +20,8 @@ namespace gx
 		m_vertex_cbuffer.bind_as_vertex_constant_buffer(device_context);
 		m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-        dx11::vs_set_shader(device_context, m_vertex_shader );
-		dx11::ps_set_shader(device_context, m_pixel_shader );
+        d3d11::vs_set_shader(device_context, m_vertex_shader );
+		d3d11::ps_set_shader(device_context, m_pixel_shader );
 		device_context->IASetInputLayout(m_input_layout);
 	}
 

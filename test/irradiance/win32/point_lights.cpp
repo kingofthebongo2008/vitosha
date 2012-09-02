@@ -4,8 +4,8 @@
 
 #include <iterator>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_helpers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_helpers.h>
 
 #include <math/math_graphics.h>
 
@@ -19,8 +19,8 @@
 point_lights_entity::point_lights_entity
 		( 
 			gx::indexed_draw_call_3	draw_call,
-			dx11::id3d11buffer_ptr	transform_color,
-			dx11::id3d11inputlayout_ptr	input_layout,
+			d3d11::ibuffer_ptr	transform_color,
+			d3d11::iinputlayout_ptr	input_layout,
 			point_lights_entity::shader_info info
 		) : 
 	m_draw_call(draw_call)
@@ -54,7 +54,7 @@ void point_lights_entity::on_create_draw_calls( gx::draw_call_collector_context*
 
 void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_context, math::float4x4 world_matrix)
 {
-	dx11::d3d11_buffer_scope_lock buffer ( device_context, m_transform_color.get() );
+	d3d11::d3d11_buffer_scope_lock buffer ( device_context, m_transform_color.get() );
 	auto	buffer_data = reinterpret_cast< math::float4* > (buffer.m_mapped_resource.pData );
 
 	//transform lights into world space and upload matrices and color
@@ -86,8 +86,8 @@ void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
 
 	device_context->IASetInputLayout(m_input_layout.get());
 
-    dx11::vs_set_shader(device_context, m_debug_vertex_shader );
-    dx11::ps_set_shader(device_context, m_debug_pixel_shader );
+    d3d11::vs_set_shader(device_context, m_debug_vertex_shader );
+    d3d11::ps_set_shader(device_context, m_debug_pixel_shader );
     
 	m_draw_call.draw_instanced( device_context, static_cast<uint32_t> ( m_lights.size() ) );
 }
@@ -95,14 +95,14 @@ void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
 std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* device)
 {
 	//create positions and index buffer
-	std::tuple< dx11::id3d11buffer_ptr,  dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr, uint32_t >	sphere = gxu::create_lat_lon_sphere_2(device, 0.2f, 20 );
+	std::tuple< d3d11::ibuffer_ptr,  d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, uint32_t >	sphere = gxu::create_lat_lon_sphere_2(device, 0.2f, 20 );
 
 	const uint32_t transform_buffer_size  = ( sizeof(math::float4x4) + sizeof(math::float4) )  * point_lights_entity::max_light_count;
 	std::vector<uint8_t> initial_data;
 	initial_data.resize(transform_buffer_size);
 	
 	//create instance stream
-	auto	transform_color = dx11::create_dynamic_vertex_buffer(device, &initial_data[0], transform_buffer_size  );
+	auto	transform_color = d3d11::create_dynamic_vertex_buffer(device, &initial_data[0], transform_buffer_size  );
 
 	//create shaders
 	point_light_sphere_debug_vertex_shader	debug_vertex_shader(device);
@@ -114,7 +114,7 @@ std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* de
 	point_lights_entity::shader_info info(debug_vertex_shader, debug_pixel_shader, cbuffer);
 
 	//create input layout
-	dx11::id3d11inputlayout_ptr	input_layout;
+	d3d11::iinputlayout_ptr	input_layout;
 	D3D11_INPUT_ELEMENT_DESC desc[] = 
 	{
 		{ "position",			0,	DXGI_FORMAT_R16G16B16A16_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -127,7 +127,7 @@ std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* de
 		{ "sphere_color",		0,  DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 	};
 
-	dx11::throw_if_failed<dx11::create_input_layout> (device->CreateInputLayout(&desc[0], sizeof(desc) / sizeof(desc[0]) ,debug_vertex_shader.m_code, debug_vertex_shader.m_code_size, dx11::get_pointer(input_layout)));
+	dx::throw_if_failed<d3d11::create_input_layout> (device->CreateInputLayout(&desc[0], sizeof(desc) / sizeof(desc[0]) ,debug_vertex_shader.m_code, debug_vertex_shader.m_code_size, dx::get_pointer(input_layout)));
 
 	return std::make_shared<point_lights_entity>( 
 		gx::create_indexed_draw_call< 8, 12,  sizeof(math::float4x4) + sizeof(math::float4) > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )

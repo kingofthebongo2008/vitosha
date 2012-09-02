@@ -6,7 +6,7 @@
 #include <math/math_matrix.h>
 #include <math/math_graphics.h>
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 namespace gx
 {

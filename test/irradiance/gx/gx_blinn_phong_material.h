@@ -1,7 +1,7 @@
 #ifndef __GX_BLINN_PHONG_MATERIAL_H__
 #define __GX_BLINN_PHONG_MATERIAL_H__
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <gx/gx_blinn_phong_pixel_shader.h>
 
@@ -16,18 +16,18 @@ namespace gx
 	{
 		blinn_phong_texture_set (
 							ID3D11Device*				device,
-							dx11::id3d11texture2d_ptr	diffuse,
-							dx11::id3d11texture2d_ptr	normal,
-							dx11::id3d11texture2d_ptr	specular
+							d3d11::itexture2d_ptr	diffuse,
+							d3d11::itexture2d_ptr	normal,
+							d3d11::itexture2d_ptr	specular
 					   );
 
-		dx11::id3d11texture2d_ptr			m_diffuse;
-		dx11::id3d11texture2d_ptr			m_normal;
-		dx11::id3d11texture2d_ptr			m_specular;
+		d3d11::itexture2d_ptr			m_diffuse;
+		d3d11::itexture2d_ptr			m_normal;
+		d3d11::itexture2d_ptr			m_specular;
 
-		dx11::id3d11shaderresourceview_ptr	m_diffuse_view;
-		dx11::id3d11shaderresourceview_ptr	m_normal_view;
-		dx11::id3d11shaderresourceview_ptr	m_specular_view;
+		d3d11::ishaderresourceview_ptr	m_diffuse_view;
+		d3d11::ishaderresourceview_ptr	m_normal_view;
+		d3d11::ishaderresourceview_ptr	m_specular_view;
 	};
 
 	struct blinn_phong_shader_set
@@ -70,7 +70,7 @@ namespace gx
 	};
 
 	blinn_phong_material create_blinn_phong_material( ID3D11Device* device,  blinn_phong_texture_set texture_set ) ;
-	blinn_phong_material create_blinn_phong_material( ID3D11Device*	device,  dx11::id3d11texture2d_ptr	diffuse, dx11::id3d11texture2d_ptr	normal, dx11::id3d11texture2d_ptr specular ) ;
+	blinn_phong_material create_blinn_phong_material( ID3D11Device*	device,  d3d11::itexture2d_ptr	diffuse, d3d11::itexture2d_ptr	normal, d3d11::itexture2d_ptr specular ) ;
 }
 
 #endif

@@ -1,19 +1,8 @@
-#ifndef __DX11_ERROR_H__
-#define __DX11_ERROR_H__
+#ifndef __d3d11_ERROR_H__
+#define __d3d11_ERROR_H__
 
-#include <dx11/dx11_exception.h>
-
-namespace dx11
-{
-    template < typename Exception > void throw_if_failed(HRESULT hr)
-    {
-        if (hr != S_OK)
-        {
-            throw Exception();
-        }
-    }
-
-}
+#include <dx/dx_error.h>
+#include <d3d11/d3d11_exception.h>
 
 
 #endif

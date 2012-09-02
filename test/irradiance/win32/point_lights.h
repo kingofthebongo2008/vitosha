@@ -7,7 +7,7 @@
 #include <util/util_memory.h>
 
 #include <math/math_vector.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <fnd/fnd_updater.h>
 
@@ -162,8 +162,8 @@ class point_lights_entity : public gx::entity
 	point_lights_entity
 		( 
 			gx::indexed_draw_call_3	draw_call,
-			dx11::id3d11buffer_ptr	transform_color,
-			dx11::id3d11inputlayout_ptr	input_layout,
+			d3d11::ibuffer_ptr	transform_color,
+			d3d11::iinputlayout_ptr	input_layout,
 			shader_info info
 		);
 
@@ -180,8 +180,8 @@ class point_lights_entity : public gx::entity
 
 	private:
 	gx::indexed_draw_call_3	m_draw_call;		//sphere vertex and index buffer (holds reference to the instance stream inside)
-	dx11::id3d11buffer_ptr	m_transform_color;	//instance stream
-	dx11::id3d11inputlayout_ptr	m_input_layout;
+	d3d11::ibuffer_ptr	m_transform_color;	//instance stream
+	d3d11::iinputlayout_ptr	m_input_layout;
 
 	point_light_sphere_debug_vertex_shader					m_debug_vertex_shader;
 	point_light_sphere_debug_pixel_shader					m_debug_pixel_shader;

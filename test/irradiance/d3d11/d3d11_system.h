@@ -1,17 +1,18 @@
-#ifndef __dx11_SYSTEM_H__
-#define __dx11_SYSTEM_H__
+#ifndef __d3d11_SYSTEM_H__
+#define __d3d11_SYSTEM_H__
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
+#include <dx/dxgi_pointers.h>
 
-namespace dx11
+namespace d3d11
 {
     struct system_context
     {
-        idxgiadapter_ptr			m_adapter;
-        idxgiswapchain_ptr			m_swap_chain;
-        id3d11device_ptr			m_device;
-        id3d11devicecontext_ptr		m_immediate_context;
-        HWND						m_hwnd;
+        dxgi::idxgiadapter_ptr			m_adapter;
+        dxgi::idxgiswapchain_ptr		m_swap_chain;
+        idevice_ptr						m_device;
+        idevicecontext_ptr				m_immediate_context;
+        HWND							m_hwnd;
     };
 
     system_context create_system_context(HWND hwnd);

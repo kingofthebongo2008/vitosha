@@ -1,6 +1,6 @@
 #include "precompiled.h"
 
-#include <dx11/dx11_helpers.h>
+#include <d3d11/d3d11_helpers.h>
 
 #include <gx/gx_debug_draw.h>
 
@@ -11,29 +11,29 @@ namespace gx
 {
     void debug_draw_diffuse_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::float4x4 screen_space_transform )
     {
-		dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_diffuse );
+		d3d11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_diffuse );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_normal_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::float4x4 screen_space_transform )
     {
-        dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_normal );
+        d3d11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_normal );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_specular_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::float4x4 screen_space_transform )
     {
-        dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context ,  render_context->m_gbuffer_render_data.m_specular );
+        d3d11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context ,  render_context->m_gbuffer_render_data.m_specular );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_gloss_gbuffer( ID3D11DeviceContext* device_context, render_context* render_context, math::float4x4 screen_space_transform )
     {
-        dx11::ps_set_shader(device_context, render_context->m_color_texture_channel_3_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_specular );
+        d3d11::ps_set_shader(device_context, render_context->m_color_texture_channel_3_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context,  render_context->m_gbuffer_render_data.m_specular );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
@@ -45,15 +45,15 @@ namespace gx
         cbuffer.flush(device_context);
         cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-        dx11::ps_set_shader(device_context, render_context->m_debug_view_space_depth_pixel_shader );
-        dx11::ps_set_shader_resources( device_context,  render_context->m_debug_render_data.m_depth_buffer_copy );
+        d3d11::ps_set_shader(device_context, render_context->m_debug_view_space_depth_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context,  render_context->m_debug_render_data.m_depth_buffer_copy );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 
     void debug_draw_light_buffer( ID3D11DeviceContext* device_context, render_context* render_context, math::float4x4 screen_space_transform )
     {
-        dx11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
-        dx11::ps_set_shader_resources( device_context ,  render_context->m_light_buffer_render_data.m_light_buffer );
+        d3d11::ps_set_shader(device_context, render_context->m_color_texture_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context ,  render_context->m_light_buffer_render_data.m_light_buffer );
         draw_screen_space_quad(device_context, render_context, screen_space_transform);
     }
 }

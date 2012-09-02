@@ -77,21 +77,6 @@
     <ClInclude Include="win32/resource.h" />
     <ClInclude Include="win32/targetver.h" />
     <ClInclude Include="win32/window.h" />
-    <ClInclude Include="dx11\dx11_system.h">
-      <Filter>dx11</Filter>
-    </ClInclude>
-    <ClInclude Include="dx11\dx11_error.h">
-      <Filter>dx11</Filter>
-    </ClInclude>
-    <ClInclude Include="dx11\dx11_exception.h">
-      <Filter>dx11</Filter>
-    </ClInclude>
-    <ClInclude Include="dx11\dx11_helpers.h">
-      <Filter>dx11</Filter>
-    </ClInclude>
-    <ClInclude Include="dx11\dx11_pointers.h">
-      <Filter>dx11</Filter>
-    </ClInclude>
     <ClInclude Include="gx\gx_blinn_phong_material.h">
       <Filter>gx</Filter>
     </ClInclude>
@@ -308,9 +293,6 @@
     <ClInclude Include="sys\sys_spsc_queue.h">
       <Filter>sys</Filter>
     </ClInclude>
-    <ClInclude Include="dx11\dxgi_helpers.h">
-      <Filter>dx11</Filter>
-    </ClInclude>
     <ClInclude Include="gx\gx_copy_depth_pixel_shader.h">
       <Filter>gx</Filter>
     </ClInclude>
@@ -341,16 +323,52 @@
     <ClInclude Include="io\io_std_console_notifier.h">
       <Filter>io</Filter>
     </ClInclude>
+    <ClInclude Include="d2d\d2d_error.h">
+      <Filter>d2d</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d\d2d_exception.h">
+      <Filter>d2d</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d\d2d_pointers.h">
+      <Filter>d2d</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d\dwrite_pointers.h">
+      <Filter>d2d</Filter>
+    </ClInclude>
+    <ClInclude Include="dx\dx_error.h">
+      <Filter>dx</Filter>
+    </ClInclude>
+    <ClInclude Include="dx\dx_pointers.h">
+      <Filter>dx</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d\d2d_helpers.h">
+      <Filter>d2d</Filter>
+    </ClInclude>
+    <ClInclude Include="dx\dxgi_pointers.h">
+      <Filter>dx</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11\d3d11_error.h">
+      <Filter>d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11\d3d11_exception.h">
+      <Filter>d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11\d3d11_helpers.h">
+      <Filter>d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11\d3d11_pointers.h">
+      <Filter>d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11\d3d11_system.h">
+      <Filter>d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11\dxgi_helpers.h">
+      <Filter>d3d11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
     <ClCompile Include="win32\window.cpp" />
-    <ClCompile Include="dx11\dx11_helpers.cpp">
-      <Filter>dx11</Filter>
-    </ClCompile>
-    <ClCompile Include="dx11\dx11_system.cpp">
-      <Filter>dx11</Filter>
-    </ClCompile>
     <ClCompile Include="gx\gx_blinn_phong_material.cpp">
       <Filter>gx</Filter>
     </ClCompile>
@@ -531,9 +549,6 @@
     <ClCompile Include="irradiance.cpp">
       <Filter>irradiance</Filter>
     </ClCompile>
-    <ClCompile Include="dx11\dxgi_helpers.cpp">
-      <Filter>dx11</Filter>
-    </ClCompile>
     <ClCompile Include="gx\gx_copy_depth_pixel_shader.cpp">
       <Filter>gx</Filter>
     </ClCompile>
@@ -558,14 +573,20 @@
     <ClCompile Include="io\io_std_console_notifier.cpp">
       <Filter>io</Filter>
     </ClCompile>
+    <ClCompile Include="d3d11\d3d11_helpers.cpp">
+      <Filter>d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d11\d3d11_system.cpp">
+      <Filter>d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d11\dxgi_helpers.cpp">
+      <Filter>d3d11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win32/irradiance.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="dx11">
-      <UniqueIdentifier>{9227faa3-9975-4799-a4b5-9fdfb17cf952}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gx">
       <UniqueIdentifier>{ac70448c-ee20-4c5d-8436-ecdf1aa71440}</UniqueIdentifier>
     </Filter>
@@ -589,6 +610,15 @@
     </Filter>
     <Filter Include="sys">
       <UniqueIdentifier>{60ff5101-81c8-48a3-a4a7-867c33407c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="d2d">
+      <UniqueIdentifier>{0fee0c9d-b5ed-40bc-a2f4-4758d570c1af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dx">
+      <UniqueIdentifier>{fea9b550-2f18-4683-a699-487b97d75d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="d3d11">
+      <UniqueIdentifier>{9227faa3-9975-4799-a4b5-9fdfb17cf952}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <memory>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <math/math_matrix.h>
 
@@ -46,12 +46,12 @@ namespace gx
 
 		void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
 		{
-			context->VSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
+			context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
 		}
 
 		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context, uint32_t slot)
 		{
-			context->PSSetConstantBuffers(slot, 1, dx11::get_pointer(m_buffer));
+			context->PSSetConstantBuffers(slot, 1, dx::get_pointer(m_buffer));
 		}
 
 		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context)
@@ -77,7 +77,7 @@ namespace gx
 		public:
 
 		math::float4		m_color;
-		dx11::id3d11buffer_ptr	m_buffer;
+		d3d11::ibuffer_ptr	m_buffer;
 	};
 
 	class light_pixel_shader
@@ -91,7 +91,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		dx11::id3d11pixelshader_ptr							 m_shader;
+		d3d11::ipixelshader_ptr							 m_shader;
 		const void*											 m_code;
 		uint32_t										 m_code_size;
     };

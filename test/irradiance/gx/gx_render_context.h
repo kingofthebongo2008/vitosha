@@ -6,9 +6,9 @@
 #include <cstdint>
 #include <boost/noncopyable.hpp>
 
-#include <dx11/dx11_pointers.h>
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_system.h>
+#include <d3d11/d3d11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_system.h>
 
 #include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
 
@@ -52,7 +52,7 @@ namespace gx
         target_render_resource  m_diffuse;
         target_render_resource  m_specular;
 
-        dx11::id3d11blendstate_ptr  m_opaque;
+        d3d11::iblendstate_ptr  m_opaque;
 
 	};
 
@@ -65,11 +65,11 @@ namespace gx
 
         }
 
-        dx11::id3d11blendstate_ptr              m_additive_blend;
+        d3d11::iblendstate_ptr              m_additive_blend;
         target_render_resource                  m_light_buffer;
 
-        dx11::id3d11depthstencilview_ptr		m_read_depth_dsv;
-        dx11::id3d11shaderresourceview_ptr		m_depth_srv;
+        d3d11::idepthstencilview_ptr		m_read_depth_dsv;
+        d3d11::ishaderresourceview_ptr		m_depth_srv;
     };
 
 	struct depth_render_data
@@ -96,10 +96,10 @@ namespace gx
 
 		}
 
-		dx11::id3d11inputlayout_ptr								m_screen_space_input_layout;
+		d3d11::iinputlayout_ptr								m_screen_space_input_layout;
 		transform_position_uv_vertex_shader						m_screen_space_vertex_shader;
 		transform_position_uv_vertex_shader_constant_buffer		m_screen_space_constant_buffer;
-        dx11::id3d11buffer_ptr	                                m_screen_space_vertex_buffer;
+        d3d11::ibuffer_ptr	                                m_screen_space_vertex_buffer;
 	};
 
     struct debug_render_data
@@ -118,8 +118,8 @@ namespace gx
         //copy of the depth buffer
         target_render_resource                  m_depth_buffer_copy;
 
-        dx11::id3d11depthstencilview_ptr		m_read_depth_dsv;
-        dx11::id3d11shaderresourceview_ptr		m_depth_srv;
+        d3d11::idepthstencilview_ptr		m_read_depth_dsv;
+        d3d11::ishaderresourceview_ptr		m_depth_srv;
 	};
 
     class thread_render_context;
@@ -131,7 +131,7 @@ namespace gx
         public:
 		typedef  std::vector< std::unique_ptr<thread_render_context> > thread_render_context_container;
 
-		render_context(dx11::system_context sys_context, uint32_t render_context_count, view_port view_port);
+		render_context(d3d11::system_context sys_context, uint32_t render_context_count, view_port view_port);
 		~render_context();
 
         void begin_frame();
@@ -241,23 +241,23 @@ namespace gx
 
 		void select_view_port(ID3D11DeviceContext* device_context);
 
-        dx11::system_context									m_system_context;
+        d3d11::system_context									m_system_context;
         thread_render_context_container							m_render_contexts;
 
         public:
 
-		dx11::id3d11rendertargetview_ptr						m_back_buffer;
+		d3d11::id3d11rendertargetview_ptr						m_back_buffer;
         depth_resource                                          m_depth_buffer;
-        dx11::id3d11depthstencilstate_ptr                       m_depth_enable_state;
-        dx11::id3d11depthstencilstate_ptr                       m_depth_disable_state;
+        d3d11::idepthstencilstate_ptr                       m_depth_enable_state;
+        d3d11::idepthstencilstate_ptr                       m_depth_disable_state;
 
-        dx11::id3d11blendstate_ptr                              m_opaque_state;
-        dx11::id3d11blendstate_ptr                              m_additive_state;
+        d3d11::iblendstate_ptr                              m_opaque_state;
+        d3d11::iblendstate_ptr                              m_additive_state;
 
-        dx11::id3d11samplerstate_ptr                            m_default_sampler_state;
-        dx11::id3d11samplerstate_ptr                            m_point_sampler_state;
+        d3d11::isamplerstate_ptr                            m_default_sampler_state;
+        d3d11::isamplerstate_ptr                            m_point_sampler_state;
 
-        dx11::id3d11rasterizerstate_ptr                         m_cull_back_raster_state;
+        d3d11::irasterizerstate_ptr                         m_cull_back_raster_state;
 
 		gbuffer_render_data										m_gbuffer_render_data;
 		depth_render_data										m_depth_render_data;

@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <iterator>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_helpers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_helpers.h>
 
 #include <math/math_graphics.h>
 
@@ -17,7 +17,7 @@
 
 directional_lights_entity::directional_lights_entity
     ( 
-        dx11::id3d11buffer_ptr                  quad_data,
+        d3d11::ibuffer_ptr                  quad_data,
         gx::light_directional_vertex_pipeline   vertex_pipeline,
         gx::light_directional_pixel_pipeline    pixel_pipeline,
         const directional_light*                begin,
@@ -59,8 +59,8 @@ void directional_lights_entity::on_execute_draw_calls( gx::draw_call_context* co
     std::get<1>(m_pixel_pipeline).flush(device_context);
     std::get<1>(m_pixel_pipeline).bind_as_pixel_constant_buffer(device_context);
 
-    dx11::vs_set_shader(device_context, std::get<0>(m_vertex_pipeline) );
-	dx11::ps_set_shader(device_context, std::get<0>(m_pixel_pipeline) );
+    d3d11::vs_set_shader(device_context, std::get<0>(m_vertex_pipeline) );
+	d3d11::ps_set_shader(device_context, std::get<0>(m_pixel_pipeline) );
 	device_context->IASetInputLayout( std::get<1>(m_vertex_pipeline) );
 
     uint32_t stride = 12;
@@ -74,7 +74,7 @@ void directional_lights_entity::on_execute_draw_calls( gx::draw_call_context* co
 
 }
 
-std::shared_ptr<directional_lights_entity> create_directional_lights_entity(    ID3D11Device* device,  dx11::id3d11buffer_ptr quad_data, const directional_light* begin, const directional_light* end  )
+std::shared_ptr<directional_lights_entity> create_directional_lights_entity(    ID3D11Device* device,  d3d11::ibuffer_ptr quad_data, const directional_light* begin, const directional_light* end  )
 {
     return std::make_shared<directional_lights_entity>( quad_data, gx::create_light_directional_vertex_pipeline(device), 
                                                         gx::create_light_directional_pixel_pipeline(device), begin, end );

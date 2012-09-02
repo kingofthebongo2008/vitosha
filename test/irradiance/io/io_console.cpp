@@ -158,5 +158,10 @@ namespace console
 		thread_info* info = g_thread_info;
 		info->m_pointer->register_message(m);
 	}
+
+	void	writeln(const wchar_t* string)
+	{
+
+	}
 }
 }

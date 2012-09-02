@@ -1,103 +1,103 @@
-#ifndef __dx11_HELPERS_H__
-#define __dx11_HELPERS_H__
+#ifndef __d3d11_HELPERS_H__
+#define __d3d11_HELPERS_H__
 
 #include <cstdint>
 
-#include <dx11/dx11_pointers.h>
-#include <dx11/dx11_error.h>
+#include <d3d11/d3d11_pointers.h>
+#include <d3d11/d3d11_error.h>
 
-namespace dx11
+namespace d3d11
 {
-    inline id3d11blendstate_ptr   create_blend_state(ID3D11Device* device,   const D3D11_BLEND_DESC* description )
+    inline iblendstate_ptr   create_blend_state(ID3D11Device* device,   const D3D11_BLEND_DESC* description )
     {
-        dx11::id3d11blendstate_ptr result;
-        dx11::throw_if_failed< dx11::create_blend_state_exception> ( device->CreateBlendState(description, dx11::get_pointer(result) ) );
+        d3d11::iblendstate_ptr result;
+        dx::throw_if_failed< d3d11::create_blend_state_exception> ( device->CreateBlendState(description, dx::get_pointer(result) ) );
         return result;
     }
     
-    inline id3d11depthstencilstate_ptr    create_depth_stencil_state(ID3D11Device* device,  const D3D11_DEPTH_STENCIL_DESC* description )
+    inline idepthstencilstate_ptr    create_depth_stencil_state(ID3D11Device* device,  const D3D11_DEPTH_STENCIL_DESC* description )
     {
-        id3d11depthstencilstate_ptr result;
-        dx11::throw_if_failed< dx11::create_depth_stencil_state_exception> ( device->CreateDepthStencilState( description, dx11::get_pointer(result) ) );
+        idepthstencilstate_ptr result;
+        dx::throw_if_failed< d3d11::create_depth_stencil_state_exception> ( device->CreateDepthStencilState( description, dx::get_pointer(result) ) );
         return result;
     }
 
-    inline id3d11depthstencilview_ptr    create_depth_stencil_view(ID3D11Device* device, ID3D11Resource* resource,  const D3D11_DEPTH_STENCIL_VIEW_DESC* description )
+    inline idepthstencilview_ptr    create_depth_stencil_view(ID3D11Device* device, ID3D11Resource* resource,  const D3D11_DEPTH_STENCIL_VIEW_DESC* description )
     {
-        id3d11depthstencilview_ptr result;
-        dx11::throw_if_failed< dx11::create_depth_stencil_view_exception> ( device->CreateDepthStencilView(resource, description, dx11::get_pointer(result) ) );
+        idepthstencilview_ptr result;
+        dx::throw_if_failed< d3d11::create_depth_stencil_view_exception> ( device->CreateDepthStencilView(resource, description, dx::get_pointer(result) ) );
         return result;
     }
 
-    inline id3d11rasterizerstate_ptr      create_raster_state(ID3D11Device* device, const D3D11_RASTERIZER_DESC* description )
+    inline irasterizerstate_ptr      create_raster_state(ID3D11Device* device, const D3D11_RASTERIZER_DESC* description )
     {
-        id3d11rasterizerstate_ptr result;
-        dx11::throw_if_failed< dx11::create_rasterizer_state_exception> (device->CreateRasterizerState(description, dx11::get_pointer(result) ) );
+        irasterizerstate_ptr result;
+        dx::throw_if_failed< d3d11::create_rasterizer_state_exception> (device->CreateRasterizerState(description, dx::get_pointer(result) ) );
         return result;
     }
     
     inline id3d11rendertargetview_ptr    create_render_target_view(ID3D11Device* device, ID3D11Resource* resource, const D3D11_RENDER_TARGET_VIEW_DESC* description )
     {
         id3d11rendertargetview_ptr result;
-        dx11::throw_if_failed< dx11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, description, dx11::get_pointer(result) ) );
+        dx::throw_if_failed< d3d11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, description, dx::get_pointer(result) ) );
         return result;
     }
 
     inline id3d11rendertargetview_ptr    create_render_target_view(ID3D11Device* device, ID3D11Resource* resource )
     {
         id3d11rendertargetview_ptr result;
-        dx11::throw_if_failed< dx11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, nullptr, dx11::get_pointer(result) ) );
+        dx::throw_if_failed< d3d11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, nullptr, dx::get_pointer(result) ) );
         return result;
     }
 
-    inline id3d11samplerstate_ptr        create_sampler_state(ID3D11Device* device, const D3D11_SAMPLER_DESC* description )
+    inline isamplerstate_ptr        create_sampler_state(ID3D11Device* device, const D3D11_SAMPLER_DESC* description )
     {
-        id3d11samplerstate_ptr result;
-        dx11::throw_if_failed< dx11::create_sampler_state_exception> (device->CreateSamplerState(description, dx11::get_pointer(result) ) );
+        isamplerstate_ptr result;
+        dx::throw_if_failed< d3d11::create_sampler_state_exception> (device->CreateSamplerState(description, dx::get_pointer(result) ) );
         return result;
     }
 
-    inline id3d11shaderresourceview_ptr        create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource , const D3D11_SHADER_RESOURCE_VIEW_DESC* description)
+    inline ishaderresourceview_ptr        create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource , const D3D11_SHADER_RESOURCE_VIEW_DESC* description)
     {
-        id3d11shaderresourceview_ptr result;
-        dx11::throw_if_failed< dx11::create_shader_resource_view_exception> ( device->CreateShaderResourceView( resource, description, dx11::get_pointer(result) )  );
+        ishaderresourceview_ptr result;
+        dx::throw_if_failed< d3d11::create_shader_resource_view_exception> ( device->CreateShaderResourceView( resource, description, dx::get_pointer(result) )  );
         return result;
     }
 
-    inline id3d11shaderresourceview_ptr create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource)
+    inline ishaderresourceview_ptr create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource)
     {
         return create_shader_resource_view(device, resource, nullptr);
     }
 
-    inline id3d11texture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description, const D3D11_SUBRESOURCE_DATA* initial_data )
+    inline itexture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description, const D3D11_SUBRESOURCE_DATA* initial_data )
     {
-        id3d11texture2d_ptr result;
-        dx11::throw_if_failed< dx11::create_texture2d_exception> (device->CreateTexture2D(description, initial_data, dx11::get_pointer(result) ) );
+        itexture2d_ptr result;
+        dx::throw_if_failed< d3d11::create_texture2d_exception> (device->CreateTexture2D(description, initial_data, dx::get_pointer(result) ) );
         return result;
     }
 
-    inline id3d11texture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description)
+    inline itexture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description)
     {
         return create_texture_2d(device, description, nullptr);
     }
 
-    id3d11buffer_ptr              create_constant_buffer(ID3D11Device* device, size_t size);
-	id3d11buffer_ptr              create_default_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
-	id3d11buffer_ptr              create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+    ibuffer_ptr              create_constant_buffer(ID3D11Device* device, size_t size);
+	ibuffer_ptr              create_default_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	ibuffer_ptr              create_default_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
-    id3d11buffer_ptr              create_stream_out_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+    ibuffer_ptr              create_stream_out_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
-	id3d11buffer_ptr              create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
-	id3d11buffer_ptr              create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	ibuffer_ptr              create_dynamic_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	ibuffer_ptr              create_dynamic_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
-	id3d11buffer_ptr              create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
-	id3d11buffer_ptr              create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	ibuffer_ptr              create_immutable_index_buffer(ID3D11Device* device, const void* initial_data, size_t size );
+	ibuffer_ptr              create_immutable_vertex_buffer(ID3D11Device* device, const void* initial_data, size_t size );
 
 	struct d3d11_buffer_scope_lock
 	{
 		d3d11_buffer_scope_lock( ID3D11DeviceContext* context, ID3D11Buffer* buffer) : m_context(context), m_buffer(buffer)
 		{
-			dx11::throw_if_failed<dx11::d3d11_exception>(context->Map( buffer, 0,  D3D11_MAP_WRITE_DISCARD, 0, &m_mapped_resource) ) ;
+			dx::throw_if_failed<d3d11::d3d11_exception>(context->Map( buffer, 0,  D3D11_MAP_WRITE_DISCARD, 0, &m_mapped_resource) ) ;
 		}
 
 		~d3d11_buffer_scope_lock()

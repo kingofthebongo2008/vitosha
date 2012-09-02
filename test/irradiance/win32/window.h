@@ -6,8 +6,10 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "dx11/dx11_error.h"
-#include "dx11/dx11_pointers.h"
+#include "dx/dxgi_pointers.h"
+
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include "fnd/fnd_world.h"
 
@@ -57,7 +59,7 @@ namespace wnd
 	{
 		public:
 
-		window(application& application, dx11::idxgiswapchain_ptr swap_chain, gx::render_context* render_context );
+		window(application& application, dxgi::idxgiswapchain_ptr swap_chain, gx::render_context* render_context );
 
 		inline void set_scene( std::shared_ptr<gx::scene> scene )
 		{
@@ -96,7 +98,7 @@ namespace wnd
 		~window();
 
 		application&				m_application;
-		dx11::idxgiswapchain_ptr    m_swap_chain;
+		dxgi::idxgiswapchain_ptr    m_swap_chain;
 		gx::render_context*			m_render_context;
 		std::shared_ptr<gx::scene>	m_scene;
 		bool						m_occluded_by_another_window;

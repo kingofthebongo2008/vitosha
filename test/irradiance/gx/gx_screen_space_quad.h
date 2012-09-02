@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include <math/math_matrix.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <gx/gx_indexed_draw_call.h>
 

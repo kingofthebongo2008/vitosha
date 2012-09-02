@@ -1,6 +1,6 @@
 #include "precompiled.h"
 
-#include <dx11/dxgi_helpers.h>
+#include <d3d11/dxgi_helpers.h>
 
 namespace dxgi
 {

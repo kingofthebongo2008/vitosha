@@ -161,6 +161,8 @@ namespace io
 		void	unregister_notifier( std::shared_ptr<notifier> n) ;
 
 		void	write(const wchar_t* string);
+		void	writeln(const wchar_t* string);
+
 
 		class register_thread_info_helper : private boost::noncopyable
 		{

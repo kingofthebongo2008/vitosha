@@ -5,8 +5,8 @@
 #include <iterator>
 #include <memory>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 #include <math/math_matrix.h>
 
@@ -52,7 +52,7 @@ namespace gx
 
 		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context)
 		{
-			context->PSSetConstantBuffers(0, 1, dx11::get_pointer(m_buffer));
+			context->PSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
 		}
 
         operator ID3D11Buffer*()
@@ -72,7 +72,7 @@ namespace gx
 
 		private:
 
-		dx11::id3d11buffer_ptr	m_buffer;
+		d3d11::ibuffer_ptr	m_buffer;
 		math::float4x4	m_inverse_projection;
         math::float4x4	m_view;
 
@@ -92,7 +92,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		dx11::id3d11pixelshader_ptr							 m_shader;
+		d3d11::ipixelshader_ptr							 m_shader;
 		const void*											 m_code;
 		uint32_t										 m_code_size;
     };

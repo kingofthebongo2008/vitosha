@@ -2,8 +2,8 @@
 
 #include "floor.h"
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_helpers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_helpers.h>
 
 #include <math/math_half.h>
 #include <math/math_graphics.h>
@@ -36,9 +36,9 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 	m_pixel_cbuffer.flush(device_context);
     m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
-    dx11::vs_set_shader(device_context, std::get<0>(m_vertex_pipeline) );
-    dx11::gs_set_shader(device_context, m_geometry_shader );
-	dx11::ps_set_shader(device_context, m_pixel_shader );
+    d3d11::vs_set_shader(device_context, std::get<0>(m_vertex_pipeline) );
+    d3d11::gs_set_shader(device_context, m_geometry_shader );
+	d3d11::ps_set_shader(device_context, m_pixel_shader );
 
     device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
     device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -51,15 +51,15 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
    
     device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    dx11::gs_set_shader(device_context, nullptr );
+    d3d11::gs_set_shader(device_context, nullptr );
 }
 
 std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::render_context* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
 {
     math::half half[8] = {};
 
-    dx11::id3d11buffer_ptr point = dx11::create_immutable_vertex_buffer(device, &half[0], sizeof(half) );
-    dx11::id3d11buffer_ptr out  = dx11::create_stream_out_vertex_buffer(device, &half[0], 6 * sizeof(half) );
+    d3d11::ibuffer_ptr point = d3d11::create_immutable_vertex_buffer(device, &half[0], sizeof(half) );
+    d3d11::ibuffer_ptr out  = d3d11::create_stream_out_vertex_buffer(device, &half[0], 6 * sizeof(half) );
 
 
     return std::make_shared<floor_entity>
@@ -73,7 +73,7 @@ std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::ren
                                 gx::grid_geometry_shader(device) ,
 								context->m_blinn_phong_shift_invariant_pixel_shader,
 								context->m_blinn_phong_shift_invariant_pixel_cbuffer,
-                                std::make_tuple< dx11::id3d11buffer_ptr, dx11::id3d11buffer_ptr > ( std::move(point),  std::move(out) )
+                                std::make_tuple< d3d11::ibuffer_ptr, d3d11::ibuffer_ptr > ( std::move(point),  std::move(out) )
                                 );
 }
 

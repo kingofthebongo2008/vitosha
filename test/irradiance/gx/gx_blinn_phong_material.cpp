@@ -2,7 +2,7 @@
 
 #include <gx/gx_blinn_phong_material.h>
 
-#include <dx11/dx11_error.h>
+#include <d3d11/d3d11_error.h>
 
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_material_database.h>
@@ -11,14 +11,14 @@ namespace gx
 {
 	blinn_phong_texture_set::blinn_phong_texture_set (
 							ID3D11Device*				device,
-							dx11::id3d11texture2d_ptr	diffuse,
-							dx11::id3d11texture2d_ptr	normal,
-							dx11::id3d11texture2d_ptr	specular
+							d3d11::itexture2d_ptr	diffuse,
+							d3d11::itexture2d_ptr	normal,
+							d3d11::itexture2d_ptr	specular
 					   )
 	{
-		dx11::throw_if_failed<dx11::create_resource_view_exception>(device->CreateShaderResourceView( diffuse.get(),  NULL, dx11::get_pointer(m_diffuse_view) ) );
-		dx11::throw_if_failed<dx11::create_resource_view_exception>(device->CreateShaderResourceView( normal.get(),   NULL, dx11::get_pointer(m_normal_view) ) );
-		dx11::throw_if_failed<dx11::create_resource_view_exception>(device->CreateShaderResourceView( specular.get(), NULL, dx11::get_pointer(m_specular_view) ));
+		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( diffuse.get(),  NULL, dx::get_pointer(m_diffuse_view) ) );
+		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( normal.get(),   NULL, dx::get_pointer(m_normal_view) ) );
+		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( specular.get(), NULL, dx::get_pointer(m_specular_view) ));
 	}
 
 
@@ -32,7 +32,7 @@ namespace gx
 													m_texture_set.m_specular_view.get()
 												 };
 
-        dx11::ps_set_shader_resources ( draw_call_context->m_device_context, sizeof(resources) / sizeof( resources[0]) , resources );
+        d3d11::ps_set_shader_resources ( draw_call_context->m_device_context, sizeof(resources) / sizeof( resources[0]) , resources );
 	}
 
 	blinn_phong_material::blinn_phong_material ( blinn_phong_texture_set texture_set, blinn_phong_shader_set shader_set ) : m_texture_set(texture_set), m_shader_set(shader_set)
@@ -56,7 +56,7 @@ namespace gx
             );
 	}
 
-	blinn_phong_material create_blinn_phong_material( ID3D11Device*	device,  dx11::id3d11texture2d_ptr	diffuse, dx11::id3d11texture2d_ptr	normal, dx11::id3d11texture2d_ptr specular ) 
+	blinn_phong_material create_blinn_phong_material( ID3D11Device*	device,  d3d11::itexture2d_ptr	diffuse, d3d11::itexture2d_ptr	normal, d3d11::itexture2d_ptr specular ) 
 	{
 		return create_blinn_phong_material(device, blinn_phong_texture_set( device, diffuse, normal, specular ) );
 	}

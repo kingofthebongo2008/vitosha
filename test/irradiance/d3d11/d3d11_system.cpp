@@ -1,14 +1,14 @@
 #include "precompiled.h"
 
-#include <dx11/dx11_system.h>
+#include <d3d11/d3d11_system.h>
 
 #include <DXGI.h>
 
-#include <dx11/dx11_error.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_pointers.h>
 
 
-namespace dx11
+namespace d3d11
 {
     namespace
     {
@@ -40,15 +40,15 @@ namespace dx11
         auto level					= D3D_FEATURE_LEVEL_11_0;
         auto desc					= create_default_swap_chain_desc(hwnd);
 
-        idxgiadapter_ptr			adapter;
-        idxgiswapchain_ptr			swap_chain;
+        dxgi::idxgiadapter_ptr			adapter;
+        dxgi::idxgiswapchain_ptr		swap_chain;
 
-        id3d11device_ptr			device;
-        id3d11devicecontext_ptr		context;
+        idevice_ptr						device;
+        idevicecontext_ptr				context;
 
-        auto hr  = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, flags, &level , 1, D3D11_SDK_VERSION, &desc, get_pointer(swap_chain), get_pointer(device), 0, get_pointer(context) );
+        auto hr  = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, flags, &level , 1, D3D11_SDK_VERSION, &desc, dx::get_pointer(swap_chain), dx::get_pointer(device), 0, dx::get_pointer(context) );
 
-        throw_if_failed<create_device_exception>(hr);
+        dx::throw_if_failed<create_device_exception>(hr);
 
         system_context result = {adapter, swap_chain, device, context, hwnd};
         return result;
@@ -56,14 +56,14 @@ namespace dx11
 
     system_context create_system_context(HWND hwnd, system_context context)
     {
-        idxgifactory1_ptr factory;
+        dxgi::idxgifactory1_ptr factory;
 
-        throw_if_failed<create_dxgi_factory_exception>( CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) get_pointer(factory)  ) );
+        dx::throw_if_failed<create_dxgi_factory_exception>( CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) dx::get_pointer(factory)  ) );
 
         DXGI_SWAP_CHAIN_DESC desc = create_default_swap_chain_desc(hwnd);
       
-        idxgiswapchain_ptr		swap_chain;
-        throw_if_failed<create_swap_chain_exception>( factory->CreateSwapChain(context.m_device.get(), &desc,  get_pointer(swap_chain) ) ); 
+        dxgi::idxgiswapchain_ptr		swap_chain;
+        dx::throw_if_failed<create_swap_chain_exception>( factory->CreateSwapChain(context.m_device.get(), &desc,  dx::get_pointer(swap_chain) ) ); 
         
         system_context result = {context.m_adapter, swap_chain, context.m_device,  context.m_immediate_context, hwnd};
 

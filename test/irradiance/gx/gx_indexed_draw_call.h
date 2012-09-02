@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include <math/math_matrix.h>
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 namespace gx
 {
@@ -22,7 +22,7 @@ namespace gx
 			uint32_t                m_start_instance_location;
         };
 
-        indexed_draw_call( index_info info, dx11::id3d11buffer_ptr vertex_buffer[vertex_buffer_count], dx11::id3d11buffer_ptr index_buffer ) : m_index_info(info), m_index_buffer(index_buffer)
+        indexed_draw_call( index_info info, d3d11::ibuffer_ptr vertex_buffer[vertex_buffer_count], d3d11::ibuffer_ptr index_buffer ) : m_index_info(info), m_index_buffer(index_buffer)
 		{
 			for (auto i = 0; i < vertex_buffer_count; ++i)
 			{
@@ -68,43 +68,43 @@ namespace gx
 		indexed_draw_call();
 
         index_info                m_index_info;
-        dx11::id3d11buffer_ptr    m_vertex_buffer[vertex_buffer_count];
-        dx11::id3d11buffer_ptr    m_index_buffer;
+        d3d11::ibuffer_ptr    m_vertex_buffer[vertex_buffer_count];
+        d3d11::ibuffer_ptr    m_index_buffer;
     };
 
 	typedef indexed_draw_call<1> indexed_draw_call_1;
 	typedef indexed_draw_call<2> indexed_draw_call_2;
 	typedef indexed_draw_call<3> indexed_draw_call_3;
 
-	template < uint32_t vertex_size > inline indexed_draw_call_1 create_indexed_draw_call(uint32_t index_count, dx11::id3d11buffer_ptr vertex_buffer, dx11::id3d11buffer_ptr index_buffer)
+	template < uint32_t vertex_size > inline indexed_draw_call_1 create_indexed_draw_call(uint32_t index_count, d3d11::ibuffer_ptr vertex_buffer, d3d11::ibuffer_ptr index_buffer)
 	{
 		indexed_draw_call_1::index_info info = {};
 		info.m_index_count = index_count;
 		info.m_vertex_size[0] = vertex_size;
-		dx11::id3d11buffer_ptr vertex_buffer_s[] = vertex_buffer;
+		d3d11::ibuffer_ptr vertex_buffer_s[] = vertex_buffer;
 
 		return indexed_draw_call_1(info, vertex_buffer_s, index_buffer);
 	}
 
-	template < uint32_t vertex_size0, uint32_t vertex_size1 >inline indexed_draw_call_2 create_indexed_draw_call(uint32_t index_count, dx11::id3d11buffer_ptr vertex_buffer0, dx11::id3d11buffer_ptr vertex_buffer1, dx11::id3d11buffer_ptr index_buffer)
+	template < uint32_t vertex_size0, uint32_t vertex_size1 >inline indexed_draw_call_2 create_indexed_draw_call(uint32_t index_count, d3d11::ibuffer_ptr vertex_buffer0, d3d11::ibuffer_ptr vertex_buffer1, d3d11::ibuffer_ptr index_buffer)
 	{
 		indexed_draw_call_2::index_info info = {};
 		info.m_index_count = index_count;
 		info.m_vertex_size[0] = vertex_size0;
 		info.m_vertex_size[1] = vertex_size1;
-		dx11::id3d11buffer_ptr vertex_buffer_s[] = { vertex_buffer0, vertex_buffer1 } ;
+		d3d11::ibuffer_ptr vertex_buffer_s[] = { vertex_buffer0, vertex_buffer1 } ;
 		return indexed_draw_call_2(info, vertex_buffer_s, index_buffer);
 
 	}
 
-	template < uint32_t vertex_size0, uint32_t vertex_size1, uint32_t vertex_size2 >inline indexed_draw_call_3 create_indexed_draw_call(uint32_t index_count, dx11::id3d11buffer_ptr vertex_buffer0, dx11::id3d11buffer_ptr vertex_buffer1, dx11::id3d11buffer_ptr vertex_buffer2, dx11::id3d11buffer_ptr index_buffer)
+	template < uint32_t vertex_size0, uint32_t vertex_size1, uint32_t vertex_size2 >inline indexed_draw_call_3 create_indexed_draw_call(uint32_t index_count, d3d11::ibuffer_ptr vertex_buffer0, d3d11::ibuffer_ptr vertex_buffer1, d3d11::ibuffer_ptr vertex_buffer2, d3d11::ibuffer_ptr index_buffer)
 	{
 		indexed_draw_call_3::index_info info = {};
 		info.m_index_count = index_count;
 		info.m_vertex_size[0] = vertex_size0;
 		info.m_vertex_size[1] = vertex_size1;
 		info.m_vertex_size[2] = vertex_size2;
-		dx11::id3d11buffer_ptr vertex_buffer_s[] = { vertex_buffer0, vertex_buffer1, vertex_buffer2 } ;
+		d3d11::ibuffer_ptr vertex_buffer_s[] = { vertex_buffer0, vertex_buffer1, vertex_buffer2 } ;
 		return indexed_draw_call_3(info, vertex_buffer_s, index_buffer);
 	}
 

@@ -6,7 +6,7 @@
 
 #include <sys/sys_base.h>
 
-#include <dx11/dx11_system.h>
+#include <d3d11/d3d11_system.h>
 #include <fnd/fnd_universe.h>
 
 #include <gx/gx_initializer.h>
@@ -25,6 +25,8 @@
 #include <iostream>
 #include <io/io_console.h>
 #include <io/io_std_console_notifier.h>
+
+#include <d2d/d2d_helpers.h>
 
 #define MAX_LOADSTRING 100
 
@@ -87,7 +89,7 @@ math::float4   m_q_3;
 math::float4   m_q_4;
 math::float4   m_q_5;
 
-extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, dx11::system_context context, std::shared_ptr<fnd::universe> universe );
+extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, d3d11::system_context context, std::shared_ptr<fnd::universe> universe );
 
 
 std::tuple<float, float> k1()
@@ -144,7 +146,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//2. Create a default view port
 	gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
     //3. Create direct3d11 structures
-	dx11::system_context	context = dx11::create_system_context(hwnd);
+	d3d11::system_context	context = d3d11::create_system_context(hwnd);
 	//4. Create render contexts
 	gx::render_context		render_context(context, 3, view_port);
 	//5. Create application with a window and worlds with data

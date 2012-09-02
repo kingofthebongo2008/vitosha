@@ -23,7 +23,7 @@ namespace gx
 	void screen_space_quad_render::begin(ID3D11DeviceContext* device_context)
 	{
 		device_context->IASetInputLayout(m_input_layout);
-		dx11::vs_set_shader( device_context, m_vertex_shader );
+		d3d11::vs_set_shader( device_context, m_vertex_shader );
 
 		uint32_t stride = 12;
         uint32_t offset = 0;

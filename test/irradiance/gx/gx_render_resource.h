@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include <dx11/dx11_pointers.h>
+#include <d3d11/d3d11_pointers.h>
 
 namespace gx
 {
@@ -12,9 +12,9 @@ namespace gx
         public:
 
         target_render_resource (    
-                                    dx11::id3d11texture2d_ptr			resource,
-                                    dx11::id3d11rendertargetview_ptr    resource_rtv,
-                                    dx11::id3d11shaderresourceview_ptr	resource_srv
+                                    d3d11::itexture2d_ptr			resource,
+                                    d3d11::id3d11rendertargetview_ptr    resource_rtv,
+                                    d3d11::ishaderresourceview_ptr	resource_srv
                                     
                                 ) : m_resource(resource) , m_resource_rtv(resource_rtv), m_resource_srv(resource_srv)
         {
@@ -51,9 +51,9 @@ namespace gx
             return m_resource_srv.get();
         }
 
-        dx11::id3d11texture2d_ptr			m_resource;
-        dx11::id3d11rendertargetview_ptr    m_resource_rtv;
-        dx11::id3d11shaderresourceview_ptr	m_resource_srv;
+        d3d11::itexture2d_ptr			m_resource;
+        d3d11::id3d11rendertargetview_ptr    m_resource_rtv;
+        d3d11::ishaderresourceview_ptr	m_resource_srv;
 
     };
 
@@ -62,9 +62,9 @@ namespace gx
         public:
 
         depth_resource (    
-                                    dx11::id3d11texture2d_ptr			resource,
-                                    dx11::id3d11depthstencilview_ptr    resource_dsv,
-                                    dx11::id3d11shaderresourceview_ptr	resource_srv
+                                    d3d11::itexture2d_ptr			resource,
+                                    d3d11::idepthstencilview_ptr    resource_dsv,
+                                    d3d11::ishaderresourceview_ptr	resource_srv
                                 ) : m_resource(resource) , m_resource_dsv(resource_dsv), m_resource_srv(resource_srv)
         {
 
@@ -100,20 +100,20 @@ namespace gx
             return m_resource_srv.get();
         }
 
-        dx11::id3d11texture2d_ptr			m_resource;
-        dx11::id3d11depthstencilview_ptr    m_resource_dsv;
-        dx11::id3d11shaderresourceview_ptr	m_resource_srv;
+        d3d11::itexture2d_ptr			m_resource;
+        d3d11::idepthstencilview_ptr    m_resource_dsv;
+        d3d11::ishaderresourceview_ptr	m_resource_srv;
 
     };
 
 
-    dx11::id3d11depthstencilview_ptr    create_read_depth_stencil_view( ID3D11Device* device, ID3D11Resource* resource );
-    dx11::id3d11depthstencilview_ptr    create_write_depth_stencil_view( ID3D11Device* device, ID3D11Resource* resource );
+    d3d11::idepthstencilview_ptr    create_read_depth_stencil_view( ID3D11Device* device, ID3D11Resource* resource );
+    d3d11::idepthstencilview_ptr    create_write_depth_stencil_view( ID3D11Device* device, ID3D11Resource* resource );
  
-    dx11::id3d11shaderresourceview_ptr  create_depth_resource_view( ID3D11Device* device, ID3D11Resource* resource );
+    d3d11::ishaderresourceview_ptr  create_depth_resource_view( ID3D11Device* device, ID3D11Resource* resource );
 
-    dx11::id3d11depthstencilstate_ptr   create_depth_test_enable_state( ID3D11Device* device);
-    dx11::id3d11depthstencilstate_ptr   create_depth_test_disable_state( ID3D11Device* device );
+    d3d11::idepthstencilstate_ptr   create_depth_test_enable_state( ID3D11Device* device);
+    d3d11::idepthstencilstate_ptr   create_depth_test_disable_state( ID3D11Device* device );
 
 
     target_render_resource              create_target_render_resource(ID3D11Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format);
@@ -123,18 +123,18 @@ namespace gx
 
     target_render_resource              create_light_buffer_resource(ID3D11Device* device, uint32_t width, uint32_t height);
 
-    dx11::id3d11blendstate_ptr          create_opaque_blend_state( ID3D11Device* device );
-    dx11::id3d11blendstate_ptr          create_additive_blend_state( ID3D11Device* device );
-    dx11::id3d11blendstate_ptr          create_gbuffer_opaque_blend_state( ID3D11Device* device );
+    d3d11::iblendstate_ptr          create_opaque_blend_state( ID3D11Device* device );
+    d3d11::iblendstate_ptr          create_additive_blend_state( ID3D11Device* device );
+    d3d11::iblendstate_ptr          create_gbuffer_opaque_blend_state( ID3D11Device* device );
     
 
     depth_resource                      create_depth_resource(ID3D11Device* device, uint32_t width, uint32_t height);
 
-    dx11::id3d11samplerstate_ptr              create_default_sampler_state( ID3D11Device* device );
-    dx11::id3d11samplerstate_ptr              create_point_sampler_state( ID3D11Device* device );
+    d3d11::isamplerstate_ptr              create_default_sampler_state( ID3D11Device* device );
+    d3d11::isamplerstate_ptr              create_point_sampler_state( ID3D11Device* device );
 
 
-    dx11::id3d11rasterizerstate_ptr		create_cull_back_rasterizer_state( ID3D11Device* device );
+    d3d11::irasterizerstate_ptr		create_cull_back_rasterizer_state( ID3D11Device* device );
 }
 
 
