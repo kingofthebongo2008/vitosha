@@ -28,6 +28,8 @@
 
 #include <d2d/d2d_helpers.h>
 
+#include <mem/mem_streamflow.h>
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -43,60 +45,14 @@ static INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 using namespace wnd;
 
-double PCFreq = 0.0;
-__int64 CounterStart = 0;
-
-
-
-
-void StartCounter()
-{
-    LARGE_INTEGER li;
-    if(!QueryPerformanceFrequency(&li))
-        std::cout << "QueryPerformanceFrequency failed!\n";
-
-    PCFreq = double(li.QuadPart) / 1000.0;
-
-    QueryPerformanceCounter(&li);
-    CounterStart = li.QuadPart;
-}
-
-double GetCounter()
-{
-    LARGE_INTEGER li;
-    QueryPerformanceCounter(&li);
-    return double(li.QuadPart-CounterStart) / PCFreq;
-}
-
-void myInvalidParameterHandler(const wchar_t* expression,
-   const wchar_t* function, 
-   const wchar_t* file, 
-   unsigned int line, 
-   uintptr_t pReserved)
-{
-   wprintf(L"Invalid parameter detected in function %s."
-            L" File: %s Line: %d\n", function, file, line);
-   wprintf(L"Expression: %s\n", expression);
-   abort();
-}
-
-math::float4x4 m_g;
-math::float4x4 m_g_1;
-math::float4   m_q;
-math::float4   m_q_1;
-math::float4   m_q_2;
-math::float4   m_q_3;
-math::float4   m_q_4;
-math::float4   m_q_5;
-
 extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, d3d11::system_context context, std::shared_ptr<fnd::universe> universe );
 
-
-std::tuple<float, float> k1()
+namespace mem
 {
-	float a = 1.0f;
-	float b = 2.0f;
-	return std::make_tuple<float, float> ( std::move(a), std::move(b) );		
+	namespace streamflow
+	{
+		extern void test_streamflow();
+	}
 }
 
 
@@ -105,16 +61,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
+	void* v = malloc(256);
+
+	if ( mem::is_aligned( v, 256) )
+	{
+		int k = 0;
+		k++;
+	}
+
+	mem::streamflow::test_streamflow();
 	io::console::runner runner;
 	io::console::register_thread_info_helper helper_i;
 	io::console::register_notifier_helper helper_n ( std::make_shared<io::console::std_notifier>() );
-	
 
 	io::console::write(L"test");
-
-   _invalid_parameter_handler oldHandler, newHandler;
-   newHandler = myInvalidParameterHandler;
-   oldHandler = _set_invalid_parameter_handler(newHandler);
 
     UNUSED_PARAMETER(hInstance);
 	UNUSED_PARAMETER(nCmdShow);
@@ -158,7 +118,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     application.set_universe(universe);
     application.set_scene(scene);
 
-	window* wnd = new window( application, context.m_swap_chain, &render_context );
+	gx::target_render_resource d2d_resource	= gx::create_target_render_resource( context.m_device.get(), view_port.get_width(), view_port.get_height(), DXGI_FORMAT_B8G8R8A8_UNORM );
+
+	window* wnd = new window( hwnd, application, context.m_swap_chain, &render_context, d2d_resource );
 	application.new_window(wnd);
 	wnd->set_scene(scene);
 	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wnd) );

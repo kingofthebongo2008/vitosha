@@ -365,6 +365,12 @@
     <ClInclude Include="d3d11\dxgi_helpers.h">
       <Filter>d3d11</Filter>
     </ClInclude>
+    <ClInclude Include="d2d\dwrite_helpers.h">
+      <Filter>d2d</Filter>
+    </ClInclude>
+    <ClInclude Include="tools\libmesh\include\mesh_utils.h">
+      <Filter>tools\libmesh\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -582,6 +588,12 @@
     <ClCompile Include="d3d11\dxgi_helpers.cpp">
       <Filter>d3d11</Filter>
     </ClCompile>
+    <ClCompile Include="tools\libmesh\src\mesh_utils.cpp">
+      <Filter>tools\libmesh\src</Filter>
+    </ClCompile>
+    <ClCompile Include="mem\mem_streamflow.cpp">
+      <Filter>mem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win32/irradiance.rc" />
@@ -619,6 +631,18 @@
     </Filter>
     <Filter Include="d3d11">
       <UniqueIdentifier>{9227faa3-9975-4799-a4b5-9fdfb17cf952}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools">
+      <UniqueIdentifier>{f2bed595-6e27-47d2-bbaf-56b15e0223d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools\libmesh">
+      <UniqueIdentifier>{fbc9882c-709c-49ce-b65f-281798648225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools\libmesh\include">
+      <UniqueIdentifier>{3133d5a4-7c9d-446a-8cdc-9d58e13e0e69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools\libmesh\src">
+      <UniqueIdentifier>{805927ec-e392-494c-ada4-feb56b675790}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
