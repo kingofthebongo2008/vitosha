@@ -20,7 +20,7 @@ namespace d2d
         return result;
     }
 
-	inline irendertarget_ptr create_render_target(ifactory_ptr factory, dxgi::idxgisurface_ptr surface)
+	inline irendertarget_ptr create_render_target(ifactory_ptr factory, dxgi::isurface_ptr surface)
     {
 		irendertarget_ptr result;
 		float	dpi_x = 0.0f;
@@ -28,7 +28,14 @@ namespace d2d
 
 		factory->GetDesktopDpi(&dpi_x, &dpi_y);
 
-		D2D1_PIXEL_FORMAT pixel_format = D2D1::PixelFormat();
+		//D2D1_PIXEL_FORMAT pixel_format = D2D1::PixelFormat();
+
+		D2D1_PIXEL_FORMAT pixel_format = 
+		{
+				DXGI_FORMAT_B8G8R8A8_UNORM,
+				D2D1_ALPHA_MODE_PREMULTIPLIED
+
+		};
 
 		D2D1_RENDER_TARGET_PROPERTIES properties = 
 		{ 
@@ -44,6 +51,13 @@ namespace d2d
 
         return result;
     }
+
+	inline isolid_color_brush_ptr create_solid_color_brush(irendertarget_ptr render_target)//, D2D1::ColorF color)
+	{
+		isolid_color_brush_ptr result;
+		dx::throw_if_failed<d2d_exception> ( render_target->CreateSolidColorBrush( D2D1::ColorF(D2D1::ColorF::White, 1.0f), dx::get_pointer(result) ) );
+		return result;
+	}
 }
 
 

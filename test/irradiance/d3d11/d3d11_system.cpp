@@ -35,13 +35,13 @@ namespace d3d11
     }
     system_context create_system_context(HWND hwnd)
     {
-        auto flags					= D3D11_CREATE_DEVICE_DEBUG;
+        auto flags					= D3D11_CREATE_DEVICE_DEBUG |  D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
         auto level					= D3D_FEATURE_LEVEL_11_0;
         auto desc					= create_default_swap_chain_desc(hwnd);
 
-        dxgi::idxgiadapter_ptr			adapter;
-        dxgi::idxgiswapchain_ptr		swap_chain;
+        dxgi::iadapter_ptr			adapter;
+        dxgi::iswapchain_ptr		swap_chain;
 
         idevice_ptr						device;
         idevicecontext_ptr				context;
@@ -56,13 +56,13 @@ namespace d3d11
 
     system_context create_system_context(HWND hwnd, system_context context)
     {
-        dxgi::idxgifactory1_ptr factory;
+        dxgi::ifactory1_ptr factory;
 
         dx::throw_if_failed<create_dxgi_factory_exception>( CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) dx::get_pointer(factory)  ) );
 
         DXGI_SWAP_CHAIN_DESC desc = create_default_swap_chain_desc(hwnd);
       
-        dxgi::idxgiswapchain_ptr		swap_chain;
+        dxgi::iswapchain_ptr		swap_chain;
         dx::throw_if_failed<create_swap_chain_exception>( factory->CreateSwapChain(context.m_device.get(), &desc,  dx::get_pointer(swap_chain) ) ); 
         
         system_context result = {context.m_adapter, swap_chain, context.m_device,  context.m_immediate_context, hwnd};
