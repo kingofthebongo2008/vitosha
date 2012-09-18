@@ -13,6 +13,16 @@ namespace mem
         return size + (alignment - 1)  & ~(alignment - 1);
     }
 
+	inline bool is_aligned(uintptr_t size, size_t alignment) throw()
+    {
+        return ( size & (alignment - 1) ) == 0;
+    }
+
+	inline bool is_aligned(void* pointer, size_t alignment) throw()
+    {
+        return is_aligned( reinterpret_cast<uintptr_t> ( pointer ), alignment );
+    }
+
     template <typename t, typename h > inline t* allocate(h* heap)
     {
         return reinterpret_cast<t*> (heap->allocate(sizeof(t)));
