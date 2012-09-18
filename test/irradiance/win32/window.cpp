@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <dx/dxgi_pointers.h>
+#include <d3d11/dxgi_helpers.h>
 
 #include <math/math_graphics.h>
 
@@ -30,11 +31,13 @@
 
 namespace wnd
 {
-	window::window(application& application, dxgi::idxgiswapchain_ptr swap_chain, gx::render_context* render_context ) : 
-			m_application(application)
+	window::window(HWND hwnd, application& application, dxgi::iswapchain_ptr swap_chain, gx::render_context* render_context, gx::target_render_resource d2d_resource  ) : 
+			m_hwnd(hwnd)
+			, m_application(application)
 			, m_swap_chain(swap_chain)
 			, m_render_context(render_context)
 			, m_occluded_by_another_window(false)
+			, m_d2d_resource(d2d_resource)
 	{
 
 		math::float4  view_position_ws = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
@@ -50,6 +53,10 @@ namespace wnd
 		m_main_camera.set_near(1.0f);
 		m_main_camera.set_far(200.f); //meters
 
+
+		m_d2d_factory = d2d::create_d2d_factory();
+		m_dwrite_factory = dwrite::create_dwrite_factory();
+		m_text_format = dwrite::create_text_format(m_dwrite_factory);
 	}
 
 	window::~window()
@@ -113,6 +120,27 @@ namespace wnd
 
 		pipeline.add_node( std::make_shared< gx::final_pipeline_node>() );
 		pipeline.process();
+
+
+		//render text
+		m_d2d_render_target->BeginDraw();
+		m_d2d_render_target->Clear();
+
+		RECT r;
+		::GetClientRect(m_hwnd, &r);
+		::InflateRect(&r, -10, -10 );
+	
+		D2D1_RECT_F rf = {static_cast<float> (r.left), static_cast<float>(r.top), static_cast<float>(r.right), static_cast<float>(r.bottom)};
+	
+
+		m_d2d_render_target->DrawTextW(L"Testo", 4, m_text_format.get(), &rf, m_d2d_brush.get());
+
+		m_d2d_render_target->EndDraw();
+
+		ID3D11DeviceContext* device_context = m_render_context->get_immediate_context();
+		d3d11::ps_set_shader(device_context, m_render_context->m_color_texture_pixel_shader );
+        d3d11::ps_set_shader_resources( device_context,  m_d2d_resource );
+		gx::draw_screen_space_quad(device_context, m_render_context, math::identity_matrix());
 	}
 
 	void window::resize_window(uint32_t width, uint32_t height)
@@ -138,6 +166,16 @@ namespace wnd
 		m_main_camera.set_aspect_ratio ( static_cast<float>(width) / static_cast<float>(height) );
 
 		m_render_context->create_swap_chain_buffers();
+
+		ID3D11Device*	device = m_render_context->get_device();
+		m_d2d_resource	= gx::create_target_render_resource( device, width, height, DXGI_FORMAT_B8G8R8A8_UNORM );
+
+		dxgi::isurface_ptr surface;
+		ID3D11Texture2D* texture = m_d2d_resource;
+		dx::throw_if_failed<dx::exception>( texture->QueryInterface( IID_IDXGISurface, reinterpret_cast<void**> (&surface) ) );
+		m_d2d_render_target = d2d::create_render_target(m_d2d_factory, surface);
+
+		m_d2d_brush = d2d::create_solid_color_brush(m_d2d_render_target);
 	}
 
 	void window::process_user_input()

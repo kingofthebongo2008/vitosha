@@ -11,6 +11,10 @@
 #include <d3d11/d3d11_error.h>
 #include <d3d11/d3d11_pointers.h>
 
+#include <d2d/d2d_helpers.h>
+
+#include <d2d/dwrite_helpers.h>
+
 #include "fnd/fnd_world.h"
 
 #include "io/io_mouse.h"
@@ -18,6 +22,7 @@
 
 
 #include "gx/gx_pinhole_camera.h"
+#include "gx/gx_render_resource.h"
 #include "gx/gx_view_port.h"
 
 namespace gx
@@ -58,8 +63,7 @@ namespace wnd
 	class window : private boost::noncopyable
 	{
 		public:
-
-		window(application& application, dxgi::idxgiswapchain_ptr swap_chain, gx::render_context* render_context );
+		window(HWND hwnd, application& application, dxgi::iswapchain_ptr swap_chain, gx::render_context* render_context, gx::target_render_resource d2d_resource );
 
 		inline void set_scene( std::shared_ptr<gx::scene> scene )
 		{
@@ -96,9 +100,9 @@ namespace wnd
 	private:
 
 		~window();
-
+		HWND						m_hwnd;
 		application&				m_application;
-		dxgi::idxgiswapchain_ptr    m_swap_chain;
+		dxgi::iswapchain_ptr		m_swap_chain;
 		gx::render_context*			m_render_context;
 		std::shared_ptr<gx::scene>	m_scene;
 		bool						m_occluded_by_another_window;
@@ -110,6 +114,13 @@ namespace wnd
 		io::pad_state				m_pad_state;
 
 		arcball_rotation_state		m_arcball_state;
+
+		d2d::ifactory_ptr			m_d2d_factory;
+		d2d::irendertarget_ptr		m_d2d_render_target;
+		d2d::ibrush_ptr				m_d2d_brush;
+		gx::target_render_resource	m_d2d_resource;
+		dwrite::ifactory_ptr		m_dwrite_factory;
+		dwrite::itextformat_ptr		m_text_format;
 
 		void render_frame();
 	};
