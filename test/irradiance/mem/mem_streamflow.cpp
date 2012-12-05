@@ -6,13 +6,14 @@ namespace mem
 {
     namespace streamflow
     {
-		static const std::uint32_t							size_classes = 256;
-		static const std::uint32_t							page_block_size_classes = 5; //16kb, 32kb, 64kb, 128kb, 256kb
+		const std::uint32_t									size_classes = 256;
+		const std::uint32_t									page_block_size_classes = 5; //16kb, 32kb, 64kb, 128kb, 256kb
 
-		static concurrent_stack								g_orphaned_page_blocks[size_classes];
-		static concurrent_stack								g_free_page_blocks[page_block_size_classes];
+		static super_page_manager							g_super_page_manager;
 
-		
+		static concurrent_stack								g_orphaned_free_partial_page_blocks[size_classes];		//freed on thread finalize
+		static concurrent_stack								g_free_page_blocks[page_block_size_classes];			//global cache of free page blocks
+
 		static __declspec(thread) void*						t_local_heaps_memory;
 		static __declspec(thread) thread_local_heap*		t_local_heaps[ size_classes ];
 
@@ -195,17 +196,89 @@ namespace mem
 			return size_to_allocate;
 		}
 
+		static inline std::uint32_t compute_page_size_class( std::uint32_t page_block_size)
+		{
+			const uint32_t page = 4096;
+			const uint32_t page_count = (16 * 1024) / page;;
+			const uint32_t min_page_log = detail::log2_c<page_count>::value;
+
+			//16kb, 32kb, 64kb, 128kb, 256kb
+			return detail::log2( page_block_size / page ) - min_page_log;
+		}
+
+		static page_block* get_free_page_block(concurrent_stack* orphaned_free_page_blocks, concurrent_stack* free_partial_page_blocks, size_class size_class)
+		{
+			page_block* block = reinterpret_cast<page_block*> ( free_partial_page_blocks[ size_class].pop() );
+
+			if ( block == nullptr )
+			{
+				uint32_t page_block_class = compute_page_size_class( compute_page_block_size( size_class) );
+				block = reinterpret_cast<page_block*> ( orphaned_free_page_blocks[page_block_class].pop() );
+			}
+
+			if (block && block->full())
+			{
+				//garbage_collect
+			}
+
+			
+			return block;
+		}
+
+		static page_block* get_free_page_block( super_page_manager* page_manager, concurrent_stack* global_page_blocks, concurrent_stack* free_partial_page_blocks, concurrent_stack* local_inactive_page_blocks )
+		{
+			/*
+			size_class size_class = 0;
+
+			page_block* block = get_free_page_block(global_page_blocks, free_partial_page_blocks, size_class);
+
+
+			if (block == nullptr)
+			{
+				page_manager->m_super_pages
+
+			}
+			else if ( block->get_size_class() != size_class)
+			{
+				block->reset(size_class);
+			}
+			*/
+
+		}
+
+
+
 		void test_streamflow()
 		{
+
+			uintptr_t t = details::details1::encode_pointer(129, 5, 1);
+			uintptr_t t1 = details::details1::get_counter(t);
+			uintptr_t t2 = details::details1::get_version(t);
+			uintptr_t t3 = reinterpret_cast<uintptr_t> ( details::details1::decode_pointer(t) );
+
 			size_class size_class = compute_size_class(4);
 			auto page_block_size = compute_page_block_size(size_class);
 			std::size_t s = sizeof(page_block);
 			std::size_t s1 = sizeof(DWORD);
-			std::size_t s2 = sizeof(concurrent_stack::concurrent_stack_element);
+			
+
+			uint8_t mem_1[64] = {0};
+			uint8_t mem_2[64] = {0};
+
+			concurrent_stack stack;
+
+			stack.push(&mem_1[0]);
+			stack.push(&mem_2[0]);
+
+			uint8_t* pop_1 = stack.pop<uint8_t>();
+			uint8_t* pop_2 = stack.pop<uint8_t>();
 
 
-			int k;
-			k +=page_block_size;
+
+
+			int k = 0;
+			k+=3;
+			//k +=page_block_size;
 		}
 
     }
