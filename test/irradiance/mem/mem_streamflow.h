@@ -223,12 +223,6 @@ namespace mem
         //---------------------------------------------------------------------------------------
 		namespace details
 		{
-			enum struct consumer_behavior : uint32_t
-			{
-				single_threaded_consumer = 0,
-				multi_threaded_consumer = 1
-			};
-
 			namespace details1
 			{
 				//128 bit aligned pointer on windows with 43 bits used in it
@@ -334,6 +328,26 @@ namespace mem
 				template <typename t> t* pop() throw()
 				{
 					return reinterpret_cast<t*> ( pop_() );
+				}
+
+				size_t size() const throw()
+				{
+					auto versioned_top = std::atomic_load(&m_top);
+					auto top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
+
+					if (top == nullptr)
+					{
+						return 0;
+					}
+					else
+					{
+						return details1::get_counter(versioned_top);
+					}
+				}
+
+				bool empty() const throw()
+				{
+					return (size() == 0);
 				}
 
 				private:

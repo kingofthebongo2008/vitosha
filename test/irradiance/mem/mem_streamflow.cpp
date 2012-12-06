@@ -251,29 +251,13 @@ namespace mem
 		void test_streamflow()
 		{
 
-			uintptr_t t = details::details1::encode_pointer(129, 5, 1);
+			void* p = ::VirtualAlloc( 0, 128 , MEM_TOP_DOWN | MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+
+			(*(uint32_t*)p) = 120;
+			uintptr_t t = details::details1::encode_pointer(p, 5, 511);
 			uintptr_t t1 = details::details1::get_counter(t);
 			uintptr_t t2 = details::details1::get_version(t);
 			uintptr_t t3 = reinterpret_cast<uintptr_t> ( details::details1::decode_pointer(t) );
-
-			size_class size_class = compute_size_class(4);
-			auto page_block_size = compute_page_block_size(size_class);
-			std::size_t s = sizeof(page_block);
-			std::size_t s1 = sizeof(DWORD);
-			
-
-			uint8_t mem_1[64] = {0};
-			uint8_t mem_2[64] = {0};
-
-			concurrent_stack stack;
-
-			stack.push(&mem_1[0]);
-			stack.push(&mem_2[0]);
-
-			uint8_t* pop_1 = stack.pop<uint8_t>();
-			uint8_t* pop_2 = stack.pop<uint8_t>();
-
-
 
 
 			int k = 0;
