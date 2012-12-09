@@ -81,8 +81,9 @@ namespace mem
                   m_previous = previous;
               }
 
-              T*  m_previous;
-              T*  m_next;
+			  uint8_t	m_opaque_data[8]; //buddy order and tag go here
+              T*		m_previous;
+              T*		m_next;
         };
 
         //---------------------------------------------------------------------------------------
@@ -435,27 +436,35 @@ namespace mem
 
             }
 
-			//pointer must point to memory of at least 16 bytes
-            void push(uintptr_t pointer) throw()
-            {
-				stack_element* element = reinterpret_cast<stack_element*>  (pointer);
-				element->m_next = m_top;
-				m_top = element;
-            }
+
+			template <typename t> void push( t* pointer) throw()
+			{
+				push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
+			}
+
+			//pointer must point to memory of 64 bytes at least
+			void push(uintptr_t pointer) throw()
+			{
+				push_( reinterpret_cast<stack_element*> (pointer) );
+			}
 
 			uintptr_t pop() throw()
-            {
-				stack_element* element = m_top;
+			{
+				return reinterpret_cast<uintptr_t> ( pop_() );
+			}
 
-				if (element == nullptr)
-				{
-					return 0;
-				}
+			template <typename t> t* pop() throw()
+			{
+				return reinterpret_cast<t*> ( pop_() );
+			}
 
-				m_top = element->m_next;
-				return reinterpret_cast<uintptr_t> ( element );
-            }
+			size_t size() const throw()
+			{
+				return m_counter;
+			}
 
+
+			private:
 			struct __declspec( align(64) ) stack_element
             {
                 stack_element() : m_next(nullptr)
@@ -468,52 +477,79 @@ namespace mem
                 uint8_t				m_pad[ 64 - sizeof(stack_element*)  - 8 * sizeof(std::uint8_t) ];
             };
 
+
+			//pointer must point to memory of at least 16 bytes
+            void push_(stack_element* pointer) throw()
+            {
+				stack_element* element = reinterpret_cast<stack_element*>  (pointer);
+				element->m_next = m_top;
+				m_top = element;
+				m_counter++;
+            }
+
+			stack_element* pop_() throw()
+            {
+				stack_element* element = m_top;
+
+				if (element == nullptr)
+				{
+					return 0;
+				}
+
+				m_counter--;
+				m_top = element->m_next;
+				return element;
+            }
+
 			private:
 			stack_element*			m_top;
-            uint8_t                 m_pad[ 64 - sizeof(stack_element*) ];
+			uint32_t				m_counter;
+            uint8_t                 m_pad[ 64 - sizeof(stack_element*) - sizeof(uint32_t) ];
         };
 
-		
-		template <typename t, typename op> class counted_stack : protected op
-		{
-			private:
-			typedef typename t stack;
-
-			public:
-			counted_stack() : m_items(0)
-			{
-
-			}
-
-			void push(uintptr_t pointer) throw()
-            {
-				op::increment(m_items);
-				m_stack.push(pointer);
-			}
-
-			uintptr_t pop() throw()
-            {
-				op::decrement(m_items);
-				return m_stack.pop();
-			}
-
-			int32_t size() const throw()
-			{
-				return m_items;
-			}
-
-			private:
-			stack		m_stack;
-			int32_t		m_items;
-		};
-
         class super_page;
+		typedef uint16_t	size_class;
+		typedef uint32_t	thread_id;
 
-		typedef std::uint16_t	size_class;
+		class __declspec(align(64) ) remote_page_block_info
+		{
+			public:
+
+			remote_page_block_info() : m_memory_reference(0)
+			{
+				
+			}
+
+			struct remote_free_queue
+			{
+				uint16_t m_next;
+				uint16_t m_count;
+			};
+
+			struct thread_info
+			{
+				thread_id		  m_thread_id;
+				remote_free_queue m_free_queue;
+			};
+
+			remote_free_queue get_queue_info( uint64_t reference ) const throw()
+			{
+				thread_info* info = reinterpret_cast<thread_info*>( reference );
+				return info->m_free_queue;
+			}
+
+			thread_id get_thread_id( uint64_t reference ) const throw()
+			{
+				thread_info* info = reinterpret_cast<thread_info*>( reference );
+				return info->m_thread_id;
+			}
+
+			std::atomic<uint64_t>	m_memory_reference;
+		};
 
         //---------------------------------------------------------------------------------------
         //page_block are the basic elements for allocations 
-        class __declspec( align(128) ) page_block : public list_element<page_block>
+		class __declspec( align(128) ) page_block : public list_element<page_block>
         {
         public:
             page_block(super_page* super_page, uintptr_t memory, uint32_t memory_size) throw() : 
@@ -522,11 +558,10 @@ namespace mem
                   , m_memory_size(memory_size)
                   , m_unallocated_offset(0)
                   , m_free_objects(0)
-				  ,	m_thread_id(0xFFFFFFFF)
-                  , m_lifo_list(0)
                   , m_free_offset(0)
-                  , m_size_class(0)
+				  , m_size_class( std::numeric_limits<size_class>().infinity() )
               {
+
               }
 
 		      size_class get_size_class() const throw()
@@ -534,19 +569,14 @@ namespace mem
 				  return m_size_class;
 			  }
 
-			  void set_size_class(size_class size_class) throw()
-              {
-                  m_size_class = size_class;
-              }
-
               bool full() const throw()
               {
-                  return m_free_objects == 0;
+                  return (m_free_objects == 0);
               }
 
               bool empty() const throw()
               {
-                  return m_free_objects == convert_to_object_offset(m_memory_size);
+                  return ( m_free_objects == convert_to_object_offset(m_memory_size) );
               }
 
               uint32_t get_memory_size() const throw()
@@ -604,6 +634,11 @@ namespace mem
                   ++m_free_objects;
               }
 
+			  void thread_local_free(void* pointer) throw()
+			  {
+				  free(pointer);
+			  }
+
               super_page*     get_super_page() const throw()
               {
                   return m_super_page;
@@ -615,18 +650,14 @@ namespace mem
             page_block(const page_block&);
             const page_block operator=(const page_block&);
 
-            uint32_t        m_buddy_order;          //buddy order from super page allocation information. aliased memory, not used in page_block, must be the first member
 			uint32_t		m_free_objects;
-
-			uintptr_t		m_opaque_ptr;			//for free page lists
 
 			super_page*     m_super_page;
             uintptr_t		m_memory;
             uintptr_t		m_memory_size;			//memory size in bytes
 
-
-			uint32_t		m_thread_id;
-			uint32_t		m_lifo_list;
+			//
+			remote_page_block_info	m_block_info;	//frees from other threads go here
 
             uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
             uint16_t	    m_free_offset;			
@@ -778,10 +809,12 @@ namespace mem
                 }
             }
 
-            uint16_t get_largest_free_order() const throw()
-            {
-                    return m_largest_free_order;
-            }
+			bool has_enough_free_space(uint32_t size) const throw()
+			{
+				uint32_t        size_in_pages   =   static_cast<uint32_t> ( size / page_size) ;
+                uint32_t        order           =   detail::log2( size_in_pages );
+				return ( order < buddy_max_order && m_largest_free_order <= order);
+			}
 
         private:
 
@@ -1113,27 +1146,28 @@ namespace mem
                 }
             }
 
+			super_page* get_super_page() throw()
+			{
+					//scan super page list for a block
+			}
+
 			page_block*	get_page_block( std::uint32_t page_size ) throw()
 			{
 				//scan super page list for a block
-
 			}
 
         private:
+
             virtual_alloc_heap_fixed<1024*1024, 1024>           m_os_heap_pages;
             virtual_alloc_heap_fixed<1024*1024, 1>              m_os_heap_header;
             super_page_header_allocator< sizeof(super_page)>    m_header_allocator;
 
             super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
-            page_block_list                                     m_free_page_blocks;     //global cache of free page blocks. orphaned threads put here,
-            page_block_list                                     m_orphaned_page_blocks; //global cache of orphaned page blocks. orphaned threads put here,
             bibop_table                                         m_bibop;
-
 
 
             void free(super_page* header, void* super_page_base) throw()
             {
-				//lock?
                 m_super_pages.remove(header);
                 header->~super_page();
 
@@ -1154,7 +1188,6 @@ namespace mem
         //heap allocated in the thread local storage
         class thread_local_heap
         {
-
             public:
 
 			void* allocate(size_t, uint32_t size_class) throw()
@@ -1232,10 +1265,24 @@ namespace mem
 				*/
             }
 
-            private:
+			void insert_page_block(page_block* block)
+			{
+				m_active_blocks.push_front(block);
+			}
+
+			void remove_page_block(page_block* block)
+			{
+				m_active_blocks.remove(block);
+			}
+
+			void rotate_page_block(page_block* block)
+			{
+				m_active_blocks.remove(block);
+				m_active_blocks.push_back(block);
+			}
 
             super_page_manager*                 m_page_manager;
-
+			list<page_block>					m_active_blocks;
         };
     }
 }

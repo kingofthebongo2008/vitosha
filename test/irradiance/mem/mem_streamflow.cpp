@@ -11,14 +11,14 @@ namespace mem
 
 		static super_page_manager							g_super_page_manager;
 
-		static concurrent_stack								g_orphaned_free_partial_page_blocks[size_classes];		//freed on thread finalize
-		static concurrent_stack								g_free_page_blocks[page_block_size_classes];			//global cache of free page blocks
+		static concurrent_stack								g_page_blocks_orphaned[size_classes];				//freed on thread finalize
+		static concurrent_stack								g_page_blocks_free[page_block_size_classes];		//global cache of free page blocks
 
 		static __declspec(thread) void*						t_local_heaps_memory;
 		static __declspec(thread) thread_local_heap*		t_local_heaps[ size_classes ];
 
 		static __declspec(thread) void*						t_local_inactive_page_blocks_memory;
-		static __declspec(thread) concurrent_stack*			t_local_inactive_page_blocks[ page_block_size_classes ];
+		static __declspec(thread) stack*					t_local_inactive_page_blocks[ page_block_size_classes ];	//local cache of free page blocks
 
 		static void thread_initialize()
 		{
@@ -48,7 +48,7 @@ namespace mem
 
 				for ( std::uint32_t i = 0 ; i < page_block_size_classes; ++i, memory += sizeof(concurrent_stack) )
 				{
-					t_local_inactive_page_blocks[i] = new (memory) concurrent_stack();
+					t_local_inactive_page_blocks[i] = new (memory) stack();
 					
 					memory += sizeof(concurrent_stack) ;
 					memory = reinterpret_cast<uint8_t*> ( align(reinterpret_cast<uintptr_t>(memory), __alignof(concurrent_stack)) );
@@ -71,7 +71,7 @@ namespace mem
 
 			for ( std::uint32_t i = 0 ; i < page_block_size_classes; ++i)
 			{
-				t_local_inactive_page_blocks[i]->~concurrent_stack();
+				t_local_inactive_page_blocks[i]->~stack();
 			}
 
 			::VirtualFree(t_local_inactive_page_blocks_memory, 0, MEM_RELEASE);
@@ -206,14 +206,13 @@ namespace mem
 			return detail::log2( page_block_size / page ) - min_page_log;
 		}
 
-		static page_block* get_free_page_block(concurrent_stack* orphaned_free_page_blocks, concurrent_stack* free_partial_page_blocks, size_class size_class)
+		static page_block* get_free_page_block(concurrent_stack* stack_1, concurrent_stack* stack_2)
 		{
-			page_block* block = reinterpret_cast<page_block*> ( free_partial_page_blocks[ size_class].pop() );
+			page_block* block = reinterpret_cast<page_block*> ( stack_1->pop() );
 
 			if ( block == nullptr )
 			{
-				uint32_t page_block_class = compute_page_size_class( compute_page_block_size( size_class) );
-				block = reinterpret_cast<page_block*> ( orphaned_free_page_blocks[page_block_class].pop() );
+				block = reinterpret_cast<page_block*> ( stack_2->pop() );
 			}
 
 			if (block && block->full())
@@ -221,13 +220,18 @@ namespace mem
 				//garbage_collect
 			}
 
-			
 			return block;
 		}
 
-		static page_block* get_free_page_block( super_page_manager* page_manager, concurrent_stack* global_page_blocks, concurrent_stack* free_partial_page_blocks, concurrent_stack* local_inactive_page_blocks )
+		static page_block* get_free_page_block( super_page_manager* page_manager)
+		{
+			//das
+		}
+
+		static page_block* get_free_page_block( super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2, concurrent_stack* local_inactive_page_blocks )
 		{
 			/*
+			uint32_t page_block_class = compute_page_size_class( compute_page_block_size( size_class) );
 			size_class size_class = 0;
 
 			page_block* block = get_free_page_block(global_page_blocks, free_partial_page_blocks, size_class);
@@ -244,6 +248,7 @@ namespace mem
 			}
 			*/
 
+			return nullptr;
 		}
 
 
@@ -251,18 +256,7 @@ namespace mem
 		void test_streamflow()
 		{
 
-			void* p = ::VirtualAlloc( 0, 128 , MEM_TOP_DOWN | MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 
-			(*(uint32_t*)p) = 120;
-			uintptr_t t = details::details1::encode_pointer(p, 5, 511);
-			uintptr_t t1 = details::details1::get_counter(t);
-			uintptr_t t2 = details::details1::get_version(t);
-			uintptr_t t3 = reinterpret_cast<uintptr_t> ( details::details1::decode_pointer(t) );
-
-
-			int k = 0;
-			k+=3;
-			//k +=page_block_size;
 		}
 
     }
