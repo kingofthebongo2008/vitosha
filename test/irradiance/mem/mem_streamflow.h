@@ -3,27 +3,10 @@
 
 #include <atomic>
 #include <cstdint>
-#include <limits>
-#include <new>
-#include <mutex>
-
 #include <intrin.h>
 
+#include <sys/sys_spin_lock.h>
 #include <mem/mem_alloc.h>
-
-
-//mimic keywords which are not in visual studio 2012 yet
-#if !defined(ALIGNAS)
-
-#define ALIGNAS(x)  __declspec( align( x ) )
-
-#endif
-
-#if !defined(THREAD_LOCAL)
-
-#define THREAD_LOCAL __declspec(thread)
-
-#endif
 
 namespace mem
 {
@@ -318,7 +301,7 @@ namespace mem
 				}
 			}
 
-			class ALIGNAS(64) concurrent_stack
+			class __declspec( align(64) ) concurrent_stack
 			{
 				public:
 
@@ -370,7 +353,7 @@ namespace mem
 
 				private:
 
-				struct ALIGNAS(64) concurrent_stack_element
+				struct __declspec( align(64) ) concurrent_stack_element
 				{
 					concurrent_stack_element() : m_next(nullptr)
 					{
@@ -444,7 +427,7 @@ namespace mem
 		typedef details::concurrent_stack concurrent_stack;
 
 		//---------------------------------------------------------------------------------------
-        class ALIGNAS(64) stack
+        class __declspec( align(64) ) stack
         {
             public:
 
@@ -482,7 +465,7 @@ namespace mem
 
 
 			private:
-			struct ALIGNAS(64) stack_element
+			struct __declspec( align(64) ) stack_element
             {
                 stack_element() : m_next(nullptr)
                 {
@@ -526,18 +509,9 @@ namespace mem
 
         class super_page;
 		typedef uint16_t	size_class;
-		typedef uint32_t	page_block_size;
-
 		typedef uint32_t	thread_id;
-		typedef uint32_t	remote_free_queue;
-		const thread_id		thread_id_orphan = std::numeric_limits<uint32_t>::max();
 
-		inline bool thread_is_orphan(thread_id id) throw()
-		{
-			return (id == thread_id_orphan);
-		}
-
-		class ALIGNAS(64) remote_page_block_info
+		class __declspec(align(64) ) remote_page_block_info
 		{
 			public:
 
@@ -546,61 +520,36 @@ namespace mem
 				
 			}
 
-			/*
 			struct remote_free_queue
 			{
 				uint16_t m_next;
 				uint16_t m_count;
 			};
-			*/
 
-				struct thread_info
+			struct thread_info
 			{
-				thread_id				m_owning_thread_id;
-				remote_free_queue		m_free_queue;
+				thread_id		  m_thread_id;
+				remote_free_queue m_free_queue;
 			};
 
-			static uint16_t get_next(remote_free_queue queue) throw()
+			remote_free_queue get_queue_info( uint64_t reference ) const throw()
 			{
-				return ( (queue >>16 ) & 0xFFFF);
+				thread_info* info = reinterpret_cast<thread_info*>( reference );
+				return info->m_free_queue;
 			}
 
-			static uint16_t get_count(remote_free_queue queue) throw()
+			thread_id get_thread_id( uint64_t reference ) const throw()
 			{
-				return ( queue  & 0xFFFF );
+				thread_info* info = reinterpret_cast<thread_info*>( reference );
+				return info->m_thread_id;
 			}
 
-			static remote_free_queue set_next_count( uint16_t next, uint16_t count) throw()
-			{
-				return ( (next<< 16 ) | count );
-			}
-
-			static thread_id get_thread_id( uint64_t reference  ) throw()
-			{
-				return static_cast<thread_id> ( reference >> 32 );
-			}
-
-			static uint64_t set_thread_id( uint64_t reference, thread_id thread_id  ) throw()
-			{
-				return (thread_id << 32 ) | ( reference & 0xFFFFFFFF);
-			}
-
-			static remote_free_queue get_free_queue( uint64_t reference ) throw()
-			{
-				return static_cast<remote_free_queue> ( reference );
-			}
-
-			static uint64_t set_free_queue( uint64_t reference, remote_free_queue free_queue  ) throw()
-			{
-				return ( free_queue ) | ( reference & 0xFFFFFFFF00000000L );
-			}
-
-			std::atomic<uint64_t> 	m_memory_reference;
+			std::atomic<uint64_t>	m_memory_reference;
 		};
 
         //---------------------------------------------------------------------------------------
         //page_block are the basic elements for allocations 
-		class ALIGNAS(128) page_block : public list_element<page_block>
+		class __declspec( align(128) ) page_block : public list_element<page_block>
         {
         public:
             page_block(super_page* super_page, uintptr_t memory, uint32_t memory_size) throw() : 
@@ -695,19 +644,6 @@ namespace mem
                   return m_super_page;
               }
 
-			  thread_id		 get_owning_thread_id() const throw()
-			  {
-				uint64_t reference =  std::atomic_load(&m_block_info.m_memory_reference);
-				return m_block_info.get_thread_id( reference );
-			  }
-
-			  bool	adopt_page_block(thread_id thread_id) const throw()
-			  {
-
-				return false;
-
-			  }
-
         private:
 
             page_block();
@@ -720,7 +656,7 @@ namespace mem
             uintptr_t		m_memory;
             uintptr_t		m_memory_size;			//memory size in bytes
 
-			
+			//
 			remote_page_block_info	m_block_info;	//frees from other threads go here
 
             uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
@@ -1177,8 +1113,48 @@ namespace mem
 
             }
 
-            super_page* allocate_super_page() throw();
-			page_block*	allocate_page_block( std::uint32_t page_size ) throw();
+            super_page* allocate_super_page() throw()
+            {
+                //1. allocate memory for the header
+                void* super_page_header = m_header_allocator.allocate();
+
+                if (super_page_header)
+                {
+                    //2. allocate memory for the pages
+                    void* sp_base = m_os_heap_pages.allocate();
+
+                    if (sp_base)
+                    {
+                        super_page* page = new 
+							 (super_page_header) super_page(sp_base, free_super_page_callback, this);
+
+						//lock?
+                        m_super_pages.push_front(page);
+
+                        return page;
+                    }
+                    else
+                    {
+						//free the header
+						m_header_allocator.free(super_page_header);
+						return nullptr;
+                    }
+                }
+                else
+                {
+                    return nullptr;
+                }
+            }
+
+			super_page* get_super_page() throw()
+			{
+					//scan super page list for a block
+			}
+
+			page_block*	get_page_block( std::uint32_t page_size ) throw()
+			{
+				//scan super page list for a block
+			}
 
         private:
 
@@ -1188,25 +1164,19 @@ namespace mem
 
             super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
             bibop_table                                         m_bibop;
-			std::mutex											m_super_pages_lock;
-
-
-			super_page* get_super_page( std::uint32_t page_size ) throw();
 
 
             void free(super_page* header, void* super_page_base) throw()
             {
-				std::lock_guard<std::mutex> guard(m_super_pages_lock);
                 m_super_pages.remove(header);
                 header->~super_page();
+
                 m_os_heap_pages.free(super_page_base);
                 m_header_allocator.free(header);
-
             }
 
             static void free_super_page_callback(super_page* header, uintptr_t super_page_base, void* callback_parameter) throw()
             {
-				
                 super_page_manager* page_manager    = reinterpret_cast<super_page_manager*> (callback_parameter);
                 void*               base            = reinterpret_cast<void*> (super_page_base);
                 page_manager->free(header, base);
@@ -1311,11 +1281,10 @@ namespace mem
 				m_active_blocks.push_back(block);
 			}
 
+            super_page_manager*                 m_page_manager;
 			list<page_block>					m_active_blocks;
         };
-
     }
-
 }
 
 
