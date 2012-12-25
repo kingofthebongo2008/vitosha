@@ -19,7 +19,7 @@ namespace d3d11
 
             mode.RefreshRate.Numerator = 60;
             mode.RefreshRate.Denominator = 1;
-            mode.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            mode.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//DXGI_FORMAT_R8G8B8A8_UNORM;//DXGI_FORMAT_R10G10B10A2_UNORM; //DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
             desc.BufferDesc = mode;
             desc.Windowed = (hwnd !=0);
