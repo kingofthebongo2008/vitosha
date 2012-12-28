@@ -61,8 +61,9 @@ namespace gx
 	    }
     }
 
-    render_context::render_context(d3d11::system_context sys_context, uint32_t thread_render_context_count, view_port view_port) : 
+    render_context::render_context(d3d11::system_context sys_context, std::shared_ptr<shader_database> shader_database, uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
+		, m_shader_database(shader_database)
 		, m_per_pass_buffer( d3d11::create_constant_buffer( sys_context.m_device.get(), 2 * sizeof( math::float4x4) ) )
         , m_depth_buffer( create_depth_resource( sys_context.m_device.get(), 320, 240 ) )
         , m_gbuffer_render_data ( sys_context.m_device.get(), m_per_pass_buffer ) 
@@ -71,41 +72,6 @@ namespace gx
         , m_debug_render_data( sys_context.m_device.get() )
 		, m_view_port(view_port)
 		, m_screen_space_render_data ( sys_context.m_device.get() )
-		
-        
-        , m_transform_position_vertex_shader( sys_context.m_device.get() )
-        , m_transform_position_vertex_shader_cbuffer( sys_context.m_device.get() )
-        , m_transform_position_input_layout ( sys_context.m_device.get(), &m_transform_position_vertex_shader )
-
-        , m_transform_position_uv_vertex_shader( sys_context.m_device.get() )
-        , m_transform_position_uv_vertex_shader_cbuffer( sys_context.m_device.get() )
-		, m_transform_position_uv_input_layout( sys_context.m_device.get(), &m_transform_position_uv_vertex_shader )
-
-        , m_transform_position_normal_vertex_shader( sys_context.m_device.get() )
-        , m_transform_position_normal_vertex_shader_cbuffer( sys_context.m_device.get() )
-        , m_transform_position_normal_input_layout ( sys_context.m_device.get(), &m_transform_position_normal_vertex_shader )
-
-        , m_transform_position_normal_uv_vertex_shader( sys_context.m_device.get() )
-        , m_transform_position_normal_uv_vertex_shader_cbuffer( sys_context.m_device.get() )
-		, m_transform_position_normal_uv_input_layout ( sys_context.m_device.get(), &m_transform_position_normal_uv_vertex_shader )
-
-        , m_copy_depth_pixel_shader ( sys_context.m_device.get() )
-		, m_color_pixel_shader ( sys_context.m_device.get() )
-		, m_color_pixel_shader_cbuffer ( sys_context.m_device.get() )
-		, m_color_texture_pixel_shader (  sys_context.m_device.get() )
-        , m_color_texture_channel_3_pixel_shader (  sys_context.m_device.get() )
-        
-        , m_debug_view_space_depth_pixel_shader (  sys_context.m_device.get() )
-        , m_debug_view_space_depth_pixel_shader_cbuffer (  sys_context.m_device.get() )
-
-        , m_screen_space_uv_vertex_shader         (  sys_context.m_device.get() )
-        , m_screen_space_uv_vertex_shader_cbuffer (  sys_context.m_device.get() )
-
-		, m_lambert_shift_invariant_pixel_shader(sys_context.m_device.get() )
-		, m_lambert_pixel_cbuffer( sys_context.m_device.get() )
-        , m_blinn_phong_shift_invariant_pixel_shader( sys_context.m_device.get()  )
-		, m_blinn_phong_shift_invariant_pixel_cbuffer( sys_context.m_device.get() )
-
     {
         m_render_contexts.reserve(thread_render_context_count);
 
@@ -145,9 +111,10 @@ namespace gx
 
 	render_context::~render_context()
 	{
+
 	}
 
-    void render_context::begin_frame()
+	void render_context::begin_frame()
     {
 		//submit everything we have done in the previous frame
 		for  (auto it = std::begin(m_render_contexts); it!= std::end(m_render_contexts); ++it)
@@ -404,7 +371,7 @@ namespace gx
         };
 
         d3d11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view );
-        d3d11::ps_set_shader( device_context, m_copy_depth_pixel_shader );
+        d3d11::ps_set_shader( device_context, m_shader_database->m_copy_depth_pixel_shader );
         draw_screen_space_quad( device_context, this );
         
         reset_render_targets(device_context);
@@ -481,7 +448,7 @@ namespace gx
 
 		device_context->PSSetSamplers( 0, sizeof(samplers) / sizeof(samplers[0]), &samplers[0] );
 
-        d3d11::ps_set_shader(device_context, m_color_texture_pixel_shader );
+        d3d11::ps_set_shader(device_context, m_shader_database->m_color_texture_pixel_shader );
         d3d11::ps_set_shader_resources( device_context,  m_light_buffer_render_data.m_light_buffer );
 
 		math::float4x4 matrices[] = { math::identity_matrix(), math::identity_matrix() };
@@ -524,12 +491,12 @@ namespace gx
 
 	void render_context::create_depth_buffer_layout()
 	{
-        m_depth_render_data.m_input_layout = m_transform_position_input_layout;
+        m_depth_render_data.m_input_layout = m_shader_database->m_transform_position_input_layout;
 	}
 
 	void render_context::create_screen_space_input_layout()
 	{
-        m_screen_space_render_data.m_screen_space_input_layout = m_transform_position_uv_input_layout;
+        m_screen_space_render_data.m_screen_space_input_layout = m_shader_database->m_transform_position_uv_input_layout;
 	}
 
 	screen_space_quad_render	render_context::create_screen_space_quad_render()

@@ -10,27 +10,10 @@
 #include <d3d11/d3d11_error.h>
 #include <d3d11/d3d11_system.h>
 
-#include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
-
-#include <gx/gx_color_pixel_shader.h>
-#include <gx/gx_color_texture_pixel_shader.h>
-#include <gx/gx_color_texture_channel_3_pixel_shader.h>
-#include <gx/gx_copy_depth_pixel_shader.h>
-
-#include <gx/gx_debug_view_space_depth_pixel_shader.h>
-
-#include <gx/gx_lambert_pixel_shader.h>
-#include <gx/gx_lambert_shift_invariant_pixel_shader.h>
-
 #include <gx/gx_render_resource.h>
 
 #include <gx/gx_screen_space_quad.h>
-#include <gx/gx_screen_space_uv_vertex_shader.h>
-
-#include <gx/gx_transform_position_vertex_shader.h>
-#include <gx/gx_transform_position_normal_vertex_shader.h>
-#include <gx/gx_transform_position_normal_uv_vertex_shader.h>
-#include <gx/gx_transform_position_uv_vertex_shader.h>
+#include <gx/gx_shader_database.h>
 
 #include <gx/gx_view_port.h>
 
@@ -132,7 +115,7 @@ namespace gx
         public:
 		typedef  std::vector< std::unique_ptr<thread_render_context> > thread_render_context_container;
 
-		render_context(d3d11::system_context sys_context, uint32_t render_context_count, view_port view_port);
+		render_context(d3d11::system_context sys_context, std::shared_ptr<shader_database> shader_database, uint32_t render_context_count, view_port view_port);
 		~render_context();
 
         void begin_frame();
@@ -213,6 +196,16 @@ namespace gx
 			return m_system_context.m_device.get();
 		}
 
+		inline const shader_database* get_shader_database() const
+		{
+			return m_shader_database.get();
+		}
+
+		inline shader_database* get_shader_database()
+		{
+			return m_shader_database.get();
+		}
+
 		private:
 
 		render_context();
@@ -269,42 +262,7 @@ namespace gx
 
 		view_port													m_view_port;
 		screen_space_render_data									m_screen_space_render_data;
-
-        transform_position_vertex_shader							m_transform_position_vertex_shader;
-        transform_position_vertex_shader_constant_buffer			m_transform_position_vertex_shader_cbuffer;
-		transform_position_input_layout								m_transform_position_input_layout;
-
-        transform_position_uv_vertex_shader							m_transform_position_uv_vertex_shader;
-        transform_position_uv_vertex_shader_constant_buffer			m_transform_position_uv_vertex_shader_cbuffer;
-		transform_position_uv_input_layout							m_transform_position_uv_input_layout;
-
-        transform_position_normal_vertex_shader						m_transform_position_normal_vertex_shader;
-        transform_position_normal_vertex_shader_constant_buffer		m_transform_position_normal_vertex_shader_cbuffer;
-		transform_position_normal_input_layout						m_transform_position_normal_input_layout;
-
-        transform_position_normal_uv_vertex_shader				    m_transform_position_normal_uv_vertex_shader;
-        transform_position_normal_uv_vertex_shader_constant_buffer  m_transform_position_normal_uv_vertex_shader_cbuffer;
-		transform_position_normal_uv_input_layout                   m_transform_position_normal_uv_input_layout;
-
-        copy_depth_pixel_shader                                     m_copy_depth_pixel_shader;
-		color_pixel_shader										    m_color_pixel_shader;
-		color_pixel_shader_constant_buffer						    m_color_pixel_shader_cbuffer;
-
-		color_texture_pixel_shader								    m_color_texture_pixel_shader;
-        color_texture_channel_3_pixel_shader					    m_color_texture_channel_3_pixel_shader;
-
-        debug_view_space_depth_pixel_shader                         m_debug_view_space_depth_pixel_shader;
-        debug_view_space_depth_pixel_shader_constant_buffer         m_debug_view_space_depth_pixel_shader_cbuffer;
-
-        screen_space_uv_vertex_shader                               m_screen_space_uv_vertex_shader;            
-        screen_space_uv_vertex_shader_constant_buffer               m_screen_space_uv_vertex_shader_cbuffer;
-        
-		lambert_shift_invariant_pixel_shader					    m_lambert_shift_invariant_pixel_shader;
-		lambert_shift_invariant_pixel_shader_constant_buffer	    m_lambert_pixel_cbuffer;
-
-        blinn_phong_shift_invariant_pixel_shader				    m_blinn_phong_shift_invariant_pixel_shader;
-		blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_blinn_phong_shift_invariant_pixel_cbuffer;
-
+		std::shared_ptr<shader_database>							m_shader_database;
     };
 }
 

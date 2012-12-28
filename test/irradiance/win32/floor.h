@@ -11,7 +11,9 @@
 #include <gx/gx_entity.h>
 #include <gx/gx_grid_geometry_shader.h>
 #include <gx/gx_material_database.h>
+#include <gx/gx_shader_database.h>
 #include <gx/gx_transform_position_normal_vertex_shader.h>
+
 
 namespace gx
 {
@@ -54,7 +56,7 @@ class floor_entity : public gx::entity
     uint16_t                                                        m_material_id;
 };
 
-std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::render_context* context, uint32_t width, uint32_t height, uint32_t subdivision_count );
+std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count );
 
 
 #endif

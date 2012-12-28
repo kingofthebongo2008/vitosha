@@ -6,7 +6,7 @@
 
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_material_database.h>
-#include <gx/gx_render_context.h>
+#include <gx/gx_shader_database.h>
 
 namespace gx
 {
@@ -43,12 +43,12 @@ namespace gx
 		m_pixel_cbuffer.set_color(color);
 	}
 
-	color_material create_color_material( render_context* context, math::float4 color )
+	color_material create_color_material( shader_database* context, math::float4 color )
 	{
 		return color_material( 
-								context->m_depth_render_data.m_depth_vertex_shader,
-								context->m_depth_render_data.m_depth_constant_buffer,
-								context->m_depth_render_data.m_input_layout,
+								context->m_transform_position_vertex_shader,
+								context->m_transform_position_vertex_shader_cbuffer,
+								context->m_transform_position_input_layout,
 								context->m_color_pixel_shader,
 								context->m_color_pixel_shader_cbuffer,
 								color);

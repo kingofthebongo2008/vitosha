@@ -7,6 +7,8 @@
 #include <gx/gx_blinn_phong_shift_invariant_pixel_shader.h>
 #include <gx/gx_transform_position_normal_uv_vertex_shader.h>
 
+#include <gx/gx_shader_database.h>
+
 namespace gx
 {
 	struct draw_call_context;
@@ -65,13 +67,13 @@ namespace gx
 
 	};
 
-	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( render_context* context, math::float4 kd, math::float4 ks_gloss );
+	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( shader_database* context, math::float4 kd, math::float4 ks_gloss );
 
 	struct blinn_phong_shift_invairant_material_factory
 	{
 		typedef blinn_phong_shift_invairant_material type;
 
-		static blinn_phong_shift_invairant_material create(render_context* context, math::float4 kd, math::float4 ks_gloss )
+		static blinn_phong_shift_invairant_material create(shader_database* context, math::float4 kd, math::float4 ks_gloss )
 		{
 			return create_blinn_phong_shift_invairant_material(context, kd, ks_gloss);
 		}

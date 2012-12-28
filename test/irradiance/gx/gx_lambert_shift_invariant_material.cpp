@@ -6,7 +6,7 @@
 
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_material_database.h>
-#include <gx/gx_render_context.h>
+#include <gx/gx_shader_database.h>
 
 namespace gx
 {
@@ -43,7 +43,7 @@ namespace gx
 		m_pixel_cbuffer.set_diffuse_albedo(diffuse_albedo);
 	}
 
-	lambert_shift_invairant_material create_lambert_shift_invairant_material( render_context* context, math::float4 diffuse_albedo )
+	lambert_shift_invairant_material create_lambert_shift_invairant_material( shader_database* context, math::float4 diffuse_albedo )
 	{
 		return lambert_shift_invairant_material(
                                 std::make_tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer,  transform_position_normal_uv_input_layout > 

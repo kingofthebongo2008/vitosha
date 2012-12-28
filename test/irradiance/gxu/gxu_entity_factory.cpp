@@ -231,7 +231,7 @@ namespace gxu
 
 	std::tuple< d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )
 	{
-	d3d11::ibuffer_ptr positions;
+		d3d11::ibuffer_ptr positions;
         d3d11::ibuffer_ptr normals_uvs;
         d3d11::ibuffer_ptr indices;
 		

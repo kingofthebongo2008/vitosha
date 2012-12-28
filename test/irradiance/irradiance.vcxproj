@@ -298,6 +298,7 @@
     <ClInclude Include="gx\gx_profile.h" />
     <ClInclude Include="gx\gx_render_resource.h" />
     <ClInclude Include="gx\gx_screen_space_uv_vertex_shader.h" />
+    <ClInclude Include="gx\gx_shader_database.h" />
     <ClInclude Include="gx\gx_shader_geometry_pass_common.hlsl" />
     <ClInclude Include="gx\gx_transform_position_normal_uv_vertex_shader.h" />
     <ClInclude Include="gx\gx_material_database.h" />
@@ -389,6 +390,7 @@
     <ClCompile Include="gx\gx_profile.cpp" />
     <ClCompile Include="gx\gx_render_resource.cpp" />
     <ClCompile Include="gx\gx_screen_space_uv_vertex_shader.cpp" />
+    <ClCompile Include="gx\gx_shader_database.cpp" />
     <ClCompile Include="gx\gx_transform_position_normal_uv_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_transform_position_normal_vertex_shader.cpp" />
     <ClCompile Include="gx\gx_transform_position_vertex_shader.cpp" />

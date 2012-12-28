@@ -11,7 +11,7 @@
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
-#include <gx/gx_render_context.h>
+#include <gx/gx_shader_database.h>
 
 void floor_entity::on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
 {
@@ -55,7 +55,7 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
     d3d11::gs_set_shader(device_context, nullptr );
 }
 
-std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::render_context* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
+std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
 {
     math::half half[8] = {};
 

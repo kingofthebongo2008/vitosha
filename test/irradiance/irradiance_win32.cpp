@@ -107,8 +107,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
     //3. Create direct3d11 structures
 	d3d11::system_context	context = d3d11::create_system_context(hwnd);
+
+	std::shared_ptr<gx::shader_database>		shader_database = std::make_shared<gx::shader_database>( context.m_device.get() );
 	//4. Create render contexts
-	gx::render_context		render_context(context, 3, view_port);
+	gx::render_context		render_context(context, shader_database, 3, view_port);
 	//5. Create application with a window and worlds with data
 	application				application;
 

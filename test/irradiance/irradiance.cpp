@@ -38,7 +38,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
 
     //floor
-    auto floor_entity = create_floor_entity( context.m_device.get(), render_context, 20, 20, 30 );
+	auto floor_entity = create_floor_entity( context.m_device.get(), render_context->get_shader_database(), 20, 20, 30 );
 
     //directional light
     std::vector<directional_light> directional_lights;
@@ -74,7 +74,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto root = scene->get_root();
 
     //auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
-    auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context, 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, 0.12f )  ); 
+	auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, 0.12f )  ); 
 	
 	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );
