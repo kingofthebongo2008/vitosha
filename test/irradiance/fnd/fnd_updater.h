@@ -144,6 +144,7 @@ namespace fnd
 
 		void add_type ( uint16_t type, std::shared_ptr< fnd::updater> type_updater )
 		{
+			///??? bug
 			//make sure we have enough buckets
 			m_buckets.resize( std::max( m_buckets.size(), size_t( type + 1) ) );
 			m_buckets[type].reserve(1024);

@@ -1,6 +1,8 @@
-cbuffer per_object
+#include "gx_shader_geometry_pass_common.hlsl"
+
+cbuffer per_object : register(SLOT_PER_DRAW_CALL)
 {
-	row_major float4x4 m_wvp;
+	row_major float4x4 m_w;
 }
 
 struct vs_input
@@ -16,7 +18,9 @@ struct vs_output
 vs_output main( in  vs_input input)
 {
 	vs_output output;
-	output.position_ps = mul ( float4(input.position_os), m_wvp )  ;	
+
+	output.position_ps = project_vertex(input.position_os, m_w, m_v, m_p);
+
 	return output;
 }
 

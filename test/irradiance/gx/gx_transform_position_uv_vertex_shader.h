@@ -17,9 +17,9 @@ namespace gx
 
 		explicit transform_position_uv_vertex_shader_constant_buffer ( ID3D11Device* device );
 
-		void set_wvp(math::float4x4 value)
+		void set_w(math::float4x4 value)
 		{
-			m_wvp = value;
+			m_w = value;
 		}
 
 		void update ( ID3D11DeviceContext* context, math::float4x4* value )
@@ -29,12 +29,12 @@ namespace gx
 
 		void flush ( ID3D11DeviceContext* context )
 		{
-			update(context, &m_wvp);
+			update(context, &m_w);
 		}
 
 		void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
 		{
-			context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
+			context->VSSetConstantBuffers(1, 1, dx::get_pointer(m_buffer));
 		}
 
         operator ID3D11Buffer*()
@@ -49,13 +49,13 @@ namespace gx
 
         size_t size() const
         {
-            return sizeof(m_wvp);
+            return sizeof(m_w);
         }
 
 		private:
 
 		d3d11::ibuffer_ptr	m_buffer;
-		math::float4x4	m_wvp;
+		math::float4x4		m_w;
 	};
 
 	class transform_position_uv_vertex_shader
@@ -70,8 +70,8 @@ namespace gx
 		}
 
 		d3d11::ivertexshader_ptr	m_shader;
-		const void*						m_code;
-		uint32_t						m_code_size;
+		const void*					m_code;
+		uint32_t					m_code_size;
     };
 
 	class transform_position_uv_input_layout

@@ -371,6 +371,9 @@
     <ClInclude Include="tools\libmesh\include\mesh_utils.h">
       <Filter>tools\libmesh\include</Filter>
     </ClInclude>
+    <ClInclude Include="gx\gx_shader_geometry_pass_common.hlsl">
+      <Filter>gx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />

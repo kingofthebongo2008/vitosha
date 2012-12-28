@@ -39,13 +39,13 @@ namespace gx
 
 	namespace
 	{
-		void process_command( gx::render_context* render_context, ID3D11DeviceContext* device_context, gx::command::type command ) 
+		void process_command( gx::render_context* render_context, ID3D11DeviceContext* device_context, gx::command::type command, const draw_calls_pipeline_params* in_params ) 
 		{
 			switch (command)
 			{
 				case gx::command::gbuffer_initialize:
 				{
-					render_context->select_gbuffer(device_context);
+					render_context->select_gbuffer(device_context, &in_params->m_view_matrix, &in_params->m_projection_matrix);
 					break;
 				}
 
@@ -120,7 +120,7 @@ namespace gx
 			else
 			{
 				gx::command::type command = info.m_key.get_command();
-				process_command( m_render_context, device_context, command);
+				process_command( m_render_context, device_context, command, in_params);
 			}
 		}
 

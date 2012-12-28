@@ -50,7 +50,7 @@ class point_light_sphere_debug_vertex_shader_constant_buffer
 	public:
 
 	d3d11::ibuffer_ptr	m_buffer;
-	math::float4x4	m_vp;		//view projection
+	math::float4x4		m_vp;		//view projection
 };
 
 

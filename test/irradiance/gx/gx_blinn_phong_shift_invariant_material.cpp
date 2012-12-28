@@ -14,7 +14,7 @@ namespace gx
 	{
 		auto device_context = draw_call_context->m_device_context;
 
-        std::get<1>(m_vertex_pipeline).set_wvp(*draw_call_context->m_wvp_matrix);
+        std::get<1>(m_vertex_pipeline).set_w(*draw_call_context->m_world_matrix);
         std::get<1>(m_vertex_pipeline).set_normal_transform( math::mul( *draw_call_context->m_world_matrix, *draw_call_context->m_view_matrix ));
 
 

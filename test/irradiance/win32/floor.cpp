@@ -25,10 +25,11 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 {
     auto device_context = draw_call_context->m_device_context;
 
-    std::get<1>(m_vertex_pipeline).set_wvp(*draw_call_context->m_wvp_matrix);
+    std::get<1>(m_vertex_pipeline).set_w(*draw_call_context->m_world_matrix);
     std::get<1>(m_vertex_pipeline).set_normal_transform( math::mul( *draw_call_context->m_world_matrix, *draw_call_context->m_view_matrix ));
-
     std::get<1>(m_vertex_pipeline).flush(device_context);
+
+	std::get<1>(m_vertex_pipeline).bind_as_vertex_constant_buffer(device_context);
     std::get<1>(m_vertex_pipeline).bind_as_geometry_constant_buffer(device_context);
 
     m_pixel_cbuffer.set_ks_gloss( math::set( 1.0f, 0.3f, 1.0f, 0.2f ) );
@@ -40,7 +41,7 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
     d3d11::gs_set_shader(device_context, m_geometry_shader );
 	d3d11::ps_set_shader(device_context, m_pixel_shader );
 
-    device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
+	device_context->IASetInputLayout( std::get<2>(m_vertex_pipeline) );
     device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
     ID3D11Buffer* buffers[] = { m_point.get() };

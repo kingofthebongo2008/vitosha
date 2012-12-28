@@ -18,29 +18,29 @@ namespace gx
 
 		explicit transform_position_normal_uv_vertex_shader_constant_buffer ( ID3D11Device* device );
 
-        void set_wvp(math::float4x4 value)
+        void set_w(math::float4x4 value)
 		{
-			m_wvp = value;
+			m_w = value;
 		}
 
         void set_normal_transform(math::float4x4 value)
 		{
-			m_world = value;
+			m_normal_transform = value;
 		}
 
         void flush ( ID3D11DeviceContext* context )
 		{
-            constant_buffer_update(context, m_buffer.get(), (void*) &m_wvp, size() );
+            constant_buffer_update(context, m_buffer.get(), (void*) &m_w, size() );
 		}
 
         void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
 		{
-			context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
+			context->VSSetConstantBuffers(1, 1, dx::get_pointer(m_buffer));
 		}
 
         inline size_t size() const
 		{
-			 return sizeof(m_wvp) + sizeof(m_world);
+			 return sizeof(m_w) + sizeof(m_normal_transform);
 		}
 
 
@@ -58,8 +58,8 @@ namespace gx
 
 		d3d11::ibuffer_ptr	m_buffer;
 
-		math::float4x4	m_wvp;
-		math::float4x4	m_world;
+		math::float4x4	m_w;
+		math::float4x4	m_normal_transform;
 	};
 
 	class transform_position_normal_uv_vertex_shader

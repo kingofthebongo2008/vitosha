@@ -58,7 +58,7 @@ float4 main( in  vs_output input) : sv_target
 
     float linear_z = depth_buffer_z_2_linear_z_2( depth_buffer_z, zn, zf  );
 
-    float normalized_linear_z = normalize_linear_z(linear_z, zn, zf );
-
+	//for display purposes
+	float normalized_linear_z = normalize_linear_z(linear_z, zn, zf );
     return float4( normalized_linear_z, normalized_linear_z, normalized_linear_z, 1.0f);
 }

@@ -18,8 +18,8 @@ namespace gx
 
         std::vector< math::float4x4 >*    m_wvp_matrices;
         std::vector< math::float4x4 >*    m_world_matrices;
-        std::vector < draw_call_info >*         m_draw_calls;
-        std::vector< void* >*                   m_data;
+        std::vector < draw_call_info >*   m_draw_calls;
+        std::vector< void* >*             m_data;
     };
 
 }

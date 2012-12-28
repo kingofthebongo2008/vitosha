@@ -44,11 +44,6 @@ namespace gx
 			update(context, &m_color);
 		}
 
-		void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
-		{
-			context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
-		}
-
 		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context, uint32_t slot)
 		{
 			context->PSSetConstantBuffers(slot, 1, dx::get_pointer(m_buffer));

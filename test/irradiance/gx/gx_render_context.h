@@ -38,11 +38,12 @@ namespace gx
 {
 	struct gbuffer_render_data
 	{
-        explicit gbuffer_render_data ( ID3D11Device* device) : 
+        explicit gbuffer_render_data ( ID3D11Device* device, d3d11::ibuffer_ptr per_pass_buffer ) : 
           m_normal( create_normal_resource(device, 320, 240 ) )
         , m_diffuse( create_diffuse_resource( device, 320, 240 ) )
         , m_specular( create_specular_resource( device, 320, 240 ) )
         , m_opaque( create_gbuffer_opaque_blend_state(device) )
+		, m_per_pass_buffer ( per_pass_buffer )
         {
 
         }
@@ -54,6 +55,7 @@ namespace gx
 
         d3d11::iblendstate_ptr  m_opaque;
 
+		d3d11::ibuffer_ptr		m_per_pass_buffer;
 	};
 
     struct light_buffer_render_data
@@ -96,10 +98,10 @@ namespace gx
 
 		}
 
-		d3d11::iinputlayout_ptr								m_screen_space_input_layout;
+		d3d11::iinputlayout_ptr									m_screen_space_input_layout;
 		transform_position_uv_vertex_shader						m_screen_space_vertex_shader;
 		transform_position_uv_vertex_shader_constant_buffer		m_screen_space_constant_buffer;
-        d3d11::ibuffer_ptr	                                m_screen_space_vertex_buffer;
+        d3d11::ibuffer_ptr										m_screen_space_vertex_buffer;
 	};
 
     struct debug_render_data
@@ -117,9 +119,8 @@ namespace gx
 
         //copy of the depth buffer
         target_render_resource                  m_depth_buffer_copy;
-
-        d3d11::idepthstencilview_ptr		m_read_depth_dsv;
-        d3d11::ishaderresourceview_ptr		m_depth_srv;
+        d3d11::idepthstencilview_ptr			m_read_depth_dsv;
+        d3d11::ishaderresourceview_ptr			m_depth_srv;
 	};
 
     class thread_render_context;
@@ -143,7 +144,7 @@ namespace gx
 		void reset_state( ID3D11DeviceContext* device_context );
 		void clear_buffers( ID3D11DeviceContext* device_context);
 		void select_depth_pass(ID3D11DeviceContext* device_context);
-		void select_gbuffer(ID3D11DeviceContext* device_context);
+		void select_gbuffer(ID3D11DeviceContext* device_context, const math::float4x4* view_matrix, const math::float4x4* projection_matrix);
 		void select_back_buffer_target(ID3D11DeviceContext* device_context);
         void select_light_buffer(ID3D11DeviceContext* device_context);
         void select_debug_target(ID3D11DeviceContext* device_context);
@@ -246,38 +247,40 @@ namespace gx
 
         public:
 
-		d3d11::id3d11rendertargetview_ptr						m_back_buffer;
-        depth_resource                                          m_depth_buffer;
-        d3d11::idepthstencilstate_ptr                       m_depth_enable_state;
-        d3d11::idepthstencilstate_ptr                       m_depth_disable_state;
+		d3d11::id3d11rendertargetview_ptr							m_back_buffer;
+        depth_resource												m_depth_buffer;
+        d3d11::idepthstencilstate_ptr								m_depth_enable_state;
+        d3d11::idepthstencilstate_ptr								m_depth_disable_state;
+		d3d11::ibuffer_ptr											m_per_pass_buffer;
 
-        d3d11::iblendstate_ptr                              m_opaque_state;
-        d3d11::iblendstate_ptr                              m_additive_state;
 
-        d3d11::isamplerstate_ptr                            m_default_sampler_state;
-        d3d11::isamplerstate_ptr                            m_point_sampler_state;
+        d3d11::iblendstate_ptr										m_opaque_state;
+        d3d11::iblendstate_ptr										m_additive_state;
 
-        d3d11::irasterizerstate_ptr                         m_cull_back_raster_state;
+        d3d11::isamplerstate_ptr									m_default_sampler_state;
+        d3d11::isamplerstate_ptr									m_point_sampler_state;
 
-		gbuffer_render_data										m_gbuffer_render_data;
-		depth_render_data										m_depth_render_data;
-        light_buffer_render_data                                m_light_buffer_render_data;
-        debug_render_data                                       m_debug_render_data;
+        d3d11::irasterizerstate_ptr									m_cull_back_raster_state;
 
-		view_port												m_view_port;
-		screen_space_render_data								m_screen_space_render_data;
+		gbuffer_render_data											m_gbuffer_render_data;
+		depth_render_data											m_depth_render_data;
+        light_buffer_render_data									m_light_buffer_render_data;
+        debug_render_data											m_debug_render_data;
 
-        transform_position_vertex_shader						m_transform_position_vertex_shader;
-        transform_position_vertex_shader_constant_buffer        m_transform_position_vertex_shader_cbuffer;
-		transform_position_input_layout                         m_transform_position_input_layout;
+		view_port													m_view_port;
+		screen_space_render_data									m_screen_space_render_data;
 
-        transform_position_uv_vertex_shader						m_transform_position_uv_vertex_shader;
-        transform_position_uv_vertex_shader_constant_buffer     m_transform_position_uv_vertex_shader_cbuffer;
-		transform_position_uv_input_layout                      m_transform_position_uv_input_layout;
+        transform_position_vertex_shader							m_transform_position_vertex_shader;
+        transform_position_vertex_shader_constant_buffer			m_transform_position_vertex_shader_cbuffer;
+		transform_position_input_layout								m_transform_position_input_layout;
 
-        transform_position_normal_vertex_shader					m_transform_position_normal_vertex_shader;
-        transform_position_normal_vertex_shader_constant_buffer m_transform_position_normal_vertex_shader_cbuffer;
-		transform_position_normal_input_layout                  m_transform_position_normal_input_layout;
+        transform_position_uv_vertex_shader							m_transform_position_uv_vertex_shader;
+        transform_position_uv_vertex_shader_constant_buffer			m_transform_position_uv_vertex_shader_cbuffer;
+		transform_position_uv_input_layout							m_transform_position_uv_input_layout;
+
+        transform_position_normal_vertex_shader						m_transform_position_normal_vertex_shader;
+        transform_position_normal_vertex_shader_constant_buffer		m_transform_position_normal_vertex_shader_cbuffer;
+		transform_position_normal_input_layout						m_transform_position_normal_input_layout;
 
         transform_position_normal_uv_vertex_shader				    m_transform_position_normal_uv_vertex_shader;
         transform_position_normal_uv_vertex_shader_constant_buffer  m_transform_position_normal_uv_vertex_shader_cbuffer;

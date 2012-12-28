@@ -55,7 +55,7 @@ namespace gx
 		private:
 
 		d3d11::ibuffer_ptr	m_buffer;
-		math::float4x4	m_wvp;
+		math::float4x4		m_wvp;
 	};
 
 	class screen_space_uv_vertex_shader
@@ -74,7 +74,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		d3d11::ivertexshader_ptr	m_shader;
+		d3d11::ivertexshader_ptr		m_shader;
 		const void*						m_code;
 		uint32_t						m_code_size;
     };

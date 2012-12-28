@@ -120,6 +120,11 @@ blinn_phong_surface blinn_phong(float3 albedo, float3 specular_color, float powe
     return result;
 }
 
+float3 encode_2_back_buffer( float3 color )
+{
+	return pow( abs(color) , 1/2.2f );
+}
+
 float3 main( in  vs_output input) : sv_target
 {
     float2 uv               = input.uv;
@@ -153,7 +158,7 @@ float3 main( in  vs_output input) : sv_target
         radiance		            =  radiance +  decode_light_power ( m_light_color[i] ) * ( surface.m_kd + surface.m_ks) ;
     }
 
-    return radiance;
+    return encode_2_back_buffer(radiance);
 }
 
 

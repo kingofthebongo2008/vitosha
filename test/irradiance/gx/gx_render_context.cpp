@@ -10,6 +10,7 @@
 
 #include <gx/gx_profile.h>
 #include <gx/gx_thread_render_context.h>
+#include <gx/gx_constant_buffer_helper.h>
 
 namespace gx
 {
@@ -62,13 +63,15 @@ namespace gx
 
     render_context::render_context(d3d11::system_context sys_context, uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
+		, m_per_pass_buffer( d3d11::create_constant_buffer( sys_context.m_device.get(), 2 * sizeof( math::float4x4) ) )
         , m_depth_buffer( create_depth_resource( sys_context.m_device.get(), 320, 240 ) )
-        , m_gbuffer_render_data ( sys_context.m_device.get() ) 
+        , m_gbuffer_render_data ( sys_context.m_device.get(), m_per_pass_buffer ) 
 		, m_depth_render_data( sys_context.m_device.get() )
         , m_light_buffer_render_data( sys_context.m_device.get() )
         , m_debug_render_data( sys_context.m_device.get() )
 		, m_view_port(view_port)
 		, m_screen_space_render_data ( sys_context.m_device.get() )
+		
         
         , m_transform_position_vertex_shader( sys_context.m_device.get() )
         , m_transform_position_vertex_shader_cbuffer( sys_context.m_device.get() )
@@ -192,6 +195,16 @@ namespace gx
 	void render_context::create_back_buffer_render_target()
 	{
 		d3d11::itexture2d_ptr	back_buffer = dxgi::get_buffer( m_system_context.m_swap_chain.get() );
+
+		D3D11_TEXTURE2D_DESC texture_description = {};
+
+		D3D11_RENDER_TARGET_VIEW_DESC view = {};
+
+		back_buffer->GetDesc(&texture_description);
+
+		view.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
+		view.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
         m_back_buffer = d3d11::create_render_target_view( m_system_context.m_device.get(), back_buffer.get() );
 	}
 
@@ -228,7 +241,6 @@ namespace gx
 
         m_light_buffer_render_data.m_read_depth_dsv = create_read_depth_stencil_view( m_system_context.m_device.get(), m_depth_buffer ) ;
         m_light_buffer_render_data.m_depth_srv = create_depth_resource_view( m_system_context.m_device.get(), m_depth_buffer );
-
     }
 
     void render_context::create_debug_buffer()
@@ -268,7 +280,7 @@ namespace gx
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 
-	void render_context::select_gbuffer(ID3D11DeviceContext* device_context)
+	void render_context::select_gbuffer(ID3D11DeviceContext* device_context, const math::float4x4* view_matrix, const math::float4x4* projection_matrix)
 	{
         profile p(L"select_gbuffer");
 		reset_render_targets( device_context );
@@ -294,6 +306,12 @@ namespace gx
 
 		device_context->PSSetSamplers( 0, sizeof(samplers)/sizeof(samplers[0]), &samplers[0] ); 
 		select_view_port(device_context);
+
+
+		math::float4x4 matrices[] = { *view_matrix, *projection_matrix };
+		constant_buffer_update( device_context, m_per_pass_buffer.get(), &matrices[0], 2 * sizeof(math::float4x4) );
+		device_context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
+		device_context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
 	}
 
     void render_context::select_light_buffer(ID3D11DeviceContext* device_context)
@@ -465,6 +483,13 @@ namespace gx
 
         d3d11::ps_set_shader(device_context, m_color_texture_pixel_shader );
         d3d11::ps_set_shader_resources( device_context,  m_light_buffer_render_data.m_light_buffer );
+
+		math::float4x4 matrices[] = { math::identity_matrix(), math::identity_matrix() };
+		constant_buffer_update( device_context, m_per_pass_buffer.get(), &matrices[0], 2 * sizeof(math::float4x4) );
+
+		device_context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer) );
+		device_context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer) );
+
         draw_screen_space_quad( device_context, this );
     }
 

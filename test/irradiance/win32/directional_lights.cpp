@@ -32,8 +32,8 @@ m_quad_data (quad_data)
 
     std::for_each ( begin, end, [= ] ( const directional_light& light ) 
     {
-            m_light_direction_ws.push_back( light.get_power() );
-            m_light_color.push_back ( light.get_direction() );
+            m_light_color.push_back( light.get_power() );
+            m_light_direction_ws.push_back ( light.get_direction() );
     }
     );
 }

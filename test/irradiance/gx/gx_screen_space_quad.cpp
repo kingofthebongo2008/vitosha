@@ -16,7 +16,7 @@ namespace gx
 	void screen_space_quad_render::draw_quad(ID3D11DeviceContext* device_context, math::float4x4 transform)
 	{
 		constant_buffer_update( device_context, m_cbuffer, transform);
-		device_context->VSSetConstantBuffers(0, 1, &m_cbuffer );
+		device_context->VSSetConstantBuffers(1, 1, &m_cbuffer );
 		device_context->Draw( 6, 0 );
 	}
 

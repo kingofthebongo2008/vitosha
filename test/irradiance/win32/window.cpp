@@ -122,6 +122,7 @@ namespace wnd
 		pipeline.process();
 
 
+		/*
 		//render text
 		m_d2d_render_target->BeginDraw();
 		m_d2d_render_target->Clear();
@@ -141,6 +142,7 @@ namespace wnd
 		d3d11::ps_set_shader(device_context, m_render_context->m_color_texture_pixel_shader );
         d3d11::ps_set_shader_resources( device_context,  m_d2d_resource );
 		gx::draw_screen_space_quad(device_context, m_render_context, math::identity_matrix());
+		*/
 	}
 
 	void window::resize_window(uint32_t width, uint32_t height)

@@ -12,7 +12,7 @@ namespace gx
     struct scene_pipeline_params
     {
         std::vector< math::float4x4 >* m_world_matrices;
-        std::vector< void* >*                m_data;
+        std::vector< void* >*          m_data;
     };
 
     struct view_pipeline_params
@@ -23,7 +23,7 @@ namespace gx
         math::float4x4                 m_inverse_projection_matrix;
         std::vector< math::float4x4 >* m_wvp_matrices;
         std::vector< math::float4x4 >* m_world_matrices;
-        std::vector< void* >*                m_data;
+        std::vector< void* >*          m_data;
     };
 }
 
