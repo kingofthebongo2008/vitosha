@@ -32,9 +32,6 @@ namespace gx
         , m_debug_view_space_depth_pixel_shader (  device )
         , m_debug_view_space_depth_pixel_shader_cbuffer (  device )
 
-        , m_screen_space_uv_vertex_shader         (  device )
-        , m_screen_space_uv_vertex_shader_cbuffer (  device )
-
 		, m_lambert_shift_invariant_pixel_shader(device )
 		, m_lambert_pixel_cbuffer( device )
         , m_blinn_phong_shift_invariant_pixel_shader( device  )

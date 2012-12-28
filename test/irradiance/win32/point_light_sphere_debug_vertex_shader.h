@@ -29,7 +29,7 @@ class point_light_sphere_debug_vertex_shader_constant_buffer
 
 	void bind_as_vertex_constant_buffer(ID3D11DeviceContext* context)
 	{
-		context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_buffer));
+		context->VSSetConstantBuffers(1, 1, dx::get_pointer(m_buffer));
 	}
 
 	operator ID3D11Buffer*()

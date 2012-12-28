@@ -370,6 +370,11 @@ namespace gx
             m_debug_render_data.m_depth_srv.get()
         };
 
+		math::float4x4 matrices[] = { math::identity_matrix(), math::identity_matrix() };
+		constant_buffer_update( device_context, m_per_pass_buffer.get(), &matrices[0], 2 * sizeof(math::float4x4) );
+		device_context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
+		device_context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
+
         d3d11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view );
         d3d11::ps_set_shader( device_context, m_shader_database->m_copy_depth_pixel_shader );
         draw_screen_space_quad( device_context, this );
@@ -383,7 +388,7 @@ namespace gx
 			m_back_buffer.get()
 		};
 
-         ID3D11SamplerState* samplers[] =	{ 
+        ID3D11SamplerState* samplers[] =	{ 
 												m_default_sampler_state.get(), 
 												m_default_sampler_state.get(), 
 												m_default_sampler_state.get(), 

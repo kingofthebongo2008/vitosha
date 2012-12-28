@@ -64,9 +64,6 @@ namespace gx
         debug_view_space_depth_pixel_shader                         m_debug_view_space_depth_pixel_shader;
         debug_view_space_depth_pixel_shader_constant_buffer         m_debug_view_space_depth_pixel_shader_cbuffer;
 
-        screen_space_uv_vertex_shader                               m_screen_space_uv_vertex_shader;            
-        screen_space_uv_vertex_shader_constant_buffer               m_screen_space_uv_vertex_shader_cbuffer;
-        
 		lambert_shift_invariant_pixel_shader					    m_lambert_shift_invariant_pixel_shader;
 		lambert_shift_invariant_pixel_shader_constant_buffer	    m_lambert_pixel_cbuffer;
 

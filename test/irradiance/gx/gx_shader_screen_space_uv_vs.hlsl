@@ -1,3 +1,5 @@
+#include "gx_shader_geometry_pass_common.hlsl"
+
 cbuffer per_object
 {
 	row_major float4x4 m_wvp; 

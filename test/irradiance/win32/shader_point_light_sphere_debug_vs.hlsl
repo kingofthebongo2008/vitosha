@@ -1,4 +1,6 @@
-cbuffer per_object
+#include "gx/gx_shader_geometry_pass_common.hlsl"
+
+cbuffer per_object : register(SLOT_PER_DRAW_CALL)
 {
 	row_major float4x4 vp;	//view projection
 }
