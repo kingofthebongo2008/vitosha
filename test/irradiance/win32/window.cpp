@@ -40,7 +40,7 @@ namespace wnd
 			, m_d2d_resource(d2d_resource)
 	{
 
-		math::float4  view_position_ws = math::set( 0.0f, 0.0f,  -5.0f, 0.0f ); //meters
+		math::float4  view_position_ws = math::set( 0.0f, 5.0f,  -5.0f, 0.0f ); //meters
 		math::float4  view_direction_ws  = math::set( 0.0f, 0.0f,  1.0f, 0.0f ); //look along the z
 		math::float4  view_up_ws = math::set( 0.0f, 1.0f, 0.0f, 0.0f );  //up vector
 
@@ -182,8 +182,8 @@ namespace wnd
 
 	void window::process_user_input()
 	{
-        const float movement_camera_speed = 0.002f;
-        const float rotation_camera_speed = 0.0001f * 3.1415f;
+        const float movement_camera_speed = 0.06f;
+        const float rotation_camera_speed = 0.002f * 3.1415f;
 
 		if (m_pad_state.is_button_down<io::pad_state::button_6>())
 		{
@@ -191,7 +191,7 @@ namespace wnd
 			
 			auto		m = gx::create_inverse_perspective_matrix(&m_main_camera);
 			auto		mouse_coordinates = m_mouse_state.get_coordinates();
-			auto		point = math::set( static_cast<float> (std::get<0>( mouse_coordinates ) ),  static_cast<float> ( std::get<1>( mouse_coordinates ) ) , 0.0f, 1.0f );
+			auto		point = math::set( static_cast<float> (std::get<0>( mouse_coordinates ) ),  -static_cast<float> ( std::get<1>( mouse_coordinates ) ) , 0.0f, 1.0f );
 			auto		point_vs = math::unproject( point, m, m_view_port );
 			auto		radius = 0.25f;
 			auto		center = math::unproject( math::identity_r3(), m, m_view_port );

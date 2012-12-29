@@ -35,9 +35,9 @@ namespace gx
             m_light_count = value;
         }
 
-        void set_light_direction_ws( const math::float4* begin, const math::float4* end )
+        void set_light_direction_vs( const math::float4* begin, const math::float4* end )
         {
-            std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_direction_ws[0], 8, 0 ) );
+            std::copy(begin, end, stdext::make_checked_array_iterator(&m_light_direction_vs[0], 8, 0 ) );
         }
 
         void set_light_color( const math::float4* begin, const math::float4* end)
@@ -67,7 +67,7 @@ namespace gx
 
         size_t size() const
         {
-            return ( sizeof(m_inverse_projection) + sizeof(m_view) + sizeof(m_light_direction_ws) + sizeof ( m_light_color ) + sizeof(m_light_count) + (16 - 1) ) & ~(16 - 1) ;
+            return ( sizeof(m_inverse_projection) + sizeof(m_view) + sizeof(m_light_direction_vs) + sizeof ( m_light_color ) + sizeof(m_light_count) + (16 - 1) ) & ~(16 - 1) ;
         }
 
 		private:
@@ -76,9 +76,9 @@ namespace gx
 		math::float4x4	m_inverse_projection;
         math::float4x4	m_view;
 
-        math::float4     m_light_direction_ws[8];
+        math::float4     m_light_direction_vs[8];
         math::float4     m_light_color[8];
-        uint32_t                m_light_count;
+        uint32_t         m_light_count;
 	};
 
 	class light_directional_pixel_shader

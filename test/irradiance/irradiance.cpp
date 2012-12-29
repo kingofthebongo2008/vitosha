@@ -1,6 +1,8 @@
 #include "precompiled.h"
 
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 
 #include <d3d11/d3d11_system.h>
 #include <math/math_graphics.h>
@@ -20,6 +22,8 @@
 #include "win32/floor.h"
 #include "win32/point_lights.h"
 #include "win32/directional_lights.h"
+#include "win32/room.h"
+
 
 std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_context, d3d11::system_context context, std::shared_ptr<fnd::universe> universe )
 {
@@ -36,6 +40,11 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	universe->add_world(dynamic_entities);
 	universe->add_world(scene);
 
+	//room
+	std::ifstream f("giroom.am", std::ios_base::in | std::ios_base::binary);
+
+	auto room_entity = create_room_entity(context.m_device.get(), render_context->get_shader_database(), f);
+
 
     //floor
 	auto floor_entity = create_floor_entity( context.m_device.get(), render_context->get_shader_database(), 20, 20, 30 );
@@ -46,7 +55,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
     math::float4 light_position = math::set( 5.0f, 5.0f, 0.0f, 1.0f );
 
-    directional_lights.push_back(  directional_light( ( math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) )  , gx::color::white()));
+    directional_lights.push_back(  directional_light( gx::color::white(), math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f)) ));
 
     //should be quad
     auto directional_entity = create_directional_lights_entity( context.m_device.get(), render_context->m_screen_space_render_data.m_screen_space_vertex_buffer, &directional_lights[0], &directional_lights[0] + directional_lights.size()  );
@@ -80,18 +89,21 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );
     auto node_3 = std::make_shared<gx::scene::node> ( m_4, directional_entity.get() );
     auto node_4 = std::make_shared<gx::scene::node> ( math::translation(0.0f, -2.0f, 0.0f) , floor_entity.get() );
+	auto node_5 = std::make_shared<gx::scene::node> ( math::translation(0.0f, -2.0f, 0.0f), room_entity.get() );
 
 	//1. add to graphic world
 	gx::add_node(root, node_1);
 	gx::add_node(root, node_2);
     gx::add_node(root, node_3);
     gx::add_node(root, node_4);
+	gx::add_node(root, node_5);
 	
 	//2. add to entities world
 	entities->add_entity( entity_1);
 	entities->add_entity( point_lights);
     entities->add_entity( directional_entity );
     entities->add_entity( floor_entity );
+	entities->add_entity( room_entity );
 
 	scene->rebuild();
 

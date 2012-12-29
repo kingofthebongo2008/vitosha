@@ -161,7 +161,7 @@ class point_lights_entity : public gx::entity
 
 	point_lights_entity
 		( 
-			gx::indexed_draw_call_3	draw_call,
+			gx::indexed_draw_call<3, gx::bit_16>	draw_call,
 			d3d11::ibuffer_ptr	transform_color,
 			d3d11::iinputlayout_ptr	input_layout,
 			shader_info info
@@ -179,7 +179,7 @@ class point_lights_entity : public gx::entity
 	void on_execute_draw_calls(gx::draw_call_context* context);
 
 	private:
-	gx::indexed_draw_call_3	m_draw_call;		//sphere vertex and index buffer (holds reference to the instance stream inside)
+	gx::indexed_draw_call<3, gx::bit_16>	m_draw_call;		//sphere vertex and index buffer (holds reference to the instance stream inside)
 	d3d11::ibuffer_ptr	m_transform_color;	//instance stream
 	d3d11::iinputlayout_ptr	m_input_layout;
 

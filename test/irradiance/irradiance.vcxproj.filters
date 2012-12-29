@@ -377,6 +377,9 @@
     <ClInclude Include="gx\gx_shader_database.h">
       <Filter>gx</Filter>
     </ClInclude>
+    <ClInclude Include="win32\room.h">
+      <Filter>irradiance</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -602,6 +605,9 @@
     </ClCompile>
     <ClCompile Include="gx\gx_shader_database.cpp">
       <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\room.cpp">
+      <Filter>irradiance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

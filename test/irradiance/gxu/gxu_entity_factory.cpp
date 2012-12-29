@@ -56,7 +56,7 @@ namespace gxu
 
 	}
 
-    gx::indexed_draw_call_2 create_lat_lon_sphere( ID3D11Device* device , float radius, uint32_t subdivision_count )
+    gx::indexed_draw_call<2, gx::bit_16> create_lat_lon_sphere( ID3D11Device* device , float radius, uint32_t subdivision_count )
     {
 		d3d11::ibuffer_ptr positions;
         d3d11::ibuffer_ptr normals_uvs;
@@ -226,7 +226,7 @@ namespace gxu
 
 		indices = d3d11::create_immutable_index_buffer(  device, &indices_v[0], indices_v.size() * sizeof(uint16_t) );
 
-		return gx::create_indexed_draw_call<8,12> ( static_cast<uint32_t> ( indices_v.size() ), positions, normals_uvs, indices ) ;
+		return gx::create_indexed_draw_call<8,12, gx::bit_16> ( static_cast<uint32_t> ( indices_v.size() ), positions, normals_uvs, indices ) ;
     }
 
 	std::tuple< d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, d3d11::ibuffer_ptr, uint32_t > create_lat_lon_sphere_2( ID3D11Device* device, float radius, uint32_t subdivision_count )

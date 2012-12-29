@@ -146,7 +146,7 @@ namespace gx
         */
 
         //gx::debug_draw_depth_gbuffer( device_context, m_render_context, math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( -0.5f,  0.5f, 0.0f ) ) );
-        //gx::debug_draw_depth_buffer( device_context, m_render_context, in_params->m_projection_matrix , math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( -0.5f,  0.5f, 0.0f ) ) );
+        gx::debug_draw_depth_buffer( device_context, m_render_context, in_params->m_projection_matrix , math::mul(  math::scaling( 0.5f, 0.5f, 1.0f) , math::translation( -0.5f,  0.5f, 0.0f ) ) );
 
 
 

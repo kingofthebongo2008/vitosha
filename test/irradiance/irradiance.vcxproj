@@ -346,6 +346,7 @@
     <ClInclude Include="win32\point_lights.h" />
     <ClInclude Include="win32\point_light_sphere_debug_pixel_shader.h" />
     <ClInclude Include="win32\point_light_sphere_debug_vertex_shader.h" />
+    <ClInclude Include="win32\room.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3d11\d3d11_helpers.cpp" />
@@ -431,6 +432,7 @@
     <ClCompile Include="win32\point_lights.cpp" />
     <ClCompile Include="win32\point_light_sphere_debug_pixel_shader.cpp" />
     <ClCompile Include="win32\point_light_sphere_debug_vertex_shader.cpp" />
+    <ClCompile Include="win32\room.cpp" />
     <ClCompile Include="win32\window.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -131,9 +131,20 @@ namespace math
 		return _mm_and_ps(v, _mm_load_ps(address) );
 	}
 
+	inline float4 load3u(const float* __restrict const address)
+	{
+		float4 v = set_uint32(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0);
+		return _mm_and_ps(v, _mm_loadu_ps(address) );
+	}
+
 	inline float4 load4(const float* __restrict const address)
 	{
 		return _mm_load_ps(address);
+	}
+
+	inline float4 load4u(const float* __restrict const address)
+	{
+		return _mm_loadu_ps(address);
 	}
 
     inline float4 load4(const uint32_t* __restrict const address)

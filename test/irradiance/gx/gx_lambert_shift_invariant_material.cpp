@@ -15,7 +15,7 @@ namespace gx
 		auto device_context = draw_call_context->m_device_context;
 
         std::get<1>(m_vertex_pipeline).set_w(*draw_call_context->m_world_matrix);
-        std::get<1>(m_vertex_pipeline).set_normal_transform( math::mul( *draw_call_context->m_view_matrix, *draw_call_context->m_world_matrix ));
+		std::get<1>(m_vertex_pipeline).set_normal_transform( math::transpose( math::inverse ( math::mul( *draw_call_context->m_view_matrix, *draw_call_context->m_world_matrix ) ) ) );
         std::get<1>(m_vertex_pipeline).flush(device_context);
         std::get<1>(m_vertex_pipeline).bind_as_vertex_constant_buffer(device_context);
 

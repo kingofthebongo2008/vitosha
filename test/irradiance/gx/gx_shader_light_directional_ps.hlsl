@@ -2,11 +2,10 @@ cbuffer per_draw_call : register(c0)
 {
     row_major float4x4 m_inverse_projection;
     row_major float4x4 m_view; 
-    float4             m_light_direction_ws[8];
+    float4             m_light_direction_vs[8];
     float4             m_light_color[8];
     uint               m_light_count;
 };
-
 
 struct vs_output
 {
@@ -130,28 +129,27 @@ float3 main( in  vs_output input) : sv_target
     float2 uv               = input.uv;
 
 	float3 kd               = diffuse_gbuffer.Sample(default_sampler, uv).xyz;
-    float3 n_vs             = normal_gbuffer.Sample( default_sampler, uv ).xyz;
+    float3 n_vs             = normalize( normal_gbuffer.Sample( default_sampler, uv ).xyz );
     float4 ks_gloss         = specular_gloss_gbuffer.Sample(default_sampler, uv);
 
     float depth_buffer_z    = depth_buffer.Sample(default_sampler, uv).x;
 
+	//todo: fix with far plane to be at infinity
     if ( depth_buffer_z == 1.0f ) discard;
 
     float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
 
-    float3 v            = surface_sample_position_vs;
+    float3 v				= surface_sample_position_vs;
 
-    float3 specular_color = decode_specular_color( ks_gloss );
+	float3 specular_color = decode_specular_color( ks_gloss );
     float  specular_power = decode_specular_power( ks_gloss );
 
     float3 radiance		  =  float3(0.0f,0.0f,0.0f);
 
     for (uint i = 0 ; i < m_light_count;++i)
     {
-        const float4		light_direction_1_ws = normalize( m_light_direction_ws[0] );
-
-	    const float3 light_vs_1	= normalize( mul ( light_direction_1_ws, m_view ).xyz );
-	    const float3 normal_vs_1	= n_vs;
+	    const float3 light_vs_1		= m_light_direction_vs[0].xyz;
+		const float3 normal_vs_1	= n_vs;
 
         blinn_phong_surface surface = blinn_phong(kd, specular_color, specular_power,  light_vs_1 , normal_vs_1, normalize(v) );
         

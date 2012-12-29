@@ -18,7 +18,7 @@
 
 point_lights_entity::point_lights_entity
 		( 
-			gx::indexed_draw_call_3	draw_call,
+			gx::indexed_draw_call<3, gx::bit_16>	draw_call,
 			d3d11::ibuffer_ptr	transform_color,
 			d3d11::iinputlayout_ptr	input_layout,
 			point_lights_entity::shader_info info
@@ -130,7 +130,7 @@ std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* de
 	dx::throw_if_failed<d3d11::create_input_layout> (device->CreateInputLayout(&desc[0], sizeof(desc) / sizeof(desc[0]) ,debug_vertex_shader.m_code, debug_vertex_shader.m_code_size, dx::get_pointer(input_layout)));
 
 	return std::make_shared<point_lights_entity>( 
-		gx::create_indexed_draw_call< 8, 12,  sizeof(math::float4x4) + sizeof(math::float4) > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )
+		gx::create_indexed_draw_call< 8, 12,  sizeof(math::float4x4) + sizeof(math::float4), gx::bit_16 > (std::get<3>(sphere), std::get<0>(sphere), std::get<1>(sphere), transform_color, std::get<2>(sphere) )
 		, transform_color
 		, input_layout
 		, info
