@@ -122,6 +122,13 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
     </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_encode_for_back_buffer_ps.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T ps_5_0 /Vn %(FileName)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension) /I $(ProjectDir) /T ps_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</Outputs>
+    </CustomBuild>
     <CustomBuild Include="gx\gx_shader_grid_gs.hlsl">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T gs_5_0 /Vn %(FileName)</Command>
@@ -270,6 +277,7 @@
     <ClInclude Include="gx\gx_color.h" />
     <ClInclude Include="gx\gx_color_material.h" />
     <ClInclude Include="gx\gx_color_pixel_shader.h" />
+    <ClInclude Include="gx\gx_encode_for_back_buffer_pixel_shader.h" />
     <ClInclude Include="gx\gx_color_texture_channel_3_pixel_shader.h" />
     <ClInclude Include="gx\gx_color_texture_pixel_shader.h" />
     <ClInclude Include="gx\gx_constant_buffer_helper.h" />
@@ -364,6 +372,7 @@
     <ClCompile Include="gx\gx_blinn_phong_shift_invariant_material.cpp" />
     <ClCompile Include="gx\gx_blinn_phong_shift_invariant_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_color_material.cpp" />
+    <ClCompile Include="gx\gx_encode_for_back_buffer_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_color_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_color_texture_channel_3_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_color_texture_pixel_shader.cpp" />

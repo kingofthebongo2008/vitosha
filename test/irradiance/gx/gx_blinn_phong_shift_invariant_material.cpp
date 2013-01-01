@@ -15,7 +15,7 @@ namespace gx
 		auto device_context = draw_call_context->m_device_context;
 
         std::get<1>(m_vertex_pipeline).set_w(*draw_call_context->m_world_matrix);
-        std::get<1>(m_vertex_pipeline).set_normal_transform( math::mul( *draw_call_context->m_world_matrix, *draw_call_context->m_view_matrix ));
+        std::get<1>(m_vertex_pipeline).set_normal_transform( math::transpose( math::inverse( math::mul( *draw_call_context->m_world_matrix, *draw_call_context->m_view_matrix ))));
 
 
         std::get<1>(m_vertex_pipeline).flush(device_context);
@@ -32,9 +32,9 @@ namespace gx
 
 	blinn_phong_shift_invairant_material::blinn_phong_shift_invairant_material
         ( 
-                transform_position_normal_uv_vertex_pipeline                vertex_pipeline,
-                blinn_phong_shift_invariant_pixel_shader					pixel_shader,
-                blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
+                const transform_position_normal_uv_vertex_pipeline              vertex_pipeline,
+                const blinn_phong_shift_invariant_pixel_shader					pixel_shader,
+                const blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
 				math::float4                                         kd,
 				math::float4                                         ks_gloss
 		
@@ -49,15 +49,18 @@ namespace gx
         set_ks_gloss(ks_gloss);
 	}
 
-	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( shader_database* context, math::float4 kd, math::float4 ks_gloss )
+	blinn_phong_shift_invairant_material create_blinn_phong_shift_invairant_material( const shader_database* context, math::float4 kd, math::float4 ks_gloss )
 	{
+			std::tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer, transform_position_normal_uv_input_layout >
+			tuple(
+			        std::move(context->m_transform_position_normal_uv_vertex_shader),
+                    std::move(context->m_transform_position_normal_uv_vertex_shader_cbuffer),
+                    std::move(context->m_transform_position_normal_uv_input_layout)
+            
+			);
+
 		    return blinn_phong_shift_invairant_material(
-                                std::make_tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer,  transform_position_normal_uv_input_layout > 
-                                ( 
-                                    std::move(context->m_transform_position_normal_uv_vertex_shader),
-                                    std::move(context->m_transform_position_normal_uv_vertex_shader_cbuffer),
-                                    std::move(context->m_transform_position_normal_uv_input_layout)
-                                ) ,
+								std::move(tuple),
 								context->m_blinn_phong_shift_invariant_pixel_shader,
 								context->m_blinn_phong_shift_invariant_pixel_cbuffer,
 								kd,

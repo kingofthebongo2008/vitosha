@@ -17,6 +17,7 @@
 #include <gx/gx_copy_depth_pixel_shader.h>
 
 #include <gx/gx_debug_view_space_depth_pixel_shader.h>
+#include <gx/gx_encode_for_back_buffer_pixel_shader.h>
 
 #include <gx/gx_lambert_pixel_shader.h>
 #include <gx/gx_lambert_shift_invariant_pixel_shader.h>
@@ -60,6 +61,8 @@ namespace gx
 
 		color_texture_pixel_shader								    m_color_texture_pixel_shader;
         color_texture_channel_3_pixel_shader					    m_color_texture_channel_3_pixel_shader;
+
+		encode_for_back_buffer_pixel_shader							m_encode_for_back_buffer_pixel_shader;
 
         debug_view_space_depth_pixel_shader                         m_debug_view_space_depth_pixel_shader;
         debug_view_space_depth_pixel_shader_constant_buffer         m_debug_view_space_depth_pixel_shader_cbuffer;

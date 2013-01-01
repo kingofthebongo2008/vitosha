@@ -453,7 +453,7 @@ namespace gx
 
 		device_context->PSSetSamplers( 0, sizeof(samplers) / sizeof(samplers[0]), &samplers[0] );
 
-        d3d11::ps_set_shader(device_context, m_shader_database->m_color_texture_pixel_shader );
+		d3d11::ps_set_shader(device_context, m_shader_database->m_encode_for_back_buffer_pixel_shader );
         d3d11::ps_set_shader_resources( device_context,  m_light_buffer_render_data.m_light_buffer );
 
 		math::float4x4 matrices[] = { math::identity_matrix(), math::identity_matrix() };

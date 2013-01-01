@@ -43,7 +43,7 @@ namespace gx
 		m_pixel_cbuffer.set_color(color);
 	}
 
-	color_material create_color_material( shader_database* context, math::float4 color )
+	color_material create_color_material( const shader_database* context, math::float4 color )
 	{
 		return color_material( 
 								context->m_transform_position_vertex_shader,

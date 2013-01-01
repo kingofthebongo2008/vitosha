@@ -2,7 +2,6 @@
 *_compiled.hlsl
 
 x64/
-win32/
 ipch/
 
 ## Ignore Visual Studio temporary files, build results, and

@@ -43,7 +43,7 @@ class room_entity : public gx::entity
 	gx::blinn_phong_shift_invairant_material		m_material;
 };
 
-std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, gx::shader_database* context, std::istream& in);
+std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx::shader_database* context, std::istream& in);
 
 
 #endif

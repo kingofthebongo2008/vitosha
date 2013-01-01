@@ -28,7 +28,7 @@ ps_output main( in  vs_output input)
 {
 	ps_output result;
 
-    result.m_kd = m_kd;
+    result.m_kd = m_kd.xyz;
     result.m_normal_depth = float4(input.normal_ws, 0.5f) ;
 	result.m_ks_gloss = float4(0.0f, 0.0f, 0.0f, 0.0f);
     result.m_ks_gloss = float4(1.0f, 0.0f, 0.0f, 0.0f);

@@ -21,8 +21,8 @@ namespace gx
 		}
 
 		d3d11::ipixelshader_ptr		m_shader;
-		const void*						m_code;
-		uint32_t						m_code_size;
+		const void*					m_code;
+		uint32_t					m_code_size;
     };
 }
 

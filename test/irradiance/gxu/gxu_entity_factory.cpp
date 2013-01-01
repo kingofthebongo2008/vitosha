@@ -82,7 +82,7 @@ namespace gxu
 		for ( uint32_t i = 0; i < vertical_segments + 1 ; ++i)
 		{
 			float v = ( 1.0f - i ) / vertical_segments;
-			float lattitude = ( i * pi / vertical_segments ) - pi_div_two;
+			float lattitude = ( ( (float) i / vertical_segments ) * pi  ) - pi_div_two;
 
 			float dxz;
 			float dy;
@@ -102,11 +102,10 @@ namespace gxu
 
 				auto v_3 = math::splat( two_pi );
 				auto v_4 = math::splat( static_cast<float> (horizontal_segments) );
-				auto v_5 =  math::splat( pi );
 
-				auto v_6 =  math::mul( v_1, v_3 );
-				auto v_7 =  math::div( v_6, v_4 );
-				auto longitude =  math::sub(v_7, v_5);
+				auto v_5 =  math::mul( v_1, v_3 );
+				auto v_6 =  math::div( v_5, v_4 );
+				auto longitude =  math::sub(v_6, math::splat(pi) );
 
 				auto dx =  math::sin(longitude);
 				auto dz =  math::cos(longitude);
@@ -127,8 +126,8 @@ namespace gxu
 				math::float4x4 p_1;
 
 				p_1.r[0] = x;
-				p_1.r[1] = y;
-				p_1.r[2] = z;
+				p_1.r[1] = z;
+				p_1.r[2] = y;
 				p_1.r[3] = one;
 
 				//store positions
@@ -138,19 +137,19 @@ namespace gxu
 
 				//sse 1,2,3 requires memory addresses to be 16 byte aligned. we cannot guarantee this, so we store byte by byte
 				auto uv_address = &normals_uvs_v[vertex_count];
-				uv_address->m_normal = normal( dx.m128_f32[0], v_10.m128_f32[0],  dz.m128_f32[0], 1.0f);
+				uv_address->m_normal = normal( dx.m128_f32[0], dz.m128_f32[0], v_10.m128_f32[0], 0.0f);
 				uv_address->m_uv = uv( u.m128_f32[0], v );
 
 				uv_address++;
-				uv_address->m_normal = normal(dx.m128_f32[1], v_10.m128_f32[1], dz.m128_f32[1], 1.0f);
+				uv_address->m_normal = normal(dx.m128_f32[1], dz.m128_f32[1], v_10.m128_f32[1], 0.0f);
 				uv_address->m_uv = uv( u.m128_f32[1], v );
 
 				uv_address++;
-				uv_address->m_normal = normal( dx.m128_f32[2], v_10.m128_f32[2], dz.m128_f32[2], 1.0f);
+				uv_address->m_normal = normal( dx.m128_f32[2], dz.m128_f32[2], v_10.m128_f32[2], 0.0f);
 				uv_address->m_uv = uv( u.m128_f32[2], v );
 
 				uv_address++;
-				uv_address->m_normal = normal( dx.m128_f32[3], v_10.m128_f32[3], dz.m128_f32[3], 1.0f);
+				uv_address->m_normal = normal( dx.m128_f32[3], dz.m128_f32[3], v_10.m128_f32[3], 0.0f);
 				uv_address->m_uv = uv( u.m128_f32[3], v );
 			}
 
@@ -158,7 +157,7 @@ namespace gxu
 			for (uint32_t j = horizontal_segments_div_4 ; j < horizontal_segments + 1 ; ++j, ++vertex_count )
 			{
 				auto u = static_cast<float>  (j)  / horizontal_segments;
-				auto longitude = ( j * two_pi / horizontal_segments )  - pi; 
+				auto longitude = ( j * two_pi / horizontal_segments  )  - pi; 
 
 				float dx;
 				float dz;
@@ -177,11 +176,11 @@ namespace gxu
 
 				//store the position
 				position* address = &positions_v[vertex_count];
-				*address = position ( x, y, z, 1.0f);
+				*address = position ( x, z, y, 1.0f);
 
 				//store normal and uv
 				normal_uv* uv_address = &normals_uvs_v[vertex_count];
-				uv_address->m_normal = normal(dx, dy, dz, 1.0f );
+				uv_address->m_normal = normal(dx, dz, dy, 0.0f );
 				uv_address->m_uv.m_u = u;
 				uv_address->m_uv.m_v = v;
 			}
@@ -300,8 +299,8 @@ namespace gxu
 				math::float4x4 p_1;
 
 				p_1.r[0] = x;
-				p_1.r[1] = y;
-				p_1.r[2] = z;
+				p_1.r[1] = z;
+				p_1.r[2] = y;
 				p_1.r[3] = one;
 
 				//store positions
@@ -311,19 +310,19 @@ namespace gxu
 
 				//sse 1,2,3 requires memory addresses to be 16 byte aligned. we cannot guarantee this, so we store byte by byte
 				auto uv_address = &normals_uvs_v[vertex_count];
-				uv_address->m_normal = normal( dx.m128_f32[0], v_10.m128_f32[0],  dz.m128_f32[0], 1.0f);
+				uv_address->m_normal = normal( dx.m128_f32[0], dz.m128_f32[0],  v_10.m128_f32[0], 1.0f);
 				uv_address->m_uv = uv( u.m128_f32[0], v );
 
 				uv_address++;
-				uv_address->m_normal = normal(dx.m128_f32[1], v_10.m128_f32[1], dz.m128_f32[1], 1.0f);
+				uv_address->m_normal = normal(dx.m128_f32[1], dz.m128_f32[1], v_10.m128_f32[1], 1.0f);
 				uv_address->m_uv = uv( u.m128_f32[1], v );
 
 				uv_address++;
-				uv_address->m_normal = normal( dx.m128_f32[2], v_10.m128_f32[2], dz.m128_f32[2], 1.0f);
+				uv_address->m_normal = normal( dx.m128_f32[2], dz.m128_f32[2], v_10.m128_f32[2], 1.0f);
 				uv_address->m_uv = uv( u.m128_f32[2], v );
 
 				uv_address++;
-				uv_address->m_normal = normal( dx.m128_f32[3], v_10.m128_f32[3], dz.m128_f32[3], 1.0f);
+				uv_address->m_normal = normal( dx.m128_f32[3], dz.m128_f32[3], v_10.m128_f32[3], 1.0f);
 				uv_address->m_uv = uv( u.m128_f32[3], v );
 			}
 
@@ -350,11 +349,11 @@ namespace gxu
 
 				//store the position
 				position* address = &positions_v[vertex_count];
-				*address = position ( x, y, z, 1.0f);
+				*address = position ( x, z, y, 1.0f);
 
 				//store normal and uv
 				normal_uv* uv_address = &normals_uvs_v[vertex_count];
-				uv_address->m_normal = normal(dx, dy, dz, 1.0f );
+				uv_address->m_normal = normal(dx, dz, dy, 1.0f );
 				uv_address->m_uv.m_u = u;
 				uv_address->m_uv.m_v = v;
 			}

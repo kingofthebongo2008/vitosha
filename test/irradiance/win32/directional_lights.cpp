@@ -60,14 +60,12 @@ void directional_lights_entity::on_execute_draw_calls( gx::draw_call_context* co
 					std::begin(m_light_direction_ws), std::end(m_light_direction_ws), std::begin(light_direction_vs),
 					[=]( math::float4 v )
 					{
-						math::float4 v2 = math::mul ( v,  *context->m_view_matrix ) ;
-						math::float4 v1 = math::mul ( v,  inverse_transpose_view ) ;
 						return math::normalize3( math::mul ( v, inverse_transpose_view) );
 					}
 		
 		);
 
-	std::get<1>(m_pixel_pipeline).set_light_count( static_cast<uint32_t> ( m_light_direction_ws.size() ) );
+	std::get<1>(m_pixel_pipeline).set_light_count( static_cast<uint32_t> ( light_direction_vs.size() ) );
     std::get<1>(m_pixel_pipeline).set_light_direction_vs( &light_direction_vs[0], &light_direction_vs[0] + light_direction_vs.size() );
     std::get<1>(m_pixel_pipeline).set_light_color( &m_light_color[0], &m_light_color[0] + m_light_color.size() );
 

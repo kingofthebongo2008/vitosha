@@ -10,7 +10,7 @@ namespace gx
 {
     struct draw_call_context
     {
-        ID3D11DeviceContext*			m_device_context;
+        ID3D11DeviceContext*	  m_device_context;
 
 		math::float4x4*           m_view_matrix;
         math::float4x4*           m_projection_matrix;
@@ -19,7 +19,7 @@ namespace gx
         math::float4x4*           m_wvp_matrix;
 		math::float4x4*           m_world_matrix;
 
-		uint16_t						m_entity_draw_call_index;
+		uint16_t				  m_entity_draw_call_index;
     };
 }
 

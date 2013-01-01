@@ -42,7 +42,6 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
 	//room
 	std::ifstream f("giroom.am", std::ios_base::in | std::ios_base::binary);
-
 	auto room_entity = create_room_entity(context.m_device.get(), render_context->get_shader_database(), f);
 
 
@@ -53,9 +52,9 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
 
-    math::float4 light_position = math::set( 5.0f, 5.0f, 0.0f, 1.0f );
+    math::float4 light_position = math::set( 5.0f, 7.0f, 5.0f, 1.0f );
 
-    directional_lights.push_back(  directional_light( gx::color::white(), math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f)) ));
+    directional_lights.push_back(  directional_light( gx::color::white(), math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) ));
 
     //should be quad
     auto directional_entity = create_directional_lights_entity( context.m_device.get(), render_context->m_screen_space_render_data.m_screen_space_vertex_buffer, &directional_lights[0], &directional_lights[0] + directional_lights.size()  );
@@ -85,7 +84,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     //auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::lambert_shift_invairant_material_factory>( render_context, 1.0f, 20, gx::color::blue() ); 
 	auto entity_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, 0.12f )  ); 
 	
-	auto node_1 = std::make_shared<gx::scene::node> ( m_3, entity_1.get() );
+	auto node_1 = std::make_shared<gx::scene::node> ( m_4, entity_1.get() );
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );
     auto node_3 = std::make_shared<gx::scene::node> ( m_4, directional_entity.get() );
     auto node_4 = std::make_shared<gx::scene::node> ( math::translation(0.0f, -2.0f, 0.0f) , floor_entity.get() );

@@ -28,6 +28,8 @@ namespace gx
 		, m_color_pixel_shader_cbuffer ( device )
 		, m_color_texture_pixel_shader (  device )
         , m_color_texture_channel_3_pixel_shader (  device )
+
+		, m_encode_for_back_buffer_pixel_shader ( device )
         
         , m_debug_view_space_depth_pixel_shader (  device )
         , m_debug_view_space_depth_pixel_shader_cbuffer (  device )

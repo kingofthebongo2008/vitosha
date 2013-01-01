@@ -56,7 +56,7 @@ class floor_entity : public gx::entity
     uint16_t                                                        m_material_id;
 };
 
-std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count );
+std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, const gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count );
 
 
 #endif

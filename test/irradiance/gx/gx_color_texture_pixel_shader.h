@@ -20,7 +20,7 @@ namespace gx
 			return m_shader.get();
 		}
 
-		d3d11::ipixelshader_ptr		m_shader;
+		d3d11::ipixelshader_ptr			m_shader;
 		const void*						m_code;
 		uint32_t						m_code_size;
     };

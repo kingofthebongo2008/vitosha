@@ -55,7 +55,7 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
     d3d11::gs_set_shader(device_context, nullptr );
 }
 
-std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
+std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, const gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
 {
     math::half half[8] = {};
 
@@ -63,19 +63,23 @@ std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, gx::sha
     d3d11::ibuffer_ptr out  = d3d11::create_stream_out_vertex_buffer(device, &half[0], 6 * sizeof(half) );
 
 
+	std::tuple <gx::transform_position_normal_vertex_shader, gx::transform_position_normal_vertex_shader_constant_buffer,  gx::transform_position_normal_input_layout > 
+	tupple(
+		                        std::move(context->m_transform_position_normal_vertex_shader),
+                                std::move(context->m_transform_position_normal_vertex_shader_cbuffer),
+                                std::move(context->m_transform_position_normal_input_layout)
+        
+		
+	);
+
     return std::make_shared<floor_entity>
     (  
-        std::make_tuple< gx::transform_position_normal_vertex_shader, gx::transform_position_normal_vertex_shader_constant_buffer,  gx::transform_position_normal_input_layout > 
-                                ( 
-                                    std::move(context->m_transform_position_normal_vertex_shader),
-                                    std::move(context->m_transform_position_normal_vertex_shader_cbuffer),
-                                    std::move(context->m_transform_position_normal_input_layout)
-                                ),
-                                gx::grid_geometry_shader(device) ,
+								std::move(tupple),
+								gx::grid_geometry_shader(device) ,
 								context->m_blinn_phong_shift_invariant_pixel_shader,
 								context->m_blinn_phong_shift_invariant_pixel_cbuffer,
                                 std::make_tuple< d3d11::ibuffer_ptr, d3d11::ibuffer_ptr > ( std::move(point),  std::move(out) )
-                                );
+	);
 }
 
 

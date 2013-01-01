@@ -61,6 +61,9 @@
     <CustomBuild Include="gx\gx_shader_transform_position_normal_vs.hlsl">
       <Filter>gx</Filter>
     </CustomBuild>
+    <CustomBuild Include="gx\gx_shader_encode_for_back_buffer_ps.hlsl">
+      <Filter>gx</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="irradiance.ico" />
@@ -380,6 +383,9 @@
     <ClInclude Include="win32\room.h">
       <Filter>irradiance</Filter>
     </ClInclude>
+    <ClInclude Include="gx\gx_encode_for_back_buffer_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -608,6 +614,9 @@
     </ClCompile>
     <ClCompile Include="win32\room.cpp">
       <Filter>irradiance</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_encode_for_back_buffer_pixel_shader.cpp">
+      <Filter>gx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

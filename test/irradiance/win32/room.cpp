@@ -134,7 +134,7 @@ namespace
 }
 
 
-std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, gx::shader_database* database, std::istream& in )
+std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx::shader_database* database, std::istream& in )
 {
 	uint32_t		version = 0;
 	int8_t			header[9] = {"AtiModel"};

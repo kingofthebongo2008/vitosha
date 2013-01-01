@@ -18,9 +18,9 @@ namespace gx
 
 		lambert_shift_invairant_material::lambert_shift_invairant_material
         ( 
-								        transform_position_normal_uv_vertex_pipeline            vertex_pipeline,
-										lambert_shift_invariant_pixel_shader					pixel_shader,
-										lambert_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
+								        const transform_position_normal_uv_vertex_pipeline          vertex_pipeline,
+										const lambert_shift_invariant_pixel_shader					pixel_shader,
+										const lambert_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
 
 										math::float4	diffuse_albedo
 
