@@ -39,43 +39,59 @@ namespace gx
 
 	namespace
 	{
-		void process_command( gx::render_context* render_context, ID3D11DeviceContext* device_context, gx::command::type command, const draw_calls_pipeline_params* in_params ) 
+		gx::per_view_data create_per_view_data( const draw_calls_pipeline_params& in_params )
+		{
+			gx::per_view_data  per_view_data =
+			{
+				in_params.m_view_matrix,
+				in_params.m_projection_matrix,
+				in_params.m_inverse_view_matrix,
+				in_params.m_inverse_projection_matrix,
+				in_params.m_view_port,
+				in_params.m_zn,
+				in_params.m_zf
+			};
+
+			return std::move(per_view_data);
+		}
+
+		void process_command( gx::render_context* render_context, ID3D11DeviceContext* device_context, gx::command::type command, const draw_calls_pipeline_params& in_params ) 
 		{
 			switch (command)
 			{
 				case gx::command::gbuffer_initialize:
 				{
-					render_context->select_gbuffer(device_context, &in_params->m_view_matrix, &in_params->m_projection_matrix);
+					render_context->select_gbuffer(device_context, std::move(create_per_view_data(in_params)));
 					break;
 				}
 
 				case gx::command::gbuffer_finalize:
 				{
-					render_context->end_gbuffer(device_context);
+					render_context->end_gbuffer(device_context, std::move(create_per_view_data(in_params)));
 					break;
 				}
 
                 case gx::command::light_buffer_initialize:
                 {
-                    render_context->select_light_buffer(device_context);
+                    render_context->select_light_buffer(device_context, std::move(create_per_view_data(in_params)));
                     break;
                 }
 
                 case gx::command::light_buffer_finalize:
                 {
-                    render_context->end_light_buffer(device_context);
+                    render_context->end_light_buffer(device_context, std::move(create_per_view_data(in_params)));
                     break;
                 }
                 
                 case gx::command::compose_light_buffer:
 				{
-                    render_context->compose_light_buffer(device_context);
+                    render_context->compose_light_buffer(device_context, std::move(create_per_view_data(in_params)));
                     break;
                 }
 
 				case gx::command::debug_initialize:
 				{
-					render_context->select_debug_target(device_context);
+					render_context->select_debug_target(device_context, std::move(create_per_view_data(in_params)));
 					break;
 				}
 
@@ -120,7 +136,7 @@ namespace gx
 			else
 			{
 				gx::command::type command = info.m_key.get_command();
-				process_command( m_render_context, device_context, command, in_params);
+				process_command( m_render_context, device_context, command, *in_params);
 			}
 		}
 
@@ -181,7 +197,7 @@ namespace gx
 
 		m_render_context->begin_frame();
 
-		m_render_context->select_depth_pass( m_render_context->front()->get_device_context().get() );
+		m_render_context->select_depth_pass( m_render_context->front()->get_device_context().get(), create_per_view_data(*in_params) );
 
 		for (auto i = 0; it != end; ++i, ++it)
 		{
@@ -192,7 +208,7 @@ namespace gx
 
 			auto device_context = (*it)->get_device_context().get();
 
-			m_render_context->select_depth_pass( device_context );
+			m_render_context->select_depth_pass( device_context, create_per_view_data(*in_params) );
 
 			auto draw_call_context = create_draw_call_context( device_context, in_params);
 														

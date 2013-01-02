@@ -76,7 +76,10 @@ namespace console
 			buffer->reset();
 		});
 
-		std::sort( messages.begin(), messages.end() );
+		if (!messages.empty())
+		{
+			std::sort( messages.begin(), messages.end() );
+		}
 
 		std::for_each( m_notifiers.begin(), m_notifiers.end(), [&](const std::shared_ptr<notifier>& notifier)
 		{

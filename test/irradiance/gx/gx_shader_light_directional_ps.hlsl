@@ -1,4 +1,6 @@
-cbuffer per_draw_call : register(c0)
+#include "gx_shader_geometry_pass_common.hlsl"
+
+cbuffer per_draw_call : register(SLOT_PER_DRAW_CALL)
 {
     row_major float4x4 m_inverse_projection;
     row_major float4x4 m_view; 
@@ -13,7 +15,7 @@ struct vs_output
     float2  uv                  : texcoord;
 };
 
-struct blinn_phong_surface
+struct shaded_surface
 {
     float3 m_kd;
     float3 m_ks;
@@ -31,11 +33,12 @@ SamplerState	default_sampler : register(s0);
 float3  convert_to_view_space ( float x, float y, float depth_buffer_z)
 {
     //translate from perspective space to view space with inverse matrix
-
     float4 ps = float4(x, y, depth_buffer_z, 1.0f);
-    float4 v = mul( m_inverse_projection, ps );
+    float4 v = mul( ps, m_inverse_projection );
     float4 result = v / v.w;
-    return result.xyz;
+    //return result.xyz;
+
+	return reconstruct_xyz_vs(  float2 (x,y), depth_buffer_z);
 }
 
 float3 convert_to_view_space ( float2 texture_coord, float depth_buffer_z)
@@ -90,25 +93,154 @@ float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3
 
     float3 fresnel = fresnel_schlick( specular_color, l, h );
 
-    float  multiplier = ( (power + 2.0f) / 8.0f )  * pow ( saturate( dot( n, h ) ) , power ) ;
+	const float pi = 3.14159265f;
+	float  normalization = ( (power + 2.0f) / ( 8.0f ) ); //( (power + 8.0f) / ( 8.0f * pi ) );
+
+    float  multiplier =  normalization * pow ( saturate( dot( n, h ) ) , power ) ;
 
     return multiplier * fresnel * n_dot_l;
 }
 
 float3 blinn_phong_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l )
 {
-    return albedo * n_dot_l;
+	const float pi = 3.14159265f;
+    return (albedo * n_dot_l) / pi;
 }
 
-blinn_phong_surface blinn_phong(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
+shaded_surface blinn_phong(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
 {
-    blinn_phong_surface result;
-    float n_dot_l = saturate( dot ( n, l ) );
+    shaded_surface result;
+    float n_dot_l = dot ( n, l );
 
     if (n_dot_l > 0.0f)
     {
+		n_dot_l = saturate(n_dot_l);
         result.m_kd = blinn_phong_diffuse ( albedo, l, n, n_dot_l);
         result.m_ks = blinn_phong_specular ( specular_color, power, l, n, v, n_dot_l);
+    }
+    else
+    {
+        result.m_kd = float3(0.0f, 0.0f, 0.0f);
+        result.m_ks = float3(0.0f, 0.0f, 0.0f);
+    }
+
+    return result;
+}
+
+float3 phong_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float3 n_dot_l)
+{
+    float3 h = half_way_vector( l, v );
+
+	//float3 r = 2 * dot(v,n) * n - v; 
+	float3 r = reflect( -v, n );
+
+    float3 fresnel = fresnel_schlick( specular_color, l, h );
+
+	const float pi = 3.14159265f;
+
+	float  normalization = ( (power + 2.0f) / ( 2.0f * pi ) );
+
+    float  multiplier =  normalization  * pow ( saturate( dot( r, l ) ) , power ) ;
+
+    return multiplier * fresnel * n_dot_l;
+}
+
+shaded_surface phong(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
+{
+	shaded_surface result;
+    float n_dot_l = dot ( n, l );
+
+    if (n_dot_l > 0.0f)
+    {
+		n_dot_l = saturate(n_dot_l);
+        result.m_kd = blinn_phong_diffuse ( albedo, l, n, n_dot_l);
+        result.m_ks = phong_specular ( specular_color, power, l, n, v, n_dot_l);
+    }
+    else
+    {
+        result.m_kd = float3(0.0f, 0.0f, 0.0f);
+        result.m_ks = float3(0.0f, 0.0f, 0.0f);
+    }
+
+    return result;
+}
+
+float3 gotanda_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l, float3 specular_color )
+{
+	const float pi = 3.14159265f;
+	//full calculation
+	
+	float3 fresnel = fresnel_schlick( specular_color, n, l );
+    return ( albedo *  ( 1.0f - fresnel ) ) / pi;
+	
+
+	//approximation
+	//return ( albedo * (1.0f - specular_color ) ) /  pi;
+}
+
+float3 gotanda_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float3 n_dot_l)
+{
+    float3 h = half_way_vector( l, v );
+	float  n_dot_v  = dot ( n, v );
+
+    float3 fresnel = fresnel_schlick( specular_color, l, h );
+
+	float  normalization = 0.0397436f * power +  0.0856832f;
+
+	float  multiplier =  normalization * pow ( saturate( dot( n, h ) ) , power ) ;
+
+    return multiplier * fresnel / max ( n_dot_l, n_dot_v );
+}
+
+shaded_surface gotanda(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
+{
+	shaded_surface result;
+    float n_dot_l = dot ( n, l );
+
+    if (n_dot_l > 0.0f)
+    {
+		n_dot_l = saturate(n_dot_l);
+        result.m_kd = gotanda_diffuse ( albedo, l, n, n_dot_l, specular_color);
+        result.m_ks = gotanda_specular ( specular_color, power, l, n, v, n_dot_l);
+    }
+    else
+    {
+        result.m_kd = float3(0.0f, 0.0f, 0.0f);
+        result.m_ks = float3(0.0f, 0.0f, 0.0f);
+    }
+
+    return result;
+}
+
+float3 schuller_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l )
+{
+	const float pi = 3.14159265f;
+    return (albedo) / pi;
+}
+
+float3 schuller_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float3 n_dot_l)
+{
+    float3 h = half_way_vector( l, v );
+
+	const float pi = 3.14159265f;
+	float  normalization = ( (power + 1.0f) / ( 8.0f * pi ) );
+
+    float  multiplier =  normalization * pow ( saturate( dot( n, h ) ) , power ) ;
+	float  l_dot_h = dot ( l, h);
+
+    return multiplier * specular_color / ( l_dot_h * l_dot_h * l_dot_h ) ;
+}
+
+shaded_surface schuller(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
+{
+	shaded_surface result;
+    float n_dot_l = dot ( n, l );
+
+    if (n_dot_l > 0.0f)
+    {
+		n_dot_l = saturate(n_dot_l);
+        result.m_kd = schuller_diffuse ( albedo, l, n, n_dot_l);
+        result.m_ks = schuller_specular ( specular_color, power, l, n, v, n_dot_l);
     }
     else
     {
@@ -134,21 +266,21 @@ float3 main( in  vs_output input) : sv_target
 
     float3 surface_sample_position_vs = convert_to_view_space ( input.uv, depth_buffer_z );
 
-    float3 v				= surface_sample_position_vs;
+    float3 v						= -surface_sample_position_vs;
 
-	float3 specular_color	= decode_specular_color( ks_gloss );
-    float  specular_power	= decode_specular_power( ks_gloss );
+	float3 specular_color			= decode_specular_color( ks_gloss );
+    float  specular_power			= 200.0f;//decode_specular_power( ks_gloss );
 
-    float3 radiance		  =  float3(0.0f,0.0f,0.0f);
+    float3 radiance					=  float3(0.0f,0.0f,0.0f);
 
     for (uint i = 0 ; i < m_light_count;++i)
     {
 	    const float3 light_vs		= m_light_direction_vs[0].xyz;
 		const float3 normal_vs		= n_vs;
 
-        blinn_phong_surface surface = blinn_phong(kd, specular_color, specular_power, light_vs , normal_vs, normalize(v) );
+        shaded_surface surface		= gotanda(kd, specular_color, specular_power, light_vs , normal_vs, normalize(v) );
         
-        radiance		            =  radiance +  decode_light_power ( m_light_color[i] ) * ( surface.m_kd  + surface.m_ks) ;
+        radiance		            = radiance +  decode_light_power ( m_light_color[i] ) * ( surface.m_kd  + surface.m_ks) ;
     }
 
     return radiance;

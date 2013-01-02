@@ -386,6 +386,9 @@
     <ClInclude Include="gx\gx_encode_for_back_buffer_pixel_shader.h">
       <Filter>gx</Filter>
     </ClInclude>
+    <ClInclude Include="gx\gx_geometry_pass_common.h">
+      <Filter>gx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />

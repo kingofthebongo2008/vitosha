@@ -7,6 +7,15 @@
 
 namespace gx
 {
+	struct reprojection_params
+	{
+		//depth
+		float a;
+		float b;
+		float c;
+		float d;
+	};
+
     struct pinhole_camera
     {
         public:
@@ -169,6 +178,11 @@ namespace gx
 		return math::mul( create_inverse_perspective_matrix(camera), create_inverse_view_matrix(camera) );
 	}
 
+	inline reprojection_params create_perspective_reprojection_params( const pinhole_camera* )
+	{
+		return reprojection_params();
+	}
+
 	inline void rotate(pinhole_camera* camera, math::float4 quaternion)
 	{
 		auto up = camera->get_up();
@@ -177,7 +191,6 @@ namespace gx
 		camera->set_view_up( math::rotate_vector3(up, quaternion));
 		camera->set_view_direction( math::rotate_vector3(direction, quaternion));
 	}
-
 }
 
 #endif

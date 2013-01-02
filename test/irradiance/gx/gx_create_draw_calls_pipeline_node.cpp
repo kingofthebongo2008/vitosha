@@ -55,7 +55,12 @@ namespace gx
                 in_params->m_view_matrix, 
                 in_params->m_projection_matrix, 
                 in_params->m_inverse_view_matrix, 
-                in_params->m_inverse_projection_matrix, 
+                in_params->m_inverse_projection_matrix,
+
+				in_params->m_view_port,
+				in_params->m_zf,
+				in_params->m_zn,
+
                 in_params->m_wvp_matrices,
                 in_params->m_world_matrices,
                 &m_draw_calls,

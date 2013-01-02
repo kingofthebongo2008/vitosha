@@ -8,9 +8,11 @@
 
 #include <math/math_half.h>
 
+#include <gx/gx_constant_buffer_helper.h>
+#include <gx/gx_geometry_pass_common.h>
 #include <gx/gx_profile.h>
 #include <gx/gx_thread_render_context.h>
-#include <gx/gx_constant_buffer_helper.h>
+
 
 namespace gx
 {
@@ -64,9 +66,10 @@ namespace gx
     render_context::render_context(d3d11::system_context sys_context, std::shared_ptr<shader_database> shader_database, uint32_t thread_render_context_count, view_port view_port) : 
 		m_system_context(sys_context)
 		, m_shader_database(shader_database)
-		, m_per_pass_buffer( d3d11::create_constant_buffer( sys_context.m_device.get(), 2 * sizeof( math::float4x4) ) )
+		, m_per_pass_vertex_buffer( d3d11::create_constant_buffer( sys_context.m_device.get(), sizeof( cbuffer_constants_per_pass ) ) )
+		, m_per_pass_pixel_buffer( d3d11::create_constant_buffer( sys_context.m_device.get(), sizeof( cbuffer_constants_per_pass ) ) )
         , m_depth_buffer( create_depth_resource( sys_context.m_device.get(), 320, 240 ) )
-        , m_gbuffer_render_data ( sys_context.m_device.get(), m_per_pass_buffer ) 
+        , m_gbuffer_render_data ( sys_context.m_device.get(), m_per_pass_vertex_buffer ) 
 		, m_depth_render_data( sys_context.m_device.get() )
         , m_light_buffer_render_data( sys_context.m_device.get() )
         , m_debug_render_data( sys_context.m_device.get() )
@@ -247,7 +250,7 @@ namespace gx
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 
-	void render_context::select_gbuffer(ID3D11DeviceContext* device_context, const math::float4x4* view_matrix, const math::float4x4* projection_matrix)
+	void render_context::select_gbuffer(ID3D11DeviceContext* device_context, const per_view_data& view)
 	{
         profile p(L"select_gbuffer");
 		reset_render_targets( device_context );
@@ -275,13 +278,19 @@ namespace gx
 		select_view_port(device_context);
 
 
-		math::float4x4 matrices[] = { *view_matrix, *projection_matrix };
-		constant_buffer_update( device_context, m_per_pass_buffer.get(), &matrices[0], 2 * sizeof(math::float4x4) );
-		device_context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
-		device_context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
+		cbuffer_constants_per_pass per_pass = 
+		{
+			view.m_view_matrix,
+			view.m_projection_matrix,
+			0.0f, 1.0f, 0.0f, 1.0f
+		};
+
+		constant_buffer_update( device_context, m_per_pass_vertex_buffer.get(), per_pass );
+		device_context->VSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer));
+		device_context->GSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer));
 	}
 
-    void render_context::select_light_buffer(ID3D11DeviceContext* device_context)
+    void render_context::select_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view)
     {
         profile p(L"select_light_buffer");
         reset_render_targets(device_context);
@@ -305,21 +314,44 @@ namespace gx
         };
 
         d3d11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view);
+
+		float zn = view.m_zn;
+		float zf = view.m_zf;
+
+		cbuffer_constants_per_pass per_pass_0 = 
+		{
+			math::identity_matrix(),
+			math::identity_matrix(),
+			0.0f, 1.0f, 0.0f, 1.0f,
+		};
+
+		constant_buffer_update( device_context, m_per_pass_vertex_buffer.get(), per_pass_0 );
+		device_context->VSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer));
+
+		cbuffer_constants_per_pass per_pass_1 = 
+		{
+			view.m_view_matrix,
+			view.m_projection_matrix,
+			0.0f, 1.0f, 1.0f / zn - 1.0f / zf , 1.0f / zn
+		};
+
+		constant_buffer_update( device_context, m_per_pass_pixel_buffer.get(), per_pass_1 );
+		device_context->PSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_pixel_buffer));
     }
 
-    void render_context::end_light_buffer(ID3D11DeviceContext* device_context)
+    void render_context::end_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view)
     {
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
     }
 
-	void render_context::end_gbuffer(ID3D11DeviceContext* device_context)
+	void render_context::end_gbuffer(ID3D11DeviceContext* device_context, const per_view_data& view)
 	{
 		reset_render_targets(device_context);
 		reset_shader_resources(device_context);
 	}
 
-	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context)
+	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context, const per_view_data& view)
 	{
         profile p(L"select_back_buffer_target");
 		reset_render_targets(device_context);
@@ -347,7 +379,7 @@ namespace gx
 		select_view_port(device_context);
 	}
 
-    void render_context::select_debug_target(ID3D11DeviceContext* device_context)
+    void render_context::select_debug_target(ID3D11DeviceContext* device_context, const per_view_data& view)
     {
         profile p(L"select_debug_target");
 
@@ -370,10 +402,20 @@ namespace gx
             m_debug_render_data.m_depth_srv.get()
         };
 
-		math::float4x4 matrices[] = { math::identity_matrix(), math::identity_matrix() };
-		constant_buffer_update( device_context, m_per_pass_buffer.get(), &matrices[0], 2 * sizeof(math::float4x4) );
-		device_context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
-		device_context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer));
+		float zn = view.m_zn;
+		float zf = view.m_zf;
+
+		cbuffer_constants_per_pass per_pass_0 = 
+		{
+			math::identity_matrix(),
+			math::identity_matrix(),
+			0.0f, 1.0f, 0.0f, 1.0f
+		};
+
+
+		constant_buffer_update( device_context, m_per_pass_vertex_buffer.get(), per_pass_0 );
+		device_context->VSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer));
+		device_context->GSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer));
 
         d3d11::ps_set_shader_resources( device_context, sizeof(shader_resource_view) / sizeof( shader_resource_view[0] ) , shader_resource_view );
         d3d11::ps_set_shader( device_context, m_shader_database->m_copy_depth_pixel_shader );
@@ -402,7 +444,7 @@ namespace gx
         device_context->OMSetBlendState(m_opaque_state.get(), nullptr, 0xFFFFFFFF);
     }
 
-	void render_context::select_depth_pass(ID3D11DeviceContext* device_context)
+	void render_context::select_depth_pass(ID3D11DeviceContext* device_context, const per_view_data& view)
 	{
 		reset_render_targets(device_context);
 		reset_shader_resources(device_context);
@@ -423,13 +465,13 @@ namespace gx
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 
-    void render_context::end_depth_pass(ID3D11DeviceContext* device_context)
+    void render_context::end_depth_pass(ID3D11DeviceContext* device_context, const per_view_data& view)
 	{
 		reset_shader_resources(device_context);
 		reset_render_targets(device_context);
 	}
 
-    void render_context::compose_light_buffer(ID3D11DeviceContext* device_context)
+    void render_context::compose_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view)
     {
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
@@ -456,12 +498,18 @@ namespace gx
 		d3d11::ps_set_shader(device_context, m_shader_database->m_encode_for_back_buffer_pixel_shader );
         d3d11::ps_set_shader_resources( device_context,  m_light_buffer_render_data.m_light_buffer );
 
-		math::float4x4 matrices[] = { math::identity_matrix(), math::identity_matrix() };
-		constant_buffer_update( device_context, m_per_pass_buffer.get(), &matrices[0], 2 * sizeof(math::float4x4) );
+		cbuffer_constants_per_pass per_pass = 
+		{
+			math::identity_matrix(),
+			math::identity_matrix(),
+			0.0f, 1.0f, 0.0, 1.0f
+		};
 
-		device_context->VSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer) );
-		device_context->GSSetConstantBuffers(0, 1, dx::get_pointer(m_per_pass_buffer) );
 
+		constant_buffer_update( device_context, m_per_pass_vertex_buffer.get(), per_pass );
+
+		device_context->VSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer) );
+		device_context->GSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_vertex_buffer) );
         draw_screen_space_quad( device_context, this );
     }
 

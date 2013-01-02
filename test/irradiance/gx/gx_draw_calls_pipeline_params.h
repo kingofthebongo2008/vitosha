@@ -16,6 +16,11 @@ namespace gx
         math::float4x4                    m_inverse_view_matrix;
         math::float4x4                    m_inverse_projection_matrix;
 
+		view_port						  m_view_port;
+		float							  m_zn;
+		float							  m_zf;
+
+
         std::vector< math::float4x4 >*    m_wvp_matrices;
         std::vector< math::float4x4 >*    m_world_matrices;
         std::vector < draw_call_info >*   m_draw_calls;

@@ -110,7 +110,7 @@ namespace wnd
 		math::float4x4 view_matrix = gx::create_view_matrix(&m_main_camera);
 		math::float4x4 perspective_matrix = gx::create_perspective_matrix(&m_main_camera);
 
-		gx::view			 view( view_matrix, perspective_matrix );
+		gx::view	   view( view_matrix, perspective_matrix, m_view_port, m_main_camera.get_near(), m_main_camera.get_far() );
 
 		pipeline.add_node( std::make_shared< gx::scene_pipeline_node>(m_scene.get()) );
 

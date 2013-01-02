@@ -106,6 +106,18 @@ namespace gx
         d3d11::ishaderresourceview_ptr			m_depth_srv;
 	};
 
+	struct per_view_data
+	{
+		math::float4x4							m_view_matrix;
+        math::float4x4							m_projection_matrix;
+        math::float4x4							m_inverse_view_matrix;
+        math::float4x4							m_inverse_projection_matrix;
+
+		view_port								m_view_port;
+		float									m_zn;
+		float									m_zf;
+	};
+
     class thread_render_context;
 
 	//performs management of surfaces, gpu memory buffers, shaders, textures on a higher level than a 3d device
@@ -126,17 +138,17 @@ namespace gx
 
 		void reset_state( ID3D11DeviceContext* device_context );
 		void clear_buffers( ID3D11DeviceContext* device_context);
-		void select_depth_pass(ID3D11DeviceContext* device_context);
-		void select_gbuffer(ID3D11DeviceContext* device_context, const math::float4x4* view_matrix, const math::float4x4* projection_matrix);
-		void select_back_buffer_target(ID3D11DeviceContext* device_context);
-        void select_light_buffer(ID3D11DeviceContext* device_context);
-        void select_debug_target(ID3D11DeviceContext* device_context);
 
-        void end_depth_pass(ID3D11DeviceContext* device_context);
-		void end_light_buffer(ID3D11DeviceContext* device_context);
-        void end_gbuffer(ID3D11DeviceContext* device_context);
+		void select_depth_pass(ID3D11DeviceContext* device_context, const per_view_data& view);
+		void select_gbuffer(ID3D11DeviceContext* device_context, const per_view_data& view);
+		void select_back_buffer_target(ID3D11DeviceContext* device_context, const per_view_data& view);
+        void select_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view);
+        void select_debug_target(ID3D11DeviceContext* device_context, const per_view_data& view);
 
-        void compose_light_buffer(ID3D11DeviceContext* device_context);
+        void end_depth_pass(ID3D11DeviceContext* device_context, const per_view_data& view);
+		void end_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view);
+        void end_gbuffer(ID3D11DeviceContext* device_context, const per_view_data& view);
+        void compose_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view);
 
 
         screen_space_quad_render	create_screen_space_quad_render();
@@ -244,7 +256,8 @@ namespace gx
         depth_resource												m_depth_buffer;
         d3d11::idepthstencilstate_ptr								m_depth_enable_state;
         d3d11::idepthstencilstate_ptr								m_depth_disable_state;
-		d3d11::ibuffer_ptr											m_per_pass_buffer;
+		d3d11::ibuffer_ptr											m_per_pass_vertex_buffer;
+		d3d11::ibuffer_ptr											m_per_pass_pixel_buffer;
 
 
         d3d11::iblendstate_ptr										m_opaque_state;

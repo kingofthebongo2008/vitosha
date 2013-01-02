@@ -23,9 +23,16 @@ namespace gx
 
 
         view_pipeline_params view_params = {
-                                view_matrix, projection_matrix, 
-                                inverse_view_matrix, inverse_projection_matrix,
-                                &m_wvp_matrices, in_params->m_world_matrices, in_params->m_data } ;
+                                view_matrix, 
+								projection_matrix, 
+                                inverse_view_matrix, 
+								inverse_projection_matrix,
+								m_view->get_view_port(),
+								m_view->get_zn(),
+								m_view->get_zf(),
+                                &m_wvp_matrices, 
+								in_params->m_world_matrices, 
+								in_params->m_data } ;
 
         math::float4x4 vp = math::mul( view_matrix, projection_matrix  );
 

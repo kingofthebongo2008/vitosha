@@ -290,6 +290,7 @@
     <ClInclude Include="gx\gx_draw_call_context.h" />
     <ClInclude Include="gx\gx_entity_world.h" />
     <ClInclude Include="gx\gx_execute_draw_calls_pipeline_node.h" />
+    <ClInclude Include="gx\gx_geometry_pass_common.h" />
     <ClInclude Include="gx\gx_grid_geometry_shader.h" />
     <ClInclude Include="gx\gx_indexed_draw_call.h" />
     <ClInclude Include="gx\gx_entity.h" />

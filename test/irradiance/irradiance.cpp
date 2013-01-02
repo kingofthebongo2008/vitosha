@@ -52,7 +52,7 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
     std::vector<directional_light> directional_lights;
     directional_lights.reserve(8);
 
-    math::float4 light_position = math::set( 5.0f, 7.0f, 5.0f, 1.0f );
+    math::float4 light_position = math::set( 5.0f, 1.0f, 5.0f, 1.0f );
 
     directional_lights.push_back(  directional_light( gx::color::white(), math::sub(light_position, math::set(0.0f, 0.0f, 0.0f, 1.0f) ) ));
 
