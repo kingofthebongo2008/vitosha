@@ -9,7 +9,6 @@ cbuffer per_object : register(SLOT_PER_DRAW_CALL)
 struct gs_input
 {
 	half4	position_os	: sv_position; 
-	//float3  normal_ws	: normal;
 };
 
 struct gs_output

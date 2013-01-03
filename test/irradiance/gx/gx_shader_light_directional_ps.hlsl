@@ -21,7 +21,6 @@ struct shaded_surface
     float3 m_ks;
 };
 
-
 Texture2D		normal_gbuffer  : register(t0);
 Texture2D		diffuse_gbuffer : register(t1);
 Texture2D		specular_gloss_gbuffer : register(t2);                                       
@@ -29,15 +28,8 @@ Texture2D       depth_buffer : register(t3);;
 
 SamplerState	default_sampler : register(s0);
 
-
 float3  convert_to_view_space ( float x, float y, float depth_buffer_z)
 {
-    //translate from perspective space to view space with inverse matrix
-    float4 ps = float4(x, y, depth_buffer_z, 1.0f);
-    float4 v = mul( ps, m_inverse_projection );
-    float4 result = v / v.w;
-    //return result.xyz;
-
 	return reconstruct_xyz_vs(  float2 (x,y), depth_buffer_z);
 }
 
@@ -48,7 +40,6 @@ float3 convert_to_view_space ( float2 texture_coord, float depth_buffer_z)
     float2 translate = float2( 1.0f, 1.0f);
 
     float2 result = texture_coord * scale + translate;
-
     return convert_to_view_space( result.x, result.y, depth_buffer_z );
 }
 
@@ -95,6 +86,7 @@ float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3
 
 	const float pi = 3.14159265f;
 	float  normalization = ( (power + 2.0f) / ( 8.0f ) ); //( (power + 8.0f) / ( 8.0f * pi ) );
+	//float  normalization = ( (power + 8.0f) / ( 8.0f * pi ) ); //( (power + 8.0f) / ( 8.0f * pi ) );
 
     float  multiplier =  normalization * pow ( saturate( dot( n, h ) ) , power ) ;
 
@@ -116,7 +108,7 @@ shaded_surface blinn_phong(float3 albedo, float3 specular_color, float power, fl
     {
 		n_dot_l = saturate(n_dot_l);
         result.m_kd = blinn_phong_diffuse ( albedo, l, n, n_dot_l);
-        result.m_ks = blinn_phong_specular ( specular_color, power, l, n, v, n_dot_l);
+        result.m_ks = blinn_phong_specular ( specular_color, 4.0f * power, l, n, v, n_dot_l);
     }
     else
     {
@@ -171,7 +163,7 @@ float3 gotanda_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l, float3
 	//full calculation
 	
 	float3 fresnel = fresnel_schlick( specular_color, n, l );
-    return ( albedo *  ( 1.0f - fresnel ) ) / pi;
+    return n_dot_l * ( albedo  *  ( 1.0f - fresnel ) ) / pi;
 	
 
 	//approximation
@@ -215,7 +207,7 @@ shaded_surface gotanda(float3 albedo, float3 specular_color, float power, float3
 float3 schuller_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l )
 {
 	const float pi = 3.14159265f;
-    return (albedo) / pi;
+    return (albedo * n_dot_l ) / pi;
 }
 
 float3 schuller_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float3 n_dot_l)
@@ -228,7 +220,7 @@ float3 schuller_specular(float3 specular_color, float power, float3 l, float3 n,
     float  multiplier =  normalization * pow ( saturate( dot( n, h ) ) , power ) ;
 	float  l_dot_h = dot ( l, h);
 
-    return multiplier * specular_color / ( l_dot_h * l_dot_h * l_dot_h ) ;
+    return n_dot_l * multiplier * specular_color / ( l_dot_h * l_dot_h * l_dot_h ) ;
 }
 
 shaded_surface schuller(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
@@ -278,7 +270,7 @@ float3 main( in  vs_output input) : sv_target
 	    const float3 light_vs		= m_light_direction_vs[0].xyz;
 		const float3 normal_vs		= n_vs;
 
-        shaded_surface surface		= gotanda(kd, specular_color, specular_power, light_vs , normal_vs, normalize(v) );
+        shaded_surface surface		= blinn_phong(kd, specular_color, specular_power, light_vs , normal_vs, normalize(v) );
         
         radiance		            = radiance +  decode_light_power ( m_light_color[i] ) * ( surface.m_kd  + surface.m_ks) ;
     }
