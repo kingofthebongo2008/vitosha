@@ -505,6 +505,7 @@
     <ClInclude Include="gx\gx_lambert_shift_invariant_pixel_shader.h" />
     <ClInclude Include="gx\gx_lambert_material.h" />
     <ClInclude Include="gx\gx_lambert_pixel_shader.h" />
+    <ClInclude Include="gx\gx_lighting.h" />
     <ClInclude Include="gx\gx_light_directional_pixel_shader.h" />
     <ClInclude Include="gx\gx_light_directional_vertex_shader.h" />
     <ClInclude Include="gx\gx_light_pixel_shader.h" />

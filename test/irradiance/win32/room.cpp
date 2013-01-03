@@ -11,6 +11,7 @@
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
+#include <gx/gx_lighting.h>
 #include <gx/gx_shader_database.h>
 
 void room_entity::on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
@@ -391,11 +392,12 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 		return nullptr;
 	}
 
+	float specular_power = gx::encode_specular_power(75.0f);
 
 	return std::make_shared<room_entity>
     (  
 		std::move( gx::create_indexed_draw_call<8,12, gx::bit_32> ( static_cast<uint32_t> ( indices.size() ), positions_vb, normals_uvs_vb, indices_ib )  ),
-		std::move( gx::create_blinn_phong_shift_invairant_material( database, math::set( 1.0f, 0.0f, 0.0f, 0.0f), math::set(0.05f, 0.05f, 0.05f, 0.12f )) )
+		std::move( gx::create_blinn_phong_shift_invairant_material( database, math::set( 1.0f, 0.0f, 0.0f, 0.0f), math::set(0.05f, 0.05f, 0.05f, specular_power )) )
 	);
 }
 
