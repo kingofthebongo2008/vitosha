@@ -69,7 +69,7 @@ shaded_surface blinn_phong(float3 albedo, float3 specular_color, float power, fl
     {
 		n_dot_l = saturate(n_dot_l);
         result.m_kd = blinn_phong_diffuse ( albedo, l, n, n_dot_l);
-        result.m_ks = blinn_phong_specular ( specular_color, 4.0f * power, l, n, v, n_dot_l);
+        result.m_ks = blinn_phong_specular ( specular_color, power, l, n, v, n_dot_l);
     }
     else
     {
@@ -106,7 +106,7 @@ shaded_surface phong(float3 albedo, float3 specular_color, float power, float3 l
     {
 		n_dot_l = saturate(n_dot_l);
         result.m_kd = blinn_phong_diffuse ( albedo, l, n, n_dot_l);
-        result.m_ks = phong_specular ( specular_color, power, l, n, v, n_dot_l);
+        result.m_ks = phong_specular ( specular_color, power / 4.0f, l, n, v, n_dot_l);
     }
     else
     {
@@ -145,6 +145,7 @@ float3 gotanda_specular(float3 specular_color, float power, float3 l, float3 n, 
 
 shaded_surface gotanda(float3 albedo, float3 specular_color, float power, float3 l, float3 n, float3 v)
 {
+
 	shaded_surface result;
     float n_dot_l = dot ( n, l );
 

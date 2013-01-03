@@ -1,67 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="gx\gx_shader_blinn_phong_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_blinn_phong_shift_invariant_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_color_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_color_texture_channel_3_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_color_texture_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_debug_view_space_depth_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_lambert_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_lambert_shift_invariant_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_light_directional_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_light_directional_vs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_light_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_screen_space_uv_vs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_transform_position_normal_uv_vs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_transform_position_uv_vs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="win32\shader_point_light_sphere_debug_ps.hlsl">
-      <Filter>irradiance</Filter>
-    </CustomBuild>
-    <CustomBuild Include="win32\shader_point_light_sphere_debug_vs.hlsl">
-      <Filter>irradiance</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_copy_depth_ps.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
     <CustomBuild Include="gx\gx_shader_grid_gs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_transform_position_vs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_transform_position_normal_vs.hlsl">
-      <Filter>gx</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gx\gx_shader_encode_for_back_buffer_ps.hlsl">
       <Filter>gx</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -675,6 +615,66 @@
   <ItemGroup>
     <FxCompile Include="gx\gx_shader_lighting.hlsl">
       <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_light_directional_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_blinn_phong_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_blinn_phong_shift_invariant_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_color_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_color_texture_channel_3_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_color_texture_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_copy_depth_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_debug_view_space_depth_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_encode_for_back_buffer_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_lambert_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_lambert_shift_invariant_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_light_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="win32\shader_point_light_sphere_debug_ps.hlsl">
+      <Filter>irradiance</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_light_directional_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_screen_space_uv_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_transform_position_normal_uv_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_transform_position_normal_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_transform_position_uv_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_transform_position_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="win32\shader_point_light_sphere_debug_vs.hlsl">
+      <Filter>irradiance</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
