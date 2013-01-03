@@ -121,12 +121,12 @@ float3 gotanda_diffuse(float3 albedo, float3 l, float3 n, float3 n_dot_l, float3
 {
 	const float pi = 3.14159265f;
 	
-	float3 fresnel = fresnel_schlick( specular_color, n, l );
-    return n_dot_l * ( albedo  *  ( 1.0f - fresnel ) ) / pi;
+	//float3 fresnel = fresnel_schlick( specular_color, n, l );
+    //return n_dot_l * ( albedo  *  ( 1.0f - fresnel ) ) / pi;
 	
 
 	//approximation
-	//return ( albedo * (1.0f - specular_color ) ) /  pi;
+	return n_dot_l * ( albedo * (1.0f - specular_color ) ) /  pi;
 }
 
 float3 gotanda_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float3 n_dot_l)
