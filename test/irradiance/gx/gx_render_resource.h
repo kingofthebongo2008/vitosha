@@ -117,6 +117,7 @@ namespace gx
 
 
     target_render_resource              create_target_render_resource(ID3D11Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format);
+	target_render_resource              create_srgb_target_render_resource(ID3D11Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format);
     target_render_resource              create_normal_resource(ID3D11Device* device, uint32_t width, uint32_t height);
     target_render_resource              create_diffuse_resource(ID3D11Device* device, uint32_t width, uint32_t height);
     target_render_resource              create_specular_resource(ID3D11Device* device, uint32_t width, uint32_t height);

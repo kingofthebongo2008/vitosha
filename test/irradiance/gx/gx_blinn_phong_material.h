@@ -15,7 +15,7 @@ namespace gx
 	struct blinn_phong_texture_set
 	{
 		blinn_phong_texture_set (
-							ID3D11Device*				device,
+							ID3D11Device*			device,
 							d3d11::itexture2d_ptr	diffuse,
 							d3d11::itexture2d_ptr	normal,
 							d3d11::itexture2d_ptr	specular

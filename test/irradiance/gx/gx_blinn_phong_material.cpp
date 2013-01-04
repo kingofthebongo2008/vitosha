@@ -3,6 +3,7 @@
 #include <gx/gx_blinn_phong_material.h>
 
 #include <d3d11/d3d11_error.h>
+#include <d3d11/d3d11_helpers.h>
 
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_material_database.h>
@@ -10,15 +11,18 @@
 namespace gx
 {
 	blinn_phong_texture_set::blinn_phong_texture_set (
-							ID3D11Device*				device,
+							ID3D11Device*			device,
 							d3d11::itexture2d_ptr	diffuse,
 							d3d11::itexture2d_ptr	normal,
 							d3d11::itexture2d_ptr	specular
 					   )
 	{
-		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( diffuse.get(),  NULL, dx::get_pointer(m_diffuse_view) ) );
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc_diffuse = d3d11::create_srgb_shader_resource_view_desc(diffuse.get());
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc_specular = d3d11::create_srgb_shader_resource_view_desc(specular.get());
+
+		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( diffuse.get(),  &desc_diffuse, dx::get_pointer(m_diffuse_view) ) );
 		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( normal.get(),   NULL, dx::get_pointer(m_normal_view) ) );
-		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( specular.get(), NULL, dx::get_pointer(m_specular_view) ));
+		dx::throw_if_failed<d3d11::create_resource_view_exception>(device->CreateShaderResourceView( specular.get(), &desc_specular, dx::get_pointer(m_specular_view) ));
 	}
 
 

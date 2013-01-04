@@ -43,7 +43,8 @@ float3 main( in  vs_output input) : sv_target
     float2 uv					    = input.uv;
 
 	float3 kd					    = diffuse_gbuffer.Sample(default_sampler, uv).xyz;
-    float3 n_vs						= normalize( normal_gbuffer.Sample( default_sampler, uv ).xyz );
+	float4 n_vs_gloss				= normal_gbuffer.Sample( default_sampler, uv );
+    float3 n_vs						= normalize( n_vs_gloss.xyz );
     float4 ks_gloss			        = specular_gloss_gbuffer.Sample(default_sampler, uv);
 
     float depth_buffer_z			= depth_buffer.Sample(default_sampler, uv).x;
@@ -56,7 +57,7 @@ float3 main( in  vs_output input) : sv_target
     float3 v						= -surface_sample_position_vs;
 
 	float3 specular_color			= decode_specular_color( ks_gloss );
-    float  specular_power			= decode_specular_power( ks_gloss );
+    float  specular_power			= decode_specular_power( n_vs_gloss );
 
     float3 radiance					=  float3(0.0f,0.0f,0.0f);
 

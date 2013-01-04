@@ -24,12 +24,18 @@ class floor_entity : public gx::entity
 {
 	public:
 
+	struct material
+	{
+		math::float4 m_diffuse;
+		math::float4 m_specular;
+	};
+
     floor_entity (
                     gx::transform_position_normal_vertex_pipeline                   vertex_pipeline, 
                     gx::grid_geometry_shader                                        geometry_shader,
                     gx::blinn_phong_shift_invariant_pixel_shader				    pixel_shader,
 					gx::blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
-                    std::tuple<d3d11::ibuffer_ptr, d3d11::ibuffer_ptr>      buffers
+                    std::tuple<d3d11::ibuffer_ptr, d3d11::ibuffer_ptr>				buffers
                     ) : 
     m_vertex_pipeline(vertex_pipeline)
     ,m_geometry_shader( geometry_shader)
@@ -50,8 +56,8 @@ class floor_entity : public gx::entity
     gx::grid_geometry_shader                                        m_geometry_shader;
     gx::blinn_phong_shift_invariant_pixel_shader					m_pixel_shader;
 	gx::blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_pixel_cbuffer;
-    d3d11::ibuffer_ptr                                          m_point;    
-    d3d11::ibuffer_ptr                                          m_stream_out;    
+    d3d11::ibuffer_ptr												m_point;    
+    d3d11::ibuffer_ptr												m_stream_out;    
 
     uint16_t                                                        m_material_id;
 };

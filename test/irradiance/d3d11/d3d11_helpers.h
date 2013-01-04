@@ -3,11 +3,45 @@
 
 #include <cstdint>
 
+#include <d3d11/dxgi_helpers.h>
 #include <d3d11/d3d11_pointers.h>
 #include <d3d11/d3d11_error.h>
 
 namespace d3d11
 {
+	inline D3D11_RENDER_TARGET_VIEW_DESC create_srgb_render_target_view_desc(ID3D11Texture2D* texture)
+	{
+		D3D11_TEXTURE2D_DESC desc = {};
+		texture->GetDesc(&desc);
+
+		D3D11_RENDER_TARGET_VIEW_DESC result =
+				{
+					dxgi::format_2_srgb_format( desc.Format ),
+					D3D11_RTV_DIMENSION_TEXTURE2D,
+					0,
+					0
+				};
+
+		return result;
+	}
+
+	inline D3D11_SHADER_RESOURCE_VIEW_DESC create_srgb_shader_resource_view_desc(ID3D11Texture2D* texture)
+	{
+		D3D11_TEXTURE2D_DESC desc = {};
+		texture->GetDesc(&desc);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC result =
+				{
+					dxgi::format_2_srgb_format( desc.Format ),
+					D3D11_SRV_DIMENSION_TEXTURE2D,
+					static_cast<uint32_t> (0),
+					desc.MipLevels
+				};
+
+		return result;
+	}
+
+
     inline iblendstate_ptr   create_blend_state(ID3D11Device* device,   const D3D11_BLEND_DESC* description )
     {
         d3d11::iblendstate_ptr result;
@@ -45,9 +79,13 @@ namespace d3d11
 
     inline id3d11rendertargetview_ptr    create_render_target_view(ID3D11Device* device, ID3D11Resource* resource )
     {
-        id3d11rendertargetview_ptr result;
-        dx::throw_if_failed< d3d11::create_render_target_view_exception> (device->CreateRenderTargetView(resource, nullptr, dx::get_pointer(result) ) );
-        return result;
+		return create_render_target_view(device, resource, nullptr);
+    }
+
+	inline id3d11rendertargetview_ptr    create_srgb_render_target_view(ID3D11Device* device, ID3D11Texture2D* resource )
+    {
+		D3D11_RENDER_TARGET_VIEW_DESC desc = create_srgb_render_target_view_desc(resource);
+		return create_render_target_view(device, resource, &desc);
     }
 
     inline isamplerstate_ptr        create_sampler_state(ID3D11Device* device, const D3D11_SAMPLER_DESC* description )
@@ -67,6 +105,12 @@ namespace d3d11
     inline ishaderresourceview_ptr create_shader_resource_view(ID3D11Device* device, ID3D11Resource* resource)
     {
         return create_shader_resource_view(device, resource, nullptr);
+    }
+
+	inline ishaderresourceview_ptr create_srgb_shader_resource_view(ID3D11Device* device, ID3D11Texture2D* resource)
+    {
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc = create_srgb_shader_resource_view_desc(resource);
+        return create_shader_resource_view(device, resource, &desc);
     }
 
     inline itexture2d_ptr           create_texture_2d(ID3D11Device* device,  const D3D11_TEXTURE2D_DESC* description, const D3D11_SUBRESOURCE_DATA* initial_data )

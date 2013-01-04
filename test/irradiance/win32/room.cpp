@@ -2,6 +2,8 @@
 
 #include "room.h"
 
+#include <array>
+
 #include <d3d11/d3d11_error.h>
 #include <d3d11/d3d11_helpers.h>
 
@@ -20,12 +22,38 @@ void room_entity::on_create_draw_calls( gx::draw_call_collector_context* context
     collector->add_draw_call(key, context->m_entity_index ) ;
 }
 
+void room_entity::draw(gx::draw_call_context* draw_call_context, uint32_t material_index, uint32_t draw_call_index)
+{
+	auto device_context = draw_call_context->m_device_context;
+
+	m_material.set_kd( this->m_materials[material_index].m_diffuse );
+	m_material.set_kd( this->m_materials[material_index].m_specular );
+	m_material.apply(draw_call_context);
+	m_draw_calls[draw_call_index].draw(device_context);
+}
+
 void room_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_context )
 {
-    auto device_context = draw_call_context->m_device_context;
+	//hand
+	draw(draw_call_context, 9, 0);
 
-	m_material.apply(draw_call_context);
-	m_draw_call.draw(device_context);
+	// Ball + Horse + Sci-Fi weirdo + Bench + Frame
+	draw(draw_call_context, 4, 1);
+
+
+	// Horse stand + Sci-Fi weirdo stand + Globe stand
+	draw(draw_call_context, 7, 2);
+
+	// Ceiling + Pillars + Stands + Wall lights
+	draw(draw_call_context, 5, 3);
+
+	
+	// Walls
+	draw(draw_call_context, 0, 4);
+
+	// Teapot
+	draw(draw_call_context, 8, 5);
+
 }
 
 namespace
@@ -385,7 +413,44 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 	auto normals_uvs_vb = d3d11::create_immutable_vertex_buffer( device, &normals_uv[0], normals_uv.size() * sizeof(math::half) );
 	auto indices_ib = d3d11::create_immutable_index_buffer(  device, &indices[0], indices.size() * sizeof(uint32_t) );
 
+	//wait until initializer lists are supported in vs2012
+	std::vector<room_entity::material> materials_shade;
+	room_entity::material materials_shade_[10]=
+	{
+		{ math::set( 0.816f, 0.216f, 0.227f,  0.0f), math::set( 0.45f, 0.15f, 0.15f, gx::encode_specular_power(16.0f)) },	
+		{ math::set( 0.435f, 0.443f, 0.682f,  0.0f), math::set( 0.3f,  0.3f,  0.6f,  gx::encode_specular_power(16.0f)) },
+		{ math::set( 0.29f,  0.482f, 0.298f, 0.0f), math::set( 0.15f, 0.3f,  0.15f, gx::encode_specular_power(16.0f)) },
+		{ math::set( 0.973f, 0.894f, 0.8f,   0.0f), math::set( 0.5f,  0.5f,  0.5f,  gx::encode_specular_power(16.0f)) },
+		{ math::set( 1.0f,   0.6f,   0.2f,   0.0f), math::set( 4.0f,  2.4f,  1.6f,  gx::encode_specular_power(24.0f)) },
+		{ math::set( 1.0f,   1.0f,   1.0f,   0.0f), math::set( 0.3f,  0.4f,  0.6f,   gx::encode_specular_power(4.0f)) },
+		{ math::set( 0.25f,  0.7f,   0.8f,   0.0f), math::set( 0.7f,  0.7f,  0.8f,   gx::encode_specular_power(4.0f)) },
+		{ math::set( 0.2f,   0.2f,   0.2f,   0.0f), math::set( 0.7f,  0.7f,  0.7f,  gx::encode_specular_power(16.0f)) },
+		{ math::set( 0.616f, 0.494f, 0.361f, 0.0f), math::set( 0.1f,  0.1f,  0.1f,  gx::encode_specular_power(32.0f)) },
+		{ math::set( 0.5f,   0.5f,   0.5f,   0.0f), math::set( 0.7f,  0.7f,  0.7f,  gx::encode_specular_power(16.0f)) }
+	};
 
+	std::copy ( &materials_shade_[0], &materials_shade_[0] + 10, std::back_insert_iterator<std::vector<room_entity::material>>(materials_shade));
+
+	
+	std::vector<room_entity::draw_call>	indexed_draw_calls;
+	indexed_draw_calls.reserve(13);
+
+	for(uint32_t i = 0; i < 13; ++i)
+	{
+		room_entity::draw_call::index_info info = {};
+
+		info.m_vertex_size[0] = 8;
+		info.m_vertex_size[1] = 12;
+
+		uint32_t start = material_range[i];
+		uint32_t end = material_range[i+1];
+
+		info.m_start_index_location = start;
+		info.m_index_count = end - start;
+
+		d3d11::ibuffer_ptr vertex_buffer_s[] = { positions_vb, normals_uvs_vb } ;
+		indexed_draw_calls.push_back ( std::move(room_entity::draw_call( info, vertex_buffer_s, indices_ib ) )  ) ;
+	}
 
 	if ( in.eof() )
 	{
@@ -396,8 +461,14 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 
 	return std::make_shared<room_entity>
     (  
-		std::move( gx::create_indexed_draw_call<8,12, gx::bit_32> ( static_cast<uint32_t> ( indices.size() ), positions_vb, normals_uvs_vb, indices_ib )  ),
-		std::move( gx::create_blinn_phong_shift_invairant_material( database, math::set( 1.0f, 0.0f, 0.0f, 0.0f), math::set(0.05f, 0.05f, 0.05f, specular_power )) )
+		//std::move( gx::create_indexed_draw_call<8,12, gx::bit_32> ( static_cast<uint32_t> ( indices.size() ), positions_vb, normals_uvs_vb, indices_ib )  ),
+		std::begin(indexed_draw_calls),
+		std::end(indexed_draw_calls),
+
+		std::move( gx::create_blinn_phong_shift_invairant_material( database, math::set( 1.0f, 0.0f, 0.0f, 0.0f), math::set(0.05f, 0.05f, 0.05f, specular_power )) ),
+
+		std::begin(materials_shade),
+		std::end(materials_shade)
 	);
 }
 

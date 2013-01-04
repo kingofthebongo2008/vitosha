@@ -1,9 +1,11 @@
 #ifndef _ROOM_H__
 #define _ROOM_H__
 
+#include <algorithm>
 #include <memory>
 #include <vector>
 #include <istream>
+#include <iterator>
 
 #include <math/math_vector.h>
 #include <d3d11/d3d11_pointers.h>
@@ -22,25 +24,41 @@ namespace gx
 class room_entity : public gx::entity
 {
 	public:
-    room_entity
-		( 
-			gx::indexed_draw_call<2,gx::bit_32>								draw_call,
-			gx::blinn_phong_shift_invairant_material						material
-		) :
 
-			m_draw_call(draw_call)
-		,	m_material(material)
+	struct material
+	{
+		math::float4 m_diffuse;
+		math::float4 m_specular;
+	};
+
+	typedef gx::indexed_draw_call<2,gx::bit_32> draw_call;
+
+
+    template < typename const_iterator_draw_calls, typename const_iterator_materials > room_entity
+		( 
+			const_iterator_draw_calls								draw_calls_begin,
+			const_iterator_draw_calls								draw_calls_end,
+			gx::blinn_phong_shift_invairant_material				material,
+			const_iterator_materials								materials_begin,
+			const_iterator_materials								materials_end
+		) :
+			m_material(material)
+			, m_materials(materials_begin, materials_end)
+			, m_draw_calls(draw_calls_begin, draw_calls_end)
+			
     {
-    
     }
 
     void on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector);
 	void on_execute_draw_calls( gx::draw_call_context* draw_call_context );
 
 	private:
-
-	gx::indexed_draw_call<2,gx::bit_32>				m_draw_call;
 	gx::blinn_phong_shift_invairant_material		m_material;
+
+	std::vector<material>							m_materials;
+	std::vector<draw_call>							m_draw_calls;
+
+	void											draw(gx::draw_call_context*, uint32_t material_index, uint32_t draw_call_index);
 };
 
 std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx::shader_database* context, std::istream& in);

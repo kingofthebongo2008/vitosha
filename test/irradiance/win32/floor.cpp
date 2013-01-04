@@ -11,6 +11,7 @@
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
+#include <gx/gx_lighting.h>
 #include <gx/gx_shader_database.h>
 
 void floor_entity::on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
@@ -32,8 +33,8 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 	std::get<1>(m_vertex_pipeline).bind_as_vertex_constant_buffer(device_context);
     std::get<1>(m_vertex_pipeline).bind_as_geometry_constant_buffer(device_context);
 
-    m_pixel_cbuffer.set_ks_gloss( math::set( 1.0f, 0.3f, 1.0f, 0.2f ) );
-    m_pixel_cbuffer.set_kd( math::set( 0.2f, 0.3f, 1.0f, 1.0f ) );
+    m_pixel_cbuffer.set_ks_gloss( math::set( 1.0f, 0.0f, 0.0f, gx::encode_specular_power(400.0f) ) );
+    m_pixel_cbuffer.set_kd( math::set( 0.002f, 0.003f, 0.002f, 1.0f ) );
 	m_pixel_cbuffer.flush(device_context);
     m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 

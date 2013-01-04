@@ -3,7 +3,12 @@
 
 #include <cstdint>
 #include <math.h>
+
+#include <dxgiformat.h>
+
 #include <math/math_matrix.h>
+
+
 
 namespace gx
 {

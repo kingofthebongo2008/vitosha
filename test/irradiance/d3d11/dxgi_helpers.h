@@ -24,6 +24,25 @@ namespace dxgi
 		dx::throw_if_failed<d3d11::d3d11_exception>( swap_chain->GetDesc(&desc) );
         return desc;
     }
+
+	
+	inline DXGI_FORMAT format_2_srgb_format( DXGI_FORMAT format)
+	{
+		switch (format)
+		{
+			case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+			case DXGI_FORMAT_BC1_TYPELESS:
+			case DXGI_FORMAT_BC2_TYPELESS:
+			case DXGI_FORMAT_BC3_TYPELESS:
+			case DXGI_FORMAT_BC7_TYPELESS:
+				{
+					return static_cast<DXGI_FORMAT> ( static_cast<uint32_t> ( format ) + 2 );
+				}
+
+			default:
+					return format;
+		}
+	}
 }
 
 

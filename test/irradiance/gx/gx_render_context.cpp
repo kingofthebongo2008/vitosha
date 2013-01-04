@@ -339,19 +339,19 @@ namespace gx
 		device_context->PSSetConstantBuffers(slot_per_pass, 1, dx::get_pointer(m_per_pass_pixel_buffer));
     }
 
-    void render_context::end_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view)
+    void render_context::end_light_buffer(ID3D11DeviceContext* device_context, const per_view_data&)
     {
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
     }
 
-	void render_context::end_gbuffer(ID3D11DeviceContext* device_context, const per_view_data& view)
+	void render_context::end_gbuffer(ID3D11DeviceContext* device_context, const per_view_data&)
 	{
 		reset_render_targets(device_context);
 		reset_shader_resources(device_context);
 	}
 
-	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context, const per_view_data& view)
+	void render_context::select_back_buffer_target(ID3D11DeviceContext* device_context, const per_view_data&)
 	{
         profile p(L"select_back_buffer_target");
 		reset_render_targets(device_context);
@@ -379,7 +379,7 @@ namespace gx
 		select_view_port(device_context);
 	}
 
-    void render_context::select_debug_target(ID3D11DeviceContext* device_context, const per_view_data& view)
+    void render_context::select_debug_target(ID3D11DeviceContext* device_context, const per_view_data&)
     {
         profile p(L"select_debug_target");
 
@@ -401,9 +401,6 @@ namespace gx
         {
             m_debug_render_data.m_depth_srv.get()
         };
-
-		float zn = view.m_zn;
-		float zf = view.m_zf;
 
 		cbuffer_constants_per_pass per_pass_0 = 
 		{
@@ -444,7 +441,7 @@ namespace gx
         device_context->OMSetBlendState(m_opaque_state.get(), nullptr, 0xFFFFFFFF);
     }
 
-	void render_context::select_depth_pass(ID3D11DeviceContext* device_context, const per_view_data& view)
+	void render_context::select_depth_pass(ID3D11DeviceContext* device_context, const per_view_data&)
 	{
 		reset_render_targets(device_context);
 		reset_shader_resources(device_context);
@@ -465,13 +462,13 @@ namespace gx
         device_context->RSSetState(m_cull_back_raster_state.get());
 	}
 
-    void render_context::end_depth_pass(ID3D11DeviceContext* device_context, const per_view_data& view)
+    void render_context::end_depth_pass(ID3D11DeviceContext* device_context, const per_view_data&)
 	{
 		reset_shader_resources(device_context);
 		reset_render_targets(device_context);
 	}
 
-    void render_context::compose_light_buffer(ID3D11DeviceContext* device_context, const per_view_data& view)
+    void render_context::compose_light_buffer(ID3D11DeviceContext* device_context, const per_view_data&)
     {
         reset_render_targets(device_context);
 		reset_shader_resources(device_context);
@@ -561,7 +558,7 @@ namespace gx
 													, m_screen_space_render_data.m_screen_space_input_layout.get()
 												};
 
-		return quad_render;
+		return std::move(quad_render);
 	}
 
 	void render_context::create_screen_space_vertex_buffer()
