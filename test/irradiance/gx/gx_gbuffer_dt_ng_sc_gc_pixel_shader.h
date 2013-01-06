@@ -9,8 +9,63 @@
 
 #include <math/math_matrix.h>
 
+#include <gx/gx_constant_buffer_helper.h>
+
 namespace gx
 {
+	class __declspec(align(16)) gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer 
+	{
+		public:
+
+		explicit gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer ( ID3D11Device* device );
+
+		math::float4 get_ks_gloss() const
+		{
+			return m_ks_gloss;
+		}
+
+		void set_ks_gloss(math::float4 value)
+		{
+			m_ks_gloss = value;
+		}
+
+
+		void flush ( ID3D11DeviceContext* context )
+		{
+			gx::constant_buffer_update(context, m_buffer.get(), (void*) &m_ks_gloss, size() );
+		}
+
+		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context, uint32_t slot)
+		{
+			context->PSSetConstantBuffers(slot, 1, dx::get_pointer(m_buffer));
+		}
+
+		void bind_as_pixel_constant_buffer(ID3D11DeviceContext* context)
+		{
+			bind_as_pixel_constant_buffer(context, 0);
+		}
+
+		operator ID3D11Buffer*()
+		{
+			return m_buffer.get();
+		}
+
+		operator const ID3D11Buffer*() const
+		{
+			return m_buffer.get();
+		}
+
+		size_t size() const
+		{
+			return sizeof(m_ks_gloss);
+		}
+
+		public:
+		math::float4		m_ks_gloss;		//specular color + gloss
+		d3d11::ibuffer_ptr	m_buffer;
+	};
+
+
 	class gbuffer_dt_ng_sc_gc_pixel_shader final
     {
 		public:

@@ -38,6 +38,9 @@ namespace gx
 		, m_lambert_pixel_cbuffer( device )
         , m_blinn_phong_shift_invariant_pixel_shader( device  )
 		, m_blinn_phong_shift_invariant_pixel_cbuffer( device )
+
+		, m_gbuffer_dt_ng_sc_gc_pixel_shader( device ) 
+		, m_gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer ( device )
     {
 
     }

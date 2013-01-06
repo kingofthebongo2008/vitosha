@@ -12,6 +12,7 @@
 namespace gx
 {
 	struct draw_call_context;
+	class shader_database;
 
 	struct gbuffer_dt_ng_sc_gc_texture_set
 	{
@@ -28,20 +29,20 @@ namespace gx
 	{
 		gbuffer_dt_ng_sc_gc_shader_set
                         ( 
-                            transform_position_normal_uv_vertex_shader vertex_shader, 
+                            transform_position_normal_uv_vertex_pipeline vertex_pipeline, 
                             gbuffer_dt_ng_sc_gc_pixel_shader  pixel_shader, 
-                            transform_position_normal_uv_vertex_shader_constant_buffer constant_buffer
+                            gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer cbuffer
                           ) :
-						  m_vertex_shader (vertex_shader),
+						  m_vertex_pipeline (vertex_pipeline),
 						  m_pixel_shader(pixel_shader),
-						  m_vertex_constant_buffer(constant_buffer)
+						  m_pixel_cbuffer(cbuffer)
 		{
 
 		}							
 
-		transform_position_normal_uv_vertex_shader					m_vertex_shader;
+        transform_position_normal_uv_vertex_pipeline                m_vertex_pipeline;
 		gbuffer_dt_ng_sc_gc_pixel_shader					        m_pixel_shader;
-		transform_position_normal_uv_vertex_shader_constant_buffer	m_vertex_constant_buffer;
+		gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer			m_pixel_cbuffer;
 	};
 
 	class gbuffer_dt_ng_sc_gc_material
@@ -56,6 +57,16 @@ namespace gx
 			return m_material_id;
 		}
 
+		math::float4 get_ks_gloss() const
+		{
+			return m_shader_set.m_pixel_cbuffer.get_ks_gloss();
+		}
+
+		void set_ks_gloss(math::float4 value)
+		{
+			m_shader_set.m_pixel_cbuffer.set_ks_gloss(value);
+		}
+
 		private:
 		gbuffer_dt_ng_sc_gc_texture_set	m_texture_set;
 		gbuffer_dt_ng_sc_gc_shader_set	m_shader_set;
@@ -63,8 +74,7 @@ namespace gx
 		uint16_t						m_material_id;
 	};
 
-	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( ID3D11Device* device,  gbuffer_dt_ng_sc_gc_texture_set texture_set ) ;
-	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( ID3D11Device*	device,  d3d11::itexture2d_ptr	diffuse, math::float4 ks_gloss ) ;
+	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( ID3D11Device* device, const shader_database* context,  d3d11::itexture2d_ptr diffuse, math::float4 ks_gloss ) ;
 }
 
 #endif

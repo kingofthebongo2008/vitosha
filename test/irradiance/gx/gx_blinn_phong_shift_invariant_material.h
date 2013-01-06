@@ -12,7 +12,6 @@
 namespace gx
 {
 	struct draw_call_context;
-	class  render_context;
 
 	class __declspec(align(16)) blinn_phong_shift_invairant_material
 	{
@@ -48,7 +47,7 @@ namespace gx
 
 		math::float4 get_ks_gloss() const
 		{
-			return m_pixel_cbuffer.get_kd();
+			return m_pixel_cbuffer.get_ks_gloss();
 		}
 
 		void set_ks_gloss(math::float4 value)

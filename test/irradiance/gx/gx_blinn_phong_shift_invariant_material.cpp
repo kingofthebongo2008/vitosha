@@ -35,8 +35,8 @@ namespace gx
                 const transform_position_normal_uv_vertex_pipeline              vertex_pipeline,
                 const blinn_phong_shift_invariant_pixel_shader					pixel_shader,
                 const blinn_phong_shift_invariant_pixel_shader_constant_buffer	pixel_cbuffer,
-				math::float4                                         kd,
-				math::float4                                         ks_gloss
+				math::float4													kd,
+				math::float4													ks_gloss
 		
 		) :  
              m_vertex_pipeline(vertex_pipeline)

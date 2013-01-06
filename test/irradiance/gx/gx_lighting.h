@@ -12,13 +12,22 @@
 
 namespace gx
 {
-	inline float	encode_specular_power(float power)
+	inline float encode_specular_power(float power)
 	{
 		power = std::max( 0.0f, std::min( power, 100000.f ) );
 		float l =  ( logf(power) / logf(2.0f) - 0.01f) / 10.0f ;
 		return l;
 	}
 
+	inline float power_2_roughness(float power)
+	{
+		return sqrtf( 2.0f / (power + 2.0f ));
+	}
+
+	inline float roughness_2_power( float roughness)
+	{
+		return 2.0f /  ( roughness * roughness ) - 2;
+	}
 
 	namespace materials
 	{

@@ -28,6 +28,9 @@
 #include <gx/gx_transform_position_normal_uv_vertex_shader.h>
 #include <gx/gx_transform_position_uv_vertex_shader.h>
 
+#include <gx/gx_transform_position_normal_uv_vertex_shader.h>
+#include <gx/gx_gbuffer_dt_ng_sc_gc_pixel_shader.h>
+
 namespace gx
 {
     class shader_database : public boost::noncopyable
@@ -72,6 +75,9 @@ namespace gx
 
         blinn_phong_shift_invariant_pixel_shader				    m_blinn_phong_shift_invariant_pixel_shader;
 		blinn_phong_shift_invariant_pixel_shader_constant_buffer	m_blinn_phong_shift_invariant_pixel_cbuffer;
+
+		gbuffer_dt_ng_sc_gc_pixel_shader							m_gbuffer_dt_ng_sc_gc_pixel_shader;
+		gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer			m_gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer;
 
     };
 }
