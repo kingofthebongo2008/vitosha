@@ -94,6 +94,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <FxCompile Include="gx\gx_shader_gbuffer_dt_ng_sc_gc_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</HeaderFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)shaders\%(Filename)_compiled%(Extension)</HeaderFileOutput>
+    </FxCompile>
     <FxCompile Include="gx\gx_shader_transform_position_vs.hlsl">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T vs_5_0 /Vn %(FileName)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(WindowsSDKDir)\bin\x64\fxc.exe" "%(FullPath)" /Fh  $(IntDir)shaders\%(Filename)_compiled%(Extension)  /I $(ProjectDir) /T vs_5_0 /Vn %(FileName) /Qstrip_reflect /Qstrip_debug /Qstrip_priv /Ges /O3 </Command>
@@ -494,6 +504,8 @@
     <ClInclude Include="gx\gx_draw_call_context.h" />
     <ClInclude Include="gx\gx_entity_world.h" />
     <ClInclude Include="gx\gx_execute_draw_calls_pipeline_node.h" />
+    <ClInclude Include="gx\gx_gbuffer_dt_ng_sc_gc_material.h" />
+    <ClInclude Include="gx\gx_gbuffer_dt_ng_sc_gc_pixel_shader.h" />
     <ClInclude Include="gx\gx_geometry_pass_common.h" />
     <ClInclude Include="gx\gx_grid_geometry_shader.h" />
     <ClInclude Include="gx\gx_indexed_draw_call.h" />
@@ -590,6 +602,8 @@
     <ClCompile Include="gx\gx_draw_call_collector_context.cpp" />
     <ClCompile Include="gx\gx_entity_world.cpp" />
     <ClCompile Include="gx\gx_execute_draw_calls_pipeline_node.cpp" />
+    <ClCompile Include="gx\gx_gbuffer_dt_ng_sc_gc_material.cpp" />
+    <ClCompile Include="gx\gx_gbuffer_dt_ng_sc_gc_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_grid_geometry_shader.cpp" />
     <ClCompile Include="gx\gx_indexed_draw_call.cpp" />
     <ClCompile Include="gx\gx_entity.cpp" />

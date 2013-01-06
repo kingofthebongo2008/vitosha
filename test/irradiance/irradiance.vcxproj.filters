@@ -332,6 +332,12 @@
     <ClInclude Include="gx\gx_lighting.h">
       <Filter>gx</Filter>
     </ClInclude>
+    <ClInclude Include="gx\gx_gbuffer_dt_ng_sc_gc_pixel_shader.h">
+      <Filter>gx</Filter>
+    </ClInclude>
+    <ClInclude Include="gx\gx_gbuffer_dt_ng_sc_gc_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -564,6 +570,12 @@
     <ClCompile Include="gx\gx_encode_for_back_buffer_pixel_shader.cpp">
       <Filter>gx</Filter>
     </ClCompile>
+    <ClCompile Include="gx\gx_gbuffer_dt_ng_sc_gc_pixel_shader.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_gbuffer_dt_ng_sc_gc_material.cpp">
+      <Filter>gx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win32/irradiance.rc" />
@@ -678,6 +690,9 @@
     </FxCompile>
     <FxCompile Include="win32\shader_point_light_sphere_debug_vs.hlsl">
       <Filter>irradiance</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_gbuffer_dt_ng_sc_gc_ps.hlsl">
+      <Filter>gx</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

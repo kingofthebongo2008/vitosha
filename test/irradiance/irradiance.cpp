@@ -86,10 +86,10 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
 	float specular_power = gx::encode_specular_power(75.0f);
 
-	auto sphere_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(25.0f) )  ); 
-	auto sphere_2 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(50.0f) )  ); 
-	auto sphere_3 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(75.0f) )  ); 
-	auto sphere_4 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(100.0f) )  ); 
+	auto sphere_1 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(2 * 25.0f) )  ); 
+	auto sphere_2 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(2 * 50.0f) )  ); 
+	auto sphere_3 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(2 * 75.0f) )  ); 
+	auto sphere_4 = gxu::create_lat_lon_sphere_entity<gx::blinn_phong_shift_invairant_material_factory>( render_context->get_device(), render_context->get_shader_database(), 1.0f, 20 , gx::color::green() , math::set(0.05f, 0.05f, 0.05f, gx::encode_specular_power(2 * 100.0f) )  ); 
 
 
 	
