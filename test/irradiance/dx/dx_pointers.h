@@ -12,6 +12,12 @@ namespace dx
     {
         return reinterpret_cast<T**>(&(ptr));
     }
+
+	template<typename T> 
+	inline void** get_pointer_void( boost::intrusive_ptr<T>& ptr )
+    {
+        return reinterpret_cast<void**>(&(ptr));
+    }
 }
 
 inline void intrusive_ptr_release( IUnknown* px )

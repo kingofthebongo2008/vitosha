@@ -4,6 +4,11 @@
 
 #include <array>
 
+#include <ppltasks.h>
+
+#include <directxtk/inc/ddstextureloader.h>
+#include <directxtk/inc/wictextureloader.h>
+
 #include <d3d11/d3d11_error.h>
 #include <d3d11/d3d11_helpers.h>
 
@@ -15,6 +20,10 @@
 #include <gx/gx_draw_call_context.h>
 #include <gx/gx_lighting.h>
 #include <gx/gx_shader_database.h>
+
+
+
+
 
 void room_entity::on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
 {
@@ -162,6 +171,57 @@ namespace
 
 }
 
+static d3d11::itexture2d_ptr load_texture_dds(ID3D11Device* device, const wchar_t* file_name)
+{
+	d3d11::itexture2d_ptr result;
+	d3d11::iresource_ptr  resource;
+
+	typedef boost::intrusive_ptr<ID3D11Resource>			iresource_ptr;
+    typedef boost::intrusive_ptr<ID3D11Texture2D>			itexture2d_ptr;
+
+	HRESULT hresult = DirectX::CreateDDSTextureFromFile(device, file_name, dx::get_pointer(resource), 0);
+
+	if (hresult == S_OK)
+	{
+		hresult = resource->QueryInterface(__uuidof(ID3D11Texture2D),dx::get_pointer_void(result));
+
+		if (hresult == S_OK)
+		{
+			return std::move(result);
+		}
+	}
+
+	return result;
+}
+
+static d3d11::itexture2d_ptr load_texture_wic(ID3D11Device* device, const wchar_t* file_name)
+{
+	d3d11::itexture2d_ptr result;
+	d3d11::iresource_ptr  resource;
+
+	typedef boost::intrusive_ptr<ID3D11Resource>			iresource_ptr;
+    typedef boost::intrusive_ptr<ID3D11Texture2D>			itexture2d_ptr;
+
+	//todo: per thread device context
+	ID3D11DeviceContext* device_context = nullptr;
+	device->GetImmediateContext(&device_context);
+
+	HRESULT hresult = DirectX::CreateWICTextureFromFile(device, device_context,  file_name, dx::get_pointer(resource), 0);
+
+	if (hresult == S_OK)
+	{
+		hresult = resource->QueryInterface(__uuidof(ID3D11Texture2D),dx::get_pointer_void(result));
+
+		if (hresult == S_OK)
+		{
+			return std::move(result);
+		}
+	}
+
+	return result;
+}
+
+
 
 std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx::shader_database* database, std::istream& in )
 {
@@ -170,6 +230,57 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 	int8_t			read_header[9];
 	int32_t			animation_type = 0;
 	offset_table	offsets = {};
+
+	//d3d11::itexture2d_ptr tex = load_texture_dds( device, L"media/giroom/floor.dds");
+
+	struct dds_loader
+	{
+		const wchar_t*			m_file_name;
+		ID3D11Device*			m_device;
+		d3d11::itexture2d_ptr*	m_result_ptr;	
+
+		dds_loader( ID3D11Device* device, d3d11::itexture2d_ptr* result_ptr,  const wchar_t* file_name ) : 
+		m_device(device)
+		, m_result_ptr(result_ptr)
+		, m_file_name(file_name)
+		{
+
+		}
+
+		void operator()() const
+		{
+			*m_result_ptr =  load_texture_dds( m_device, m_file_name);
+		}
+
+		private:
+		
+	};
+
+
+	concurrency::structured_task_group tasks;
+	d3d11::itexture2d_ptr			   m_textures[7];
+	
+	
+
+	/*
+	if ((m_textures[0] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/lopal.bmp"     ), &m_textureSRVs[0])) == NULL) return false;
+	if ((m_textures[1] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/headpal.bmp"   ), &m_textureSRVs[1])) == NULL) return false;
+	if ((m_textures[2] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/picture.dds"   ), &m_textureSRVs[2])) == NULL) return false;
+	if ((m_textures[3] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/floor.dds"     ), &m_textureSRVs[3])) == NULL) return false;
+	if ((m_textures[4] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/globe.dds"     ), &m_textureSRVs[4])) == NULL) return false;
+	if ((m_textures[5] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/wall_lm.bmp"   ), &m_textureSRVs[5])) == NULL) return false;
+	if ((m_textures[6] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/ceiling_lm.dds"), &m_textureSRVs[6])) == NULL) return false;
+	*/
+
+	auto task0 = concurrency::make_task( std::move(dds_loader( device, &m_textures[0], L"media/giroom/picture.dds") ) );
+	auto task1 = concurrency::make_task( std::move(dds_loader( device, &m_textures[1], L"media/giroom/floor.dds") ) );
+	auto task2 = concurrency::make_task( std::move(dds_loader( device, &m_textures[2], L"media/giroom/globe.dds") ) );
+	auto task3 = concurrency::make_task( std::move(dds_loader( device, &m_textures[3], L"media/giroom/ceiling_lm.dds") ) );
+
+	tasks.run(task0);
+	tasks.run(task1);
+	tasks.run(task2);
+	tasks.run(task3);
 
 	in.read((char*) &read_header[0], 8);
 
@@ -364,7 +475,6 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 
 	//combine normals and uvs
 		
-
 	std::vector<math::half> normals_uv( 6 * padded_size);
 	uint32_t j = 0;
 	uint32_t k = 0;
@@ -377,6 +487,8 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 		normals_uv[i+4] = uv_h[k];
 		normals_uv[i+5] = uv_h[k+1];
 	}
+
+
 
 	uint32_t material_range[14];
 	std::vector<uint32_t> indices( triangle_count * 3);
@@ -456,6 +568,9 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 	{
 		return nullptr;
 	}
+
+	tasks.wait();
+
 
 	float specular_power = gx::encode_specular_power(75.0f);
 
