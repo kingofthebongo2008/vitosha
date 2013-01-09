@@ -12,6 +12,7 @@
 
 #include <gx/gx_blinn_phong_shift_invariant_material.h>
 #include <gx/gx_entity.h>
+#include <gx/gx_gbuffer_dt_ng_sc_gc_material.h>
 #include <gx/gx_indexed_draw_call.h>
 #include <gx/gx_transform_position_normal_uv_vertex_shader.h>
 
@@ -34,18 +35,18 @@ class room_entity : public gx::entity
 	typedef gx::indexed_draw_call<2,gx::bit_32> draw_call;
 
 
-    template < typename const_iterator_draw_calls, typename const_iterator_materials > room_entity
+    template < typename const_iterator_draw_calls> room_entity
 		( 
 			const_iterator_draw_calls								draw_calls_begin,
 			const_iterator_draw_calls								draw_calls_end,
 			gx::blinn_phong_shift_invairant_material				material,
-			const_iterator_materials								materials_begin,
-			const_iterator_materials								materials_end
+			std::vector<room_entity::material>						materials,
+			std::vector<gx::gbuffer_dt_ng_sc_gc_material>			textured_materials
 		) :
 			m_material(material)
-			, m_materials(materials_begin, materials_end)
+			, m_materials(std::move(materials))
 			, m_draw_calls(draw_calls_begin, draw_calls_end)
-			
+			, m_textured_materials(std::move(textured_materials))
     {
     }
 
@@ -57,6 +58,7 @@ class room_entity : public gx::entity
 
 	std::vector<material>							m_materials;
 	std::vector<draw_call>							m_draw_calls;
+	std::vector<gx::gbuffer_dt_ng_sc_gc_material>	m_textured_materials;
 
 	void											draw(gx::draw_call_context*, uint32_t material_index, uint32_t draw_call_index);
 };

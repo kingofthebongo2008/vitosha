@@ -18,8 +18,10 @@
 #include <gx/gx_draw_call_collector.h>
 #include <gx/gx_draw_call_collector_context.h>
 #include <gx/gx_draw_call_context.h>
+#include <gx/gx_gbuffer_dt_ng_sc_gc_material.h>
 #include <gx/gx_lighting.h>
 #include <gx/gx_shader_database.h>
+
 
 
 
@@ -194,17 +196,13 @@ static d3d11::itexture2d_ptr load_texture_dds(ID3D11Device* device, const wchar_
 	return result;
 }
 
-static d3d11::itexture2d_ptr load_texture_wic(ID3D11Device* device, const wchar_t* file_name)
+static d3d11::itexture2d_ptr load_texture_wic(ID3D11Device* device, ID3D11DeviceContext* device_context, const wchar_t* file_name)
 {
 	d3d11::itexture2d_ptr result;
 	d3d11::iresource_ptr  resource;
 
 	typedef boost::intrusive_ptr<ID3D11Resource>			iresource_ptr;
     typedef boost::intrusive_ptr<ID3D11Texture2D>			itexture2d_ptr;
-
-	//todo: per thread device context
-	ID3D11DeviceContext* device_context = nullptr;
-	device->GetImmediateContext(&device_context);
 
 	HRESULT hresult = DirectX::CreateWICTextureFromFile(device, device_context,  file_name, dx::get_pointer(resource), 0);
 
@@ -221,6 +219,91 @@ static d3d11::itexture2d_ptr load_texture_wic(ID3D11Device* device, const wchar_
 	return result;
 }
 
+struct thread_local_context
+{
+	ID3D11Device*				m_device;
+	d3d11::idevicecontext_ptr	m_device_context;
+};
+
+struct thread_local_context_initializer
+{
+	ID3D11Device* m_device;
+
+
+	thread_local_context_initializer( ID3D11Device* device ) : m_device(device)
+	{
+
+	}
+	thread_local_context operator()()
+	{
+		d3d11::idevicecontext_ptr device_context;
+		dx::throw_if_failed<d3d11::create_deferred_context_exception> ( m_device->CreateDeferredContext(0, dx::get_pointer(device_context)));
+
+		thread_local_context result =
+		{
+			m_device,
+			device_context
+		};
+
+		return std::move(result);
+	}
+};
+
+struct wic_loader
+{
+	const wchar_t*									m_file_name;
+	ID3D11Device*									m_device;
+	d3d11::itexture2d_ptr*							m_result_ptr;
+	concurrency::combinable<thread_local_context>*	m_thread_local_context;
+
+	wic_loader( ID3D11Device* device, d3d11::itexture2d_ptr* result_ptr,  const wchar_t* file_name, concurrency::combinable<thread_local_context>* thread_local_context ) : 
+	m_device(device)
+	, m_result_ptr(result_ptr)
+	, m_file_name(file_name)
+	, m_thread_local_context(thread_local_context)
+	{
+
+	}
+
+	void operator()() const
+	{
+		concurrency::combinable<thread_local_context>* ctx = const_cast< concurrency::combinable<thread_local_context>* > ( m_thread_local_context);
+		thread_local_context& context = ctx->local();
+		d3d11::idevicecontext_ptr	device_context = context.m_device_context;
+		*m_result_ptr =  load_texture_wic( m_device, device_context.get(), m_file_name);
+
+	}
+
+
+
+	private:
+		
+};
+
+struct dds_loader
+{
+	const wchar_t*			m_file_name;
+	ID3D11Device*			m_device;
+	d3d11::itexture2d_ptr*	m_result_ptr;	
+
+	dds_loader( ID3D11Device* device, d3d11::itexture2d_ptr* result_ptr,  const wchar_t* file_name ) : 
+	m_device(device)
+	, m_result_ptr(result_ptr)
+	, m_file_name(file_name)
+	{
+
+	}
+
+	void operator()() const
+	{
+		*m_result_ptr =  load_texture_dds( m_device, m_file_name);
+	}
+
+	private:
+		
+};
+
+
 
 
 std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx::shader_database* database, std::istream& in )
@@ -231,56 +314,31 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 	int32_t			animation_type = 0;
 	offset_table	offsets = {};
 
-	//d3d11::itexture2d_ptr tex = load_texture_dds( device, L"media/giroom/floor.dds");
+	
+	thread_local_context_initializer initializer(device);
+	concurrency::combinable<thread_local_context> ctx ( initializer );
 
-	struct dds_loader
-	{
-		const wchar_t*			m_file_name;
-		ID3D11Device*			m_device;
-		d3d11::itexture2d_ptr*	m_result_ptr;	
-
-		dds_loader( ID3D11Device* device, d3d11::itexture2d_ptr* result_ptr,  const wchar_t* file_name ) : 
-		m_device(device)
-		, m_result_ptr(result_ptr)
-		, m_file_name(file_name)
-		{
-
-		}
-
-		void operator()() const
-		{
-			*m_result_ptr =  load_texture_dds( m_device, m_file_name);
-		}
-
-		private:
-		
-	};
-
-
+	
 	concurrency::structured_task_group tasks;
 	d3d11::itexture2d_ptr			   m_textures[7];
 	
+	auto task0 = concurrency::make_task( std::move(wic_loader( device, &m_textures[0], L"media/giroom/lopal.bmp", &ctx )));
+	auto task1 = concurrency::make_task( std::move(wic_loader( device, &m_textures[1], L"media/giroom/headpal.bmp", &ctx )));
+	auto task2 = concurrency::make_task( std::move(dds_loader( device, &m_textures[2], L"media/giroom/picture.dds") ) );
+	auto task3 = concurrency::make_task( std::move(dds_loader( device, &m_textures[3], L"media/giroom/floor.dds") ) );
+	auto task4 = concurrency::make_task( std::move(dds_loader( device, &m_textures[4], L"media/giroom/globe.dds") ) );
+	auto task5 = concurrency::make_task( std::move(wic_loader( device, &m_textures[5], L"media/giroom/wall_lm.bmp", &ctx )));
+	auto task6 = concurrency::make_task( std::move(dds_loader( device, &m_textures[6], L"media/giroom/ceiling_lm.dds")));
 	
-
-	/*
-	if ((m_textures[0] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/lopal.bmp"     ), &m_textureSRVs[0])) == NULL) return false;
-	if ((m_textures[1] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/headpal.bmp"   ), &m_textureSRVs[1])) == NULL) return false;
-	if ((m_textures[2] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/picture.dds"   ), &m_textureSRVs[2])) == NULL) return false;
-	if ((m_textures[3] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/floor.dds"     ), &m_textureSRVs[3])) == NULL) return false;
-	if ((m_textures[4] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/globe.dds"     ), &m_textureSRVs[4])) == NULL) return false;
-	if ((m_textures[5] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/wall_lm.bmp"   ), &m_textureSRVs[5])) == NULL) return false;
-	if ((m_textures[6] = (ID3D11Texture2D *) context->LoadTexture(_T("../../Media/Textures/ceiling_lm.dds"), &m_textureSRVs[6])) == NULL) return false;
-	*/
-
-	auto task0 = concurrency::make_task( std::move(dds_loader( device, &m_textures[0], L"media/giroom/picture.dds") ) );
-	auto task1 = concurrency::make_task( std::move(dds_loader( device, &m_textures[1], L"media/giroom/floor.dds") ) );
-	auto task2 = concurrency::make_task( std::move(dds_loader( device, &m_textures[2], L"media/giroom/globe.dds") ) );
-	auto task3 = concurrency::make_task( std::move(dds_loader( device, &m_textures[3], L"media/giroom/ceiling_lm.dds") ) );
 
 	tasks.run(task0);
 	tasks.run(task1);
 	tasks.run(task2);
 	tasks.run(task3);
+	tasks.run(task4);
+	tasks.run(task5);
+	tasks.run(task6);
+	
 
 	in.read((char*) &read_header[0], 8);
 
@@ -570,20 +628,41 @@ std::shared_ptr<room_entity> create_room_entity( ID3D11Device* device, const gx:
 	}
 
 	tasks.wait();
+	ctx.combine_each([&](thread_local_context& local)
+	{
+		 d3d11::icommandlist_ptr command_list;
+		 
+		 local.m_device_context->FinishCommandList( false, dx::get_pointer(command_list));
 
+		 d3d11::idevicecontext_ptr immediate_context;
+
+		 device->GetImmediateContext(dx::get_pointer(immediate_context) );
+		 immediate_context->ExecuteCommandList(command_list.get(), true );
+    }
+	
+	);
 
 	float specular_power = gx::encode_specular_power(75.0f);
 
+	std::vector<gx::gbuffer_dt_ng_sc_gc_material> textures_materials;
+
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[0], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[1], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[2], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[3], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[4], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[5], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+	textures_materials.push_back( std::move( gx::create_gbuffer_dt_ng_sc_gc_material( device, database, m_textures[6], math::set(0.05f, 0.05f, 0.05f, specular_power ) ) ) ) ;
+
 	return std::make_shared<room_entity>
     (  
-		//std::move( gx::create_indexed_draw_call<8,12, gx::bit_32> ( static_cast<uint32_t> ( indices.size() ), positions_vb, normals_uvs_vb, indices_ib )  ),
 		std::begin(indexed_draw_calls),
 		std::end(indexed_draw_calls),
 
 		std::move( gx::create_blinn_phong_shift_invairant_material( database, math::set( 1.0f, 0.0f, 0.0f, 0.0f), math::set(0.05f, 0.05f, 0.05f, specular_power )) ),
 
-		std::begin(materials_shade),
-		std::end(materials_shade)
+		std::move(materials_shade),
+		std::move(textures_materials)
 	);
 }
 
