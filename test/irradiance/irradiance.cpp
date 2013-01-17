@@ -1,8 +1,10 @@
 #include "precompiled.h"
 
 #include <algorithm>
-#include <iostream>
+#include <future>
 #include <fstream>
+#include <iostream>
+#include <thread>
 
 #include <d3d11/d3d11_system.h>
 #include <math/math_graphics.h>
@@ -43,7 +45,13 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 
 	//room
 	std::ifstream f("giroom.am", std::ios_base::in | std::ios_base::binary);
-	auto room_entity = create_room_entity(context.m_device.get(), render_context->get_shader_database(), f);
+
+	std::future< std::shared_ptr<room_entity> > future_room = std::async( std::launch::async, [&]()
+	{
+		return create_room_entity(context.m_device.get(), render_context->get_shader_database(), f);
+	});
+
+	//auto room_entity = create_room_entity(context.m_device.get(), render_context->get_shader_database(), f);
 
 
     //floor
@@ -95,6 +103,8 @@ std::shared_ptr<gx::scene> universe_bootstrap( gx::render_context* render_contex
 	auto node_2 = std::make_shared<gx::scene::node> ( m_4, point_lights.get() );
     auto node_3 = std::make_shared<gx::scene::node> ( m_4, directional_entity.get() );
     auto node_4 = std::make_shared<gx::scene::node> ( math::translation(0.0f, -2.0f, 0.0f) , floor_entity.get() );
+
+	auto room_entity  = future_room.get();
 	auto node_5 = std::make_shared<gx::scene::node> ( math::translation(0.0f, -2.0f, 0.0f), room_entity.get() );
 
 	auto node_6 = std::make_shared<gx::scene::node> ( math::translation(2.0f, 0.0f, 0.0f), sphere_2.get() );

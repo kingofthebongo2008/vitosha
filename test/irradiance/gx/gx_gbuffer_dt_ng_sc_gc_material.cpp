@@ -40,6 +40,9 @@ namespace gx
 		std::get<1>(m_shader_set.m_vertex_pipeline).flush(device_context);
         std::get<1>(m_shader_set.m_vertex_pipeline).bind_as_vertex_constant_buffer(device_context);
 
+		m_shader_set.m_pixel_cbuffer.set_ks_gloss(m_ks_gloss);
+		m_shader_set.m_pixel_cbuffer.set_has_alpha_test(m_has_alpha_test);
+
 		m_shader_set.m_pixel_cbuffer.flush(device_context);
     	m_shader_set.m_pixel_cbuffer.bind_as_pixel_constant_buffer(device_context);
 
@@ -48,15 +51,16 @@ namespace gx
 		device_context->IASetInputLayout( std::get<2>(m_shader_set.m_vertex_pipeline) );
 	}
 
-	gbuffer_dt_ng_sc_gc_material::gbuffer_dt_ng_sc_gc_material ( gbuffer_dt_ng_sc_gc_texture_set texture_set, gbuffer_dt_ng_sc_gc_shader_set shader_set, math::float4 ks_gloss ) : 
+	gbuffer_dt_ng_sc_gc_material::gbuffer_dt_ng_sc_gc_material ( gbuffer_dt_ng_sc_gc_texture_set texture_set, gbuffer_dt_ng_sc_gc_shader_set shader_set, math::float4 ks_gloss, bool has_alpha_test ) : 
 		m_texture_set(texture_set)
 		, m_shader_set(shader_set)
 		, m_ks_gloss(ks_gloss)
+		, m_has_alpha_test(has_alpha_test)
 	{
 		m_material_id = gx::create_material_id ( this );
 	}
 
-	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( const shader_database* context, gbuffer_dt_ng_sc_gc_texture_set texture_set, math::float4 ks_gloss )
+	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( const shader_database* context, gbuffer_dt_ng_sc_gc_texture_set texture_set, math::float4 ks_gloss, bool has_alpha_test )
 	{
 		std::tuple< transform_position_normal_uv_vertex_shader, transform_position_normal_uv_vertex_shader_constant_buffer, transform_position_normal_uv_input_layout >
 			tuple(
@@ -78,13 +82,14 @@ namespace gx
 					context->m_gbuffer_dt_ng_sc_gc_pixel_shader_constant_buffer
                 ),
 
-				ks_gloss
+				ks_gloss,
+				has_alpha_test
 
             );
 	}
 
-	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( ID3D11Device* device, const shader_database* context, d3d11::itexture2d_ptr diffuse, math::float4 ks_gloss) 
+	gbuffer_dt_ng_sc_gc_material create_gbuffer_dt_ng_sc_gc_material( ID3D11Device* device, const shader_database* context, d3d11::itexture2d_ptr diffuse, math::float4 ks_gloss, bool has_alpha_test) 
 	{
-		return create_gbuffer_dt_ng_sc_gc_material(context, gbuffer_dt_ng_sc_gc_texture_set( device, diffuse ), ks_gloss );
+		return create_gbuffer_dt_ng_sc_gc_material(context, gbuffer_dt_ng_sc_gc_texture_set( device, diffuse ), ks_gloss, has_alpha_test );
 	}
 }

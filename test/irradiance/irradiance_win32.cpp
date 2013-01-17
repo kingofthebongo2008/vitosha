@@ -61,14 +61,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-	void* v = malloc(256);
-
-	if ( mem::is_aligned( v, 256) )
-	{
-		int k = 0;
-		k++;
-	}
-
 	mem::streamflow::test_streamflow();
 	io::console::runner runner;
 	io::console::register_thread_info_helper helper_i;

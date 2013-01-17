@@ -65,7 +65,7 @@ namespace gx
 		}
 
         private:
-		render_context*					m_render_context;
+		render_context*				m_render_context;
         d3d11::idevicecontext_ptr	m_d3d11_device_context;
 
         d3d11::icommandlist_ptr		m_command_list;

@@ -484,6 +484,7 @@
     <ClInclude Include="gxu\gxu_entity_factory.h" />
     <ClInclude Include="gxu\gxu_pinhole_camera_dispatcher.h" />
     <ClInclude Include="gxu\gxu_static_mesh_entity.h" />
+    <ClInclude Include="gxu\gxu_texture_loading.h" />
     <ClInclude Include="gx\gx_blinn_phong_material.h" />
     <ClInclude Include="gx\gx_blinn_phong_pixel_shader.h" />
     <ClInclude Include="gx\gx_blinn_phong_shift_invariant_material.h" />

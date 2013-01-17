@@ -8,6 +8,7 @@ struct vs_output
 cbuffer per_object
 {
 	float4	m_ks_gloss;
+	bool	m_has_alpha_test;
 }
 
 Texture2D		diffuse;
@@ -25,8 +26,16 @@ ps_output main( in  vs_output input)
 	ps_output result;
 
 	result.m_kd				= diffuse.Sample(default_sampler, input.uv).xyz;
-	result.m_ks		= m_ks_gloss.xyz;
-    result.m_normal_gloss	= float4(normalize(input.normal_vs), m_ks_gloss.w);
+
+	if (m_has_alpha_test)
+	{
+		clip(result.m_kd - 0.5f);
+	}
+	else
+	{
+		result.m_ks				= m_ks_gloss.xyz;
+	    result.m_normal_gloss	= float4(normalize(input.normal_vs), m_ks_gloss.w);
+	}
 
 	return result;
 }

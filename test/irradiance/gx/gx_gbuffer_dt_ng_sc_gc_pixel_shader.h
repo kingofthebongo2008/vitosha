@@ -30,6 +30,16 @@ namespace gx
 		}
 
 
+		bool get_has_alpha_test() const
+		{
+			return m_has_alpha_test;
+		}
+
+		void set_has_alpha_test(bool value)
+		{
+			m_has_alpha_test = value;
+		}
+
 		void flush ( ID3D11DeviceContext* context )
 		{
 			gx::constant_buffer_update(context, m_buffer.get(), (void*) &m_ks_gloss, size() );
@@ -57,11 +67,14 @@ namespace gx
 
 		size_t size() const
 		{
-			return sizeof(m_ks_gloss);
+			return sizeof(m_ks_gloss) + sizeof(m_has_alpha_test) + sizeof(m_padding);
 		}
 
 		public:
-		math::float4		m_ks_gloss;		//specular color + gloss
+		math::float4		m_ks_gloss;			//specular color + gloss
+		bool				m_has_alpha_test;
+		uint8_t				m_padding[15];
+
 		d3d11::ibuffer_ptr	m_buffer;
 	};
 
