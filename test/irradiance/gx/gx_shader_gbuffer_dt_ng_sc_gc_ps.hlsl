@@ -25,11 +25,13 @@ ps_output main( in  vs_output input)
 {
 	ps_output result;
 
-	result.m_kd				= diffuse.Sample(default_sampler, input.uv).xyz;
+	float4 sample = diffuse.Sample(default_sampler, input.uv);
+
+	result.m_kd	= sample.xyz;
 
 	if (m_has_alpha_test)
 	{
-		clip(result.m_kd - 0.5f);
+		clip(sample.a - 0.5f);
 	}
 	else
 	{
