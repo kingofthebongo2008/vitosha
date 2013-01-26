@@ -16,6 +16,7 @@ SamplerState	default_sampler;
 
 struct ps_output
 {
+
 	float3	m_kd			: sv_target0;
 	float3	m_ks			: sv_target1;
     float4	m_normal_gloss	: sv_target2;
@@ -27,17 +28,15 @@ ps_output main( in  vs_output input)
 
 	float4 sample = diffuse.Sample(default_sampler, input.uv);
 
-	result.m_kd	= sample.xyz;
-
 	if (m_has_alpha_test)
 	{
 		clip(sample.a - 0.5f);
 	}
-	else
-	{
-		result.m_ks				= m_ks_gloss.xyz;
-	    result.m_normal_gloss	= float4(normalize(input.normal_vs), m_ks_gloss.w);
-	}
+
+	result.m_kd	= sample.xyz;
+	result.m_ks				= m_ks_gloss.xyz;
+	result.m_normal_gloss	= float4(normalize(input.normal_vs), m_ks_gloss.w);
+
 
 	return result;
 }

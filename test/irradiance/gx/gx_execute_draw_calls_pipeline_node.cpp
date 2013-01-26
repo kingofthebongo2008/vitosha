@@ -131,7 +131,10 @@ namespace gx
 				draw_call_context.m_entity_draw_call_index = info.m_entity_draw_call_index;
 				gx::entity* enty = reinterpret_cast<entity*> ( in_params->m_data->at(index) );
 
-  				enty->execute_draw_calls(&draw_call_context);
+				gx::command::type command = info.m_key.get_command();
+
+				gx::draw_call& call = info.m_key.get_draw_call();
+				call(&draw_call_context);
 			}
 			else
 			{

@@ -40,7 +40,7 @@ m_quad_data (quad_data)
 
 void directional_lights_entity::on_create_draw_calls( gx::draw_call_collector_context* context, gx::draw_call_collector* collector)
 {
-	gx::draw_call_key key = gx::create_light_draw_call();
+	gx::draw_call_key key = gx::create_light_draw_call( std::bind( &directional_lights_entity::on_execute_draw_calls , this, std::placeholders::_1 ) );
 	collector->add_draw_call(key, context->m_entity_index ) ;
 }
 

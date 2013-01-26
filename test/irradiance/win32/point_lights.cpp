@@ -48,8 +48,11 @@ void point_lights_entity::on_create_draw_calls( gx::draw_call_collector_context*
 {
 	uint16_t material_id = 2;
 
-	gx::draw_call_key key = gx::create_debug_draw_call(material_id, gx::get_perspective_transform3_depth(context) );
+	gx::draw_call_key key = gx::create_debug_draw_call(material_id, gx::get_perspective_transform3_depth(context), std::bind(&point_lights_entity::on_execute_draw_calls, this, std::placeholders::_1) );
 	collector->add_draw_call(key, context->m_entity_index ) ;
+
+	//gx::draw_call_key key2  = gx::create_light_draw_call( std::bind(&point_lights_entity::on_execute_draw_calls, this, std::placeholders::_1)  );
+	//collector->add_draw_call(key2, context->m_entity_index ) ;
 }
 
 void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_context, math::float4x4 world_matrix)
@@ -72,6 +75,7 @@ void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_con
 
 void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
 {
+	return;
     gx::profile p(L"point_lights_entity");
 	ID3D11DeviceContext* device_context = context->m_device_context;
 

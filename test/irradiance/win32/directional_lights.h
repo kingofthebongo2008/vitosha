@@ -39,8 +39,7 @@ class __declspec(align(16)) directional_light
 
 	private:
 
-	math::float4 m_power;
-
+	math::float4	m_power;
 	math::float4	m_direction_ws;
 
 };
@@ -51,7 +50,7 @@ class directional_lights_entity : public gx::entity
 
     directional_lights_entity
     ( 
-        d3d11::ibuffer_ptr                  quad_data,
+        d3d11::ibuffer_ptr						quad_data,
 
         gx::light_directional_vertex_pipeline   vertex_pipeline,
         gx::light_directional_pixel_pipeline    pixel_pipeline,
@@ -65,13 +64,13 @@ class directional_lights_entity : public gx::entity
 
     private:
 
-    d3d11::ibuffer_ptr                  m_quad_data;
+    d3d11::ibuffer_ptr						m_quad_data;
 
     gx::light_directional_vertex_pipeline   m_vertex_pipeline;
     gx::light_directional_pixel_pipeline    m_pixel_pipeline;
 
-    std::vector<math::float4>        m_light_direction_ws;
-    std::vector<math::float4>        m_light_color;
+    std::vector<math::float4>				m_light_direction_ws;
+    std::vector<math::float4>				m_light_color;
 };
 
 std::shared_ptr<directional_lights_entity> create_directional_lights_entity(    ID3D11Device* device,  d3d11::ibuffer_ptr quad_data, const directional_light* begin, const directional_light* end  );

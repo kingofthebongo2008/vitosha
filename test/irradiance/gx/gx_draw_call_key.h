@@ -2,6 +2,7 @@
 #define __GX_DRAW_CALL_KEY_H__
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 
 namespace gx
@@ -114,6 +115,9 @@ namespace gx
 		uint32_t		m_command;
 	};
 
+	struct draw_call_context;
+	typedef std::function<void(draw_call_context* g)> draw_call;
+			
 	class draw_call_key
     {
         public:
@@ -124,7 +128,7 @@ namespace gx
 			m_data.m_key[1] = 0;
         }
 
-		explicit draw_call_key(opaque_key_data opaque)
+		draw_call_key(opaque_key_data opaque, const draw_call& draw_call) : m_draw_call(draw_call)
 		{
 			m_data.m_key[0] = 0;
 			m_data.m_key[1] = 0;
@@ -132,7 +136,23 @@ namespace gx
 			m_data.m_opaque = opaque;
 		}
 
-        explicit draw_call_key(command_key_data command)
+		draw_call_key(opaque_key_data opaque, draw_call&& draw_call) : m_draw_call( std::move( draw_call ) )
+		{
+			m_data.m_key[0] = 0;
+			m_data.m_key[1] = 0;
+
+			m_data.m_opaque = opaque;
+		}
+
+        draw_call_key(command_key_data command, const draw_call& draw_call) : m_draw_call(draw_call)
+		{
+			m_data.m_key[0] = 0;
+			m_data.m_key[1] = 0;
+
+			m_data.m_command = command;
+		}
+
+		draw_call_key(command_key_data command, draw_call&& draw_call) : m_draw_call(std::move( draw_call ) )
 		{
 			m_data.m_key[0] = 0;
 			m_data.m_key[1] = 0;
@@ -160,6 +180,16 @@ namespace gx
 			return static_cast<command::type> (m_data.m_header.m_command);
 		}
 
+		const draw_call& get_draw_call() const
+		{
+			return m_draw_call;
+		}
+
+		draw_call& get_draw_call()
+		{
+			return m_draw_call;
+		}
+
 		union 
 		{
 			uint16_t				m_key[8];
@@ -168,6 +198,8 @@ namespace gx
 			translucency_key_data	m_translucency;
 			command_key_data		m_command;
 		} m_data;
+
+		draw_call		m_draw_call;
     };
 
     inline bool operator<(const draw_call_key key1, const draw_call_key key2)
@@ -175,7 +207,7 @@ namespace gx
 		return std::memcmp( &key1.m_data.m_key[0], &key2.m_data.m_key[0], 8 ) < 0  ;
     }
 
-	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, uint32_t material_pass, uint32_t depth )
+	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, uint32_t material_pass, uint32_t depth, const draw_call& draw_call )
     {
 		opaque_key_data opaque_key = {};
 
@@ -186,41 +218,70 @@ namespace gx
 		opaque_key.m_material_pass = static_cast<uint8_t> (material_pass);
 		opaque_key.m_depth = depth;
 
-		return draw_call_key ( opaque_key );
+		return draw_call_key ( opaque_key, draw_call );
 	}
 
-	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, uint32_t material_pass, float depth )
+	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, uint32_t material_pass, float depth, const draw_call& draw_call )
     {
 		uint32_t integer_depth = static_cast<uint32_t> ( depth * ( ( 1 << 24 ) - 1) );
-        return create_gbuffer_draw_call( material_id, material_pass, integer_depth);
+        return create_gbuffer_draw_call( material_id, material_pass, integer_depth, draw_call);
     }
 
-	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, float depth )
+	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, uint32_t material_pass, float depth, draw_call&& draw_call )
     {
-        return create_gbuffer_draw_call( material_id, 0, depth);
+		uint32_t integer_depth = static_cast<uint32_t> ( depth * ( ( 1 << 24 ) - 1) );
+        return create_gbuffer_draw_call( material_id, material_pass, integer_depth, draw_call);
     }
 
-	inline draw_call_key create_debug_draw_call( uint32_t material_id, float depth )
+	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, float depth, const draw_call& draw_call )
     {
-		draw_call_key key = create_gbuffer_draw_call( material_id, depth);
+        return create_gbuffer_draw_call( material_id, 0, depth, draw_call);
+    }
+
+	inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, float depth, draw_call&& draw_call )
+    {
+        return create_gbuffer_draw_call( material_id, 0, depth, draw_call);
+    }
+
+	
+	inline draw_call_key create_debug_draw_call( uint32_t material_id, float depth, const draw_call& draw_call )
+    {
+		draw_call_key key = create_gbuffer_draw_call( material_id, depth, draw_call);
+
+		//setup some default values
+		key.m_data.m_header.m_command = command::debug_draw_call;
+		return key;
+    }
+	
+
+	inline draw_call_key create_debug_draw_call( uint32_t material_id, float depth, draw_call&& draw_call )
+    {
+		draw_call_key key = create_gbuffer_draw_call( material_id, depth, draw_call);
 
 		//setup some default values
 		key.m_data.m_header.m_command = command::debug_draw_call;
 		return key;
     }
 
-    inline draw_call_key create_light_draw_call()
+    inline draw_call_key create_light_draw_call(const draw_call& draw_call)
     {
 		command_key_data light_key = {};
 		light_key.m_header.m_command = command::light_buffer_draw_call;
-		return draw_call_key(light_key);
+		return draw_call_key(light_key, draw_call);
     }
 
-    inline draw_call_key create_shadow_draw_call()
+	inline draw_call_key create_light_draw_call(draw_call&& draw_call)
+    {
+		command_key_data light_key = {};
+		light_key.m_header.m_command = command::light_buffer_draw_call;
+		return draw_call_key(light_key, draw_call);
+    }
+
+    inline draw_call_key create_shadow_draw_call(const draw_call& draw_call)
     {
 		command_key_data shadow_key = {};
 		shadow_key.m_header.m_command = command::shadows_cascade_0_draw_call;
-		return draw_call_key(shadow_key);
+		return draw_call_key(shadow_key, draw_call);
     }
 
 	inline draw_call_key create_command_draw_call( command::type command  )
@@ -233,7 +294,7 @@ namespace gx
 		opaque_key.m_depth = 0xffffffff;
 		opaque_key.m_material_pass = 0xff;
 
-		return draw_call_key ( opaque_key );
+		return draw_call_key ( opaque_key, draw_call() );
     }
 }
 

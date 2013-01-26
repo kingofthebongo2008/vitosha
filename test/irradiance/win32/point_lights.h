@@ -22,10 +22,10 @@ class __declspec(align(16)) point_light
 {
 	public:
 
-	point_light( math::float4 power, math::float4 position, float radius, float cut_off_distance ) : m_power(power), m_position(position)
+	point_light( math::float4 power, math::float4 position, float radius, float strength ) : m_power(power), m_position(position)
 	{
 		set_radius(radius);
-		set_cut_off_distance(cut_off_distance);
+		set_strength(strength);
 	}
 
 	math::float4 get_power() const
@@ -45,7 +45,7 @@ class __declspec(align(16)) point_light
 
 		auto v_1 = load4( reinterpret_cast<const float* __restrict> (&mask[0]) );
 
-		//retain the cut_off_distance
+		//retain the strength
 		m_power = select(value, m_power, v_1);
 	}
 
@@ -67,7 +67,7 @@ class __declspec(align(16)) point_light
 
 		auto v_1 = load4( reinterpret_cast<const float* __restrict> (&mask[0]) );
 
-		//retain the cut_off_distance
+		//retain the strength
 		m_position = select(value, m_position, v_1);
 	}
 
@@ -97,7 +97,7 @@ class __declspec(align(16)) point_light
 		m_power = select(m_power, v, v_1);
 	}
 
-	float get_cut_off_distance() const
+	float get_strength() const
 	{
 		using namespace math;
 
@@ -110,7 +110,7 @@ class __declspec(align(16)) point_light
 		return result;
 	}
 
-	void set_cut_off_distance(float value)
+	void set_strength(float value)
 	{
 		using namespace math;
 
@@ -126,7 +126,7 @@ class __declspec(align(16)) point_light
 
 	private:
 
-	math::float4 m_power;
+	math::float4	m_power;
 	math::float4	m_position;
 
 };

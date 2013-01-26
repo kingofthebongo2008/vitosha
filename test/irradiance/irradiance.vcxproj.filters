@@ -697,5 +697,11 @@
     <FxCompile Include="gx\gx_shader_gbuffer_dt_ng_sc_gc_ps.hlsl">
       <Filter>gx</Filter>
     </FxCompile>
+    <FxCompile Include="gx\gx_shader_light_point_vs.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
+    <FxCompile Include="gx\gx_shader_light_point_ps.hlsl">
+      <Filter>gx</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

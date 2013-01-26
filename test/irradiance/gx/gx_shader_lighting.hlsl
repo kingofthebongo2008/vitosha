@@ -39,6 +39,11 @@ float3 decode_light_power( float4 light)
     return light.xyz;
 }
 
+float decode_light_range( float4 light)
+{
+    return light.w;
+}
+
 float3 blinn_phong_specular(float3 specular_color, float power, float3 l, float3 n, float3 v, float n_dot_l)
 {
     float3 h = half_way_vector( l, v );
@@ -252,6 +257,32 @@ shaded_surface cook_torrance(float3 albedo, float3 specular_color, float power, 
     }
 
     return result;
+}
+
+//distance and range are in meters
+float light_attenuation(float distance, float range, float strength)
+{
+	float attenuation = (distance * distance) / (range * range);
+
+	attenuation = 1.0f / (attenuation * strength + 1.f);
+	strength = 1.0f / (strength + 1.0f);
+	attenuation = attenuation - strength;
+	attenuation = attenuation / (1.0f - strength );
+
+	return attenuation;
+}
+
+//distance and range are in meters
+float light_attenuation_2(float distance_squared, float range_squared, float strength)
+{
+	float attenuation = (distance_squared) / (range_squared);
+
+	attenuation = 1.0f / (attenuation * strength + 1.f);
+	strength = 1.0f / (strength + 1.0f);
+	attenuation = attenuation - strength;
+	attenuation = attenuation / (1.0f - strength );
+
+	return attenuation;
 }
 
 
