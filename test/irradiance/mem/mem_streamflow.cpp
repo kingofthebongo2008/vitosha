@@ -13,11 +13,11 @@ namespace mem
 		static std::atomic<thread_id>						g_thread_id = thread_id_orphan;
 		static super_page_manager							g_super_page_manager;
 
-		static concurrent_stack								g_page_blocks_orphaned[size_classes];				//freed on thread finalize, partially free
-		static concurrent_stack								g_page_blocks_free[page_block_size_classes];		//global cache of free page blocks
+		static concurrent_stack								g_page_blocks_orphaned[size_classes];						//freed on thread finalize, partially free
+		static concurrent_stack								g_page_blocks_free[page_block_size_classes];				//global cache of free page blocks
 
 		static THREAD_LOCAL void*							t_local_heaps_memory;
-		static THREAD_LOCAL thread_local_heap*				t_local_heaps[ size_classes ];						// per size class heap with blocks
+		static THREAD_LOCAL thread_local_heap*				t_local_heaps[ size_classes ];								// per size class heap with blocks
 
 		static THREAD_LOCAL void*							t_local_inactive_page_blocks_memory;
 		static THREAD_LOCAL stack*							t_local_inactive_page_blocks[ page_block_size_classes ];	//local cache of free page blocks
@@ -76,7 +76,6 @@ namespace mem
 			}
 
 			t_thread_id = create_thread_id();
-
 		}
 
 		static void thread_finalize()
@@ -215,7 +214,7 @@ namespace mem
 			return size_to_allocate;
 		}
 		//---------------------------------------------------------------------------------------
-		static inline std::uint32_t compute_page_size_class( std::uint32_t page_block_size)
+		static inline std::uint32_t compute_page_block_size_class( std::uint32_t page_block_size)
 		{
 			const uint32_t page = 4096;
 			const uint32_t page_count = (16 * 1024) / page;;
@@ -240,10 +239,11 @@ namespace mem
                     super_page* page = new 
 							(super_page_header) super_page(sp_base, free_super_page_callback, this);
 
-					//lock?
+
+					std::lock_guard<std::mutex> guard(m_super_pages_lock);
                     m_super_pages.push_front(page);
 
-                    return page;
+					return page;
                 }
                 else
                 {
@@ -259,17 +259,17 @@ namespace mem
         }
 
 		//---------------------------------------------------------------------------------------
-		super_page* super_page_manager::get_super_page(std::uint32_t page_size) throw()
+		super_page* super_page_manager::get_super_page(std::uint32_t page_block_size) throw()
 		{
 				//scan super page list for a block
 			return nullptr;
 		}
 		//---------------------------------------------------------------------------------------
-		page_block*	super_page_manager::allocate_page_block( std::uint32_t page_size ) throw()
+		page_block*	super_page_manager::allocate_page_block( std::uint32_t page_block_size ) throw()
 		{
 			std::lock_guard<std::mutex> guard(m_super_pages_lock);
 			
-			super_page* super_page = get_super_page(page_size);
+			super_page* super_page = get_super_page(page_block_size);
 
 			if (super_page == nullptr)
 			{
@@ -278,7 +278,7 @@ namespace mem
 
 			if (super_page)
 			{
-				return  super_page->alllocate(page_size);
+				return  super_page->alllocate(page_block_size);
 			}
 			else
 			{
@@ -303,29 +303,29 @@ namespace mem
 			return block;
 		}
 		//---------------------------------------------------------------------------------------
-		static page_block* get_free_page_block( size_class size_class, uint32_t page_size, super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2 )
+		static page_block* get_free_page_block( size_class size_class, uint32_t page_block_size, super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2, thread_id thread_id )
 		{
 			page_block* block = get_free_page_block(stack_1, stack_2);
 
 
 			if (block == nullptr)
 			{
-				block = page_manager->allocate_page_block(page_size);
+				block = page_manager->allocate_page_block(page_block_size);
 			}
 			else if ( block->get_size_class() != size_class)
 			{
-				block->reset(size_class);
+				block->reset(size_class, thread_id);
 			}
 			
 
 			return nullptr;
 		}
 		//---------------------------------------------------------------------------------------
-		static page_block* get_free_page_block( uint32_t size )
+		static page_block* get_free_page_block( uint32_t size, thread_id thread_id )
 		{
 			size_class size_class		= compute_size_class(size);
-			uint32_t page_size			= compute_page_block_size( size_class );
-			uint32_t page_block_class	= compute_page_size_class( compute_page_block_size( size_class) );
+			uint32_t page_block_size	= compute_page_block_size( size_class );
+			uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
 
 
 			concurrent_stack* stack_1 = &g_page_blocks_free[size_class];
@@ -333,7 +333,7 @@ namespace mem
 
 			super_page_manager* page_manager = &g_super_page_manager;
 
-			return get_free_page_block( size_class, page_size, page_manager, stack_1, stack_2);
+			return get_free_page_block( size_class, page_block_size, page_manager, stack_1, stack_2, thread_id);
 
 		}
 
@@ -358,22 +358,46 @@ namespace mem
 		//---------------------------------------------------------------------------------------
 		static void remote_free(void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id)
 		{
-			
-			
+			uint64_t reference = 0;
+			uint64_t new_reference = 0;
 
+			do
+			{
+                //reference holds in one 64 bit variable, counter, next pointer and thread id
+				reference = block->get_block_info();
+				auto thread_id = remote_page_block_info::get_thread_id( reference );
+
+				if (thread_id != thread_id_orphan)
+				{
+                    //fetch the old head and version
+                    remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
+					uint16_t count = remote_page_block_info::get_count( queue );
+					uint16_t next = remote_page_block_info::get_next ( queue );
+
+                    //store the old offset in the empty space
+					uint16_t offset = block->convert_to_object_offset( pointer );
+                    * reinterpret_cast<uint16_t*> ( pointer ) = next;
+                    count++;
+                    next = offset;
+                    
+                    //create new reference and try to set it
+                    new_reference = remote_page_block_info::set_thread_next_count( thread_id, next, count );
+				}
+				else
+				{
+					adopt_page_block(pointer, block, heap, thread_id);
+					break;
+				}
+			}
+			while (! block->try_set_block_info( reference, new_reference) );
 		}
 
 
 		void test_streamflow()
 		{
-			uint64_t test = 5;
-
-			std::atomic<uint64_t*> p(&test);
-
-			uint64_t k = *p.load();
+			thread_initialize();
 
 
-			k++;
 		}
 
     }

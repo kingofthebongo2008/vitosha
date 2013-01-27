@@ -581,6 +581,11 @@ namespace mem
 				return ( free_queue ) | ( reference & 0xFFFFFFFF00000000L );
 			}
 
+            static uint64_t set_thread_next_count( thread_id thread_id, uint16_t next, uint16_t count) throw()
+			{
+				return ( static_cast<uint64_t> ( (thread_id) ) << 32 |  (static_cast<uint64_t> ( next ) << 16 ) | static_cast<uint64_t> (count) );
+			}
+
 			std::atomic<uint64_t> 	m_memory_reference;
 		};
 
@@ -621,11 +626,30 @@ namespace mem
                   return static_cast<uint32_t> (m_memory_size);
               }
 
-			  void reset(size_class size_class) throw()
+			  void reset(size_class size_class,thread_id thread_id) throw()
 			  {
 				  size_class = size_class;
 				  m_free_objects = convert_to_object_offset(m_memory_size);
 				  m_unallocated_offset = 0;
+
+                  uint64_t new_reference = 0;
+                  uint64_t reference = 0;
+
+
+                  //todo: check if need to 
+                  do
+                  {
+                      auto reference = get_block_info();
+
+                      //fetch the old head and version
+                      remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
+                      uint16_t count = remote_page_block_info::get_count( queue );
+
+                      //create new reference and try to set it
+                      new_reference = remote_page_block_info::set_thread_next_count( thread_id, 0, count + 1 );
+                   }
+                    while (! try_set_block_info( reference, new_reference) );
+                  
 			  }
 
               void* allocate() throw()
@@ -693,28 +717,27 @@ namespace mem
 				  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &reference, new_reference);
 			  }
 
-			  bool try_remote_free ( void* pointer )
+			  uint64_t get_block_info() const throw()
 			  {
-				uint64_t reference = 0;
-				uint64_t new_reference = 9;
+				  return m_block_info.m_memory_reference.load();	
+			  }
 
-				do
-				{
-					auto reference = m_block_info.m_memory_reference.load();	
-					auto thread_id = m_block_info.get_thread_id( reference );
+			  bool try_set_block_info(uint64_t old_value, uint64_t value) throw()
+			  {
+				  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &old_value, value);
+			  }
 
-					if (thread_id != thread_id_orphan)
-					{
+			  uint16_t convert_to_object_offset(uintptr_t bytes) const throw()
+			  {
+			      return static_cast<uint16_t> ( bytes /  m_size_class );
+			  }
 
-					}
-					else
-					{
-						return false;
-					}
-				}
-				while ( std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &reference, new_reference) );
-
-				return true;
+              uint16_t convert_to_object_offset(const void* pointer) const throw()
+			  {
+                  auto pointer_a = m_memory;
+                  auto pointer_b = reinterpret_cast<uintptr_t> (pointer);
+                  auto offset = pointer_b - pointer_a;
+                  return convert_to_object_offset(offset);
 			  }
 
         private:
@@ -744,10 +767,6 @@ namespace mem
                 return blocks * m_size_class;
             }
 
-            uint16_t convert_to_object_offset(uintptr_t bytes) const throw()
-            {
-                return static_cast<uint16_t> ( bytes /  m_size_class );
-            }
         };
 
         //---------------------------------------------------------------------------------------
@@ -1205,8 +1224,11 @@ namespace mem
 
             void free(super_page* header, void* super_page_base) throw()
             {
-				std::lock_guard<std::mutex> guard(m_super_pages_lock);
-                m_super_pages.remove(header);
+				{
+					std::lock_guard<std::mutex> guard(m_super_pages_lock);
+					m_super_pages.remove(header);
+				}
+
                 header->~super_page();
                 m_os_heap_pages.free(super_page_base);
                 m_header_allocator.free(header);

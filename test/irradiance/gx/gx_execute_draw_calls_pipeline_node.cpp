@@ -61,37 +61,37 @@ namespace gx
 			{
 				case gx::command::gbuffer_initialize:
 				{
-					render_context->select_gbuffer(device_context, std::move(create_per_view_data(in_params)));
+					render_context->select_gbuffer(device_context, create_per_view_data(in_params));
 					break;
 				}
 
 				case gx::command::gbuffer_finalize:
 				{
-					render_context->end_gbuffer(device_context, std::move(create_per_view_data(in_params)));
+					render_context->end_gbuffer(device_context, create_per_view_data(in_params));
 					break;
 				}
 
                 case gx::command::light_buffer_initialize:
                 {
-                    render_context->select_light_buffer(device_context, std::move(create_per_view_data(in_params)));
+                    render_context->select_light_buffer(device_context, create_per_view_data(in_params));
                     break;
                 }
 
                 case gx::command::light_buffer_finalize:
                 {
-                    render_context->end_light_buffer(device_context, std::move(create_per_view_data(in_params)));
+                    render_context->end_light_buffer(device_context, create_per_view_data(in_params));
                     break;
                 }
                 
                 case gx::command::compose_light_buffer:
 				{
-                    render_context->compose_light_buffer(device_context, std::move(create_per_view_data(in_params)));
+                    render_context->compose_light_buffer(device_context, create_per_view_data(in_params));
                     break;
                 }
 
 				case gx::command::debug_initialize:
 				{
-					render_context->select_debug_target(device_context, std::move(create_per_view_data(in_params)));
+					render_context->select_debug_target(device_context, create_per_view_data(in_params));
 					break;
 				}
 
