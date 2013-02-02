@@ -36,7 +36,7 @@ namespace mem
             inline uint32_t log2(uint32_t x) throw()
             {
                 unsigned long result;
-                _BitScanForward(&result, x);
+                _BitScanReverse(&result, x);
                 return static_cast<uint32_t>(result);
             }
 
@@ -921,9 +921,9 @@ namespace mem
             {
                 uint32_t        size_in_pages   =   static_cast<uint32_t> ( size / page_size) ;
                 uint32_t        order           =   detail::log2( size_in_pages );
-                return ( order < buddy_max_order && m_largest_free_order <= order);
+                return ( m_largest_free_order < buddy_max_order &&  order <= m_largest_free_order );
             }
-
+            
         private:
 
             struct buddy_element : public list_element<buddy_element>

@@ -261,7 +261,22 @@ namespace mem
 		//---------------------------------------------------------------------------------------
 		super_page* super_page_manager::get_super_page(std::uint32_t page_block_size) throw()
 		{
-				//scan super page list for a block
+        	//scan super page list for a block
+            if ( !m_super_pages.empty() )
+            {
+                super_page* page = m_super_pages.front();
+
+                while (page)
+                {
+                    if (page->has_enough_free_space(page_block_size))
+                    {
+                        return page;
+                    }
+
+                    page = page->get_next();
+                }
+            }
+			
 			return nullptr;
 		}
 		//---------------------------------------------------------------------------------------
@@ -278,38 +293,14 @@ namespace mem
 
 			if (super_page)
 			{
-                page_block* result_0 = super_page->alllocate(page_block_size);
-                page_block* result_1 = super_page->alllocate(page_block_size);
+                page_block* result = super_page->alllocate(page_block_size);
 
-                m_bibop.register_tiny_pages( result_0->get_memory(), result_0->get_memory_size(), reinterpret_cast<uintptr_t> ( result_0 ) );
-                m_bibop.register_tiny_pages( result_1->get_memory(), result_1->get_memory_size(), reinterpret_cast<uintptr_t> ( result_1 ) );
+                if (result)
+                {
+                    m_bibop.register_tiny_pages( result->get_memory(), result->get_memory_size(), reinterpret_cast<uintptr_t> ( result ) );
+                }
 
-                page_block* result0 = m_bibop.decode((void*) ( result_0->get_memory() +  0 * 4096 ) );
-                page_block* result1 = m_bibop.decode((void*) ( result_0->get_memory() +  1 * 4096 ) );
-                page_block* result2 = m_bibop.decode((void*) ( result_0->get_memory() +  2 * 4096 ) );
-                page_block* result3 = m_bibop.decode((void*) ( result_0->get_memory() +  3 * 4096 ) );
-                page_block* result4 = m_bibop.decode((void*) ( result_0->get_memory() +  4 * 4096 ) );
-                page_block* result5 = m_bibop.decode((void*) ( result_0->get_memory() +  5 * 4096 ) );
-                page_block* result6 = m_bibop.decode((void*) ( result_0->get_memory() +  6 * 4096 ) );
-                page_block* result7 = m_bibop.decode((void*) ( result_0->get_memory() +  7 * 4096 ) );
-                
-                page_block* result8 = m_bibop.decode((void*) ( result_0->get_memory() +  1 * 2048 ) );
-                page_block* result9 = m_bibop.decode((void*) ( result_0->get_memory() +  8 * 4096 ) );
-
-
-                page_block* result10 = m_bibop.decode((void*) ( result_1->get_memory() +  0 * 4096 ) );
-                page_block* result11 = m_bibop.decode((void*) ( result_1->get_memory() +  1 * 4096 ) );
-                page_block* result12 = m_bibop.decode((void*) ( result_1->get_memory() +  2 * 4096 ) );
-                page_block* result13 = m_bibop.decode((void*) ( result_1->get_memory() +  3 * 4096 ) );
-                page_block* result14 = m_bibop.decode((void*) ( result_1->get_memory() +  4 * 4096 ) );
-                page_block* result15 = m_bibop.decode((void*) ( result_1->get_memory() +  5 * 4096 ) );
-                page_block* result16 = m_bibop.decode((void*) ( result_1->get_memory() +  6 * 4096 ) );
-                page_block* result17 = m_bibop.decode((void*) ( result_1->get_memory() +  7 * 4096 ) );
-                
-                page_block* result18 = m_bibop.decode((void*) ( result_1->get_memory() +  1 * 2048 ) );
-                page_block* result19 = m_bibop.decode((void*) ( result_1->get_memory() +  8 * 4096 ) );
-
-				return  result_0;
+				return  result;
 			}
 			else
 			{
@@ -328,13 +319,13 @@ namespace mem
 
 			if (block && block->full())
 			{
-				//garbage_collect
+                block->garbage_collect();
 			}
 
 			return block;
 		}
 		//---------------------------------------------------------------------------------------
-		static page_block* get_free_page_block( size_class size_class, uint32_t page_block_size, super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2, thread_id thread_id )
+		static page_block* get_free_page_block( uint32_t size, uint32_t page_block_size, super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2, thread_id thread_id )
 		{
 			page_block* block = get_free_page_block(stack_1, stack_2);
 
@@ -342,11 +333,11 @@ namespace mem
 			if (block == nullptr)
 			{
 				block = page_manager->allocate_page_block(page_block_size);
-                block->reset(size_class, thread_id);
+                block->reset(size, thread_id);
 			}
-			else if ( block->get_size_class() != size_class)
+			else if ( block->get_size_class() != size)
 			{
-				block->reset(size_class, thread_id);
+				block->reset(size, thread_id);
 			}
 			
 
@@ -365,7 +356,7 @@ namespace mem
 
 			super_page_manager* page_manager = &g_super_page_manager;
 
-			return get_free_page_block( size_class, page_block_size, page_manager, stack_1, stack_2, thread_id);
+			return get_free_page_block( compute_size(size_class), page_block_size, page_manager, stack_1, stack_2, thread_id);
 
 		}
 
@@ -431,6 +422,16 @@ namespace mem
 			thread_initialize();
             page_block* block1 = get_free_page_block(168, 0);
             page_block* block2 = get_free_page_block(256, 0);
+            page_block* block3 = get_free_page_block(256, 0);
+            page_block* block4 = get_free_page_block(256, 0);
+            page_block* block5 = get_free_page_block(256, 0);
+            page_block* block6 = get_free_page_block(256, 0);
+            page_block* block7 = get_free_page_block(256, 0);
+            page_block* block8 = get_free_page_block(345, 0);
+            page_block* block9 = get_free_page_block(345, 0);
+            page_block* block10 = get_free_page_block(345, 0);
+            page_block* block11 = get_free_page_block(345, 0);
+            page_block* block12 = get_free_page_block(345, 0);
 
             void* r1 = block1->allocate();
             void* r2 = block1->allocate();
