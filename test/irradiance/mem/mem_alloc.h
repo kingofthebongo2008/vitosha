@@ -83,7 +83,8 @@ namespace mem
 
         void free(void* pointer) throw()
         {
-            ::VirtualFree(pointer, page_size, MEM_DECOMMIT);
+            const uintptr_t size = static_cast<uintptr_t> (allocation_page_count) * static_cast<uintptr_t> (page_size);
+            ::VirtualFree(pointer, size, MEM_DECOMMIT);
         }
 
         void* get_heap_base() const

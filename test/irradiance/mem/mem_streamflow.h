@@ -10,6 +10,7 @@
 #include <intrin.h>
 
 #include <mem/mem_alloc.h>
+#include <sys/sys_spin_lock.h>
 
 
 //mimic keywords which are not in visual studio 2012 yet
@@ -98,7 +99,7 @@ namespace mem
                   m_previous = previous;
               }
 
-			  uint8_t	m_opaque_data[8]; //buddy order and tag go here
+              uint8_t	m_opaque_data[8]; //buddy order and tag go here
               T*		m_previous;
               T*		m_next;
         };
@@ -239,211 +240,211 @@ namespace mem
 
 
         //---------------------------------------------------------------------------------------
-		namespace details
-		{
-			namespace details1
-			{
-				//128 bit aligned pointer on windows with 43 bits used in it
-				static inline uintptr_t pack_pointer( uintptr_t pointer) throw()
-				{
-					//const size_t packed_pointer_size = 36;
-					const size_t lo_bits = 7;
+        namespace details
+        {
+            namespace details1
+            {
+                //128 bit aligned pointer on windows with 43 bits used in it
+                static inline uintptr_t pack_pointer( uintptr_t pointer) throw()
+                {
+                    //const size_t packed_pointer_size = 36;
+                    const size_t lo_bits = 7;
 
-					//const uintptr_t lo_mask = ((1ull << 7) - 1);
-					//const uintptr_t hi_mask = ~((1ull << 43) - 1);
+                    //const uintptr_t lo_mask = ((1ull << 7) - 1);
+                    //const uintptr_t hi_mask = ~((1ull << 43) - 1);
 
-					return pointer >> lo_bits;
-				}
+                    return pointer >> lo_bits;
+                }
 
-				//128 bit aligned pointer on windows with 43 bits used in it
-				static inline uintptr_t unpack_pointer( uintptr_t pointer) throw()
-				{
-					//const size_t packed_pointer_size = 36;
-					const size_t lo_bits = 7;
+                //128 bit aligned pointer on windows with 43 bits used in it
+                static inline uintptr_t unpack_pointer( uintptr_t pointer) throw()
+                {
+                    //const size_t packed_pointer_size = 36;
+                    const size_t lo_bits = 7;
 
-					//const uintptr_t lo_mask = ((1ull << 7) - 1);
-					const uintptr_t hi_mask = ~((1ull << 43) - 1);
+                    //const uintptr_t lo_mask = ((1ull << 7) - 1);
+                    const uintptr_t hi_mask = ~((1ull << 43) - 1);
 
-					return (pointer << lo_bits) & ~hi_mask;
-				}
+                    return (pointer << lo_bits) & ~hi_mask;
+                }
 
-				//encodes 128bit aligned 43 bit pointer, count and a version in 64 bits
-				inline static uintptr_t encode_pointer(uintptr_t pointer, size_t count, size_t version) throw()
-				{
-					uintptr_t packed_pointer = pack_pointer(pointer);
-					return   count << (36 + 9) | (version << 36) | ( packed_pointer );
-				}
+                //encodes 128bit aligned 43 bit pointer, count and a version in 64 bits
+                inline static uintptr_t encode_pointer(uintptr_t pointer, size_t count, size_t version) throw()
+                {
+                    uintptr_t packed_pointer = pack_pointer(pointer);
+                    return   count << (36 + 9) | (version << 36) | ( packed_pointer );
+                }
 
-				inline static uintptr_t encode_pointer(void* pointer, size_t count, size_t version) throw()
-				{
-					return encode_pointer( reinterpret_cast<uintptr_t>(pointer), count, version);
-				}
+                inline static uintptr_t encode_pointer(void* pointer, size_t count, size_t version) throw()
+                {
+                    return encode_pointer( reinterpret_cast<uintptr_t>(pointer), count, version);
+                }
 
-				inline static size_t get_version(uintptr_t pointer) throw()
-				{
-					const uint64_t  mask	=  ~((1ull << (36 + 9)) - 1 );
+                inline static size_t get_version(uintptr_t pointer) throw()
+                {
+                    const uint64_t  mask	=  ~((1ull << (36 + 9)) - 1 );
 
-					//128 bit aligned pointer on windows with 43 bits used in it
-					return static_cast<size_t> ( (pointer & ~mask) >> 36);
-				}
+                    //128 bit aligned pointer on windows with 43 bits used in it
+                    return static_cast<size_t> ( (pointer & ~mask) >> 36);
+                }
 
-				inline static size_t get_version(void* pointer) throw()
-				{
-					return get_version( reinterpret_cast<uintptr_t> (pointer) );
-				}
+                inline static size_t get_version(void* pointer) throw()
+                {
+                    return get_version( reinterpret_cast<uintptr_t> (pointer) );
+                }
 
-				inline static size_t get_counter(uintptr_t pointer) throw()
-				{
-					const uint64_t  mask	=  ~((1ull << (36 + 9)) - 1 );
+                inline static size_t get_counter(uintptr_t pointer) throw()
+                {
+                    const uint64_t  mask	=  ~((1ull << (36 + 9)) - 1 );
 
-					//128 bit aligned pointer on windows with 43 bits used in it
-					return static_cast<size_t> ( (pointer & mask) >> (36 + 9) );
-				}
+                    //128 bit aligned pointer on windows with 43 bits used in it
+                    return static_cast<size_t> ( (pointer & mask) >> (36 + 9) );
+                }
 
-				inline static size_t get_counter(void* pointer) throw()
-				{
-					return get_counter(reinterpret_cast<uintptr_t>(pointer));
-				}
+                inline static size_t get_counter(void* pointer) throw()
+                {
+                    return get_counter(reinterpret_cast<uintptr_t>(pointer));
+                }
 
-				inline static void* decode_pointer(uintptr_t pointer) throw()
-				{
-					//128 bit aligned pointer on windows with 43 bits used in it
-					const uint64_t  mask	=  ~((1ull << (36 )) - 1 );
-					return reinterpret_cast<void*> (unpack_pointer( pointer & ~mask )) ;
-				}
+                inline static void* decode_pointer(uintptr_t pointer) throw()
+                {
+                    //128 bit aligned pointer on windows with 43 bits used in it
+                    const uint64_t  mask	=  ~((1ull << (36 )) - 1 );
+                    return reinterpret_cast<void*> (unpack_pointer( pointer & ~mask )) ;
+                }
 
-				inline static void* decode_pointer(void* pointer) throw()
-				{
-					return decode_pointer( reinterpret_cast<uintptr_t>(pointer) ) ;
-				}
-			}
+                inline static void* decode_pointer(void* pointer) throw()
+                {
+                    return decode_pointer( reinterpret_cast<uintptr_t>(pointer) ) ;
+                }
+            }
 
-			class ALIGNAS(64) concurrent_stack
-			{
-				public:
+            class ALIGNAS(64) concurrent_stack
+            {
+                public:
 
-				concurrent_stack() : m_top(nullptr)
-				{
+                concurrent_stack() : m_top(nullptr)
+                {
 
-				}
+                }
 
-				template <typename t> void push( t* pointer) throw()
-				{
-					push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
-				}
+                template <typename t> void push( t* pointer) throw()
+                {
+                    push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
+                }
 
-				//pointer must point to memory of 64 bytes at least
-				void push(uintptr_t pointer) throw()
-				{
-					push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
-				}
+                //pointer must point to memory of 64 bytes at least
+                void push(uintptr_t pointer) throw()
+                {
+                    push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
+                }
 
-				uintptr_t pop() throw()
-				{
-					return reinterpret_cast<uintptr_t> ( pop_() );
-				}
+                uintptr_t pop() throw()
+                {
+                    return reinterpret_cast<uintptr_t> ( pop_() );
+                }
 
-				template <typename t> t* pop() throw()
-				{
-					return reinterpret_cast<t*> ( pop_() );
-				}
+                template <typename t> t* pop() throw()
+                {
+                    return reinterpret_cast<t*> ( pop_() );
+                }
 
-				size_t size() const throw()
-				{
-					auto versioned_top = std::atomic_load(&m_top);
-					auto top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
+                size_t size() const throw()
+                {
+                    auto versioned_top = std::atomic_load(&m_top);
+                    auto top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
 
-					if (top == nullptr)
-					{
-						return 0;
-					}
-					else
-					{
-						return details1::get_counter(versioned_top);
-					}
-				}
+                    if (top == nullptr)
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        return details1::get_counter(versioned_top);
+                    }
+                }
 
-				bool empty() const throw()
-				{
-					return (size() == 0);
-				}
+                bool empty() const throw()
+                {
+                    return (size() == 0);
+                }
 
-				private:
+                private:
 
-				struct ALIGNAS(64) concurrent_stack_element
-				{
-					concurrent_stack_element() : m_next(nullptr)
-					{
+                struct ALIGNAS(64) concurrent_stack_element
+                {
+                    concurrent_stack_element() : m_next(nullptr)
+                    {
 
-					}
+                    }
 
-					std::uint8_t				m_opaque_data[8];
-					concurrent_stack_element*	m_next;
-					uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*)  - 8 * sizeof(std::uint8_t) ];
-				};
+                    std::uint8_t				m_opaque_data[8];
+                    concurrent_stack_element*	m_next;
+                    uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*)  - 8 * sizeof(std::uint8_t) ];
+                };
 
 
-				void push_(concurrent_stack_element* pointer) throw()
-				{
-					auto	top		= std::atomic_load(&m_top);
+                void push_(concurrent_stack_element* pointer) throw()
+                {
+                    auto	top		= std::atomic_load(&m_top);
 
-					pointer->m_next = reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
-					
-					auto	new_top	= reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
-					auto	delay_value = 2;
+                    pointer->m_next = reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
+                    
+                    auto	new_top	= reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
+                    auto	delay_value = 2;
 
-					while (!std::atomic_compare_exchange_weak( &m_top, &top, new_top  ) )
-					{
-						delay_value			= delay(delay_value);
-						pointer->m_next		= reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
-						new_top				=  reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
-					}
-				}
+                    while (!std::atomic_compare_exchange_weak( &m_top, &top, new_top  ) )
+                    {
+                        delay_value			= delay(delay_value);
+                        pointer->m_next		= reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
+                        new_top				=  reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
+                    }
+                }
 
-				concurrent_stack_element* pop_() throw()
-				{
-					auto versioned_top = std::atomic_load(&m_top);
-					auto top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
+                concurrent_stack_element* pop_() throw()
+                {
+                    auto versioned_top = std::atomic_load(&m_top);
+                    auto top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
 
-					if (top == nullptr)
-					{
-						return 0;
-					}
+                    if (top == nullptr)
+                    {
+                        return 0;
+                    }
 
-					auto new_top = reinterpret_cast<concurrent_stack_element*> ( details1::encode_pointer( top->m_next, details1::get_counter(versioned_top) - 1, details1::get_version( versioned_top ) + 1) );
+                    auto new_top = reinterpret_cast<concurrent_stack_element*> ( details1::encode_pointer( top->m_next, details1::get_counter(versioned_top) - 1, details1::get_version( versioned_top ) + 1) );
 
-					auto delay_value = 2;
-					while( !std::atomic_compare_exchange_weak( &m_top, &versioned_top, new_top  ))
-					{
-						delay_value = delay(delay_value);
-						top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
-						new_top = reinterpret_cast<concurrent_stack_element*> ( details1::encode_pointer( top->m_next, details1::get_counter(versioned_top) - 1, details1::get_version( versioned_top ) + 1) );
-					}
+                    auto delay_value = 2;
+                    while( !std::atomic_compare_exchange_weak( &m_top, &versioned_top, new_top  ))
+                    {
+                        delay_value = delay(delay_value);
+                        top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
+                        new_top = reinterpret_cast<concurrent_stack_element*> ( details1::encode_pointer( top->m_next, details1::get_counter(versioned_top) - 1, details1::get_version( versioned_top ) + 1) );
+                    }
 
-					return top;
-				}
+                    return top;
+                }
 
-				//perform exponential backoff
-				static uint32_t delay(uint32_t value) throw()
-				{
-					volatile uint32_t i;
+                //perform exponential backoff
+                static uint32_t delay(uint32_t value) throw()
+                {
+                    volatile uint32_t i;
 
-					for (i = 0; i < value; ++i)
-					{
-						;
-					}
+                    for (i = 0; i < value; ++i)
+                    {
+                        ;
+                    }
 
-					return value * value;
-				}
+                    return value * value;
+                }
 
-				std::atomic<concurrent_stack_element*>	m_top;
-				uint8_t									m_pad[ 64 - sizeof(std::atomic<concurrent_stack_element*>) ];
-			};
-		}
+                std::atomic<concurrent_stack_element*>	m_top;
+                uint8_t									m_pad[ 64 - sizeof(std::atomic<concurrent_stack_element*>) ];
+            };
+        }
 
-		typedef details::concurrent_stack concurrent_stack;
+        typedef details::concurrent_stack concurrent_stack;
 
-		//---------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------
         class ALIGNAS(64) stack
         {
             public:
@@ -454,144 +455,144 @@ namespace mem
             }
 
 
-			template <typename t> void push( t* pointer) throw()
-			{
-				push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
-			}
+            template <typename t> void push( t* pointer) throw()
+            {
+                push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
+            }
 
-			//pointer must point to memory of 64 bytes at least
-			void push(uintptr_t pointer) throw()
-			{
-				push_( reinterpret_cast<stack_element*> (pointer) );
-			}
+            //pointer must point to memory of 64 bytes at least
+            void push(uintptr_t pointer) throw()
+            {
+                push_( reinterpret_cast<stack_element*> (pointer) );
+            }
 
-			uintptr_t pop() throw()
-			{
-				return reinterpret_cast<uintptr_t> ( pop_() );
-			}
+            uintptr_t pop() throw()
+            {
+                return reinterpret_cast<uintptr_t> ( pop_() );
+            }
 
-			template <typename t> t* pop() throw()
-			{
-				return reinterpret_cast<t*> ( pop_() );
-			}
+            template <typename t> t* pop() throw()
+            {
+                return reinterpret_cast<t*> ( pop_() );
+            }
 
-			size_t size() const throw()
-			{
-				return m_counter;
-			}
+            size_t size() const throw()
+            {
+                return m_counter;
+            }
 
 
-			private:
-			struct ALIGNAS(64) stack_element
+            private:
+            struct ALIGNAS(64) stack_element
             {
                 stack_element() : m_next(nullptr)
                 {
 
                 }
 
-				std::uint8_t		m_opaque_data[8];
+                std::uint8_t		m_opaque_data[8];
                 stack_element*		m_next;
                 uint8_t				m_pad[ 64 - sizeof(stack_element*)  - 8 * sizeof(std::uint8_t) ];
             };
 
 
-			//pointer must point to memory of at least 16 bytes
+            //pointer must point to memory of at least 16 bytes
             void push_(stack_element* pointer) throw()
             {
-				stack_element* element = reinterpret_cast<stack_element*>  (pointer);
-				element->m_next = m_top;
-				m_top = element;
-				m_counter++;
+                stack_element* element = reinterpret_cast<stack_element*>  (pointer);
+                element->m_next = m_top;
+                m_top = element;
+                m_counter++;
             }
 
-			stack_element* pop_() throw()
+            stack_element* pop_() throw()
             {
-				stack_element* element = m_top;
+                stack_element* element = m_top;
 
-				if (element == nullptr)
-				{
-					return 0;
-				}
+                if (element == nullptr)
+                {
+                    return 0;
+                }
 
-				m_counter--;
-				m_top = element->m_next;
-				return element;
+                m_counter--;
+                m_top = element->m_next;
+                return element;
             }
 
-			private:
-			stack_element*			m_top;
-			uint32_t				m_counter;
+            private:
+            stack_element*			m_top;
+            uint32_t				m_counter;
             uint8_t                 m_pad[ 64 - sizeof(stack_element*) - sizeof(uint32_t) ];
         };
 
         class super_page;
-		typedef uint16_t	size_class;
-		typedef uint32_t	page_block_size;
+        typedef uint16_t	size_class;
+        typedef uint32_t	page_block_size;
 
-		typedef uint32_t	thread_id;
-		typedef uint32_t	remote_free_queue;
-		const thread_id		thread_id_orphan = std::numeric_limits<uint32_t>::max();
+        typedef uint32_t	thread_id;
+        typedef uint32_t	remote_free_queue;
+        const thread_id		thread_id_orphan = std::numeric_limits<uint32_t>::max();
 
-		inline bool thread_is_orphan(thread_id id) throw()
-		{
-			return (id == thread_id_orphan);
-		}
+        inline bool thread_is_orphan(thread_id id) throw()
+        {
+            return (id == thread_id_orphan);
+        }
 
-		class remote_page_block_info
-		{
-			public:
+        class remote_page_block_info
+        {
+            public:
 
-			remote_page_block_info() : m_memory_reference(0)
-			{
-				
-			}
+            remote_page_block_info() : m_memory_reference(0)
+            {
+                
+            }
 
-			static uint16_t get_next(remote_free_queue queue) throw()
-			{
-				return ( (queue >>16 ) & 0xFFFF);
-			}
+            static uint16_t get_next(remote_free_queue queue) throw()
+            {
+                return ( (queue >>16 ) & 0xFFFF);
+            }
 
-			static uint16_t get_count(remote_free_queue queue) throw()
-			{
-				return ( queue  & 0xFFFF );
-			}
+            static uint16_t get_count(remote_free_queue queue) throw()
+            {
+                return ( queue  & 0xFFFF );
+            }
 
-			static remote_free_queue set_next_count( uint16_t next, uint16_t count) throw()
-			{
-				return ( (next<< 16 ) | count );
-			}
+            static remote_free_queue set_next_count( uint16_t next, uint16_t count) throw()
+            {
+                return ( (next<< 16 ) | count );
+            }
 
-			static thread_id get_thread_id( uint64_t reference  ) throw()
-			{
-				return static_cast<thread_id> ( reference >> 32 );
-			}
+            static thread_id get_thread_id( uint64_t reference  ) throw()
+            {
+                return static_cast<thread_id> ( reference >> 32 );
+            }
 
-			static uint64_t set_thread_id( uint64_t reference, thread_id thread_id  ) throw()
-			{
-				return (static_cast<uint64_t> (thread_id) << 32 ) | ( reference & 0xFFFFFFFF);
-			}
+            static uint64_t set_thread_id( uint64_t reference, thread_id thread_id  ) throw()
+            {
+                return (static_cast<uint64_t> (thread_id) << 32 ) | ( reference & 0xFFFFFFFF);
+            }
 
-			static remote_free_queue get_free_queue( uint64_t reference ) throw()
-			{
-				return static_cast<remote_free_queue> ( reference );
-			}
+            static remote_free_queue get_free_queue( uint64_t reference ) throw()
+            {
+                return static_cast<remote_free_queue> ( reference );
+            }
 
-			static uint64_t set_free_queue( uint64_t reference, remote_free_queue free_queue  ) throw()
-			{
-				return ( free_queue ) | ( reference & 0xFFFFFFFF00000000L );
-			}
+            static uint64_t set_free_queue( uint64_t reference, remote_free_queue free_queue  ) throw()
+            {
+                return ( free_queue ) | ( reference & 0xFFFFFFFF00000000L );
+            }
 
             static uint64_t set_thread_next_count( thread_id thread_id, uint16_t next, uint16_t count) throw()
-			{
-				return ( static_cast<uint64_t> ( (thread_id) ) << 32 |  (static_cast<uint64_t> ( next ) << 16 ) | static_cast<uint64_t> (count) );
-			}
+            {
+                return ( static_cast<uint64_t> ( (thread_id) ) << 32 |  (static_cast<uint64_t> ( next ) << 16 ) | static_cast<uint64_t> (count) );
+            }
 
-			std::atomic<uint64_t> 	m_memory_reference;
-		};
+            std::atomic<uint64_t> 	m_memory_reference;
+        };
 
         //---------------------------------------------------------------------------------------
         //page_block are the basic elements for allocations 
-		class ALIGNAS(128) page_block : public list_element<page_block>
+        class ALIGNAS(128) page_block : public list_element<page_block>
         {
         public:
             page_block(super_page* super_page, uintptr_t memory, uint32_t memory_size) throw() : 
@@ -601,15 +602,15 @@ namespace mem
                   , m_unallocated_offset(0)
                   , m_free_objects(0)
                   , m_free_offset(0)
-				  , m_size_class( std::numeric_limits<size_class>().infinity() )
+                  , m_size_class( std::numeric_limits<size_class>().infinity() )
               {
 
               }
 
-		      size_class get_size_class() const throw()
-			  {
-				  return m_size_class;
-			  }
+              size_class get_size_class() const throw()
+              {
+                  return m_size_class;
+              }
 
               bool full() const throw()
               {
@@ -621,16 +622,21 @@ namespace mem
                   return ( m_free_objects == convert_to_object_offset(m_memory_size) );
               }
 
-              uint32_t get_memory_size() const throw()
+              uintptr_t get_memory() const throw()
               {
-                  return static_cast<uint32_t> (m_memory_size);
+                return m_memory;
               }
 
-			  void reset(size_class size_class,thread_id thread_id) throw()
-			  {
-				  size_class = size_class;
-				  m_free_objects = convert_to_object_offset(m_memory_size);
-				  m_unallocated_offset = 0;
+              uintptr_t get_memory_size() const throw()
+              {
+                  return m_memory_size;
+              }
+
+              void reset(size_class size_class,thread_id thread_id) throw()
+              {
+                  m_size_class = size_class;
+                  m_free_objects = convert_to_object_offset(m_memory_size);
+                  m_unallocated_offset = 0;
 
                   uint64_t new_reference = 0;
                   uint64_t reference = 0;
@@ -641,16 +647,11 @@ namespace mem
                   {
                       auto reference = get_block_info();
 
-                      //fetch the old head and version
-                      remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
-                      uint16_t count = remote_page_block_info::get_count( queue );
-
                       //create new reference and try to set it
-                      new_reference = remote_page_block_info::set_thread_next_count( thread_id, 0, count + 1 );
+                      new_reference = remote_page_block_info::set_thread_next_count( thread_id, 0, 0 );
                    }
                     while (! try_set_block_info( reference, new_reference) );
-                  
-			  }
+              }
 
               void* allocate() throw()
               {
@@ -695,50 +696,65 @@ namespace mem
                   ++m_free_objects;
               }
 
-			  void thread_local_free(void* pointer) throw()
-			  {
-				  free(pointer);
-			  }
+              void thread_local_free(void* pointer) throw()
+              {
+                  free(pointer);
+              }
 
               super_page*     get_super_page() const throw()
               {
                   return m_super_page;
               }
 
-			  thread_id		 get_owning_thread_id() const throw()
-			  {
-				  return m_block_info.get_thread_id( m_block_info.m_memory_reference.load() );
-			  }
+              thread_id		 get_owning_thread_id() const throw()
+              {
+                  return m_block_info.get_thread_id( m_block_info.m_memory_reference.load() );
+              }
 
-			  bool	try_set_thread(thread_id thread_id) throw()
-			  {
-				  auto reference = m_block_info.m_memory_reference.load();	
-				  auto new_reference = remote_page_block_info::set_thread_id(reference, thread_id);
-				  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &reference, new_reference);
-			  }
+              bool	try_set_thread(thread_id thread_id) throw()
+              {
+                  auto reference = m_block_info.m_memory_reference.load();	
+                  auto new_reference = remote_page_block_info::set_thread_id(reference, thread_id);
+                  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &reference, new_reference);
+              }
 
-			  uint64_t get_block_info() const throw()
-			  {
-				  return m_block_info.m_memory_reference.load();	
-			  }
+              uint64_t get_block_info() const throw()
+              {
+                  return m_block_info.m_memory_reference.load();	
+              }
 
-			  bool try_set_block_info(uint64_t old_value, uint64_t value) throw()
-			  {
-				  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &old_value, value);
-			  }
+              bool try_set_block_info(uint64_t old_value, uint64_t value) throw()
+              {
+                  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &old_value, value);
+              }
 
-			  uint16_t convert_to_object_offset(uintptr_t bytes) const throw()
-			  {
-			      return static_cast<uint16_t> ( bytes /  m_size_class );
-			  }
+              uint16_t convert_to_object_offset(uintptr_t bytes) const throw()
+              {
+                  return static_cast<uint16_t> ( bytes /  m_size_class );
+              }
 
               uint16_t convert_to_object_offset(const void* pointer) const throw()
-			  {
+              {
                   auto pointer_a = m_memory;
                   auto pointer_b = reinterpret_cast<uintptr_t> (pointer);
                   auto offset = pointer_b - pointer_a;
                   return convert_to_object_offset(offset);
-			  }
+              }
+
+            //---------------------------------------------------------------------------------------
+            void garbage_collect() throw()
+            {
+                //reference holds in one 64 bit variable, counter, next pointer and thread id
+                auto reference = get_block_info();
+
+                //fetch the old head and version
+                auto queue = remote_page_block_info::get_free_queue(reference);
+                auto count = remote_page_block_info::get_count( queue );
+                auto next = remote_page_block_info::get_next ( queue );
+
+                m_free_offset = next;
+                m_free_objects += count;
+            }
 
         private:
 
@@ -746,21 +762,21 @@ namespace mem
             page_block(const page_block&);
             const page_block operator=(const page_block&);
 
-			uint32_t		m_free_objects;
+            uint32_t		m_free_objects;
 
-			super_page*     m_super_page;
+            super_page*     m_super_page;
             uintptr_t		m_memory;
             uintptr_t		m_memory_size;			//memory size in bytes
 
-			
-			remote_page_block_info	m_block_info;	//frees from other threads go here
+            
+            remote_page_block_info	m_block_info;	//frees from other threads go here
 
             uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
             uint16_t	    m_free_offset;			
 
-			size_class		m_size_class;
+            size_class		m_size_class;
 
-			uint8_t			m_pad[58];
+            uint8_t			m_pad[58];
 
             uint32_t convert_to_bytes(uint16_t blocks) const throw()
             {
@@ -851,7 +867,7 @@ namespace mem
             void free(page_block* block) throw()
             {
                 uintptr_t       block_address   = reinterpret_cast<uintptr_t>(block); 
-                uint32_t        block_size      = block->get_memory_size() + sizeof(page_block); // alignment?
+                uint32_t        block_size      = static_cast<uint32_t> ( block->get_memory_size() + sizeof(page_block) ); // alignment?
                 uint32_t        size_in_pages   = block_size / page_size;
                 uint32_t        k               = detail::log2(size_in_pages);
                 uintptr_t       buddy_address   = buddy(block_address, k, m_sp_base );
@@ -901,12 +917,12 @@ namespace mem
                 }
             }
 
-			bool has_enough_free_space(uint32_t size) const throw()
-			{
-				uint32_t        size_in_pages   =   static_cast<uint32_t> ( size / page_size) ;
+            bool has_enough_free_space(uint32_t size) const throw()
+            {
+                uint32_t        size_in_pages   =   static_cast<uint32_t> ( size / page_size) ;
                 uint32_t        order           =   detail::log2( size_in_pages );
-				return ( order < buddy_max_order && m_largest_free_order <= order);
-			}
+                return ( order < buddy_max_order && m_largest_free_order <= order);
+            }
 
         private:
 
@@ -1134,12 +1150,18 @@ namespace mem
             {
                 const uint32_t  page_size   = 4096;
                 uint32_t        start_index = get_index(m_memory_base, start_page);
-                uintptr_t       offset      = ( start_page - page_block ) / page_size; //result should be [0;127]
+                uintptr_t       offset      = ( start_page - page_block )>> detail::log2_c<page_size>::value; //result should be [0;127]
 
                 for(uint32_t i = start_index; i < start_index + page_count; ++i, ++offset )
                 {
                     m_pages[i].set_value( static_cast<uint8_t> (offset) ) ;
                 }
+            }
+
+            void register_tiny_pages(uintptr_t start, uintptr_t size,  uintptr_t page_block) throw()
+            {
+                const uint32_t  page_size   = 4096;
+                register_tiny_pages(start, static_cast<uint32_t> ( align(size, page_size) >> detail::log2_c<page_size>::value ), page_block);
             }
 
             void register_large_pages(uintptr_t start_page, uint32_t page_count) throw()
@@ -1160,8 +1182,8 @@ namespace mem
             static page_block* decode(const void* pointer, bibop_object obj) throw()
             {
                 const uint32_t  page_size   = 4096;
-                uintptr_t   p               = reinterpret_cast<uintptr_t>(pointer);
-                uintptr_t   p_              = ( p - obj.get_disposition() ) * page_size;
+                uintptr_t   p               = reinterpret_cast<uintptr_t>(pointer) >> detail::log2_c<page_size>::value;
+                uintptr_t   p_              = ( p - obj.get_disposition() )  << detail::log2_c<page_size>::value;
                 return reinterpret_cast<page_block*> (p_);
             }
 
@@ -1173,14 +1195,16 @@ namespace mem
 
             private:
             
-            bibop_object m_pages[ 1024*1024 ];  // suitable for 4gb address space and page size 4096
+            bibop_object m_pages[ 1024*1024 ];  //suitable for 4gb address space and page size 4096
             uintptr_t    m_memory_base;         //the beginning of the page table, used for addresses higher than 4gb
 
             static uint32_t get_index(uintptr_t memory_base, uintptr_t address) throw()
             {
                 const uint32_t page_size = 4096;
-                const uintptr_t p = address - memory_base;
-                return ( p & (page_size - 1) )  >> detail::log2_c<page_size>::value;
+                const uintptr_t p = memory_base - address;
+                const uintptr_t result = ( p & ~(page_size - 1))  >> detail::log2_c<page_size>::value;
+
+                return ~result & 0xFFFFF;
             }
 
             static uint32_t get_index(uintptr_t memory_base, const void* pointer) throw()
@@ -1206,28 +1230,28 @@ namespace mem
             }
 
             super_page* allocate_super_page() throw();
-			page_block*	allocate_page_block( std::uint32_t page_size ) throw();
+            page_block*	allocate_page_block( std::uint32_t page_size ) throw();
 
         private:
 
-            virtual_alloc_heap_fixed<1024*1024, 1024>           m_os_heap_pages;
-            virtual_alloc_heap_fixed<1024*1024, 1>              m_os_heap_header;
+            virtual_alloc_heap_fixed<1024*1024, 1024>           m_os_heap_pages;    //factor this
+            virtual_alloc_heap_fixed<1024*1024, 1>              m_os_heap_header;   //factor this
             super_page_header_allocator< sizeof(super_page)>    m_header_allocator;
+            sys::spinlock_fas									m_super_pages_lock;
 
             super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
             bibop_table                                         m_bibop;
-			std::mutex											m_super_pages_lock;
 
 
-			super_page* get_super_page( std::uint32_t page_size ) throw();
+            super_page* get_super_page( std::uint32_t page_size ) throw();
 
 
             void free(super_page* header, void* super_page_base) throw()
             {
-				{
-					std::lock_guard<std::mutex> guard(m_super_pages_lock);
-					m_super_pages.remove(header);
-				}
+                {
+                    sys::lock<sys::spinlock_fas> guard(m_super_pages_lock);
+                    m_super_pages.remove(header);
+                }
 
                 header->~super_page();
                 m_os_heap_pages.free(super_page_base);
@@ -1237,7 +1261,7 @@ namespace mem
 
             static void free_super_page_callback(super_page* header, uintptr_t super_page_base, void* callback_parameter) throw()
             {
-				
+                
                 super_page_manager* page_manager    = reinterpret_cast<super_page_manager*> (callback_parameter);
                 void*               base            = reinterpret_cast<void*> (super_page_base);
                 page_manager->free(header, base);
@@ -1251,9 +1275,9 @@ namespace mem
         {
             public:
 
-			void* allocate(size_t, uint32_t size_class) throw()
+            void* allocate(size_t, uint32_t size_class) throw()
             {
-				/*
+                /*
                 page_block_list* list = &m_page_blocks[size_class];
 
                 void* result = nullptr;
@@ -1299,13 +1323,13 @@ namespace mem
                 }
 
                 return result;
-				*/
+                */
             }
 
             void local_free(void* pointer, page_block* page_block, uint32_t size_class) throw()
             {
-					
-				/*
+                    
+                /*
                 page_block_list* list = &m_page_blocks[size_class];
 
                 page_block->free(pointer);
@@ -1323,26 +1347,26 @@ namespace mem
                     //todo
                     //return block to global structures for reusing
                 }
-				*/
+                */
             }
 
-			void insert_page_block(page_block* block)
-			{
-				m_active_blocks.push_front(block);
-			}
+            void insert_page_block(page_block* block)
+            {
+                m_active_blocks.push_front(block);
+            }
 
-			void remove_page_block(page_block* block)
-			{
-				m_active_blocks.remove(block);
-			}
+            void remove_page_block(page_block* block)
+            {
+                m_active_blocks.remove(block);
+            }
 
-			void rotate_page_block(page_block* block)
-			{
-				m_active_blocks.remove(block);
-				m_active_blocks.push_back(block);
-			}
+            void rotate_page_block(page_block* block)
+            {
+                m_active_blocks.remove(block);
+                m_active_blocks.push_back(block);
+            }
 
-			list<page_block>					m_active_blocks;
+            list<page_block>					m_active_blocks;
         };
 
     }
