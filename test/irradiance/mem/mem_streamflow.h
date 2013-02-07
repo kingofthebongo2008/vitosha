@@ -599,15 +599,15 @@ namespace mem
                     m_super_page(super_page)
                   , m_memory(memory)
                   , m_memory_size(memory_size)
-                  , m_unallocated_offset(0)
+                  , m_unallocated_offset(1)
                   , m_free_objects(0)
                   , m_free_offset(0)
-                  , m_size_class( std::numeric_limits<size_class>().infinity() )
+                  , m_size_class( std::numeric_limits<uint32_t>().infinity() )
               {
 
               }
 
-              size_class get_size_class() const throw()
+              uint32_t get_size_class() const throw()
               {
                   return m_size_class;
               }
@@ -632,25 +632,26 @@ namespace mem
                   return m_memory_size;
               }
 
-              void reset(size_class size_class,thread_id thread_id) throw()
+              void reset(uint32_t size_class,thread_id thread_id) throw()
               {
                   m_size_class = size_class;
                   m_free_objects = convert_to_object_offset(m_memory_size);
-                  m_unallocated_offset = 0;
+                  m_unallocated_offset = 1;
+                  m_free_offset = 0;
 
                   uint64_t new_reference = 0;
                   uint64_t reference = 0;
 
 
-                  //todo: check if need to 
-                  do
-                  {
-                      auto reference = get_block_info();
+                //todo: check if need to 
+                do
+                {
+                    reference = get_block_info();
 
-                      //create new reference and try to set it
-                      new_reference = remote_page_block_info::set_thread_next_count( thread_id, 0, 0 );
-                   }
-                    while (! try_set_block_info( reference, new_reference) );
+                    //create new reference and try to set it
+                    new_reference = remote_page_block_info::set_thread_next_count( thread_id, 0, 0 );
+                }
+                while (! try_set_block_info( reference, new_reference) );
               }
 
               void* allocate() throw()
@@ -699,11 +700,6 @@ namespace mem
               void thread_local_free(void* pointer) throw()
               {
                   free(pointer);
-              }
-
-              super_page*     get_super_page() const throw()
-              {
-                  return m_super_page;
               }
 
               thread_id		 get_owning_thread_id() const throw()
@@ -774,14 +770,21 @@ namespace mem
             uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
             uint16_t	    m_free_offset;			
 
-            size_class		m_size_class;
+            uint32_t		m_size_class;
 
-            uint8_t			m_pad[58];
+            uint8_t			m_pad[54];
 
             uint32_t convert_to_bytes(uint16_t blocks) const throw()
             {
                 return blocks * m_size_class;
             }
+
+            super_page*     get_super_page() const throw()
+            {
+                return m_super_page;
+            }
+
+            friend void free_page_block(page_block* block) throw();
 
         };
 
@@ -1219,7 +1222,6 @@ namespace mem
         {
             static const uint32_t       super_page_size   =   4 * 1024 * 1024;
             typedef list<super_page>    super_page_list;
-            typedef list<page_block>	page_block_list;
 
         public:
             super_page_manager() throw() : 
@@ -1231,6 +1233,11 @@ namespace mem
 
             super_page* allocate_super_page() throw();
             page_block*	allocate_page_block( std::uint32_t page_size ) throw();
+
+            page_block* decode_pointer(void* pointer) const throw()
+            {
+                return m_bibop.decode(pointer);
+            }
 
         private:
 
@@ -1270,107 +1277,117 @@ namespace mem
 
         
         //---------------------------------------------------------------------------------------
+        class heap;
+
+        //---------------------------------------------------------------------------------------
         //heap allocated in the thread local storage
         class thread_local_heap
         {
             public:
-
-            void* allocate(size_t, uint32_t size_class) throw()
+            thread_local_heap() throw()
             {
-                /*
-                page_block_list* list = &m_page_blocks[size_class];
 
-                void* result = nullptr;
-
-                if ( list && !list->empty() )
-                {
-                    page_block* block = list->front();
-
-                    if (block->full())
-                    {
-                        //garbage collect
-                    }
-
-                    if (block->full())
-                    {
-                        //allocate block
-                        block = m_page_manager->allocate_page_block(16384);
-                    }
-
-                    result = block->allocate();
-
-                    if (block->full())
-                    {
-                        list->pop_front();
-                        list->push_back(block);
-                    }
-
-                }
-                else
-                {
-                    //allocate block
-                    page_block* block = m_page_manager->allocate_page_block(16384);
-
-                    if (block)
-                    {
-                        result = block->allocate();
-
-                        if (block->full())
-                        {
-                            list->push_front(block);
-                        }
-                    }
-                }
-
-                return result;
-                */
             }
+            
 
-            void local_free(void* pointer, page_block* page_block, uint32_t size_class) throw()
+            bool empty() const throw()
             {
-                    
-                /*
-                page_block_list* list = &m_page_blocks[size_class];
-
-                page_block->free(pointer);
-
-                if (!page_block->empty())
-                {
-                    if (list -> front() != page_block)
-                    {
-                        list->remove(page_block);
-                        list->push_front(page_block);
-                    }
-                }
-                else
-                {
-                    //todo
-                    //return block to global structures for reusing
-                }
-                */
+                return m_active_blocks.empty();
             }
-
-            void insert_page_block(page_block* block)
+            
+            void insert_page_block(page_block* block) throw()
             {
                 m_active_blocks.push_front(block);
             }
 
-            void remove_page_block(page_block* block)
+            void remove_page_block(page_block* block) throw()
             {
                 m_active_blocks.remove(block);
             }
 
-            void rotate_page_block(page_block* block)
+            void rotate_page_block(page_block* block) throw()
             {
                 m_active_blocks.remove(block);
                 m_active_blocks.push_back(block);
             }
 
+            page_block* get_page_block() throw()
+            {
+                return m_active_blocks.front();
+            }
+
+            private:
+            thread_local_heap(const thread_local_heap&);
+            const thread_local_heap& operator=(const thread_local_heap&);
             list<page_block>					m_active_blocks;
         };
 
-    }
 
+        const std::uint32_t      size_classes = 256;
+        const std::uint32_t      page_block_size_classes = 5; //16kb, 32kb, 64kb, 128kb, 256kb
+
+        class heap
+        {
+            public:
+            explicit heap(uint32_t index) : m_index(index)
+            {
+
+            }
+
+            void* allocate(uint32_t size) throw();
+            void free(void* pointer) throw();
+
+            private:
+
+		    super_page_manager              m_super_page_manager;
+
+		    concurrent_stack                m_page_blocks_orphaned[size_classes];						//freed on thread finalize, partially free
+		    concurrent_stack                m_page_blocks_free[page_block_size_classes];				//global cache of free page blocks goes here up to 1
+
+            uint32_t                        m_index;                                                    //index of the heap in thread local storage
+
+            page_block*                     get_free_page_block( uint32_t size, thread_id thread_id ) throw();
+
+            thread_local_heap*              get_thread_local_heap(uint32_t size) throw();
+
+            heap(const heap&);
+            const heap& operator=(const heap&);
+
+            uint32_t    get_index() const throw()
+            {
+                return m_index;
+            }
+        };
+
+        class thread_local_info
+        {
+            public:
+            thread_local_info() throw()
+            {
+
+            }
+
+            thread_local_heap				t_local_heaps[ size_classes ];								// per size class heap with blocks
+            stack							t_local_inactive_page_blocks[ page_block_size_classes ];	//local cache of free page blocks, //completely free (on free) goes here up to 4
+        };
+
+
+        class thread_local_heap_info
+        {
+
+            public:
+            thread_local_heap_info() {}
+
+            thread_local_info* get_thread_local_info(uint32_t heap_index) throw()
+            {
+                return &m_infos[heap_index];
+            }
+
+            private:
+
+            thread_local_info   m_infos[8];
+        };
+    }
 }
 
 

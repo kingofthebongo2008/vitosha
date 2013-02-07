@@ -7,21 +7,12 @@ namespace mem
 {
     namespace streamflow
     {
-		const std::uint32_t									size_classes = 256;
-		const std::uint32_t									page_block_size_classes = 5; //16kb, 32kb, 64kb, 128kb, 256kb
-
         //these are per heap actually
 		static std::atomic<thread_id>						g_thread_id = thread_id_orphan;
-		static super_page_manager							g_super_page_manager;
+	
+        static THREAD_LOCAL void*                           t_thread_local_heap_info_memory;
+        static THREAD_LOCAL thread_local_heap_info*         t_thread_local_heap_info;
 
-		static concurrent_stack								g_page_blocks_orphaned[size_classes];						//freed on thread finalize, partially free
-		static concurrent_stack								g_page_blocks_free[page_block_size_classes];				//global cache of free page blocks
-
-		static THREAD_LOCAL void*							t_local_heaps_memory;
-		static THREAD_LOCAL thread_local_heap*				t_local_heaps[ size_classes ];								// per size class heap with blocks
-
-		static THREAD_LOCAL void*							t_local_inactive_page_blocks_memory;
-		static THREAD_LOCAL stack*							t_local_inactive_page_blocks[ page_block_size_classes ];	//local cache of free page blocks
 		static THREAD_LOCAL thread_id						t_thread_id;
 
 
@@ -39,37 +30,12 @@ namespace mem
 
 		static void thread_initialize()
 		{
-			t_local_heaps_memory = ::VirtualAlloc( 0, size_classes * sizeof(thread_local_heap) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+            //allocate data for 8 heaps
+			t_thread_local_heap_info_memory = ::VirtualAlloc( 0, sizeof(t_thread_local_heap_info) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 
-			if (t_local_heaps_memory)
+			if (t_thread_local_heap_info_memory)
 			{
-				std::uint8_t* memory = reinterpret_cast<std::uint8_t*> ( t_local_heaps_memory );
-				for ( std::uint32_t i = 0 ; i < size_classes; ++i)
-				{
-					t_local_heaps[i] = new (memory) thread_local_heap();
-
-					memory += sizeof(thread_local_heap) ;
-					memory = reinterpret_cast<uint8_t*> ( align(reinterpret_cast<uintptr_t>(memory), __alignof(thread_local_heap)) );
-				}
-			}
-			else
-			{
-				//?????
-			}
-
-			t_local_inactive_page_blocks_memory = ::VirtualAlloc( 0, page_block_size_classes * sizeof(concurrent_stack) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
-
-			if ( t_local_inactive_page_blocks_memory )
-			{
-				std::uint8_t* memory = reinterpret_cast<std::uint8_t*> ( t_local_inactive_page_blocks_memory);
-
-				for ( std::uint32_t i = 0 ; i < page_block_size_classes; ++i, memory += sizeof(concurrent_stack) )
-				{
-					t_local_inactive_page_blocks[i] = new (memory) stack();
-					
-					memory += sizeof(concurrent_stack) ;
-					memory = reinterpret_cast<uint8_t*> ( align(reinterpret_cast<uintptr_t>(memory), __alignof(concurrent_stack)) );
-				}
+                t_thread_local_heap_info = new ( t_thread_local_heap_info_memory ) thread_local_heap_info();
 			}
 			else
 			{
@@ -81,19 +47,9 @@ namespace mem
 
 		static void thread_finalize()
 		{
-			for ( std::uint32_t i = 0 ; i < size_classes; ++i)
-			{
-				t_local_heaps[i]->~thread_local_heap();
-			}
+            t_thread_local_heap_info->~thread_local_heap_info();
+			::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
 
-			::VirtualFree(t_local_heaps_memory, 0, MEM_RELEASE);
-
-			for ( std::uint32_t i = 0 ; i < page_block_size_classes; ++i)
-			{
-				t_local_inactive_page_blocks[i]->~stack();
-			}
-
-			::VirtualFree(t_local_inactive_page_blocks_memory, 0, MEM_RELEASE);
 		}
 
 		static const std::uint16_t base[] =
@@ -343,20 +299,21 @@ namespace mem
 
 			return block;
 		}
+
 		//---------------------------------------------------------------------------------------
-		static page_block* get_free_page_block( uint32_t size, thread_id thread_id )
+		page_block* heap::get_free_page_block( uint32_t size, thread_id thread_id )
 		{
 			size_class size_class		= compute_size_class(size);
 			uint32_t page_block_size	= compute_page_block_size( size_class );
 			uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
 
 
-			concurrent_stack* stack_1 = &g_page_blocks_free[size_class];
-			concurrent_stack* stack_2 = &g_page_blocks_orphaned[page_block_class];
+			concurrent_stack* stack_1 = &m_page_blocks_free[size_class];
+			concurrent_stack* stack_2 = &m_page_blocks_orphaned[page_block_class];
 
-			super_page_manager* page_manager = &g_super_page_manager;
+			super_page_manager* page_manager = &m_super_page_manager;
 
-			return get_free_page_block( compute_size(size_class), page_block_size, page_manager, stack_1, stack_2, thread_id);
+			return streamflow::get_free_page_block( compute_size(size_class), page_block_size, page_manager, stack_1, stack_2, thread_id);
 
 		}
 
@@ -388,9 +345,9 @@ namespace mem
 			{
                 //reference holds in one 64 bit variable, counter, next pointer and thread id
 				reference = block->get_block_info();
-				auto thread_id = remote_page_block_info::get_thread_id( reference );
+				auto block_thread_id = remote_page_block_info::get_thread_id( reference );
 
-				if (thread_id != thread_id_orphan)
+				if (block_thread_id != thread_id_orphan)
 				{
                     //fetch the old head and version
                     remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
@@ -404,7 +361,7 @@ namespace mem
                     next = offset;
                     
                     //create new reference and try to set it
-                    new_reference = remote_page_block_info::set_thread_next_count( thread_id, next, count );
+                    new_reference = remote_page_block_info::set_thread_next_count( block_thread_id, next, count );
 				}
 				else
 				{
@@ -415,29 +372,88 @@ namespace mem
 			while (! block->try_set_block_info( reference, new_reference) );
 		}
 
-       
+        thread_local_heap* heap::get_thread_local_heap(uint32_t size) throw()
+        {
+            thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( get_index() );
+            size_class c = compute_size_class(size);
+            thread_local_heap*  local_heap = &local_heap_info->t_local_heaps[c];
+        }
+
+        void* heap::allocate(uint32_t size) throw()
+        {
+            page_block* block = nullptr;
+
+            thread_local_heap* local_heap = get_thread_local_heap(size);
+
+            if ( local_heap->empty() )
+            {
+                block = get_free_page_block( size, t_thread_id );
+                local_heap->insert_page_block(block);
+                
+            }
+            else
+            {
+                page_block* block = local_heap->get_page_block();
+
+                if (block->full())
+                {
+                    block->garbage_collect();
+                }
+
+                if (block->full())
+                {
+                    local_heap->rotate_page_block(block);
+                    block = get_free_page_block(size, t_thread_id );
+                }
+            }
+
+            if (block)
+            {
+                void* result = block->allocate();
+
+                if (block->full())
+                {
+                    local_heap->rotate_page_block(block);
+                }
+
+                return result;
+            }
+
+            return nullptr;
+        }
+
+        void heap::free(void* pointer) throw()
+        {
+            page_block* block = m_super_page_manager.decode_pointer(pointer);
+            thread_local_heap* local_heap = get_thread_local_heap( block->get_size_class() );
+            thread_id tid = block->get_owning_thread_id();
+
+            if ( tid == t_thread_id )
+            {
+                local_free();
+            }
+            else if ( tid == thread_id_orphan )
+            {
+                adopt_page_block( pointer, block, local_heap, tid);
+
+            } else
+            {
+                remote_free( pointer, block, local_heap, t_thread_id);
+            }
+        }
 
 		void test_streamflow()
 		{
 			thread_initialize();
-            page_block* block1 = get_free_page_block(168, 0);
-            page_block* block2 = get_free_page_block(256, 0);
-            page_block* block3 = get_free_page_block(256, 0);
-            page_block* block4 = get_free_page_block(256, 0);
-            page_block* block5 = get_free_page_block(256, 0);
-            page_block* block6 = get_free_page_block(256, 0);
-            page_block* block7 = get_free_page_block(256, 0);
-            page_block* block8 = get_free_page_block(345, 0);
-            page_block* block9 = get_free_page_block(345, 0);
-            page_block* block10 = get_free_page_block(345, 0);
-            page_block* block11 = get_free_page_block(345, 0);
-            page_block* block12 = get_free_page_block(345, 0);
+            heap heap(0);
 
-            void* r1 = block1->allocate();
-            void* r2 = block1->allocate();
+            void* r1 = heap.allocate(168);
+            void* r2 = heap.allocate(256);
+            void* r3 = heap.allocate(345);
 
-
-            
+            heap.free(r3);
+            heap.free(r2);
+            heap.free(r1);
 		}
 
     }
