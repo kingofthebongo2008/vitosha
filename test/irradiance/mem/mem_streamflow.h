@@ -457,7 +457,7 @@ namespace mem
 
             template <typename t> void push( t* pointer) throw()
             {
-                push_( reinterpret_cast<concurrent_stack_element*> (pointer) );
+                push_( reinterpret_cast<stack_element*> (pointer) );
             }
 
             //pointer must point to memory of 64 bytes at least
@@ -785,7 +785,7 @@ namespace mem
             }
 
             friend void free_page_block(page_block* block) throw();
-
+            friend void free_page_block_mt_safe(page_block* block) throw();
         };
 
         //---------------------------------------------------------------------------------------
@@ -802,10 +802,11 @@ namespace mem
             typedef void (*free_super_page_callback)(super_page*, uintptr_t, void*);
 
             public:
-            super_page(void* sp_base, free_super_page_callback free_callback, void* callback_parameter) throw() :
+            super_page(void* sp_base, free_super_page_callback free_callback, void* callback_parameter, sys::spinlock_fas* lock ) throw() :
                 m_sp_base(reinterpret_cast<uintptr_t> (sp_base) )
                 , m_free_callback(free_callback)
                 , m_callback_parameter(callback_parameter)
+                , m_lock(lock)
                 , m_largest_free_order( static_cast<uint32_t> (buddy_max_order) )
             {
                 //make the memory as one big block and mark it as free
@@ -920,6 +921,12 @@ namespace mem
                 }
             }
 
+            void free_mt_safe(page_block* block) throw()
+            {
+                sys::lock<sys::spinlock_fas> guard(*m_lock);
+                free(block);
+            }
+
             bool has_enough_free_space(uint32_t size) const throw()
             {
                 uint32_t        size_in_pages   =   static_cast<uint32_t> ( size / page_size) ;
@@ -980,10 +987,10 @@ namespace mem
             {
                 buddy_block_list    m_buddy_elements;
             };
-
             uintptr_t                   m_sp_base;
             free_super_page_callback    m_free_callback;
             void*                       m_callback_parameter;
+            sys::spinlock_fas*			m_lock;
 
             //buddy system allocation is described by Knuth in The Art of Computer Programming vol 1.
             buddy                       m_buddies[buddy_max_order + 1];             
@@ -1025,6 +1032,12 @@ namespace mem
         {
             super_page* page = block->get_super_page();
             page->free(block);
+        }
+
+        inline void free_page_block_mt_safe(page_block* block) throw()
+        {
+            super_page* page = block->get_super_page();
+            page->free_mt_safe(block);
         }
 
         //---------------------------------------------------------------------------------------
@@ -1295,23 +1308,22 @@ namespace mem
                 return m_active_blocks.empty();
             }
             
-            void insert_page_block(page_block* block) throw()
+            void push_front(page_block* block) throw()
             {
                 m_active_blocks.push_front(block);
             }
 
-            void remove_page_block(page_block* block) throw()
+            void push_back(page_block* block) throw()
             {
-                m_active_blocks.remove(block);
-            }
-
-            void rotate_page_block(page_block* block) throw()
-            {
-                m_active_blocks.remove(block);
                 m_active_blocks.push_back(block);
             }
 
-            page_block* get_page_block() throw()
+            void remove(page_block* block) throw()
+            {
+                m_active_blocks.remove(block);
+            }
+
+            page_block* front() throw()
             {
                 return m_active_blocks.front();
             }
@@ -1321,6 +1333,18 @@ namespace mem
             const thread_local_heap& operator=(const thread_local_heap&);
             list<page_block>					m_active_blocks;
         };
+
+        inline void rotate_front(thread_local_heap* heap, page_block* block)
+        {
+            heap->remove(block);
+            heap->push_front(block);
+        }
+
+        inline void rotate_back(thread_local_heap* heap, page_block* block)
+        {
+           heap->remove(block);
+           heap->push_back(block);
+        }
 
 
         const std::uint32_t      size_classes = 256;
@@ -1357,6 +1381,9 @@ namespace mem
             {
                 return m_index;
             }
+
+            void local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw();
+            
         };
 
         class thread_local_info

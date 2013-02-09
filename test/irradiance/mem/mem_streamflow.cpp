@@ -194,7 +194,7 @@ namespace mem
                 if (sp_base)
                 {
                     super_page* page = new 
-							(super_page_header) super_page(sp_base, free_super_page_callback, this);
+							(super_page_header) super_page(sp_base, free_super_page_callback, this, &m_super_pages_lock);
 
 
                     m_super_pages.push_front(page);
@@ -314,7 +314,6 @@ namespace mem
 			super_page_manager* page_manager = &m_super_page_manager;
 
 			return streamflow::get_free_page_block( compute_size(size_class), page_block_size, page_manager, stack_1, stack_2, thread_id);
-
 		}
 
 		//---------------------------------------------------------------------------------------
@@ -325,7 +324,7 @@ namespace mem
 			//try to set this thread as owner
 			if ( block->try_set_thread( thread_id ) )
 			{
-				heap->insert_page_block(block);
+				heap->push_front(block);
 				block->free(pointer);
 			}
 			else
@@ -377,23 +376,38 @@ namespace mem
             thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( get_index() );
             size_class c = compute_size_class(size);
             thread_local_heap*  local_heap = &local_heap_info->t_local_heaps[c];
+
+            return local_heap;
         }
 
         void* heap::allocate(uint32_t size) throw()
         {
             page_block* block = nullptr;
 
-            thread_local_heap* local_heap = get_thread_local_heap(size);
+            thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( get_index() );
+            size_class c = compute_size_class(size);
+
+            thread_local_heap*  local_heap = &local_heap_info->t_local_heaps[c];
 
             if ( local_heap->empty() )
             {
-                block = get_free_page_block( size, t_thread_id );
-                local_heap->insert_page_block(block);
-                
+                //1. check the inactive blocks
+                uint32_t page_block_size	= compute_page_block_size( c );
+			    uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
+                stack* inactive_blocks      = &local_heap_info->t_local_inactive_page_blocks[page_block_class];
+                block = inactive_blocks->pop<page_block>();
+
+                if ( block == nullptr)
+                {
+                    //2. check the orphaned and global page_blocks
+                    block = get_free_page_block( size, t_thread_id );
+                }
+
+                local_heap->push_front(block);
             }
             else
             {
-                page_block* block = local_heap->get_page_block();
+                page_block* block = local_heap->front();
 
                 if (block->full())
                 {
@@ -402,7 +416,7 @@ namespace mem
 
                 if (block->full())
                 {
-                    local_heap->rotate_page_block(block);
+                    rotate_back(local_heap, block);
                     block = get_free_page_block(size, t_thread_id );
                 }
             }
@@ -413,7 +427,7 @@ namespace mem
 
                 if (block->full())
                 {
-                    local_heap->rotate_page_block(block);
+                    rotate_back(local_heap, block);
                 }
 
                 return result;
@@ -422,15 +436,52 @@ namespace mem
             return nullptr;
         }
 
+        void heap::local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw()
+        {
+            block->free(pointer);
+
+            if (block->empty())
+            {
+                const uint32_t local_inactive_blocks = 4;
+                if ( stack1->size() < local_inactive_blocks )
+                {
+                    stack1->push(block);
+                }
+                else
+                {
+                    const uint32_t global_inactive_blocks = 4;
+
+                    if ( stack2->size() < global_inactive_blocks )
+                    {
+                        stack2->push(block);
+                    }
+                    else
+                    {
+                        free_page_block_mt_safe(block);
+                    }
+                }
+            }
+            else
+            {
+                rotate_front( local_heap, block );
+            }
+        }
+
         void heap::free(void* pointer) throw()
         {
             page_block* block = m_super_page_manager.decode_pointer(pointer);
-            thread_local_heap* local_heap = get_thread_local_heap( block->get_size_class() );
-            thread_id tid = block->get_owning_thread_id();
+            thread_id   tid = block->get_owning_thread_id();
+            
+            thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( get_index() );
+            size_class         c = compute_size_class(block->get_size_class());
+            thread_local_heap* local_heap = &local_heap_info->t_local_heaps[c];
 
             if ( tid == t_thread_id )
             {
-                local_free();
+            	uint32_t page_block_size	= compute_page_block_size( c );
+			    uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
+
+                local_free(pointer, block, local_heap, &local_heap_info->t_local_inactive_page_blocks[page_block_class], &m_page_blocks_free[page_block_class]);
             }
             else if ( tid == thread_id_orphan )
             {
@@ -454,6 +505,8 @@ namespace mem
             heap.free(r3);
             heap.free(r2);
             heap.free(r1);
+
+            thread_finalize();
 		}
 
     }
