@@ -973,7 +973,7 @@ namespace mem
 
                 }
 
-                //todo
+                //todo:
                 //operator new []
 
                 private:
@@ -1045,14 +1045,13 @@ namespace mem
         //it uses chunk allocator which allocates chunks of memory. they are never freed back
         //the freed headers form a queue in the freed memory and can be taken back.
         template <uint32_t super_page_header_size>
-        class super_page_header_allocator
+        class chunked_free_list
         {
             static const uint32_t chunk_size = 4096 - 8; // 8 is the size of the internal headers of the chunk heap
-            typedef virtual_alloc_heap_fixed<1024*1024, 1>       virtual_alloc_heap;
             typedef chunk_heap< chunk_size, virtual_alloc_heap > super_page_headers;
 
         public:
-            explicit super_page_header_allocator(virtual_alloc_heap* virtual_alloc_heap) : 
+            explicit chunked_free_list(virtual_alloc_heap* virtual_alloc_heap) : 
                   m_chunk_heap(virtual_alloc_heap)
                 , m_free(0)
                 , m_memory(0)
@@ -1064,11 +1063,11 @@ namespace mem
 
             void* allocate() throw()
             {
-                super_page* result = nullptr;
+                void* result = nullptr;
 
                 if (m_free !=0 )
                 {
-                    result = reinterpret_cast<super_page*> ( m_free ) ;
+                    result = reinterpret_cast<void*> ( m_free ) ;
 
                     uintptr_t* free_content = reinterpret_cast<uintptr_t*>(m_free);
                     m_free = *free_content ;
@@ -1091,7 +1090,8 @@ namespace mem
                     if (m_memory != 0)
                     {
                         result = reinterpret_cast<super_page*> ( m_memory + m_unallocated_offset  ) ;
-                        m_unallocated_offset += sizeof(super_page);
+                        m_unallocated_offset += super_page_header_size;
+
                         --m_free_objects;
                     }
                 }
@@ -1209,6 +1209,12 @@ namespace mem
                 return m_pages[ index ]; 
             }
 
+            bool is_large_object( const void* pointer) const throw()
+            {
+               bibop_object obj = decode_pointer(pointer);
+               return (obj.get_type() == bibop_object::large);
+            }
+
             private:
             
             bibop_object m_pages[ 1024*1024 ];  //suitable for 4gb address space and page size 4096
@@ -1229,7 +1235,199 @@ namespace mem
             }
         };
 
+        //---------------------------------------------------------------------------------------
+        //on 32 bit platforms bibop tables are very useful, however on 64 bits, there are too big
+        //radix page map replaces bibops. setup is number of valid bits, stripped of page bits ( 43 (windows) - 12 ) = 31
+        template <uint32_t bits>
+        class radix_page_map
+        {
+            // How many bits should we consume at each interior level
+            static const uint32_t interior_bits = (bits + 2) / 3; // Round-up
+            static const uint32_t interior_length = 1 << interior_bits;
 
+            // How many bits should we consume at leaf level
+            static const uint32_t leaf_bits = bits - ( 2 * interior_bits);
+            static const uint32_t leaf_length = 1 << leaf_bits;
+
+            public:
+            explicit radix_page_map(virtual_alloc_heap* heap) : 
+                m_allocator(heap)
+                , m_root( allocate_node() )
+            {
+
+            }
+
+            ~radix_page_map()
+            {
+                //free nodes
+            }
+
+            struct leaf
+            {
+                uintptr_t m_data [ leaf_length ] ;
+
+                leaf() : m_data()
+                {
+
+                }
+            };
+
+            struct node
+            {
+                std::atomic<void*>   m_pointers [  interior_length ];
+
+                node() : m_pointers()
+                {
+
+                }
+            };
+
+
+
+            private:
+
+            virtual_alloc_heap*                 m_allocator;
+            node*                               m_root;
+
+            public:
+
+            node* allocate_node() throw()
+            {
+                return reinterpret_cast<node*> ( m_allocator->allocate( sizeof(node) ) );
+            }
+
+            void free_node(node* node)  throw()
+            {
+                m_allocator->free(node);
+            }
+
+            leaf*   allocate_leaf()  throw()
+            {
+                return reinterpret_cast<leaf*> ( m_allocator->allocate( sizeof(leaf) ) );
+            }
+
+            void free_leaf(leaf* leaf)  throw()
+            {
+                m_allocator->free(leaf);
+            }
+
+            bool    register_pages(uintptr_t start, uintptr_t page_count,  uintptr_t data) throw()
+            {
+                const uint32_t page_size = 4096;
+                start = start >> detail::log2_c<page_size>::value;
+
+                for ( uintptr_t i = start; i < start + page_count; ++i )
+                {
+                    const uintptr_t i_1 = i >> ( leaf_bits + interior_bits );
+                    const uintptr_t i_2 = (i >> leaf_bits ) & (interior_length - 1 ); 
+                    const uintptr_t i_3 = i & ( leaf_length - 1 );
+
+                    std::atomic<void*>* __restrict atomic = &m_root->m_pointers[i_1];
+                    auto old_node = atomic->load();
+
+                    if ( old_node == nullptr)
+                    {
+                        node* __restrict n = allocate_node();
+
+                        if (n == nullptr) 
+                        {
+                            return false;
+                        }
+
+                        //another thread wrote here?
+                        if ( ! atomic->compare_exchange_strong( old_node, n ) )
+                        {
+                            //yes, delete
+                            free_node(n);
+                            //and load again
+                            old_node = atomic->load();
+                        }
+                        else
+                        {
+                            old_node =  n;
+                        }
+                    }
+
+                    node* __restrict  n = reinterpret_cast<node*> ( old_node );
+                    std::atomic<void*>* __restrict atomic2 = &n->m_pointers[i_2];
+                    auto    old_leaf = atomic2->load();
+
+                    if ( old_leaf == nullptr)
+                    {
+                        leaf* __restrict l = allocate_leaf();
+
+                        if (l == nullptr) 
+                        {
+                            return false;
+                        }
+
+                        //another thread wrote here?
+                        if ( ! atomic2->compare_exchange_strong( old_leaf, l ) )
+                        {
+                            //yes, delete
+                            free_leaf(l);
+
+                            //and load again
+                            old_leaf = atomic2->load();
+                        }
+                        else
+                        {
+                            old_leaf = l;
+                        }
+                    }
+
+                    leaf* __restrict l = reinterpret_cast<leaf*> ( old_leaf );
+                    l->m_data[i_3] = data; 
+                }
+
+                return true;
+            }
+
+            void register_tiny_pages(uintptr_t start, uintptr_t size, uintptr_t page_block_address) throw()
+            {
+                const uint32_t  page_size   = 4096;
+                register_pages(start, static_cast<uint32_t> ( align(size, page_size) >> detail::log2_c<page_size>::value ), page_block_address);
+            }
+
+            void register_large_pages(uintptr_t start, uintptr_t size, uintptr_t block_size) throw()
+            {
+                const uint32_t  page_size   = 4096;
+                register_pages(start, static_cast<uint32_t> ( align(size, page_size) >> detail::log2_c<page_size>::value ), encode_large_object(block_size) );
+            }
+
+            uintptr_t get_data( uintptr_t address ) const throw()
+            {
+                const uint32_t page_size = 4096;
+                const uintptr_t start = address >> detail::log2_c<page_size>::value;
+                const uintptr_t i_1 = start >> ( leaf_bits + interior_bits );
+                const uintptr_t i_2 = (start >> leaf_bits ) & (interior_length - 1 ); 
+                const uintptr_t i_3 = start & ( leaf_length - 1 );
+
+                node* n = reinterpret_cast<node*> (  m_root->m_pointers[i_1].load() ) ;
+                leaf* l = reinterpret_cast<leaf*> (  n->m_pointers[i_2].load() );
+
+                return l->m_data[i_3];
+            }
+
+            static uintptr_t is_large_object ( uintptr_t value ) throw()
+            {
+                return value != decode_large_object(value);
+            }
+
+            private:
+
+            static uintptr_t   encode_large_object( uintptr_t block_size) throw()
+            {
+                return  (1UL << 63 ) | block_size;
+            }
+
+            static uintptr_t   decode_large_object( uintptr_t address) throw()
+            {
+                return (address & 0x7fffffffffffffffUL);
+            }
+
+            //todo:copy?
+        };
         //---------------------------------------------------------------------------------------
         class super_page_manager
         {
@@ -1239,7 +1437,7 @@ namespace mem
         public:
             super_page_manager() throw() : 
               m_header_allocator(&m_os_heap_header)
-              , m_bibop(m_os_heap_header.get_heap_base())
+              , m_bibop(static_cast<uintptr_t> ( 0 ) )
             {
 
             }
@@ -1252,19 +1450,25 @@ namespace mem
                 return m_bibop.decode(pointer);
             }
 
-        private:
+            bool is_large_object(const void* pointer) const throw()
+            {
+                return m_bibop.is_large_object(pointer);
+            }
 
-            virtual_alloc_heap_fixed<1024*1024, 1024>           m_os_heap_pages;    //factor this
-            virtual_alloc_heap_fixed<1024*1024, 1>              m_os_heap_header;   //factor this
-            super_page_header_allocator< sizeof(super_page)>    m_header_allocator;
+            void*       allocate_large_block( size_t size ) throw();
+            void        free_large_block( void* pointer) throw();
+
+        private:
             sys::spinlock_fas									m_super_pages_lock;
+            virtual_alloc_heap                                  m_os_heap_pages;    
+            virtual_alloc_heap                                  m_os_heap_header;   
+            chunked_free_list< sizeof(super_page) >             m_header_allocator;
 
             super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
             bibop_table                                         m_bibop;
 
 
             super_page* get_super_page( std::uint32_t page_size ) throw();
-
 
             void free(super_page* header, void* super_page_base) throw()
             {
@@ -1276,7 +1480,6 @@ namespace mem
                 header->~super_page();
                 m_os_heap_pages.free(super_page_base);
                 m_header_allocator.free(header);
-
             }
 
             static void free_super_page_callback(super_page* header, uintptr_t super_page_base, void* callback_parameter) throw()
