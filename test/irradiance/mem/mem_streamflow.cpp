@@ -27,32 +27,6 @@ namespace mem
 
 			return id;
 		}
-
-		static void thread_initialize()
-		{
-            //allocate data for 8 heaps
-            const size_t size = sizeof(thread_local_heap_info);
-			t_thread_local_heap_info_memory = ::VirtualAlloc( 0, size , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
-
-			if (t_thread_local_heap_info_memory)
-			{
-                t_thread_local_heap_info = new ( t_thread_local_heap_info_memory ) thread_local_heap_info();
-			}
-			else
-			{
-				//?????
-			}
-
-			t_thread_id = create_thread_id();
-		}
-
-		static void thread_finalize()
-		{
-            t_thread_local_heap_info->~thread_local_heap_info();
-			::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
-
-		}
-
 		static const std::uint16_t base[] =
 		{
 				0,  16, 24, 28, 30, 31, 31, 32, 32, 32, 
@@ -254,7 +228,7 @@ namespace mem
 
                 if (result)
                 {
-                    m_bibop.register_tiny_pages( result->get_memory(), result->get_memory_size(), reinterpret_cast<uintptr_t> ( result ) );
+                    m_page_map.register_tiny_pages( result->get_memory(), result->get_memory_size(), reinterpret_cast<uintptr_t> ( result ) );
                 }
 
 				return  result;
@@ -272,7 +246,7 @@ namespace mem
             if (result)
             {
                 sys::lock<sys::spinlock_fas> guard(m_super_pages_lock);
-                m_bibop.register_large_pages( reinterpret_cast<uintptr_t> ( result ), static_cast<uint32_t> ( size / 4096) );
+                m_page_map.register_large_pages( reinterpret_cast<uintptr_t> ( result ), size, reinterpret_cast<uintptr_t> ( result ) );
             }
 
             return result;
@@ -280,7 +254,7 @@ namespace mem
         //---------------------------------------------------------------------------------------
         void    super_page_manager::free_large_block( void* pointer) throw()
         {
-            m_os_heap_pages.free(pointer);
+            m_os_heap_pages.free( reinterpret_cast<void*> ( decode_large_object(pointer) ) );
         }
         //---------------------------------------------------------------------------------------
 		static page_block* get_free_page_block(concurrent_stack* stack_1, concurrent_stack* stack_2)
@@ -461,6 +435,33 @@ namespace mem
             }
         }
 
+        static void global_free_page_block( page_block* block, concurrent_stack* global_free_stack )
+        {
+            const uint32_t global_inactive_blocks = 4;
+            if ( global_free_stack->size() < global_inactive_blocks )
+            {
+                global_free_stack->push(block);
+            }
+            else
+            {
+                free_page_block_mt_safe(block);
+            }
+        }
+
+        void heap::free_page_block(page_block* block, page_block_size_class size_class) throw()
+        {
+            global_free_page_block( block, &m_page_blocks_free[size_class] );
+        }
+
+        void heap::free_page_blocks() throw()
+        {
+            for (uint32_t i = 0; i < page_block_size_classes;++i)
+            {
+                page_block* block = m_page_blocks_free[i].pop<page_block>();
+                free_page_block( block, i);
+            }
+        }
+
         void heap::local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw()
         {
             block->free(pointer);
@@ -474,16 +475,7 @@ namespace mem
                 }
                 else
                 {
-                    const uint32_t global_inactive_blocks = 4;
-
-                    if ( stack2->size() < global_inactive_blocks )
-                    {
-                        stack2->push(block);
-                    }
-                    else
-                    {
-                        free_page_block_mt_safe(block);
-                    }
+                    global_free_page_block(block, stack2);
                 }
             }
             else
@@ -494,7 +486,6 @@ namespace mem
 
         void heap::free(void* pointer) throw()
         {
-
             if (!m_super_page_manager.is_large_object(pointer) )
             {            
                 page_block* block = m_super_page_manager.decode_pointer(pointer);
@@ -526,42 +517,123 @@ namespace mem
             }
         }
 
+
+		static void thread_initialize()
+		{
+            //allocate data for 8 heaps
+            const size_t size = sizeof(thread_local_heap_info);
+			t_thread_local_heap_info_memory = ::VirtualAlloc( 0, size , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+
+            t_thread_local_heap_info = 0;
+
+			if (t_thread_local_heap_info_memory)
+			{
+                t_thread_local_heap_info = new ( t_thread_local_heap_info_memory ) thread_local_heap_info();
+			}
+			else
+			{
+				//?????
+			}
+
+			t_thread_id = create_thread_id();
+		}
+
+		static void thread_finalize( heap** heaps, uint32_t heap_count )
+		{
+            for (uint32_t i = 0 ; i < heap_count; ++i)
+            {
+                heap* h = heaps[i];
+                thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( h->get_index() );
+                
+                for (uint32_t i = 0; i < size_classes;++i)
+                {
+                    thread_local_heap* local_heap = &local_heap_info->t_local_heaps[ i ] ;
+
+                    if ( !local_heap->empty() )
+                    {
+                        do
+                        {
+                            page_block* block = local_heap->front();
+                            
+                            local_heap->remove(block);
+
+                            if (block->empty())
+                            {
+                                //insert into global free
+                    			uint32_t page_block_class	= compute_page_block_size_class( static_cast<uint32_t> (block->get_memory_size()) );
+                                h->free_page_block( block, page_block_class);
+                            }
+                            else
+                            {
+                                
+                                uint64_t reference = 0;
+			                    uint64_t new_reference = 0;
+
+                                //reference holds in one 64 bit variable, counter, next pointer and thread id
+				                reference = block->get_block_info();
+
+                                //fetch the old head and version
+                                remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
+					            uint16_t count = remote_page_block_info::get_count( queue );
+
+                                if (count > 0 || !block->empty() )
+                                {
+                                    //insert into orphaned block
+                                    h->push_orphaned_block(block, i);
+                                }
+                                else
+                                {
+                                    //try to set this as orphaned block
+
+                                    //create new reference and try to set it
+                                    new_reference = remote_page_block_info::set_thread_next_count( thread_id_orphan, 0, 0 );
+
+                                    if ( !block->try_set_block_info(reference, new_reference) )
+                                    {
+                                        //insert into orphaned block, somebody else did a remote free
+                                        h->push_orphaned_block(block, i);
+                                    }
+                                    else
+                                    {
+                                        //do nothing, the first thread that frees will adopt the block
+                                    }
+                                }
+                            }
+                        }  while ( !local_heap->empty() );
+                    } 
+
+                    h->free_page_blocks();
+                }
+
+            }
+            
+            t_thread_local_heap_info->~thread_local_heap_info();
+			::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
+
+		}
+
 		void test_streamflow()
 		{
-            virtual_alloc_heap h;
-            radix_page_map<31> map(&h);
-
-
             void* heap_memory = ::VirtualAlloc( 0, sizeof(heap) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
-
-            void* base_heap_memory = ::VirtualAlloc( 0, 3 * 4096 , MEM_RESERVE , PAGE_READWRITE);
-
-            map.register_tiny_pages( reinterpret_cast<uintptr_t> ( base_heap_memory ), 3 * 4096, 5);
-
-            uintptr_t d0 = map.get_data(  reinterpret_cast<uintptr_t> ( base_heap_memory ) );
-            uintptr_t d1 = map.get_data(  reinterpret_cast<uintptr_t> ( base_heap_memory )  + 2 );
-            uintptr_t d2 = map.get_data(  reinterpret_cast<uintptr_t> ( base_heap_memory )  + 1 * 4096 );
-            uintptr_t d3 = map.get_data(  reinterpret_cast<uintptr_t> ( base_heap_memory )  + 2 * 4096 + 4095 );
-
-
-            ::VirtualFree(base_heap_memory, 0, MEM_RELEASE);
 
             if (heap_memory)
             {
-                thread_initialize();
                 heap* heap = new (heap_memory) ::mem::streamflow::heap(0);
+
+                thread_initialize( );
 
                 void* r1 = heap->allocate(2049);
                 void* r2 = heap->allocate(256);
                 void* r3 = heap->allocate(345);
                 void* r4 = heap->allocate(168);
 
+                heap->free(r1);
                 heap->free(r4);
                 heap->free(r3);
                 heap->free(r2);
                 heap->free(r1);
 
-                thread_finalize();
+                thread_finalize(&heap, 1);
                 heap->~heap();
 
                 ::VirtualFree(heap_memory, 0, MEM_RELEASE);

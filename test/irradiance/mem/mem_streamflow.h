@@ -527,6 +527,7 @@ namespace mem
 
         class super_page;
         typedef uint16_t	size_class;
+        typedef uint32_t    page_block_size_class;
         typedef uint32_t	page_block_size;
 
         typedef uint32_t	thread_id;
@@ -1409,22 +1410,22 @@ namespace mem
                 return l->m_data[i_3];
             }
 
-            static uintptr_t is_large_object ( uintptr_t value ) throw()
+            static bool is_large_object ( uintptr_t value ) throw()
             {
                 return value != decode_large_object(value);
             }
 
-            private:
-
             static uintptr_t   encode_large_object( uintptr_t block_size) throw()
             {
-                return  (1UL << 63 ) | block_size;
+                return  (~0x7fffffffffffffffUL) | block_size;
             }
 
             static uintptr_t   decode_large_object( uintptr_t address) throw()
             {
                 return (address & 0x7fffffffffffffffUL);
             }
+
+            private:
 
             //todo:copy?
         };
@@ -1437,7 +1438,7 @@ namespace mem
         public:
             super_page_manager() throw() : 
               m_header_allocator(&m_os_heap_header)
-              , m_bibop(static_cast<uintptr_t> ( 0 ) )
+              , m_page_map(&m_os_heap_pages)
             {
 
             }
@@ -1445,14 +1446,19 @@ namespace mem
             super_page* allocate_super_page() throw();
             page_block*	allocate_page_block( std::uint32_t page_size ) throw();
 
-            page_block* decode_pointer(void* pointer) const throw()
+            page_block* decode_pointer(const void* pointer) const throw()
             {
-                return m_bibop.decode(pointer);
+                return reinterpret_cast<page_block*> ( m_page_map.get_data( reinterpret_cast<uintptr_t> ( pointer )));
+            }
+
+            uintptr_t decode_large_object( const void* pointer ) const throw()
+            {
+                return m_page_map.decode_large_object( m_page_map.get_data( reinterpret_cast<uintptr_t> ( pointer ) ) ) ;
             }
 
             bool is_large_object(const void* pointer) const throw()
             {
-                return m_bibop.is_large_object(pointer);
+                return m_page_map.is_large_object( m_page_map.get_data( reinterpret_cast<uintptr_t> ( pointer ) ) );
             }
 
             void*       allocate_large_block( size_t size ) throw();
@@ -1465,7 +1471,7 @@ namespace mem
             chunked_free_list< sizeof(super_page) >             m_header_allocator;
 
             super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
-            bibop_table                                         m_bibop;
+            radix_page_map<31>                                  m_page_map;
 
 
             super_page* get_super_page( std::uint32_t page_size ) throw();
@@ -1564,6 +1570,21 @@ namespace mem
             void* allocate(uint32_t size) throw();
             void free(void* pointer) throw();
 
+            uint32_t    get_index() const throw()
+            {
+                return m_index;
+            }
+
+            void push_orphaned_block(page_block* block, uint32_t size_class)  throw()
+            {
+                m_page_blocks_orphaned[size_class].push(block);
+            }
+
+            void free_page_block(page_block* block, uint32_t size_class) throw();
+
+            void free_page_blocks() throw();
+            
+
             private:
 
 		    super_page_manager              m_super_page_manager;
@@ -1579,11 +1600,6 @@ namespace mem
 
             heap(const heap&);
             const heap& operator=(const heap&);
-
-            uint32_t    get_index() const throw()
-            {
-                return m_index;
-            }
 
             void local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw();
             
