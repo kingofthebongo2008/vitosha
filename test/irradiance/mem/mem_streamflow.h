@@ -111,127 +111,97 @@ namespace mem
         public:
 
             list() throw() : 
-              m_head(nullptr)
-                  , m_tail(nullptr)
-              {
+            m_head(nullptr)
+            , m_tail(nullptr)
+            {
 
-              }
+            }
 
-              void push_front(T* block) throw()
-              {
-                  block->set_next(m_head);
+            void push_front(T* block) throw()
+            {
+                auto head = m_head;
 
-                  if (m_head)
-                  {
-                      m_head->set_previous(block);
-                  }
+                if (head == nullptr)
+                {
+                    m_tail = block;                   
+                }
+                else
+                {
+                    head->set_previous(block);
+                }
 
-                  m_head = block;
+                block->set_next(head);
+                block->set_previous(nullptr);
+                m_head = block;
+            }
 
-                  if (m_tail == nullptr)
-                  {
-                      m_tail = m_head;
-                  }
-              }
+            T* front() throw()
+            {
+                return m_head;
+            }
 
-              void pop_front() throw()
-              {
-                  if (m_head)
-                  {
-                      m_head = m_head->get_next();
-                  }
+            const T* front() const throw()
+            {
+                return m_head;
+            }
 
-                  if (m_head == nullptr)
-                  {
-                      m_tail = nullptr;
-                  }
-                  else
-                  {
-                      m_head->set_previous(nullptr);
-                  }
-              }
+            void remove(T* block) throw()
+            {
+                T* previous = block->get_previous();
+                T* next = block->get_next();
 
-              void push_back(T* block) throw()
-              {
-                  if (m_tail != nullptr)
-                  {
-                      m_tail->set_next(nullptr);
-                  }
+                if ( previous != nullptr)
+                {
+                    previous->set_next(next);
+                }
+                else
+                {
+                    m_head = next;
+                }
 
-                  block->set_previous(m_tail);
-                  m_tail = block;
+                if ( next != nullptr)
+                {
+                    next->set_previous(previous);
+                }
+                else
+                {
+                    m_tail = previous;
+                }
 
-                  if (m_head == nullptr)
-                  {
-                      m_head = m_tail;
-                  }
-              }
+                if ( m_head != nullptr && m_head->get_next() == nullptr)
+                {
+                    m_tail = m_head;
+                }
 
-              void pop_back() throw()
-              {
-                  if (m_tail)
-                  {
-                      m_tail = m_tail->get_previous();
-                  }
+                if ( m_tail !=nullptr && m_tail->get_previous() == nullptr)
+                {
+                    m_head = m_tail;
+                }
+            }
 
-                  if (m_tail == nullptr)
-                  {
-                      m_head = nullptr;
-                  }
-                  else
-                  {
-                      m_tail->set_next(nullptr);
-                  }
-              }
+            bool empty() const throw()
+            {
+                return (m_head == nullptr && m_head == m_tail);
+            }
 
-              T* front() throw()
-              {
-                  return m_head;
-              }
+            void rotate_back() throw()
+            {
+                T* head = m_head;
+                T* tail = m_tail;
 
-              const T* front() const throw()
-              {
-                  return m_head;
-              }
+                if ( head != tail )
+                {
+                    auto new_head = head->get_next();
+                    new_head->set_previous(nullptr);
 
-              T* back() throw()
-              {
-                  return m_tail;
-              }
+                    tail->set_next(head);
+                    head->set_previous(tail);
+                    head->set_next(nullptr);
 
-              const T* back() const throw()
-              {
-                  return m_tail;
-              }
-
-              void remove(T* block) throw()
-              {
-                  if (block->get_previous())
-                  {
-                      T* previous = block->get_previous();
-                      previous->set_next( block->get_next() );
-                  }
-                  else
-                  {
-                      m_head = block->get_next();
-                  }
-
-                  if (block->get_next())
-                  {
-                      T* next = block->get_next();
-                      next->set_previous( block->get_previous() );
-                  }
-                  else
-                  {
-                      m_tail = block->get_previous();
-                  }
-
-              }
-
-              bool empty() const throw()
-              {
-                  return (m_head == nullptr && m_head == m_tail);
-              }
+                    m_head = new_head;
+                    m_tail = head;
+                }
+            }
 
         private:
             T* m_head;
@@ -652,7 +622,7 @@ namespace mem
                     //create new reference and try to set it
                     new_reference = remote_page_block_info::set_thread_next_count( thread_id, 0, 0 );
                 }
-                while (! try_set_block_info( reference, new_reference) );
+                while (! try_set_block_info_weak( reference, new_reference) );
               }
 
               void* allocate() throw()
@@ -720,7 +690,12 @@ namespace mem
                   return m_block_info.m_memory_reference.load();	
               }
 
-              bool try_set_block_info(uint64_t old_value, uint64_t value) throw()
+              bool try_set_block_info_weak(uint64_t old_value, uint64_t value) throw()
+              {
+                  return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &old_value, value);
+              }
+
+              bool try_set_block_info_strong(uint64_t old_value, uint64_t value) throw()
               {
                   return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &old_value, value);
               }
@@ -831,7 +806,7 @@ namespace mem
                     if ( !buddies->empty() )
                     {
                         buddy = buddies->front();
-                        buddies->pop_front();
+                        buddies->remove(buddy);
                         buddy->clear_tag();
                         break;
                     }
@@ -1479,7 +1454,7 @@ namespace mem
             void free(super_page* header, void* super_page_base) throw()
             {
                 {
-                    sys::lock<sys::spinlock_fas> guard(m_super_pages_lock);
+                    //sys::lock<sys::spinlock_fas> guard(m_super_pages_lock);
                     m_super_pages.remove(header);
                 }
 
@@ -1522,11 +1497,6 @@ namespace mem
                 m_active_blocks.push_front(block);
             }
 
-            void push_back(page_block* block) throw()
-            {
-                m_active_blocks.push_back(block);
-            }
-
             void remove(page_block* block) throw()
             {
                 m_active_blocks.remove(block);
@@ -1537,24 +1507,16 @@ namespace mem
                 return m_active_blocks.front();
             }
 
+            void rotate_back() throw()
+            {
+                m_active_blocks.rotate_back();
+            }
+
             private:
             thread_local_heap(const thread_local_heap&);
             const thread_local_heap& operator=(const thread_local_heap&);
             list<page_block>					m_active_blocks;
         };
-
-        inline void rotate_front(thread_local_heap* heap, page_block* block)
-        {
-            heap->remove(block);
-            heap->push_front(block);
-        }
-
-        inline void rotate_back(thread_local_heap* heap, page_block* block)
-        {
-           heap->remove(block);
-           heap->push_back(block);
-        }
-
 
         const std::uint32_t      size_classes = 256;
         const std::uint32_t      page_block_size_classes = 5; //16kb, 32kb, 64kb, 128kb, 256kb

@@ -360,7 +360,7 @@ namespace mem
 					break;
 				}
 			}
-			while (! block->try_set_block_info( reference, new_reference) );
+			while (! block->try_set_block_info_weak( reference, new_reference) );
 		}
 
         thread_local_heap* heap::get_thread_local_heap(uint32_t size) throw()
@@ -409,8 +409,12 @@ namespace mem
 
                     if (block->full())
                     {
-                        rotate_back(local_heap, block);
+                        local_heap->rotate_back();
                         block = get_free_page_block(size, t_thread_id );
+                        if (block)
+                        {
+                            local_heap->push_front(block);
+                        }
                     }
                 }
 
@@ -420,7 +424,7 @@ namespace mem
 
                     if (block->full())
                     {
-                        rotate_back(local_heap, block);
+                        local_heap->rotate_back();
                     }
 
                     return result;
@@ -458,7 +462,10 @@ namespace mem
             for (uint32_t i = 0; i < page_block_size_classes;++i)
             {
                 page_block* block = m_page_blocks_free[i].pop<page_block>();
-                free_page_block( block, i);
+                if ( block != nullptr)
+                {
+                    free_page_block( block, i);
+                }
             }
         }
 
@@ -468,7 +475,10 @@ namespace mem
 
             if (block->empty())
             {
+                local_heap->remove(block);
+
                 const uint32_t local_inactive_blocks = 4;
+
                 if ( stack1->size() < local_inactive_blocks )
                 {
                     stack1->push(block);
@@ -480,7 +490,8 @@ namespace mem
             }
             else
             {
-                rotate_front( local_heap, block );
+                local_heap->remove(block);
+                local_heap->push_front(block);
             }
         }
 
@@ -588,7 +599,7 @@ namespace mem
                                     //create new reference and try to set it
                                     new_reference = remote_page_block_info::set_thread_next_count( thread_id_orphan, 0, 0 );
 
-                                    if ( !block->try_set_block_info(reference, new_reference) )
+                                    if ( !block->try_set_block_info_strong(reference, new_reference) )
                                     {
                                         //insert into orphaned block, somebody else did a remote free
                                         h->push_orphaned_block(block, i);
@@ -612,15 +623,32 @@ namespace mem
 
 		}
 
-		void test_streamflow()
+
+    	void test_streamflow()
 		{
             void* heap_memory = ::VirtualAlloc( 0, sizeof(heap) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+            void* heap_memory1 = ::VirtualAlloc( 0, 32768 * 8 , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 
             if (heap_memory)
             {
                 heap* heap = new (heap_memory) ::mem::streamflow::heap(0);
-
                 thread_initialize( );
+                
+                for (uint32_t i = 0 ; i < 32768;++i)
+                {
+                     
+                    void* v = heap->allocate(256);
+
+                    void** v1 = reinterpret_cast<void**> ( reinterpret_cast<uintptr_t> (heap_memory1) + i * 8 );
+
+                    *v1 = v;
+                }
+
+                for (uint32_t i = 0 ; i < 32768;++i)
+                {
+                    void** v = reinterpret_cast<void**> ( reinterpret_cast<uintptr_t> (heap_memory1) + i * 8 );
+                    heap->free(*v);
+                }
 
                 void* r1 = heap->allocate(2049);
                 void* r2 = heap->allocate(256);
