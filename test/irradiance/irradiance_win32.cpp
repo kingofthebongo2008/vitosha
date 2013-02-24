@@ -29,6 +29,7 @@
 #include <d2d/d2d_helpers.h>
 
 #include <mem/mem_streamflow.h>
+#include <mem/mem_streamflow_allocator.h>
 
 #define MAX_LOADSTRING 100
 
@@ -61,7 +62,25 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-	mem::streamflow::test_streamflow();
+    //todo: exceptions go here
+	mem::streamflow::initialization_code code = mem::streamflow::initialize();
+
+    if ( code != mem::streamflow::initialization_code::success )
+    {
+        return 1;
+    }
+
+    code = mem::streamflow::thread_initialize();
+
+    if ( code != mem::streamflow::initialization_code::success )
+    {
+        mem::streamflow::finalize();
+        return 1;
+    }
+
+    mem::streamflow::allocator<int> k;
+    std::shared_ptr<int> f = std::allocate_shared<int, mem::streamflow::allocator<int> > (k);
+
 	io::console::runner runner;
 	io::console::register_thread_info_helper helper_i;
 	io::console::register_notifier_helper helper_n ( std::make_shared<io::console::std_notifier>() );
@@ -148,6 +167,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				application.render();
 		}
 	}
+
+    
+    mem::streamflow::thread_finalize();
+    mem::streamflow::finalize();
 
 	return (int) msg.wParam;
 }

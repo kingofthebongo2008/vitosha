@@ -341,6 +341,9 @@
     <ClInclude Include="gxu\gxu_texture_loading.h">
       <Filter>gxu</Filter>
     </ClInclude>
+    <ClInclude Include="mem\mem_streamflow_allocator.h">
+      <Filter>mem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />

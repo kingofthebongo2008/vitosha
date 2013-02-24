@@ -54,6 +54,23 @@ namespace mem
             {
 
             };
+
+            class noncopyable
+            {
+                protected:
+                noncopyable()
+                {
+                
+                }
+
+                ~noncopyable()
+                {
+                }
+
+                private:
+                noncopyable(const noncopyable&);
+                const noncopyable& operator=(const noncopyable&);
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -63,45 +80,45 @@ namespace mem
         public:
 
             list_element() :
-              m_previous(nullptr)
-                  , m_next(nullptr)
-              {
+            m_previous(nullptr)
+                , m_next(nullptr)
+            {
 
-              }
+            }
 
-              T* get_next() throw()
-              {
-                  return m_next;
-              }
+            T* get_next() throw()
+            {
+                return m_next;
+            }
 
-              const T* get_next() const throw()
-              {
-                  return m_next;
-              }
+            const T* get_next() const throw()
+            {
+                return m_next;
+            }
 
-              void set_next(T* next) throw()
-              {
-                  m_next = next;
-              }
+            void set_next(T* next) throw()
+            {
+                m_next = next;
+            }
 
-              T* get_previous() throw()
-              {
-                  return m_previous;
-              }
+            T* get_previous() throw()
+            {
+                return m_previous;
+            }
 
-              const T* get_previous() const throw()
-              {
-                  return m_previous;
-              }
+            const T* get_previous() const throw()
+            {
+                return m_previous;
+            }
 
-              void set_previous(T* previous) throw()
-              {
-                  m_previous = previous;
-              }
+            void set_previous(T* previous) throw()
+            {
+                m_previous = previous;
+            }
 
-              uint8_t	m_opaque_data[8]; //buddy order and tag go here
-              T*		m_previous;
-              T*		m_next;
+            uint8_t	m_opaque_data[8]; //buddy order and tag go here
+            T*		m_previous;
+            T*		m_next;
         };
 
         //---------------------------------------------------------------------------------------
@@ -1215,7 +1232,7 @@ namespace mem
         //on 32 bit platforms bibop tables are very useful, however on 64 bits, there are too big
         //radix page map replaces bibops. setup is number of valid bits, stripped of page bits ( 43 (windows) - 12 ) = 31
         template <uint32_t bits>
-        class radix_page_map
+        class radix_page_map : private detail::noncopyable
         {
             // How many bits should we consume at each interior level
             static const uint32_t interior_bits = (bits + 2) / 3; // Round-up
@@ -1235,6 +1252,7 @@ namespace mem
 
             ~radix_page_map()
             {
+                //todo
                 //free nodes
             }
 
@@ -1399,10 +1417,6 @@ namespace mem
             {
                 return (address & 0x7fffffffffffffffUL);
             }
-
-            private:
-
-            //todo:copy?
         };
         //---------------------------------------------------------------------------------------
         class super_page_manager
@@ -1453,11 +1467,7 @@ namespace mem
 
             void free(super_page* header, void* super_page_base) throw()
             {
-                {
-                    //sys::lock<sys::spinlock_fas> guard(m_super_pages_lock);
-                    m_super_pages.remove(header);
-                }
-
+                m_super_pages.remove(header);
                 header->~super_page();
                 m_os_heap_pages.free(super_page_base);
                 m_header_allocator.free(header);
@@ -1474,7 +1484,7 @@ namespace mem
 
         
         //---------------------------------------------------------------------------------------
-        class heap;
+        class internal_heap;
 
         //---------------------------------------------------------------------------------------
         //heap allocated in the thread local storage
@@ -1521,10 +1531,10 @@ namespace mem
         const std::uint32_t      size_classes = 256;
         const std::uint32_t      page_block_size_classes = 5; //16kb, 32kb, 64kb, 128kb, 256kb
 
-        class heap
+        class internal_heap
         {
             public:
-            explicit heap(uint32_t index) : m_index(index)
+            explicit internal_heap(uint32_t index) : m_index(index)
             {
 
             }
@@ -1560,8 +1570,8 @@ namespace mem
 
             thread_local_heap*              get_thread_local_heap(uint32_t size) throw();
 
-            heap(const heap&);
-            const heap& operator=(const heap&);
+            internal_heap(const internal_heap&);
+            const internal_heap& operator=(const internal_heap&);
 
             void local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw();
             
@@ -1595,8 +1605,42 @@ namespace mem
 
             thread_local_info   m_infos[8];
         };
+
+        class heap
+        {
+            public:
+
+            void*   allocate(size_t size) throw();
+            void    free(void* pointer) throw();
+            void*   reallocate(void* pointer, size_t size) throw();
+            
+            private:
+            void*   m_implementation;
+        };
+
+
+        enum initialization_code : uint32_t
+        {
+            success = 0,
+            no_memory = 1
+        };
+
+        //called once per application before all threads start to allocate
+        initialization_code initialize() throw();
+
+        //called once per application before all threads stop to allocate
+        void                finalize()  throw();
+
+        //called on every thread creation before the thread starts to allocate
+        initialization_code thread_initialize() throw();
+
+        //called on every thread creation after the thread stops to allocate
+        void                thread_finalize()  throw();
+
+        //returns one of 8 heaps to be used; default heap is 0
+        heap*               get_heap(uint32_t index) throw();
+
     }
 }
-
 
 #endif

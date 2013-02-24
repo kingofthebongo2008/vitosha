@@ -588,6 +588,7 @@
     <ClInclude Include="mem\mem_alloc.h" />
     <ClInclude Include="mem\mem_ref_counter.h" />
     <ClInclude Include="mem\mem_streamflow.h" />
+    <ClInclude Include="mem\mem_streamflow_allocator.h" />
     <ClInclude Include="precompiled.h" />
     <ClInclude Include="gx\gx_view.h" />
     <ClInclude Include="gx\gx_view_port.h" />

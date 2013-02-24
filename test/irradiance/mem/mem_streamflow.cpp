@@ -1,5 +1,7 @@
 #include "precompiled.h"
 
+#include <type_traits>
+
 #include <mem/mem_streamflow.h>
 
 
@@ -293,7 +295,7 @@ namespace mem
 		}
 
 		//---------------------------------------------------------------------------------------
-		page_block* heap::get_free_page_block( uint32_t size, thread_id thread_id )
+		page_block* internal_heap::get_free_page_block( uint32_t size, thread_id thread_id )
 		{
 			size_class size_class		= compute_size_class(size);
 			uint32_t page_block_size	= compute_page_block_size( size_class );
@@ -363,7 +365,7 @@ namespace mem
 			while (! block->try_set_block_info_weak( reference, new_reference) );
 		}
 
-        thread_local_heap* heap::get_thread_local_heap(uint32_t size) throw()
+        thread_local_heap* internal_heap::get_thread_local_heap(uint32_t size) throw()
         {
             thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( get_index() );
             size_class c = compute_size_class(size);
@@ -372,7 +374,7 @@ namespace mem
             return local_heap;
         }
 
-        void* heap::allocate(uint32_t size) throw()
+        void* internal_heap::allocate(uint32_t size) throw()
         {
             if ( size < 2048 )
             {
@@ -452,12 +454,12 @@ namespace mem
             }
         }
 
-        void heap::free_page_block(page_block* block, page_block_size_class size_class) throw()
+        void internal_heap::free_page_block(page_block* block, page_block_size_class size_class) throw()
         {
             global_free_page_block( block, &m_page_blocks_free[size_class] );
         }
 
-        void heap::free_page_blocks() throw()
+        void internal_heap::free_page_blocks() throw()
         {
             for (uint32_t i = 0; i < page_block_size_classes;++i)
             {
@@ -469,7 +471,7 @@ namespace mem
             }
         }
 
-        void heap::local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw()
+        void internal_heap::local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw()
         {
             block->free(pointer);
 
@@ -495,7 +497,7 @@ namespace mem
             }
         }
 
-        void heap::free(void* pointer) throw()
+        void internal_heap::free(void* pointer) throw()
         {
             if (!m_super_page_manager.is_large_object(pointer) )
             {            
@@ -528,8 +530,7 @@ namespace mem
             }
         }
 
-
-		static void thread_initialize()
+		static initialization_code thread_initialize(  internal_heap** , uint32_t  )
 		{
             //allocate data for 8 heaps
             const size_t size = sizeof(thread_local_heap_info);
@@ -543,17 +544,19 @@ namespace mem
 			}
 			else
 			{
-				//?????
+				return initialization_code::no_memory;
 			}
 
 			t_thread_id = create_thread_id();
+
+            return initialization_code::success;
 		}
 
-		static void thread_finalize( heap** heaps, uint32_t heap_count )
+		static void thread_finalize( internal_heap** heaps, uint32_t heap_count )
 		{
             for (uint32_t i = 0 ; i < heap_count; ++i)
             {
-                heap* h = heaps[i];
+                internal_heap* h = heaps[i];
                 thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( h->get_index() );
                 
                 for (uint32_t i = 0; i < size_classes;++i)
@@ -615,7 +618,6 @@ namespace mem
 
                     h->free_page_blocks();
                 }
-
             }
             
             t_thread_local_heap_info->~thread_local_heap_info();
@@ -623,49 +625,108 @@ namespace mem
 
 		}
 
+        static void*             heap_memory;
+        static internal_heap*    heaps[8];
+        static const uint32_t    heap_count = 8;
+
+        //heaps that are seen by the users of the library
+        static void*             public_heaps_memory;
+        static heap*             public_heaps[8];
+
+        initialization_code initialize()
+        {
+           heap_memory = ::VirtualAlloc( 0, heap_count * sizeof(internal_heap) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+           public_heaps_memory =  ::VirtualAlloc( 0, heap_count * sizeof(heap) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+
+           uintptr_t memory = reinterpret_cast<uintptr_t> ( heap_memory );
+           uintptr_t public_memory = reinterpret_cast<uintptr_t> ( public_heaps_memory );
+
+           if (heap_memory != nullptr && public_heaps_memory != nullptr)
+           {
+                for (uint32_t i = 0; i < 8;++i)
+                {
+                    uintptr_t mem_private_heap = memory + align ( i * sizeof( internal_heap ), std::alignment_of<internal_heap>::value );
+                    void*     memory = reinterpret_cast<void*> ( mem_private_heap );
+                    heaps[i] = new (memory) ::mem::streamflow::internal_heap(i);
+
+                    //patch the public pointers with the internal ones
+                    uintptr_t mem_public_heap = public_memory + align ( i * sizeof( heap ), std::alignment_of<heap>::value );
+                    void** public_heap = reinterpret_cast<void**> ( mem_public_heap );
+                    *public_heap = memory;
+
+                    public_heaps[i] = reinterpret_cast<heap*> ( mem_public_heap );
+                }
+
+                return initialization_code::success;
+           }
+           else
+           {
+                if ( heap_memory != nullptr)
+                {
+                    ::VirtualFree(heap_memory, 0, MEM_RELEASE);
+                }
+
+                if ( public_heaps_memory != nullptr)
+                {
+                    ::VirtualFree(public_heaps_memory, 0, MEM_RELEASE);
+                }
+
+                return initialization_code::no_memory;
+           }
+        }
+
+        void finalize()
+        {
+            uintptr_t memory = reinterpret_cast<uintptr_t> ( heap_memory );
+
+            for ( uint32_t i = 0; i < heap_count; ++i )
+            {
+                uintptr_t mem = memory + align ( i * sizeof( internal_heap ), std::alignment_of<internal_heap>::value );
+
+                internal_heap* h = reinterpret_cast<internal_heap*> ( mem );
+                h->~internal_heap();
+            }
+
+            ::VirtualFree(heap_memory, 0, MEM_RELEASE);
+            ::VirtualFree(public_heaps_memory, 0, MEM_RELEASE);
+        }
+
+
+        initialization_code thread_initialize() throw()
+        {
+            return thread_initialize(&heaps[0], heap_count);
+        }
+
+        void                thread_finalize() throw()
+        {
+                thread_finalize(&heaps[0], heap_count);
+
+        }
+
+        heap* get_heap(uint32_t index) throw()
+        {
+            return public_heaps[index];
+        }
+
+        void*   heap::allocate(size_t size) throw()
+        {
+            return reinterpret_cast<internal_heap*> ( m_implementation ) ->allocate( static_cast<uint32_t> ( size ) );
+        }
+
+        void    heap::free(void* pointer) throw()
+        {
+            return reinterpret_cast<internal_heap*> ( m_implementation ) ->free(pointer);
+        }
+
+        void*   heap::reallocate(void* pointer, size_t size) throw()
+        {
+            return nullptr;
+        }
 
     	void test_streamflow()
 		{
-            void* heap_memory = ::VirtualAlloc( 0, sizeof(heap) , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
-            void* heap_memory1 = ::VirtualAlloc( 0, 32768 * 8 , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 
-            if (heap_memory)
-            {
-                heap* heap = new (heap_memory) ::mem::streamflow::heap(0);
-                thread_initialize( );
-                
-                for (uint32_t i = 0 ; i < 32768;++i)
-                {
-                     
-                    void* v = heap->allocate(256);
-
-                    void** v1 = reinterpret_cast<void**> ( reinterpret_cast<uintptr_t> (heap_memory1) + i * 8 );
-
-                    *v1 = v;
-                }
-
-                for (uint32_t i = 0 ; i < 32768;++i)
-                {
-                    void** v = reinterpret_cast<void**> ( reinterpret_cast<uintptr_t> (heap_memory1) + i * 8 );
-                    heap->free(*v);
-                }
-
-                void* r1 = heap->allocate(2049);
-                void* r2 = heap->allocate(256);
-                void* r3 = heap->allocate(345);
-                void* r4 = heap->allocate(168);
-
-                heap->free(r1);
-                heap->free(r4);
-                heap->free(r3);
-                heap->free(r2);
-                heap->free(r1);
-
-                thread_finalize(&heap, 1);
-                heap->~heap();
-
-                ::VirtualFree(heap_memory, 0, MEM_RELEASE);
-            }
 		}
     }
 }
+
