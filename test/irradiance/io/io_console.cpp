@@ -6,11 +6,12 @@
 #include <memory>
 #include <chrono>
 
+#include <mem/mem_streamflow.h>
+
 namespace io
 {
 namespace console
 {
-	static std::shared_ptr<updater>							g_updater = std::make_shared<updater>();
 	static __declspec(thread) thread_info*					g_thread_info;
 	
 	void	updater::register_thread_info(std::shared_ptr<thread_info> info)
@@ -52,12 +53,10 @@ namespace console
 		m_notifiers.erase(notifier);
 	}
 
-
 	void updater::update()
 	{
 		std::lock_guard<std::mutex> guard(m_lock);
 
-		
 		std::vector<message> messages;
 		messages.reserve(200);
 
@@ -93,6 +92,8 @@ namespace console
 
 	static void runner_thread(volatile bool& stop_thread, std::shared_ptr<updater> updater)
 	{
+        mem::streamflow::thread_initializer memory_initializer;
+
 		std::shared_ptr<thread_info> info = make_thread_info();
 		updater->register_thread_info(info);
 
@@ -104,7 +105,14 @@ namespace console
 		}
 	}
 
-	runner::runner() : m_stop_thread(false), m_thread ( runner_thread, std::ref(m_stop_thread), g_updater )
+    static std::shared_ptr<updater>	get_updater()
+    {
+        static std::shared_ptr<updater> s_updater = std::make_shared<updater>();
+        return s_updater;
+    }
+
+
+	runner::runner() : m_stop_thread(false), m_thread ( runner_thread, std::ref(m_stop_thread), get_updater() )
 	{
 	}
 
@@ -134,22 +142,22 @@ namespace console
 
 	void	register_thread_info( std::shared_ptr<thread_info>	info)
 	{
-		g_updater->register_thread_info(info);
+		get_updater()->register_thread_info(info);
 	}
 
 	void	unregister_thread_info(std::shared_ptr<thread_info> info)
 	{
-		g_updater->unregister_thread_info(info);
+		get_updater()->unregister_thread_info(info);
 	}
 
 	void	register_notifier( std::shared_ptr<notifier>	n)
 	{
-		g_updater->register_notifier(n);
+		get_updater()->register_notifier(n);
 	}
 
 	void	unregister_notifier( std::shared_ptr<notifier> n)
 	{
-		g_updater->unregister_notifier(n);
+		get_updater()->unregister_notifier(n);
 	}
 
 	void	write(const wchar_t* string)

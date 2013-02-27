@@ -697,10 +697,9 @@ namespace mem
             return thread_initialize(&heaps[0], heap_count);
         }
 
-        void                thread_finalize() throw()
+        void thread_finalize() throw()
         {
-                thread_finalize(&heaps[0], heap_count);
-
+            thread_finalize(&heaps[0], heap_count);
         }
 
         heap* get_heap(uint32_t index) throw()

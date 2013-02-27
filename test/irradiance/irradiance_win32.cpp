@@ -62,117 +62,109 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-    //todo: exceptions go here
-	mem::streamflow::initialization_code code = mem::streamflow::initialize();
 
-    if ( code != mem::streamflow::initialization_code::success )
+    try
     {
-        return 1;
-    }
+	    mem::streamflow::initializer streamflow_initializer;
+        mem::streamflow::thread_initializer thread_initializer;
 
-    code = mem::streamflow::thread_initialize();
+        mem::streamflow::allocator<int> k;
+        std::shared_ptr<int> f = std::allocate_shared<int, mem::streamflow::allocator<int> > (k);
 
-    if ( code != mem::streamflow::initialization_code::success )
-    {
-        mem::streamflow::finalize();
-        return 1;
-    }
+	    io::console::runner runner;
+	    io::console::register_thread_info_helper helper_i;
+	    io::console::register_notifier_helper helper_n ( std::allocate_shared<io::console::std_notifier, mem::streamflow::allocator<io::console::std_notifier>  >(k) );
 
-    mem::streamflow::allocator<int> k;
-    std::shared_ptr<int> f = std::allocate_shared<int, mem::streamflow::allocator<int> > (k);
+	    io::console::write(L"test");
 
-	io::console::runner runner;
-	io::console::register_thread_info_helper helper_i;
-	io::console::register_notifier_helper helper_n ( std::make_shared<io::console::std_notifier>() );
+        UNUSED_PARAMETER(hInstance);
+	    UNUSED_PARAMETER(nCmdShow);
 
-	io::console::write(L"test");
-
-    UNUSED_PARAMETER(hInstance);
-	UNUSED_PARAMETER(nCmdShow);
-
-	UNUSED_PARAMETER(hPrevInstance);
-	UNUSED_PARAMETER(lpCmdLine);
+	    UNUSED_PARAMETER(hPrevInstance);
+	    UNUSED_PARAMETER(lpCmdLine);
 
 	
-    // Initialize global strings
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_IRRADIANCE, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance, szWindowClass);
+        // Initialize global strings
+	    LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	    LoadString(hInstance, IDC_IRRADIANCE, szWindowClass, MAX_LOADSTRING);
+	    MyRegisterClass(hInstance, szWindowClass);
 
-	HWND hwnd = InitInstance (hInstance);
+	    HWND hwnd = InitInstance (hInstance);
 
-	if (hwnd == 0)
-	{
-		return FALSE;
-	}
+	    if (hwnd == 0)
+	    {
+		    return FALSE;
+	    }
 
-	RECT r;
-	::GetClientRect(hwnd, &r);
+	    RECT r;
+	    ::GetClientRect(hwnd, &r);
 
-	math::details2::generate_tables();
+	    math::details2::generate_tables();
 
-	//1. Initialize static graphic data (singletons)
-	gx::initializer			initializer;
+	    //1. Initialize static graphic data (singletons)
+	    gx::initializer			initializer;
 
-	//2. Create a default view port
-	gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
-    //3. Create direct3d11 structures
-	d3d11::system_context	context = d3d11::create_system_context(hwnd);
+	    //2. Create a default view port
+	    gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
+        //3. Create direct3d11 structures
+	    d3d11::system_context	context = d3d11::create_system_context(hwnd);
 
-	std::shared_ptr<gx::shader_database>		shader_database = std::make_shared<gx::shader_database>( context.m_device.get() );
-	//4. Create render contexts
-	gx::render_context		render_context(context, shader_database, 3, view_port);
-	//5. Create application with a window and worlds with data
-	application				application;
+	    std::shared_ptr<gx::shader_database>		shader_database = std::make_shared<gx::shader_database>( context.m_device.get() );
+	    //4. Create render contexts
+	    gx::render_context		render_context(context, shader_database, 3, view_port);
+	    //5. Create application with a window and worlds with data
+	    application				application;
 
-    std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
-    std::shared_ptr<gx::scene> scene = universe_bootstrap( &render_context, context, universe );
+        std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
+        std::shared_ptr<gx::scene> scene = universe_bootstrap( &render_context, context, universe );
 
-    application.set_universe(universe);
-    application.set_scene(scene);
+        application.set_universe(universe);
+        application.set_scene(scene);
 
-	gx::target_render_resource d2d_resource	= gx::create_target_render_resource( context.m_device.get(), view_port.get_width(), view_port.get_height(), DXGI_FORMAT_B8G8R8A8_UNORM );
+	    gx::target_render_resource d2d_resource	= gx::create_target_render_resource( context.m_device.get(), view_port.get_width(), view_port.get_height(), DXGI_FORMAT_B8G8R8A8_UNORM );
 
-	window* wnd = new window( hwnd, application, context.m_swap_chain, &render_context, d2d_resource );
-	application.new_window(wnd);
-	wnd->set_scene(scene);
-	::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wnd) );
+	    window* wnd = new window( hwnd, application, context.m_swap_chain, &render_context, d2d_resource );
+	    application.new_window(wnd);
+	    wnd->set_scene(scene);
+	    ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wnd) );
 
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
-	MSG msg = {};
+	    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
+	    MSG msg = {};
 
-	::ShowWindow(hwnd, nCmdShow);
-	::UpdateWindow(hwnd);
+	    ::ShowWindow(hwnd, nCmdShow);
+	    ::UpdateWindow(hwnd);
 
-	while (msg.message != WM_QUIT)
-	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			else
-			{
-				application.process_user_input();
-				application.update();
-				application.render();
-			}
-		}
-		else
-		{
-				application.process_user_input();
-				application.update();
-				application.render();
-		}
-	}
+	    while (msg.message != WM_QUIT)
+	    {
+		    if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		    {
+			    if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			    {
+				    TranslateMessage(&msg);
+				    DispatchMessage(&msg);
+			    }
+			    else
+			    {
+				    application.process_user_input();
+				    application.update();
+				    application.render();
+			    }
+		    }
+		    else
+		    {
+				    application.process_user_input();
+				    application.update();
+				    application.render();
+		    }
+	    }
 
-    
-    mem::streamflow::thread_finalize();
-    mem::streamflow::finalize();
+	    return (int) msg.wParam;
+    }
 
-	return (int) msg.wParam;
+    catch (...)
+    {
+        return 1;
+    }
 }
 
 static ATOM MyRegisterClass(HINSTANCE hInstance, LPCTSTR szWindowClass)
@@ -526,6 +518,64 @@ static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+//pair 1
+void* operator new(std::size_t size) throw(std::bad_alloc)
+{
+    void* result = mem::streamflow::get_heap(0)->allocate( size );
+
+    if (result == nullptr)
+    {
+        throw std::bad_alloc();
+    }
+
+    return result;
+}
+
+void operator delete(void* ptr) throw()
+{
+    mem::streamflow::get_heap(0)->free(ptr);
+}
+
+//pair 2
+void* operator new   (std::size_t size, const std::nothrow_t&) throw()
+{
+    return mem::streamflow::get_heap(0)->allocate( size );
+}
+
+void operator delete (void* ptr, const std::nothrow_t&) throw()
+{
+    mem::streamflow::get_heap(0)->free(ptr);
+}
+
+//pair 3
+void* operator new  [](std::size_t size) throw(std::bad_alloc)
+{
+    void* result = mem::streamflow::get_heap(0)->allocate( size );
+
+    if (result == nullptr)
+    {
+        throw std::bad_alloc();
+    }
+
+    return result;
+}
+
+void operator delete[](void* ptr) throw()
+{
+    mem::streamflow::get_heap(0)->free(ptr);
+}
+
+//pair 4
+void* operator new  [](std::size_t size, const std::nothrow_t&) throw()
+{
+    return mem::streamflow::get_heap(0)->allocate( size );
+}
+
+void operator delete[](void* ptr, const std::nothrow_t&) throw()
+{
+    mem::streamflow::get_heap(0)->free(ptr);
 }
 
 

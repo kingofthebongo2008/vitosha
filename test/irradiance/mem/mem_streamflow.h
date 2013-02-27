@@ -6,6 +6,7 @@
 #include <limits>
 #include <new>
 #include <mutex>
+#include <exception>
 
 #include <intrin.h>
 
@@ -1640,6 +1641,50 @@ namespace mem
         //returns one of 8 heaps to be used; default heap is 0
         heap*               get_heap(uint32_t index) throw();
 
+
+        class exception : public std::exception
+        {
+
+        };
+
+
+        class initializer
+        {
+            public:
+            initializer()
+            {
+	            initialization_code code = initialize();
+
+                if ( code != initialization_code::success )
+                {
+                    throw exception();
+                }
+            }
+
+            ~initializer()
+            {
+                finalize();
+            }
+        };
+
+        class thread_initializer
+        {
+            public:
+            thread_initializer()
+            {
+	            initialization_code code = thread_initialize();
+
+                if ( code != initialization_code::success )
+                {
+                    throw exception();
+                }
+            }
+
+            ~thread_initializer()
+            {
+                thread_finalize();
+            }
+        };
     }
 }
 
