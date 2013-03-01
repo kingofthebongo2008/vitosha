@@ -27,6 +27,14 @@
 
 #endif
 
+#if defined( MEM_STREAMFLOW_DLL_IMPORT )
+    #define MEM_STREAMFLOW_DLL __declspec(dllimport)
+#elif defined( MEM_STREAMFLOW_DLL_EXPORT )
+    #define MEM_STREAMFLOW_DLL __declspec(dllexport)
+#else
+    #define MEM_STREAMFLOW_DLL 
+#endif
+
 namespace mem
 {
     namespace streamflow
@@ -463,11 +471,12 @@ namespace mem
             {
                 return reinterpret_cast<t*> ( pop_() );
             }
-
+            
             size_t size() const throw()
             {
                 return m_counter;
             }
+            
 
 
             private:
@@ -1607,7 +1616,7 @@ namespace mem
             thread_local_info   m_infos[8];
         };
 
-        class heap
+        class MEM_STREAMFLOW_DLL heap
         {
             public:
 
@@ -1639,7 +1648,7 @@ namespace mem
         void                thread_finalize()  throw();
 
         //returns one of 8 heaps to be used; default heap is 0
-        heap*               get_heap(uint32_t index) throw();
+        MEM_STREAMFLOW_DLL heap*  get_heap(uint32_t index) throw();
 
 
         class exception : public std::exception

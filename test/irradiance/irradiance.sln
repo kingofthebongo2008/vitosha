@@ -2,8 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "irradiance", "irradiance.vcxproj", "{E5F03163-D9E2-4950-85E8-1E9A0946260E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3} = {58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8FF343B5-E0FB-475B-B1B1-0B04401D8241}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vts_runtime", "..\vts_runtime\vts_runtime.vcxproj", "{58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{E5F03163-D9E2-4950-85E8-1E9A0946260E}.Debug|x64.Build.0 = Debug|x64
 		{E5F03163-D9E2-4950-85E8-1E9A0946260E}.Release|x64.ActiveCfg = Release|x64
 		{E5F03163-D9E2-4950-85E8-1E9A0946260E}.Release|x64.Build.0 = Release|x64
+		{58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3}.Debug|x64.ActiveCfg = Debug|x64
+		{58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3}.Debug|x64.Build.0 = Debug|x64
+		{58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3}.Release|x64.ActiveCfg = Release|x64
+		{58AE7BDF-447A-4BBB-818E-BEA7E9EAA1F3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

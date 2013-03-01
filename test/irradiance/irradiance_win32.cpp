@@ -65,9 +65,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     try
     {
-	    mem::streamflow::initializer streamflow_initializer;
-        mem::streamflow::thread_initializer thread_initializer;
-
         mem::streamflow::allocator<int> k;
         std::shared_ptr<int> f = std::allocate_shared<int, mem::streamflow::allocator<int> > (k);
 
@@ -533,9 +530,12 @@ void* operator new(std::size_t size) throw(std::bad_alloc)
     return result;
 }
 
-void operator delete(void* ptr) throw()
+void operator delete(void* pointer) throw()
 {
-    mem::streamflow::get_heap(0)->free(ptr);
+    if (pointer != nullptr)
+    {
+        mem::streamflow::get_heap(0)->free(pointer);
+    }
 }
 
 //pair 2
@@ -544,9 +544,12 @@ void* operator new   (std::size_t size, const std::nothrow_t&) throw()
     return mem::streamflow::get_heap(0)->allocate( size );
 }
 
-void operator delete (void* ptr, const std::nothrow_t&) throw()
+void operator delete (void* pointer, const std::nothrow_t&) throw()
 {
-    mem::streamflow::get_heap(0)->free(ptr);
+    if (pointer != nullptr)
+    {
+        mem::streamflow::get_heap(0)->free(pointer);
+    }
 }
 
 //pair 3
@@ -562,9 +565,12 @@ void* operator new  [](std::size_t size) throw(std::bad_alloc)
     return result;
 }
 
-void operator delete[](void* ptr) throw()
+void operator delete[](void* pointer) throw()
 {
-    mem::streamflow::get_heap(0)->free(ptr);
+    if (pointer != nullptr)
+    {
+        mem::streamflow::get_heap(0)->free(pointer);
+    }
 }
 
 //pair 4
@@ -573,9 +579,12 @@ void* operator new  [](std::size_t size, const std::nothrow_t&) throw()
     return mem::streamflow::get_heap(0)->allocate( size );
 }
 
-void operator delete[](void* ptr, const std::nothrow_t&) throw()
+void operator delete[](void* pointer, const std::nothrow_t&) throw()
 {
-    mem::streamflow::get_heap(0)->free(ptr);
+    if (pointer != nullptr)
+    {
+        mem::streamflow::get_heap(0)->free(pointer);
+    }
 }
 
 

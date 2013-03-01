@@ -474,11 +474,11 @@ namespace mem
         void internal_heap::local_free(void* pointer, page_block* block, thread_local_heap* local_heap, stack* stack1, concurrent_stack* stack2) throw()
         {
             block->free(pointer);
+  
+            local_heap->remove(block);
 
             if (block->empty())
             {
-                local_heap->remove(block);
-
                 const uint32_t local_inactive_blocks = 4;
 
                 if ( stack1->size() < local_inactive_blocks )
@@ -492,7 +492,6 @@ namespace mem
             }
             else
             {
-                local_heap->remove(block);
                 local_heap->push_front(block);
             }
         }
@@ -554,75 +553,79 @@ namespace mem
 
 		static void thread_finalize( internal_heap** heaps, uint32_t heap_count )
 		{
-            for (uint32_t i = 0 ; i < heap_count; ++i)
+            if (t_thread_local_heap_info != nullptr)
             {
-                internal_heap* h = heaps[i];
-                thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( h->get_index() );
-                
-                for (uint32_t i = 0; i < size_classes;++i)
+                for (uint32_t i = 0 ; i < heap_count; ++i)
                 {
-                    thread_local_heap* local_heap = &local_heap_info->t_local_heaps[ i ] ;
-
-                    if ( !local_heap->empty() )
+                    internal_heap* h = heaps[i];
+                    thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( h->get_index() );
+                
+                    for (uint32_t i = 0; i < size_classes;++i)
                     {
-                        do
+                        thread_local_heap* local_heap = &local_heap_info->t_local_heaps[ i ] ;
+                        if (local_heap != nullptr)
                         {
-                            page_block* block = local_heap->front();
+                            if ( !local_heap->empty() )
+                            {
+                                do
+                                {
+                                    page_block* block = local_heap->front();
                             
-                            local_heap->remove(block);
+                                    local_heap->remove(block);
 
-                            if (block->empty())
-                            {
-                                //insert into global free
-                    			uint32_t page_block_class	= compute_page_block_size_class( static_cast<uint32_t> (block->get_memory_size()) );
-                                h->free_page_block( block, page_block_class);
-                            }
-                            else
-                            {
-                                
-                                uint64_t reference = 0;
-			                    uint64_t new_reference = 0;
-
-                                //reference holds in one 64 bit variable, counter, next pointer and thread id
-				                reference = block->get_block_info();
-
-                                //fetch the old head and version
-                                remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
-					            uint16_t count = remote_page_block_info::get_count( queue );
-
-                                if (count > 0 || !block->empty() )
-                                {
-                                    //insert into orphaned block
-                                    h->push_orphaned_block(block, i);
-                                }
-                                else
-                                {
-                                    //try to set this as orphaned block
-
-                                    //create new reference and try to set it
-                                    new_reference = remote_page_block_info::set_thread_next_count( thread_id_orphan, 0, 0 );
-
-                                    if ( !block->try_set_block_info_strong(reference, new_reference) )
+                                    if (block->empty())
                                     {
-                                        //insert into orphaned block, somebody else did a remote free
-                                        h->push_orphaned_block(block, i);
+                                        //insert into global free
+                    			        uint32_t page_block_class	= compute_page_block_size_class( static_cast<uint32_t> (block->get_memory_size()) );
+                                        h->free_page_block( block, page_block_class);
                                     }
                                     else
                                     {
-                                        //do nothing, the first thread that frees will adopt the block
+                                
+                                        uint64_t reference = 0;
+			                            uint64_t new_reference = 0;
+
+                                        //reference holds in one 64 bit variable, counter, next pointer and thread id
+				                        reference = block->get_block_info();
+
+                                        //fetch the old head and version
+                                        remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
+					                    uint16_t count = remote_page_block_info::get_count( queue );
+
+                                        if (count > 0 || !block->empty() )
+                                        {
+                                            //insert into orphaned block
+                                            h->push_orphaned_block(block, i);
+                                        }
+                                        else
+                                        {
+                                            //try to set this as orphaned block
+
+                                            //create new reference and try to set it
+                                            new_reference = remote_page_block_info::set_thread_next_count( thread_id_orphan, 0, 0 );
+
+                                            if ( !block->try_set_block_info_strong(reference, new_reference) )
+                                            {
+                                                //insert into orphaned block, somebody else did a remote free
+                                                h->push_orphaned_block(block, i);
+                                            }
+                                            else
+                                            {
+                                                //do nothing, the first thread that frees will adopt the block
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                        }  while ( !local_heap->empty() );
-                    } 
+                                }  while ( !local_heap->empty() );
+                            } 
 
-                    h->free_page_blocks();
+                            h->free_page_blocks();
+                        }
+                    }
                 }
-            }
             
-            t_thread_local_heap_info->~thread_local_heap_info();
-			::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
-
+                t_thread_local_heap_info->~thread_local_heap_info();
+			    ::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
+            }
 		}
 
         static void*             heap_memory;

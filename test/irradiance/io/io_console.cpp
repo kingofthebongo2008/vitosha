@@ -6,8 +6,6 @@
 #include <memory>
 #include <chrono>
 
-#include <mem/mem_streamflow.h>
-
 namespace io
 {
 namespace console
@@ -92,8 +90,6 @@ namespace console
 
 	static void runner_thread(volatile bool& stop_thread, std::shared_ptr<updater> updater)
 	{
-        mem::streamflow::thread_initializer memory_initializer;
-
 		std::shared_ptr<thread_info> info = make_thread_info();
 		updater->register_thread_info(info);
 
