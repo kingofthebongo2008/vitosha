@@ -10,155 +10,155 @@ namespace mem
     namespace streamflow
     {
         //these are per heap actually
-		static std::atomic<thread_id>						g_thread_id = thread_id_orphan;
-	
+        static std::atomic<thread_id>                       g_thread_id = thread_id_orphan;
+    
         static THREAD_LOCAL void*                           t_thread_local_heap_info_memory;
         static THREAD_LOCAL thread_local_heap_info*         t_thread_local_heap_info;
 
-		static THREAD_LOCAL thread_id						t_thread_id;
+        static THREAD_LOCAL thread_id                       t_thread_id;
 
 
-		static thread_id create_thread_id()
-		{
-			thread_id id = std::atomic_fetch_add(&g_thread_id, 1);
+        static thread_id create_thread_id()
+        {
+            thread_id id = std::atomic_fetch_add(&g_thread_id, 1);
 
-			if (id == thread_id_orphan)
-			{
-				id =  std::atomic_fetch_add(&g_thread_id, 1);
-			}
+            if (id == thread_id_orphan)
+            {
+                id =  std::atomic_fetch_add(&g_thread_id, 1);
+            }
 
-			return id;
-		}
-		static const std::uint16_t base[] =
-		{
-				0,  16, 24, 28, 30, 31, 31, 32, 32, 32, 
-				32, 33, 33, 33, 33, 34, 34, 34, 34, 35, 
-				35, 35, 35, 36, 36, 36, 36, 37, 37, 37, 
-				37, 38, 38, 38, 38, 39, 39, 39, 39, 40, 
-				40, 40, 40, 41, 41, 41, 41, 42, 42, 42, 
-				42, 43, 43, 43, 43, 44, 44, 44, 44, 45, 
-				45, 45, 45, 46, 46, 46, 46, 47, 47, 47, 
-				47, 48, 48, 48, 48, 49, 49, 49, 49, 50, 
-				50, 50, 50, 51, 51, 51, 51, 52, 52, 52, 
-				52, 53, 53, 53, 53, 54, 54, 54, 54, 55, 
-				55, 55, 55, 56, 56, 56, 56, 57, 57, 57, 
-				57, 58, 58, 58, 58, 59, 59, 59, 59, 60, 
-				60, 60, 60, 61, 61, 61, 61, 62, 62, 62, 
-				62, 63, 63, 63, 63, 64, 64, 64, 64, 65, 
-				65, 65, 65, 66, 66, 66, 66, 67, 67, 67, 
-				67, 68, 68, 68, 68, 69, 69, 69, 69, 70, 
-				70, 70, 70, 71, 71, 71, 71, 72, 72, 72, 
-				72, 73, 73, 73, 73, 74, 74, 74, 74, 75, 
-				75, 75, 75, 76, 76, 76, 76, 77, 77, 77, 
-				77, 78, 78, 78, 78, 79, 79, 79, 79, 80, 
-				80, 80, 80, 81, 81, 81, 81, 82, 82, 82, 
-				82, 83, 83, 83, 83, 84, 84, 84, 84, 85, 
-				85, 85, 85, 86, 86, 86, 86, 87, 87, 87, 
-				87, 88, 88, 88, 88, 89, 89, 89, 89, 90, 
-				90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 
-				92, 93, 93, 93, 93, 94, 94, 94, 94
-		};
+            return id;
+        }
+        static const std::uint16_t base[] =
+        {
+                0,  16, 24, 28, 30, 31, 31, 32, 32, 32, 
+                32, 33, 33, 33, 33, 34, 34, 34, 34, 35, 
+                35, 35, 35, 36, 36, 36, 36, 37, 37, 37, 
+                37, 38, 38, 38, 38, 39, 39, 39, 39, 40, 
+                40, 40, 40, 41, 41, 41, 41, 42, 42, 42, 
+                42, 43, 43, 43, 43, 44, 44, 44, 44, 45, 
+                45, 45, 45, 46, 46, 46, 46, 47, 47, 47, 
+                47, 48, 48, 48, 48, 49, 49, 49, 49, 50, 
+                50, 50, 50, 51, 51, 51, 51, 52, 52, 52, 
+                52, 53, 53, 53, 53, 54, 54, 54, 54, 55, 
+                55, 55, 55, 56, 56, 56, 56, 57, 57, 57, 
+                57, 58, 58, 58, 58, 59, 59, 59, 59, 60, 
+                60, 60, 60, 61, 61, 61, 61, 62, 62, 62, 
+                62, 63, 63, 63, 63, 64, 64, 64, 64, 65, 
+                65, 65, 65, 66, 66, 66, 66, 67, 67, 67, 
+                67, 68, 68, 68, 68, 69, 69, 69, 69, 70, 
+                70, 70, 70, 71, 71, 71, 71, 72, 72, 72, 
+                72, 73, 73, 73, 73, 74, 74, 74, 74, 75, 
+                75, 75, 75, 76, 76, 76, 76, 77, 77, 77, 
+                77, 78, 78, 78, 78, 79, 79, 79, 79, 80, 
+                80, 80, 80, 81, 81, 81, 81, 82, 82, 82, 
+                82, 83, 83, 83, 83, 84, 84, 84, 84, 85, 
+                85, 85, 85, 86, 86, 86, 86, 87, 87, 87, 
+                87, 88, 88, 88, 88, 89, 89, 89, 89, 90, 
+                90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 
+                92, 93, 93, 93, 93, 94, 94, 94, 94
+        };
 
-		static const std::uint16_t factor[] =
-		{	
-				4,	 8,   16,  32,  64,  128, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
-				256, 256, 256, 256, 256, 256, 256, 256, 256
-		};
+        static const std::uint16_t factor[] =
+        {	
+                4,	 8,   16,  32,  64,  128, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+                256, 256, 256, 256, 256, 256, 256, 256, 256
+        };
 
-		static const std::uint16_t reverse[] =
-		{	
-			4,     8,     12,    16,    20,    24,    28,    32,    36,    40,
-			44,    48,    52,    56,    60,    64,    72,    80,    88,    96,
-			104,   112,   120,   128,   144,   160,   176,   192,   224,   256,
-			320,   448,   704,   960,   1216,  1472,  1728,  1984,  2240,  2496,
-			2752,  3008,  3264,  3520,  3776,  4032,  4288,  4544,  4800,  5056,
-			5312,  5568,  5824,  6080,  6336,  6592,  6848,  7104,  7360,  7616,
-			7872,  8128,  8384,  8640,  8896,  9152,  9408,  9664,  9920,  10176,
-			10432, 10688, 10944, 11200, 11456, 11712, 11968, 12224, 12480, 12736,
-			12992, 13248, 13504, 13760, 14016, 14272, 14528, 14784, 15040, 15296,
-			15552, 15808, 16064, 16320, 16576
-		}; 
-		//---------------------------------------------------------------------------------------
-		static inline size_class compute_size_class(size_t size)
-		{
-			const std::uint32_t object_granularity = sizeof(void*);
-			const std::uint32_t cache_line_size = 64;
+        static const std::uint16_t reverse[] =
+        {	
+            4,     8,     12,    16,    20,    24,    28,    32,    36,    40,
+            44,    48,    52,    56,    60,    64,    72,    80,    88,    96,
+            104,   112,   120,   128,   144,   160,   176,   192,   224,   256,
+            320,   448,   704,   960,   1216,  1472,  1728,  1984,  2240,  2496,
+            2752,  3008,  3264,  3520,  3776,  4032,  4288,  4544,  4800,  5056,
+            5312,  5568,  5824,  6080,  6336,  6592,  6848,  7104,  7360,  7616,
+            7872,  8128,  8384,  8640,  8896,  9152,  9408,  9664,  9920,  10176,
+            10432, 10688, 10944, 11200, 11456, 11712, 11968, 12224, 12480, 12736,
+            12992, 13248, 13504, 13760, 14016, 14272, 14528, 14784, 15040, 15296,
+            15552, 15808, 16064, 16320, 16576
+        }; 
+        //---------------------------------------------------------------------------------------
+        static inline size_class compute_size_class(size_t size)
+        {
+            const std::uint32_t object_granularity = sizeof(void*);
+            const std::uint32_t cache_line_size = 64;
 
-			if (size < object_granularity)
-			{
-				size = object_granularity;
-			}
+            if (size < object_granularity)
+            {
+                size = object_granularity;
+            }
 
-			std::size_t bin = size / (cache_line_size);
-			std::size_t position = (size - 1) % cache_line_size;
+            std::size_t bin = size / (cache_line_size);
+            std::size_t position = (size - 1) % cache_line_size;
 
-			if (size %  cache_line_size  == 0)
-			{
-				bin = (size - 1) / cache_line_size;
-				position = (size - 2) % cache_line_size;
-			}
+            if (size %  cache_line_size  == 0)
+            {
+                bin = (size - 1) / cache_line_size;
+                position = (size - 2) % cache_line_size;
+            }
 
-			return static_cast<size_class> ( base[bin] + (position / factor[bin]) );
-		}
-		//---------------------------------------------------------------------------------------
-		static inline std::uint32_t compute_size(size_class size_class)
-		{
-			return reverse[size_class];
-		}
-		//---------------------------------------------------------------------------------------
-		static inline std::uint32_t compute_page_block_size(size_class size_class)
-		{
-			const std::uint32_t size = compute_size(size_class);
-			const std::uint32_t	objects_per_page_block = 1024;
-			const std::uint32_t min = 16384;
-			const std::uint32_t max = 262144;
+            return static_cast<size_class> ( base[bin] + (position / factor[bin]) );
+        }
+        //---------------------------------------------------------------------------------------
+        static inline std::uint32_t compute_size(size_class size_class)
+        {
+            return reverse[size_class];
+        }
+        //---------------------------------------------------------------------------------------
+        static inline std::uint32_t compute_page_block_size(size_class size_class)
+        {
+            const std::uint32_t size = compute_size(size_class);
+            const std::uint32_t	objects_per_page_block = 1024;
+            const std::uint32_t min = 16384;
+            const std::uint32_t max = 262144;
 
-			std::uint32_t size_to_allocate = static_cast<std::uint32_t> ( align( size * objects_per_page_block, 4096) );
-			std::uint32_t log_2 = detail::log2(size_to_allocate);
+            std::uint32_t size_to_allocate = static_cast<std::uint32_t> ( align( size * objects_per_page_block, 4096) );
+            std::uint32_t log_2 = detail::log2(size_to_allocate);
 
-			size_to_allocate= 1 << (log_2 + 1);
+            size_to_allocate= 1 << (log_2 + 1);
 
-			size_to_allocate = std::min<std::uint32_t> ( size_to_allocate, max );
-			size_to_allocate = std::max<std::uint32_t> ( size_to_allocate, min );
+            size_to_allocate = std::min<std::uint32_t> ( size_to_allocate, max );
+            size_to_allocate = std::max<std::uint32_t> ( size_to_allocate, min );
 
-			return size_to_allocate;
-		}
-		//---------------------------------------------------------------------------------------
-		static inline std::uint32_t compute_page_block_size_class( std::uint32_t page_block_size)
-		{
-			const uint32_t page = 4096;
-			const uint32_t page_count = (16 * 1024) / page;;
-			const uint32_t min_page_log = detail::log2_c<page_count>::value;
+            return size_to_allocate;
+        }
+        //---------------------------------------------------------------------------------------
+        static inline std::uint32_t compute_page_block_size_class( std::uint32_t page_block_size)
+        {
+            const uint32_t page = 4096;
+            const uint32_t page_count = (16 * 1024) / page;;
+            const uint32_t min_page_log = detail::log2_c<page_count>::value;
 
-			//16kb, 32kb, 64kb, 128kb, 256kb
-			return detail::log2( page_block_size / page ) - min_page_log;
-		}
-		//---------------------------------------------------------------------------------------
-		super_page* super_page_manager::allocate_super_page() throw()
+            //16kb, 32kb, 64kb, 128kb, 256kb
+            return detail::log2( page_block_size / page ) - min_page_log;
+        }
+        //---------------------------------------------------------------------------------------
+        super_page* super_page_manager::allocate_super_page() throw()
         {
             //1. allocate memory for the header
             void* super_page_header = m_header_allocator.allocate();
@@ -171,18 +171,18 @@ namespace mem
                 if (sp_base)
                 {
                     super_page* page = new 
-							(super_page_header) super_page(sp_base, free_super_page_callback, this, &m_super_pages_lock);
+                            (super_page_header) super_page(sp_base, free_super_page_callback, this, &m_super_pages_lock);
 
 
                     m_super_pages.push_front(page);
 
-					return page;
+                    return page;
                 }
                 else
                 {
-					//free the header
-					m_header_allocator.free(super_page_header);
-					return nullptr;
+                    //free the header
+                    m_header_allocator.free(super_page_header);
+                    return nullptr;
                 }
             }
             else
@@ -191,10 +191,10 @@ namespace mem
             }
         }
 
-		//---------------------------------------------------------------------------------------
-		super_page* super_page_manager::get_super_page(std::uint32_t page_block_size) throw()
-		{
-        	//scan super page list for a block
+        //---------------------------------------------------------------------------------------
+        super_page* super_page_manager::get_super_page(std::uint32_t page_block_size) throw()
+        {
+            //scan super page list for a block
             if ( !m_super_pages.empty() )
             {
                 super_page* page = m_super_pages.front();
@@ -209,23 +209,23 @@ namespace mem
                     page = page->get_next();
                 }
             }
-			
-			return nullptr;
-		}
-		//---------------------------------------------------------------------------------------
-		page_block*	super_page_manager::allocate_page_block( std::uint32_t page_block_size ) throw()
-		{
+            
+            return nullptr;
+        }
+        //---------------------------------------------------------------------------------------
+        page_block*	super_page_manager::allocate_page_block( std::uint32_t page_block_size ) throw()
+        {
             sys::lock<sys::spinlock_fas> guard(m_super_pages_lock);
-			
-			super_page* super_page = get_super_page(page_block_size);
+            
+            super_page* super_page = get_super_page(page_block_size);
 
-			if (super_page == nullptr)
-			{
-				super_page = allocate_super_page();
-			}
+            if (super_page == nullptr)
+            {
+                super_page = allocate_super_page();
+            }
 
-			if (super_page)
-			{
+            if (super_page)
+            {
                 page_block* result = super_page->alllocate(page_block_size);
 
                 if (result)
@@ -233,14 +233,14 @@ namespace mem
                     m_page_map.register_tiny_pages( result->get_memory(), result->get_memory_size(), reinterpret_cast<uintptr_t> ( result ) );
                 }
 
-				return  result;
-			}
-			else
-			{
-				return nullptr;
-			}
-		}
-		//---------------------------------------------------------------------------------------
+                return  result;
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
+        //---------------------------------------------------------------------------------------
         void*   super_page_manager::allocate_large_block( size_t size ) throw()
         {
             void* result = m_os_heap_pages.allocate(size);
@@ -259,111 +259,111 @@ namespace mem
             m_os_heap_pages.free( reinterpret_cast<void*> ( decode_large_object(pointer) ) );
         }
         //---------------------------------------------------------------------------------------
-		static page_block* get_free_page_block(concurrent_stack* stack_1, concurrent_stack* stack_2)
-		{
-			page_block* block = reinterpret_cast<page_block*> ( stack_1->pop() );
+        static page_block* get_free_page_block(concurrent_stack* stack_1, concurrent_stack* stack_2)
+        {
+            page_block* block = reinterpret_cast<page_block*> ( stack_1->pop() );
 
-			if ( block == nullptr )
-			{
-				block = reinterpret_cast<page_block*> ( stack_2->pop() );
-			}
+            if ( block == nullptr )
+            {
+                block = reinterpret_cast<page_block*> ( stack_2->pop() );
+            }
 
-			if (block && block->full())
-			{
+            if (block && block->full())
+            {
                 block->garbage_collect();
-			}
+            }
 
-			return block;
-		}
-		//---------------------------------------------------------------------------------------
-		static page_block* get_free_page_block( uint32_t size, uint32_t page_block_size, super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2, thread_id thread_id )
-		{
-			page_block* block = get_free_page_block(stack_1, stack_2);
+            return block;
+        }
+        //---------------------------------------------------------------------------------------
+        static page_block* get_free_page_block( uint32_t size, uint32_t page_block_size, super_page_manager* page_manager, concurrent_stack* stack_1, concurrent_stack* stack_2, thread_id thread_id )
+        {
+            page_block* block = get_free_page_block(stack_1, stack_2);
 
-			if (block == nullptr)
-			{
-				block = page_manager->allocate_page_block(page_block_size);
+            if (block == nullptr)
+            {
+                block = page_manager->allocate_page_block(page_block_size);
                 block->reset(size, thread_id);
-			}
-			else if ( block->get_size_class() != size)
-			{
-				block->reset(size, thread_id);
-			}
-			
+            }
+            else if ( block->get_size_class() != size)
+            {
+                block->reset(size, thread_id);
+            }
+            
 
-			return block;
-		}
+            return block;
+        }
 
-		//---------------------------------------------------------------------------------------
-		page_block* internal_heap::get_free_page_block( uint32_t size, thread_id thread_id )
-		{
-			size_class size_class		= compute_size_class(size);
-			uint32_t page_block_size	= compute_page_block_size( size_class );
-			uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
+        //---------------------------------------------------------------------------------------
+        page_block* internal_heap::get_free_page_block( uint32_t size, thread_id thread_id )
+        {
+            size_class size_class		= compute_size_class(size);
+            uint32_t page_block_size	= compute_page_block_size( size_class );
+            uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
 
 
-			concurrent_stack* stack_1 = &m_page_blocks_free[size_class];
-			concurrent_stack* stack_2 = &m_page_blocks_orphaned[page_block_class];
+            concurrent_stack* stack_1 = &m_page_blocks_free[size_class];
+            concurrent_stack* stack_2 = &m_page_blocks_orphaned[page_block_class];
 
-			super_page_manager* page_manager = &m_super_page_manager;
+            super_page_manager* page_manager = &m_super_page_manager;
 
-			return streamflow::get_free_page_block( compute_size(size_class), page_block_size, page_manager, stack_1, stack_2, thread_id);
-		}
+            return streamflow::get_free_page_block( compute_size(size_class), page_block_size, page_manager, stack_1, stack_2, thread_id);
+        }
 
-		//---------------------------------------------------------------------------------------
-		static void remote_free(void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id);
+        //---------------------------------------------------------------------------------------
+        static void remote_free(void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id);
 
-		static void adopt_page_block( void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id)
-		{
-			//try to set this thread as owner
-			if ( block->try_set_thread( thread_id ) )
-			{
-				heap->push_front(block);
-				block->free(pointer);
-			}
-			else
-			{
-				//another thread took ownership of the block, do a remote free
-				remote_free( pointer, block, heap, thread_id );
-			}
-		}
+        static void adopt_page_block( void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id)
+        {
+            //try to set this thread as owner
+            if ( block->try_set_thread( thread_id ) )
+            {
+                heap->push_front(block);
+                block->free(pointer);
+            }
+            else
+            {
+                //another thread took ownership of the block, do a remote free
+                remote_free( pointer, block, heap, thread_id );
+            }
+        }
 
-		//---------------------------------------------------------------------------------------
-		static void remote_free(void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id)
-		{
-			uint64_t reference = 0;
-			uint64_t new_reference = 0;
+        //---------------------------------------------------------------------------------------
+        static void remote_free(void* pointer, page_block* block, thread_local_heap* heap, thread_id thread_id)
+        {
+            uint64_t reference = 0;
+            uint64_t new_reference = 0;
 
-			do
-			{
+            do
+            {
                 //reference holds in one 64 bit variable, counter, next pointer and thread id
-				reference = block->get_block_info();
-				auto block_thread_id = remote_page_block_info::get_thread_id( reference );
+                reference = block->get_block_info();
+                auto block_thread_id = remote_page_block_info::get_thread_id( reference );
 
-				if (block_thread_id != thread_id_orphan)
-				{
+                if (block_thread_id != thread_id_orphan)
+                {
                     //fetch the old head and version
                     remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
-					uint16_t count = remote_page_block_info::get_count( queue );
-					uint16_t next = remote_page_block_info::get_next ( queue );
+                    uint16_t count = remote_page_block_info::get_count( queue );
+                    uint16_t next = remote_page_block_info::get_next ( queue );
 
                     //store the old offset in the empty space
-					uint16_t offset = block->convert_to_object_offset( pointer );
+                    uint16_t offset = block->convert_to_object_offset( pointer );
                     * reinterpret_cast<uint16_t*> ( pointer ) = next;
                     count++;
                     next = offset;
                     
                     //create new reference and try to set it
                     new_reference = remote_page_block_info::set_thread_next_count( block_thread_id, next, count );
-				}
-				else
-				{
-					adopt_page_block(pointer, block, heap, thread_id);
-					break;
-				}
-			}
-			while (! block->try_set_block_info_weak( reference, new_reference) );
-		}
+                }
+                else
+                {
+                    adopt_page_block(pointer, block, heap, thread_id);
+                    break;
+                }
+            }
+            while (! block->try_set_block_info_weak( reference, new_reference) );
+        }
 
         thread_local_heap* internal_heap::get_thread_local_heap(uint32_t size) throw()
         {
@@ -388,7 +388,7 @@ namespace mem
                 {
                     //1. check the inactive blocks
                     const uint32_t page_block_size	= compute_page_block_size( c );
-			        const uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
+                    const uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
                     stack* inactive_blocks      = &local_heap_info->t_local_inactive_page_blocks[page_block_class];
                     block = inactive_blocks->pop<page_block>();
 
@@ -509,8 +509,8 @@ namespace mem
 
                 if ( tid == t_thread_id )
                 {
-            	    const uint32_t page_block_size	= compute_page_block_size( c );
-			        const uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
+                    const uint32_t page_block_size	= compute_page_block_size( c );
+                    const uint32_t page_block_class	= compute_page_block_size_class( page_block_size );
 
                     local_free(pointer, block, local_heap, &local_heap_info->t_local_inactive_page_blocks[page_block_class], &m_page_blocks_free[page_block_class]);
                 }
@@ -529,30 +529,30 @@ namespace mem
             }
         }
 
-		static initialization_code thread_initialize(  internal_heap** , uint32_t  )
-		{
+        static initialization_code thread_initialize(  internal_heap** , uint32_t  )
+        {
             //allocate data for 8 heaps
             const size_t size = sizeof(thread_local_heap_info);
-			t_thread_local_heap_info_memory = ::VirtualAlloc( 0, size , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
+            t_thread_local_heap_info_memory = ::VirtualAlloc( 0, size , MEM_COMMIT | MEM_RESERVE , PAGE_READWRITE);
 
             t_thread_local_heap_info = 0;
 
-			if (t_thread_local_heap_info_memory)
-			{
+            if (t_thread_local_heap_info_memory)
+            {
                 t_thread_local_heap_info = new ( t_thread_local_heap_info_memory ) thread_local_heap_info();
-			}
-			else
-			{
-				return initialization_code::no_memory;
-			}
+            }
+            else
+            {
+                return initialization_code::no_memory;
+            }
 
-			t_thread_id = create_thread_id();
+            t_thread_id = create_thread_id();
 
             return initialization_code::success;
-		}
+        }
 
-		static void thread_finalize( internal_heap** heaps, uint32_t heap_count )
-		{
+        static void thread_finalize( internal_heap** heaps, uint32_t heap_count )
+        {
             if (t_thread_local_heap_info != nullptr)
             {
                 for (uint32_t i = 0 ; i < heap_count; ++i)
@@ -576,21 +576,21 @@ namespace mem
                                     if (block->empty())
                                     {
                                         //insert into global free
-                    			        uint32_t page_block_class	= compute_page_block_size_class( static_cast<uint32_t> (block->get_memory_size()) );
+                                        uint32_t page_block_class	= compute_page_block_size_class( static_cast<uint32_t> (block->get_memory_size()) );
                                         h->free_page_block( block, page_block_class);
                                     }
                                     else
                                     {
                                 
                                         uint64_t reference = 0;
-			                            uint64_t new_reference = 0;
+                                        uint64_t new_reference = 0;
 
                                         //reference holds in one 64 bit variable, counter, next pointer and thread id
-				                        reference = block->get_block_info();
+                                        reference = block->get_block_info();
 
                                         //fetch the old head and version
                                         remote_free_queue queue = remote_page_block_info::get_free_queue(reference);
-					                    uint16_t count = remote_page_block_info::get_count( queue );
+                                        uint16_t count = remote_page_block_info::get_count( queue );
 
                                         if (count > 0 || !block->empty() )
                                         {
@@ -624,9 +624,9 @@ namespace mem
                 }
             
                 t_thread_local_heap_info->~thread_local_heap_info();
-			    ::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
+                ::VirtualFree(t_thread_local_heap_info_memory, 0, MEM_RELEASE);
             }
-		}
+        }
 
         static void*             heap_memory;
         static internal_heap*    heaps[8];
@@ -722,13 +722,9 @@ namespace mem
 
         void*   heap::reallocate(void* pointer, size_t size) throw()
         {
+            //todo: not implemented
             return nullptr;
         }
-
-    	void test_streamflow()
-		{
-
-		}
     }
 }
 

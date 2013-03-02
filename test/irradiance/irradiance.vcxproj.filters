@@ -582,6 +582,9 @@
     <ClCompile Include="gx\gx_gbuffer_dt_ng_sc_gc_material.cpp">
       <Filter>gx</Filter>
     </ClCompile>
+    <ClCompile Include="mem\mem_streamflow_utils.cpp">
+      <Filter>mem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win32/irradiance.rc" />

@@ -85,11 +85,10 @@
   <ItemGroup>
     <ClInclude Include="precompiled.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="vts_runtime.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\irradiance\mem\mem_streamflow.cpp" />
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="dll_main.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </PrecompiledHeader>
@@ -103,7 +102,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">precompiled.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="vts_runtime.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

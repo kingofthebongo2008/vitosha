@@ -14,6 +14,8 @@
 #include <sys/sys_spin_lock.h>
 
 
+//Paper: Scalable Locality-Conscious Multithreaded Memory Allocation
+
 //mimic keywords which are not in visual studio 2012 yet
 #if !defined(ALIGNAS)
 
@@ -374,26 +376,26 @@ namespace mem
 
                     }
 
-                    std::uint8_t				m_opaque_data[8];
-                    concurrent_stack_element*	m_next;
+                    std::uint8_t                m_opaque_data[8];
+                    concurrent_stack_element*   m_next;
                     uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*)  - 8 * sizeof(std::uint8_t) ];
                 };
 
 
                 void push_(concurrent_stack_element* pointer) throw()
                 {
-                    auto	top		= std::atomic_load(&m_top);
+                    auto    top = std::atomic_load(&m_top);
 
                     pointer->m_next = reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
                     
-                    auto	new_top	= reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
-                    auto	delay_value = 2;
+                    auto    new_top	= reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
+                    auto    delay_value = 2;
 
                     while (!std::atomic_compare_exchange_weak( &m_top, &top, new_top  ) )
                     {
-                        delay_value			= delay(delay_value);
-                        pointer->m_next		= reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
-                        new_top				=  reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
+                        delay_value         = delay(delay_value);
+                        pointer->m_next     = reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
+                        new_top             =  reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
                     }
                 }
 
@@ -487,9 +489,9 @@ namespace mem
 
                 }
 
-                std::uint8_t		m_opaque_data[8];
-                stack_element*		m_next;
-                uint8_t				m_pad[ 64 - sizeof(stack_element*)  - 8 * sizeof(std::uint8_t) ];
+                std::uint8_t        m_opaque_data[8];
+                stack_element*      m_next;
+                uint8_t             m_pad[ 64 - sizeof(stack_element*)  - 8 * sizeof(std::uint8_t) ];
             };
 
 
@@ -517,19 +519,19 @@ namespace mem
             }
 
             private:
-            stack_element*			m_top;
-            uint32_t				m_counter;
-            uint8_t                 m_pad[ 64 - sizeof(stack_element*) - sizeof(uint32_t) ];
+            stack_element*      m_top;
+            uint32_t            m_counter;
+            uint8_t             m_pad[ 64 - sizeof(stack_element*) - sizeof(uint32_t) ];
         };
 
         class super_page;
-        typedef uint16_t	size_class;
+        typedef uint16_t    size_class;
         typedef uint32_t    page_block_size_class;
-        typedef uint32_t	page_block_size;
+        typedef uint32_t    page_block_size;
 
-        typedef uint32_t	thread_id;
-        typedef uint32_t	remote_free_queue;
-        const thread_id		thread_id_orphan = std::numeric_limits<uint32_t>::max();
+        typedef uint32_t    thread_id;
+        typedef uint32_t    remote_free_queue;
+        const thread_id	    thread_id_orphan = std::numeric_limits<uint32_t>::max();
 
         inline bool thread_is_orphan(thread_id id) throw()
         {
@@ -761,21 +763,20 @@ namespace mem
             page_block(const page_block&);
             const page_block operator=(const page_block&);
 
-            uint32_t		m_free_objects;
+            uint32_t        m_free_objects;
 
             super_page*     m_super_page;
-            uintptr_t		m_memory;
-            uintptr_t		m_memory_size;			//memory size in bytes
+            uintptr_t       m_memory;
+            uintptr_t       m_memory_size;          //memory size in bytes
 
             
-            remote_page_block_info	m_block_info;	//frees from other threads go here
+            remote_page_block_info  m_block_info;   //frees from other threads go here
 
-            uint16_t	    m_unallocated_offset;	//can support offsets in pages up to 256kb
-            uint16_t	    m_free_offset;			
+            uint16_t    m_unallocated_offset;   //can support offsets in pages up to 256kb
+            uint16_t    m_free_offset;
+            uint32_t    m_size_class;
 
-            uint32_t		m_size_class;
-
-            uint8_t			m_pad[54];
+            uint8_t     m_pad[54];
 
             uint32_t convert_to_bytes(uint16_t blocks) const throw()
             {
@@ -813,7 +814,7 @@ namespace mem
                 , m_largest_free_order( static_cast<uint32_t> (buddy_max_order) )
             {
                 //make the memory as one big block and mark it as free
-                buddy_element* block = new (m_sp_base) buddy_element(buddy_max_order);
+                buddy_element* block = new (reinterpret_cast<void*> ( m_sp_base ) ) buddy_element(buddy_max_order);
                 m_buddies[ buddy_max_order ].m_buddy_elements.push_front(block);
                 block->set_tag();
             }
@@ -848,7 +849,7 @@ namespace mem
 
                         uintptr_t  buddy_address        =   reinterpret_cast<uintptr_t>(buddy);     
                         uintptr_t  right_half_address   =   buddy_address + ( page_size * ( 1 << k ) ) ;
-                        buddy_element* right_half       =   new (right_half_address) buddy_element(k);
+                        buddy_element* right_half       =   new (reinterpret_cast<void*> ( right_half_address ) ) buddy_element(k);
                         buddy_block_list* buddies       =   &m_buddies[k].m_buddy_elements;
 
                         buddies->push_front(right_half);
@@ -908,7 +909,7 @@ namespace mem
                 }
 
                 buddy_block_list*   buddies = &m_buddies[k].m_buddy_elements;
-                buddy_element*      element = new (block_address) buddy_element(k);
+                buddy_element*      element = new (reinterpret_cast<void*>  (block_address) ) buddy_element(k);
                 buddies->push_front(element);
                 element->set_tag();
 
@@ -965,19 +966,6 @@ namespace mem
                 {
                     _bittestandreset( (long*) &m_order, 31);
                 }
-
-                static void* operator new(size_t, uintptr_t where) throw()
-                {
-                    return reinterpret_cast<void*> (where);
-                }
-
-                static void operator delete(void*, uintptr_t) throw()
-                {
-
-                }
-
-                //todo:
-                //operator new []
 
                 private:
                 buddy_element();
@@ -1113,11 +1101,11 @@ namespace mem
         private:
             super_page_headers      m_chunk_heap;           
 
-            uintptr_t               m_free;			        
-            uintptr_t               m_memory;               
+            uintptr_t               m_free;
+            uintptr_t               m_memory;
 
             uint32_t                m_free_objects;         
-            uint32_t                m_unallocated_offset;	
+            uint32_t                m_unallocated_offset;
 
         };
 
@@ -1464,9 +1452,9 @@ namespace mem
             void        free_large_block( void* pointer) throw();
 
         private:
-            sys::spinlock_fas									m_super_pages_lock;
-            virtual_alloc_heap                                  m_os_heap_pages;    
-            virtual_alloc_heap                                  m_os_heap_header;   
+            sys::spinlock_fas                                   m_super_pages_lock;
+            virtual_alloc_heap                                  m_os_heap_pages;
+            virtual_alloc_heap                                  m_os_heap_header;
             chunked_free_list< sizeof(super_page) >             m_header_allocator;
 
             super_page_list                                     m_super_pages;          //super pages, that manage page_blocks
@@ -1569,10 +1557,10 @@ namespace mem
 
             private:
 
-		    super_page_manager              m_super_page_manager;
+            super_page_manager              m_super_page_manager;
 
-		    concurrent_stack                m_page_blocks_orphaned[size_classes];						//freed on thread finalize, partially free
-		    concurrent_stack                m_page_blocks_free[page_block_size_classes];				//global cache of free page blocks goes here up to 1
+            concurrent_stack                m_page_blocks_orphaned[size_classes];						//freed on thread finalize, partially free
+            concurrent_stack                m_page_blocks_free[page_block_size_classes];				//global cache of free page blocks goes here up to 1
 
             uint32_t                        m_index;                                                    //index of the heap in thread local storage
 
@@ -1595,8 +1583,8 @@ namespace mem
 
             }
 
-            thread_local_heap				t_local_heaps[ size_classes ];								// per size class heap with blocks
-            stack							t_local_inactive_page_blocks[ page_block_size_classes ];	//local cache of free page blocks, //completely free (on free) goes here up to 4
+            thread_local_heap               t_local_heaps[ size_classes ];                              // per size class heap with blocks
+            stack                           t_local_inactive_page_blocks[ page_block_size_classes ];    //local cache of free page blocks, //completely free (on free) goes here up to 4
         };
 
 
@@ -1662,7 +1650,7 @@ namespace mem
             public:
             initializer()
             {
-	            initialization_code code = initialize();
+                initialization_code code = initialize();
 
                 if ( code != initialization_code::success )
                 {
@@ -1681,7 +1669,7 @@ namespace mem
             public:
             thread_initializer()
             {
-	            initialization_code code = thread_initialize();
+                initialization_code code = thread_initialize();
 
                 if ( code != initialization_code::success )
                 {

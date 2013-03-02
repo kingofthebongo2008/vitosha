@@ -218,11 +218,11 @@ namespace sys
             static const uint32_t cache_line_size = 64;
 
             volatile __declspec( align(64) ) uint32_t m_read_ptr;
-            uint8_t				 m_padding0[ cache_line_size - 1  * sizeof(uint32_t) ];
+            uint8_t             m_padding0[ cache_line_size - 1  * sizeof(uint32_t) ];
             volatile __declspec( align(64) ) uint32_t m_write_ptr;
-            uint8_t				 m_padding1[ cache_line_size - 1  * sizeof(uint32_t) ];
+            uint8_t              m_padding1[ cache_line_size - 1  * sizeof(uint32_t) ];
             __declspec( align(64) ) uint32_t m_local_queue_ptr;
-            uint8_t				 m_padding2[ cache_line_size - 1  * sizeof(uint32_t) ];
+            uint8_t              m_padding2[ cache_line_size - 1  * sizeof(uint32_t) ];
         
             __declspec( align(64) ) std::tr1::array<void*,local_buffer_size>	m_local_queue;
             __declspec( align(64) ) std::tr1::array<void*,size>					m_queue;

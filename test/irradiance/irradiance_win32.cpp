@@ -65,12 +65,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     try
     {
-        mem::streamflow::allocator<int> k;
-        std::shared_ptr<int> f = std::allocate_shared<int, mem::streamflow::allocator<int> > (k);
-
 	    io::console::runner runner;
 	    io::console::register_thread_info_helper helper_i;
-	    io::console::register_notifier_helper helper_n ( std::allocate_shared<io::console::std_notifier, mem::streamflow::allocator<io::console::std_notifier>  >(k) );
+	    io::console::register_notifier_helper helper_n ( std::make_shared<io::console::std_notifier>( ) );
 
 	    io::console::write(L"test");
 
@@ -516,75 +513,4 @@ static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	}
 	return (INT_PTR)FALSE;
 }
-
-//pair 1
-void* operator new(std::size_t size) throw(std::bad_alloc)
-{
-    void* result = mem::streamflow::get_heap(0)->allocate( size );
-
-    if (result == nullptr)
-    {
-        throw std::bad_alloc();
-    }
-
-    return result;
-}
-
-void operator delete(void* pointer) throw()
-{
-    if (pointer != nullptr)
-    {
-        mem::streamflow::get_heap(0)->free(pointer);
-    }
-}
-
-//pair 2
-void* operator new   (std::size_t size, const std::nothrow_t&) throw()
-{
-    return mem::streamflow::get_heap(0)->allocate( size );
-}
-
-void operator delete (void* pointer, const std::nothrow_t&) throw()
-{
-    if (pointer != nullptr)
-    {
-        mem::streamflow::get_heap(0)->free(pointer);
-    }
-}
-
-//pair 3
-void* operator new  [](std::size_t size) throw(std::bad_alloc)
-{
-    void* result = mem::streamflow::get_heap(0)->allocate( size );
-
-    if (result == nullptr)
-    {
-        throw std::bad_alloc();
-    }
-
-    return result;
-}
-
-void operator delete[](void* pointer) throw()
-{
-    if (pointer != nullptr)
-    {
-        mem::streamflow::get_heap(0)->free(pointer);
-    }
-}
-
-//pair 4
-void* operator new  [](std::size_t size, const std::nothrow_t&) throw()
-{
-    return mem::streamflow::get_heap(0)->allocate( size );
-}
-
-void operator delete[](void* pointer, const std::nothrow_t&) throw()
-{
-    if (pointer != nullptr)
-    {
-        mem::streamflow::get_heap(0)->free(pointer);
-    }
-}
-
 

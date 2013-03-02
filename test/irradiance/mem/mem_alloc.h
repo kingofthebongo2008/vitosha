@@ -10,19 +10,19 @@ namespace mem
 {
     inline uintptr_t align(uintptr_t size, size_t alignment) throw()
     {
-		//static_assert(alignment is power of two)
+        //static_assert(alignment is power of two)
         return size + (alignment - 1)  & ~(alignment - 1);
     }
 
-	inline bool is_aligned(uintptr_t size, size_t alignment) throw()
+    inline bool is_aligned(uintptr_t size, size_t alignment) throw()
     {
-		//static_assert(alignment is power of two)
+        //static_assert(alignment is power of two)
         return ( size & (alignment - 1) ) == 0;
     }
 
-	inline bool is_aligned(void* pointer, size_t alignment) throw()
+    inline bool is_aligned(void* pointer, size_t alignment) throw()
     {
-		//static_assert(alignment is power of two)
+        //static_assert(alignment is power of two)
         return is_aligned( reinterpret_cast<uintptr_t> ( pointer ), alignment );
     }
 
@@ -195,7 +195,7 @@ namespace mem
         };
 
         super_heap*                 m_super_heap;
-        uintptr_t					m_chunk_ptr;
+        uintptr_t                   m_chunk_ptr;
         free_object*                m_free_objects;
     };
 
