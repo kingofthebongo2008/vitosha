@@ -28,8 +28,7 @@
 
 #include <d2d/d2d_helpers.h>
 
-#include <mem/mem_streamflow.h>
-#include <mem/mem_streamflow_allocator.h>
+#include <mem/mem_ssmalloc.h>
 
 #define MAX_LOADSTRING 100
 
@@ -48,12 +47,86 @@ using namespace wnd;
 
 extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, d3d11::system_context context, std::shared_ptr<fnd::universe> universe );
 
-namespace mem
+
+int cls2size[128];
+int sizemap[256];
+int sizemap2[128];
+
+
+void test()
 {
-	namespace streamflow
-	{
-		extern void test_streamflow();
-	}
+    int size;
+    int cls;
+
+    /* 8 +4 64 */
+    for (size = 8, cls = 0; size <= 64; size += 4, cls++) {
+        cls2size[cls] = size;
+    }
+
+    /* 80 +16 128 */
+    for (size = 64 + 16; size <= 128; size += 16, cls++) {
+        cls2size[cls] = size;
+    }
+
+    /* 160 +32 256 */
+    for (size = 128 + 32; size <= 256; size += 32, cls++) {
+        cls2size[cls] = size;
+    }
+
+    for (size = 256; size < 65536; size <<= 1) {
+        cls2size[cls++] = size + (size >> 1);
+        cls2size[cls++] = size << 1;
+    }
+
+    int cur_class = 0;
+    int cur_size = 0;
+
+    /* init sizemap */
+    for (cur_size = 4; cur_size <= 1024; cur_size += 4) {
+        if (cur_size > cls2size[cur_class])
+            cur_class++;
+        sizemap[(cur_size - 1) >> 2] = cur_class;
+    }
+    
+    /* init sizemap2 */
+    for (cur_size = 1024; cur_size <= 65536; cur_size += 512) {
+        if (cur_size > cls2size[cur_class])
+            cur_class++;
+        sizemap2[(cur_size - 1) >> 9] = cur_class;
+    }
+
+    std::fstream f1 ( "file1.txt", std::fstream::out );
+
+ 
+    if (f1.is_open())
+    {
+        for (uint32_t i = 0 ; i < sizeof(cls2size) / sizeof(cls2size[0]); ++i)
+        {
+            f1 << cls2size[i] << ", "<<std::endl;
+        }
+    }
+
+    std::fstream f2 ( "file2.txt", std::fstream::out );
+
+ 
+    if (f2.is_open())
+    {
+        for (uint32_t i = 0 ; i < sizeof(sizemap) / sizeof(sizemap[0]); ++i)
+        {
+            f2 << sizemap[i] << ", "<<std::endl;
+        }
+    }
+
+    std::fstream f3 ( "file3.txt", std::fstream::out );
+
+ 
+    if (f3.is_open())
+    {
+        for (uint32_t i = 0 ; i < sizeof(sizemap2) / sizeof(sizemap2[0]); ++i)
+        {
+            f3 << sizemap2[i] << ", "<<std::endl;
+        }
+    }
 }
 
 
@@ -62,6 +135,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
+
+    //test();
+    mem::ssmalloc::test_ssmalloc();
 
     try
     {

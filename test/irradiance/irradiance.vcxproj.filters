@@ -13,6 +13,9 @@
     <None Include="gx\gx_debug_draw.h">
       <Filter>gx</Filter>
     </None>
+    <None Include="mem\mem_ssmalloc.cpp">
+      <Filter>mem</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="precompiled.h" />
@@ -342,6 +345,9 @@
       <Filter>gxu</Filter>
     </ClInclude>
     <ClInclude Include="mem\mem_streamflow_allocator.h">
+      <Filter>mem</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\mem_ssmalloc.h">
       <Filter>mem</Filter>
     </ClInclude>
   </ItemGroup>

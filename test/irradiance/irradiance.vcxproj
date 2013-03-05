@@ -53,7 +53,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MEM_STREAMFLOW_DLL_IMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MEM_STREAMFLOW_DLL_IMPORT;MEM_SSMALLOC_DLL_IMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./;./extern/boost_1_49_0;$(IntDir)/shaders;./tools/libmesh/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -78,7 +78,7 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MEM_STREAMFLOW_DLL_IMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MEM_STREAMFLOW_DLL_IMPORT;MEM_SSMALLOC_DLL_IMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>./;./extern/boost_1_49_0;$(IntDir)/shaders;./tools/libmesh/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -492,6 +492,7 @@
     </FxCompile>
     <None Include="gx\gx_debug_draw.h" />
     <None Include="irradiance.ico" />
+    <None Include="mem\mem_ssmalloc.cpp" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
     <None Include="util\util_iterator.h" />
@@ -588,6 +589,7 @@
     <ClInclude Include="math\math_vector.h" />
     <ClInclude Include="mem\mem_alloc.h" />
     <ClInclude Include="mem\mem_ref_counter.h" />
+    <ClInclude Include="mem\mem_ssmalloc.h" />
     <ClInclude Include="mem\mem_streamflow.h" />
     <ClInclude Include="mem\mem_streamflow_allocator.h" />
     <ClInclude Include="precompiled.h" />
