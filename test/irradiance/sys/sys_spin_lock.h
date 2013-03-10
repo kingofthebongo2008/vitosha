@@ -127,7 +127,7 @@ namespace sys
     };
 
     //paper: The Performance of Spin Lock Alternatives for Shared - Memory Multiprocessors
-    //performs poorly when the lock is shared by more threads than processors
+    //performs poorly when the lock is shared by more threads than processors. this is so called fair lock
     class __declspec( align(64) ) spinlock_anderson
     {
         //fix contending processor to 16.
@@ -186,7 +186,7 @@ namespace sys
     };
 
     //paper: Algorithms for Scalable Synchronization on Shared-Memory Multiprocessors
-    //performs poorly when the lock is shared by more threads than processors
+    //performs poorly when the lock is shared by more threads than processors. this is so called fair lock
     class __declspec( align(64) ) spinlock_mcs
     {
         public:
@@ -194,8 +194,7 @@ namespace sys
         {
             qnode*      m_next;
             uint32_t    m_locked;
-
-            uint8_t     m_pad[ 64 - sizeof(uint64_t) - sizeof(uint32_t) ];
+            uint8_t     m_pad[ 64 - sizeof( qnode* ) - sizeof(uint32_t) ];
 
             qnode() : m_next(nullptr), m_locked(0)
             {
@@ -237,18 +236,25 @@ namespace sys
 
                 //compensates for the timing window between fetch_and_store and the assignment
                 //to predecessor->m_next
-                while(node->m_next == nullptr)
+                while( node->m_next == nullptr )
                 {
                     details::delay();
                 }
-            }
 
-            node->m_next->m_locked = 0;
+                if ( node->m_next != nullptr)
+                {
+                    node->m_next->m_locked = 0;
+                }
+            }
+            else
+            {
+                node->m_next->m_locked = 0;
+            }
         }
 
         private:
-        qnode*  m_node;
-        uint8_t m_pad[64 - sizeof(uint64_t) ];
+        qnode*      m_node;    
+        uint8_t     m_pad[64 - sizeof( qnode* ) ];
     };
 
     class spinlock_clh
