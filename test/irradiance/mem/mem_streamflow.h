@@ -376,7 +376,7 @@ namespace mem
 
                     }
 
-                    std::uint8_t                m_opaque_data[8];
+                    std::uint8_t                m_opaque_data[8];   //buddy data goes here
                     concurrent_stack_element*   m_next;
                     uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*)  - 8 * sizeof(std::uint8_t) ];
                 };
@@ -489,7 +489,7 @@ namespace mem
 
                 }
 
-                std::uint8_t        m_opaque_data[8];
+                std::uint8_t        m_opaque_data[8];   //buddy data goes here
                 stack_element*      m_next;
                 uint8_t             m_pad[ 64 - sizeof(stack_element*)  - 8 * sizeof(std::uint8_t) ];
             };
@@ -660,7 +660,7 @@ namespace mem
 
                   if (m_free_offset != 0)
                   {
-                      auto offset = convert_to_bytes(m_free_offset);
+                      auto offset = convert_to_bytes(m_free_offset - 1 );
 
                       result = reinterpret_cast<void*> ( m_memory + offset ) ;
 
@@ -669,7 +669,7 @@ namespace mem
                   }
                   else
                   {
-                      auto offset = convert_to_bytes(m_unallocated_offset);
+                      auto offset = convert_to_bytes(m_unallocated_offset - 1);
 
                       result = reinterpret_cast<void*> ( m_memory + offset ) ;
 
@@ -693,7 +693,7 @@ namespace mem
                   auto offset = pointer_b - pointer_a;
 
                   * reinterpret_cast<uint16_t*>(pointer) = m_free_offset;
-                  m_free_offset = convert_to_object_offset(offset);
+                  m_free_offset = convert_to_object_offset(offset) + 1;
                   ++m_free_objects;
               }
 
@@ -762,7 +762,7 @@ namespace mem
             page_block();
             page_block(const page_block&);
             const page_block operator=(const page_block&);
-
+            uint8_t         m_opaque_buddy_data[4];
             uint32_t        m_free_objects;
 
             super_page*     m_super_page;
@@ -776,7 +776,7 @@ namespace mem
             uint16_t    m_free_offset;
             uint32_t    m_size_class;
 
-            uint8_t     m_pad[54];
+            uint8_t     m_pad[50];
 
             uint32_t convert_to_bytes(uint16_t blocks) const throw()
             {
@@ -813,10 +813,7 @@ namespace mem
                 , m_lock(lock)
                 , m_largest_free_order( static_cast<uint32_t> (buddy_max_order) )
             {
-                //make the memory as one big block and mark it as free
-                buddy_element* block = new (reinterpret_cast<void*> ( m_sp_base ) ) buddy_element(buddy_max_order);
-                m_buddies[ buddy_max_order ].m_buddy_elements.push_front(block);
-                block->set_tag();
+                create_new_buddy ( m_sp_base, buddy_max_order);
             }
 
             page_block* alllocate(std::size_t size) throw()
@@ -829,13 +826,13 @@ namespace mem
                 //find block
                 for(k = order; k < buddy_max_order + 1 ; ++k )
                 {
-                    buddy_block_list* buddies = &m_buddies[k].m_buddy_elements;
+                    buddy_block_list* buddies = &m_buddies[k];
 
                     if ( !buddies->empty() )
                     {
                         buddy = buddies->front();
                         buddies->remove(buddy);
-                        buddy->clear_tag();
+
                         break;
                     }
                 }
@@ -847,13 +844,11 @@ namespace mem
                     {
                         --k;
 
-                        uintptr_t  buddy_address        =   reinterpret_cast<uintptr_t>(buddy);     
-                        uintptr_t  right_half_address   =   buddy_address + ( page_size * ( 1 << k ) ) ;
-                        buddy_element* right_half       =   new (reinterpret_cast<void*> ( right_half_address ) ) buddy_element(k);
-                        buddy_block_list* buddies       =   &m_buddies[k].m_buddy_elements;
-
-                        buddies->push_front(right_half);
-                        right_half->set_tag();
+                        uintptr_t  buddy_address        =   reinterpret_cast<uintptr_t>(buddy);
+                        uintptr_t  size                 =   ( page_size * ( 1 << k ) ) ;  
+                        uintptr_t  right_half_address   =   buddy_address + size;
+                        
+                        create_new_buddy ( right_half_address, k );
                     }
 
 
@@ -863,6 +858,7 @@ namespace mem
 
                     update_largest_free_order();
 
+                    buddy->set_order(order);
                     //convert the buddy to page_block
                     return new (buddy) page_block(this, memory_base, memory_size);
                 }
@@ -889,12 +885,12 @@ namespace mem
                 while ( 
                         !
                         (
-                            ( k == buddy_max_order || p->get_tag() == 0 ) ||
-                            ( p->get_tag() == 1 && p->get_order() != k )
+                            k == buddy_max_order || p->get_tag() == 0 ||
+                            ( p->get_tag() == 1 && p->get_order() != k ) 
                         )
                       )
                 {
-                    buddy_block_list*   buddies     = &m_buddies[k].m_buddy_elements;
+                    buddy_block_list*   buddies     = &m_buddies[k];
                     buddies->remove(p);
 
                     ++k;
@@ -908,13 +904,10 @@ namespace mem
                     p               = reinterpret_cast<buddy_element*>(buddy_address);
                 }
 
-                buddy_block_list*   buddies = &m_buddies[k].m_buddy_elements;
-                buddy_element*      element = new (reinterpret_cast<void*>  (block_address) ) buddy_element(k);
-                buddies->push_front(element);
-                element->set_tag();
+                create_new_buddy( block_address, k );
 
                 //if all pages are freed return this super_page to the os
-                buddy_block_list*   buddies_max_order = &m_buddies[buddy_max_order].m_buddy_elements;
+                buddy_block_list*   buddies_max_order = &m_buddies[buddy_max_order];
                 if ( !buddies_max_order->empty())
                 {
                     m_free_callback(this, m_sp_base, m_callback_parameter);
@@ -937,14 +930,14 @@ namespace mem
                 uint32_t        order           =   detail::log2( size_in_pages );
                 return ( m_largest_free_order < buddy_max_order &&  order <= m_largest_free_order );
             }
-            
+
         private:
 
             struct buddy_element : public list_element<buddy_element>
             {
                 explicit buddy_element(uint32_t order) : m_order(order)
                 {
-
+                    set_tag();
                 }
 
                 uint32_t get_order() const throw()
@@ -967,24 +960,27 @@ namespace mem
                     _bittestandreset( (long*) &m_order, 31);
                 }
 
+                void set_order( uint32_t order)
+                {
+                    //set the order and mark the memory as used
+                    m_order = order;
+                }
+
                 private:
                 buddy_element();
-                uint32_t    m_order;    //1 bit for tag
+                uint32_t    m_order;    //1 bit for tag, tag == 1 if the memory is free
             };
 
             typedef list<buddy_element>     buddy_block_list;
 
-            struct buddy
-            {
-                buddy_block_list    m_buddy_elements;
-            };
+
             uintptr_t                   m_sp_base;
             free_super_page_callback    m_free_callback;
             void*                       m_callback_parameter;
-            sys::spinlock_fas*			m_lock;
+            sys::spinlock_fas*          m_lock;
 
             //buddy system allocation is described by Knuth in The Art of Computer Programming vol 1.
-            buddy                       m_buddies[buddy_max_order + 1];             
+            buddy_block_list            m_buddies[buddy_max_order + 1];             
             uint16_t                    m_largest_free_order;
 
             //get the buddy of a member address with given order.
@@ -1007,7 +1003,7 @@ namespace mem
 
                 for(int32_t k = buddy_max_order; k >=0 ; --k )
                 {
-                    buddy_block_list* buddies = &m_buddies[k].m_buddy_elements;
+                    buddy_block_list* buddies = &m_buddies[k];
 
                     if ( !buddies->empty() )
                     {
@@ -1017,6 +1013,25 @@ namespace mem
                 }
                 m_largest_free_order = static_cast<uint16_t>(result);
             }
+
+
+            buddy_block_list* get_buddy_list( uint32_t order )
+            {
+                return &m_buddies[order];
+            }
+
+            buddy_element* create_buddy ( uintptr_t address, uint32_t order )
+            {
+               return new (reinterpret_cast<void*>  (address) ) buddy_element(order);
+            }
+
+            void create_new_buddy( uintptr_t address, uint32_t order )
+            {
+                buddy_block_list*   buddies = get_buddy_list(order);
+                buddy_element*      element = create_buddy( address, order);
+                buddies->push_front(element);
+            }
+
         };
 
         inline void free_page_block(page_block* block) throw()
