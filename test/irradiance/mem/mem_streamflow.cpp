@@ -283,7 +283,11 @@ namespace mem
             if (block == nullptr)
             {
                 block = page_manager->allocate_page_block(page_block_size);
-                block->reset(size, thread_id);
+
+                if (block !=nullptr)
+                {
+                    block->reset(size, thread_id);
+                }
             }
             else if ( block->get_size_class() != size)
             {
@@ -348,7 +352,7 @@ namespace mem
                     uint16_t next = remote_page_block_info::get_next ( queue );
 
                     //store the old offset in the empty space
-                    uint16_t offset = block->convert_to_object_offset( pointer );
+                    uint16_t offset = block->convert_to_object_offset( pointer ) + 1;
                     * reinterpret_cast<uint16_t*> ( pointer ) = next;
                     count++;
                     next = offset;
@@ -396,6 +400,10 @@ namespace mem
                     {
                         //2. check the orphaned and global page_blocks
                         block = get_free_page_block( size, t_thread_id );
+                    }
+                    else
+                    {
+                        block->reset( compute_size ( c ), t_thread_id);
                     }
 
                     local_heap->push_front(block);

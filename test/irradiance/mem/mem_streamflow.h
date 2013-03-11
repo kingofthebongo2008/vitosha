@@ -832,7 +832,6 @@ namespace mem
                     {
                         buddy = buddies->front();
                         buddies->remove(buddy);
-
                         break;
                     }
                 }
