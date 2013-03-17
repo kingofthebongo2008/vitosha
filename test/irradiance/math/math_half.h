@@ -428,15 +428,15 @@ namespace math
 		}
 	}
 
-	inline void convert_3_x_f32_f16_stream(const float* in_buffer, uint32_t count, float pad, math::half* out_buffer)
+	inline void convert_3_x_f32_f16_stream(const float* in_buffer, size_t count, float pad, math::half* out_buffer)
 	{
 		float4 one = math::load1(&pad);
 		one = swizzle<x,x,x,x>(one);
 
 		const uint32_t __declspec( align(16) )   mask_w[4] = { 0, 0, 0, 0xFFFFFFFF };
-		uint32_t j = 0;
+		size_t j = 0;
 
-		for (uint32_t i = 0; i < count ; i+=6, j+=8 )
+		for (size_t i = 0; i < count ; i+=6, j+=8 )
 		{
 			float4 v_1 = math::load3u(&in_buffer[i]);
 			float4 v_2 = math::load3u(&in_buffer[i+3]);

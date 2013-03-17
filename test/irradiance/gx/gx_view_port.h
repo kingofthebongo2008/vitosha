@@ -15,27 +15,27 @@ namespace gx
 
         }
 
-		view_port( uint32_t left, uint32_t top, uint32_t width, uint32_t height, float min_z, float max_z) :
-			m_left(static_cast<uint16_t> (left) )
-			, m_top(static_cast<uint16_t> (top) )
-			, m_width(static_cast<uint16_t> (width) ) 
-			, m_height(static_cast<uint16_t> (height) ) 
-			, m_min_z(min_z) 
-			, m_max_z(max_z)
-		{
+        view_port( uint32_t left, uint32_t top, uint32_t width, uint32_t height, float min_z, float max_z) :
+            m_left(static_cast<uint16_t> (left) )
+            , m_top(static_cast<uint16_t> (top) )
+            , m_width(static_cast<uint16_t> (width) ) 
+            , m_height(static_cast<uint16_t> (height) ) 
+            , m_min_z(min_z) 
+            , m_max_z(max_z)
+        {
 
-		}
+        }
 
-		view_port( uint32_t left, uint32_t top, uint32_t width, uint32_t height) :
-			m_left(static_cast<uint16_t> (left) )
-			, m_top(static_cast<uint16_t> (top) )
-			, m_width(static_cast<uint16_t> (width) ) 
-			, m_height(static_cast<uint16_t> (height) ) 
-			, m_min_z(0.0f) 
-			, m_max_z(1.0f)
-		{
+        view_port( uint32_t left, uint32_t top, uint32_t width, uint32_t height) :
+            m_left(static_cast<uint16_t> (left) )
+            , m_top(static_cast<uint16_t> (top) )
+            , m_width(static_cast<uint16_t> (width) ) 
+            , m_height(static_cast<uint16_t> (height) ) 
+            , m_min_z(0.0f) 
+            , m_max_z(1.0f)
+        {
 
-		}
+        }
 
         inline uint32_t get_height() const
         {
@@ -57,15 +57,15 @@ namespace gx
             return m_top;
         }
 
-		inline float get_min_z() const
-		{
-			return m_min_z;
-		}
+        inline float get_min_z() const
+        {
+            return m_min_z;
+        }
 
-		inline float get_max_z() const
-		{
-			return m_max_z;
-		}
+        inline float get_max_z() const
+        {
+            return m_max_z;
+        }
 
         inline void set_dimensions(uint32_t width, uint32_t height)
         {
@@ -85,19 +85,19 @@ namespace gx
             m_max_z = max_z;
         }
 
-		operator math::view_port()  const
-		{
-			const math::view_port v =
-							{ 
-									static_cast<float> ( m_left ), 
-									static_cast<float> ( m_top ),
-									static_cast<float> ( m_left	+ m_width ),
-									static_cast<float> ( m_top	+ m_height ),
-														 m_min_z, 
-														 m_max_z
-							};
-			return v;
-		}
+        operator math::view_port()  const
+        {
+            const math::view_port v =
+                            { 
+                                    static_cast<float> ( m_left ), 
+                                    static_cast<float> ( m_top ),
+                                    static_cast<float> ( m_left	+ m_width ),
+                                    static_cast<float> ( m_top	+ m_height ),
+                                                         m_min_z, 
+                                                         m_max_z
+                            };
+            return v;
+        }
         
         private:
 

@@ -27,22 +27,22 @@ namespace gx
 
         collector.begin();
 
-		collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_initialize ) );
-		collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_finalize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_initialize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_finalize ) );
 
-		collector.add_draw_call( gx::create_command_draw_call( gx::command::light_buffer_initialize ) );
-		collector.add_draw_call( gx::create_command_draw_call( gx::command::light_buffer_finalize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::light_buffer_initialize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::light_buffer_finalize ) );
 
         collector.add_draw_call( gx::create_command_draw_call( gx::command::compose_light_buffer ) );
 
-		collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_initialize ) );
-		collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_finalize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_initialize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_finalize ) );
 
-		for(auto i = static_cast<uint32_t> (0) ; i < in_params->m_data->size(); ++i)
+        for(auto i = static_cast<uint32_t> (0) ; i < in_params->m_data->size(); ++i)
         {
             context.m_wvp = &in_params->m_wvp_matrices->at(i);
             context.m_world_matrix = &in_params->m_world_matrices->at(i);
-			context.m_entity_index = i;
+            context.m_entity_index = i;
             entity* enty = reinterpret_cast<entity*> ( in_params->m_data->at(i)) ;
 
             enty->create_draw_calls(&context, &collector);
@@ -57,9 +57,9 @@ namespace gx
                 in_params->m_inverse_view_matrix, 
                 in_params->m_inverse_projection_matrix,
 
-				in_params->m_view_port,
-				in_params->m_zf,
-				in_params->m_zn,
+                in_params->m_view_port,
+                in_params->m_zf,
+                in_params->m_zn,
 
                 in_params->m_wvp_matrices,
                 in_params->m_world_matrices,

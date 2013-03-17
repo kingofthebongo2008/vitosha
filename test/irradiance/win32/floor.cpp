@@ -58,6 +58,10 @@ void floor_entity::on_execute_draw_calls( gx::draw_call_context* draw_call_conte
 
 std::shared_ptr<floor_entity> create_floor_entity( ID3D11Device* device, const gx::shader_database* context, uint32_t width, uint32_t height, uint32_t subdivision_count )
 {
+    UNREFERENCED_PARAMETER(width);
+    UNREFERENCED_PARAMETER(height);
+    UNREFERENCED_PARAMETER(subdivision_count);
+
     math::half half[8] = {};
 
     d3d11::ibuffer_ptr point = d3d11::create_immutable_vertex_buffer(device, &half[0], sizeof(half) );

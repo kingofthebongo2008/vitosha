@@ -9,20 +9,20 @@
 
 namespace gx
 {
-	class encode_for_back_buffer_pixel_shader final
+    class encode_for_back_buffer_pixel_shader final
     {
-		public:
+        public:
 
-		explicit encode_for_back_buffer_pixel_shader ( ID3D11Device* device );
+        explicit encode_for_back_buffer_pixel_shader ( ID3D11Device* device );
 
-		operator const ID3D11PixelShader*() const
-		{
-			return m_shader.get();
-		}
+        operator const ID3D11PixelShader*() const
+        {
+            return m_shader.get();
+        }
 
-		d3d11::ipixelshader_ptr	m_shader;
-		const void*				m_code;
-		uint32_t				m_code_size;
+        d3d11::ipixelshader_ptr m_shader;
+        const void*             m_code;
+        uint32_t                m_code_size;
     };
 }
 

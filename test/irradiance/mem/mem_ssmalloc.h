@@ -33,7 +33,6 @@ namespace mem
 {
     namespace ssmalloc
     {
-
         //---------------------------------------------------------------------------------------
         namespace detail
         {
@@ -58,6 +57,11 @@ namespace mem
             {
 
             };
+
+            inline uintptr_t round_up( uintptr_t value, uintptr_t alignment)
+            {
+                return ( value / alignment + 1 ) * alignment;
+            }
 
             class noncopyable
             {
@@ -120,8 +124,9 @@ namespace mem
                 m_previous = previous;
             }
 
-            T*		m_previous;
-            T*		m_next;
+            uint8_t m_opaque_data[8];
+            T*      m_previous;
+            T*      m_next;
         };
 
         //---------------------------------------------------------------------------------------
@@ -231,15 +236,12 @@ namespace mem
 
         //---------------------------------------------------------------------------------------
         typedef uint16_t    size_class;
-        typedef uint32_t    page_block_size_class;
-        typedef uint32_t    page_block_size;
 
         typedef uint32_t    thread_id;
         typedef uint32_t    remote_free_queue;
 
         const std::uint32_t size_classes = 256;
 
-        
         class remote_free_info
         {
             public:
@@ -264,14 +266,14 @@ namespace mem
                 return ( (next<< 16 ) | count );
             }
 
-            static thread_id get_thread_id( uint64_t reference  ) throw()
+            static uint16_t get_version( uint64_t reference  ) throw()
             {
-                return static_cast<thread_id> ( reference >> 32 );
+                return static_cast<uint16_t> ( reference >> 32 );
             }
 
-            static uint64_t set_thread_id( uint64_t reference, thread_id thread_id  ) throw()
+            static uint64_t set_version( uint64_t reference, uint16_t version  ) throw()
             {
-                return (static_cast<uint64_t> (thread_id) << 32 ) | ( reference & 0xFFFFFFFF);
+                return (static_cast<uint64_t> (version) << 32 ) | ( reference & 0xFFFFFFFF);
             }
 
             static remote_free_queue get_free_queue( uint64_t reference ) throw()
@@ -289,19 +291,18 @@ namespace mem
                 return ( static_cast<uint64_t> ( (thread_id) ) << 32 |  (static_cast<uint64_t> ( next ) << 16 ) | static_cast<uint64_t> (count) );
             }
 
-            std::atomic<uint64_t> 	m_memory_reference;
+            std::atomic<uint64_t>   m_memory_reference;
         };
 
 
         //---------------------------------------------------------------------------------------
         //page_block are the basic elements for allocations 
-        class memory_chunk : public list_element<memory_chunk>
+        class ALIGNAS(128) memory_chunk : public list_element<memory_chunk>
         {
-        private:
-            typedef memory_chunk this_type;
+
         public:
-            explicit memory_chunk() throw() : 
-                    m_memory( reinterpret_cast<uintptr_t> ( this ) + sizeof(this_type) )
+            explicit memory_chunk( uintptr_t memory ) throw() : 
+                    m_memory( memory )
                   , m_unallocated_offset(1)
                   , m_free_objects(0)
                   , m_free_offset(0)
@@ -317,7 +318,7 @@ namespace mem
 
               bool full() const throw()
               {
-                  return (m_free_objects == 0);
+                  return (m_free_objects <= 0);
               }
 
               bool empty() const throw()
@@ -335,7 +336,7 @@ namespace mem
                   return 64 * 1024;
               }
 
-              void reset(uint32_t size_class,thread_id thread_id) throw()
+              void reset(uint32_t size_class, thread_id thread_id) throw()
               {
                 m_size_class = size_class;
                 m_free_objects = convert_to_object_offset( get_memory_size() );
@@ -363,7 +364,7 @@ namespace mem
 
                 if (m_free_offset != 0)
                 {
-                    auto offset = convert_to_bytes(m_free_offset);
+                    auto offset = convert_to_bytes(m_free_offset - 1);
 
                     result = reinterpret_cast<void*> ( m_memory + offset ) ;
 
@@ -372,7 +373,7 @@ namespace mem
                 }
                 else
                 {
-                    auto offset = convert_to_bytes(m_unallocated_offset);
+                    auto offset = convert_to_bytes(m_unallocated_offset - 1);
 
                     result = reinterpret_cast<void*> ( m_memory + offset ) ;
 
@@ -396,7 +397,7 @@ namespace mem
                 auto offset = pointer_b - pointer_a;
 
                 * reinterpret_cast<uint16_t*>(pointer) = m_free_offset;
-                m_free_offset = convert_to_object_offset(offset);
+                m_free_offset = convert_to_object_offset(offset) + 1;
                 ++m_free_objects;
               }
 
@@ -405,15 +406,15 @@ namespace mem
                 free(pointer);
               }
 
-              thread_id		 get_owning_thread_id() const throw()
+              thread_id get_owning_thread_id() const throw()
               {
-                return m_block_info.get_thread_id( m_block_info.m_memory_reference.load() );
+                return 0;
               }
 
-              bool	try_set_thread(thread_id thread_id) throw()
+              bool	try_set_thread(thread_id)  throw()
               {
                 auto reference = m_block_info.m_memory_reference.load();	
-                auto new_reference = remote_free_info::set_thread_id(reference, thread_id);
+                auto new_reference = 0; //todo
                 return std::atomic_compare_exchange_weak(&m_block_info.m_memory_reference, &reference, new_reference);
               }
 
@@ -465,7 +466,7 @@ namespace mem
             memory_chunk(const memory_chunk&);
             const memory_chunk operator=(const memory_chunk&);
 
-            uint32_t            m_free_objects;
+            int32_t             m_free_objects;
 
             uintptr_t           m_memory;
 
@@ -474,6 +475,8 @@ namespace mem
             uint16_t            m_unallocated_offset;   //can support offsets in pages up to 256kb
             uint16_t            m_free_offset;
             uint32_t            m_size_class;
+
+            uint8_t             m_pad[68];
 
             uint32_t convert_to_bytes(uint16_t blocks) const throw()
             {
@@ -620,9 +623,8 @@ namespace mem
 
                     }
 
-                    std::uint8_t                m_opaque_data[8];
                     concurrent_stack_element*   m_next;
-                    uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*)  - 8 * sizeof(std::uint8_t) ];
+                    uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*) ];
                 };
 
 
@@ -635,7 +637,7 @@ namespace mem
                     auto    new_top	= reinterpret_cast<concurrent_stack_element*> (details1::encode_pointer(pointer, details1::get_counter(top) + 1, details1::get_version( top ) + 1 ) );
                     auto    delay_value = 2;
 
-                    while (!std::atomic_compare_exchange_weak( &m_top, &top, new_top  ) )
+                    while (!std::atomic_compare_exchange_weak_explicit( &m_top, &top, new_top, std::memory_order_seq_cst, std::memory_order_seq_cst ) )
                     {
                         delay_value         = delay(delay_value);
                         pointer->m_next     = reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
@@ -679,12 +681,89 @@ namespace mem
                     return value * value;
                 }
 
-                std::atomic<concurrent_stack_element*>	m_top;
-                uint8_t									m_pad[ 64 - sizeof(std::atomic<concurrent_stack_element*>) ];
+                std::atomic<concurrent_stack_element*>  m_top;
+                uint8_t                                 m_pad[ 64 - sizeof(std::atomic<concurrent_stack_element*>) ];
             };
         }
 
         typedef details::concurrent_stack concurrent_stack;
+
+        //---------------------------------------------------------------------------------------
+        class stack
+        {
+            public:
+
+            stack() : m_top(nullptr)
+            {
+
+            }
+
+
+            template <typename t> void push( t* pointer) throw()
+            {
+                push_( reinterpret_cast<stack_element*> (pointer) );
+            }
+
+            //pointer must point to memory of 64 bytes at least
+            void push(uintptr_t pointer) throw()
+            {
+                push_( reinterpret_cast<stack_element*> (pointer) );
+            }
+
+            uintptr_t pop() throw()
+            {
+                return reinterpret_cast<uintptr_t> ( pop_() );
+            }
+
+            template <typename t> t* pop() throw()
+            {
+                return reinterpret_cast<t*> ( pop_() );
+            }
+            
+            size_t size() const throw()
+            {
+                return m_counter;
+            }
+            
+            private:
+            struct stack_element
+            {
+                stack_element() : m_next(nullptr)
+                {
+
+                }
+
+                stack_element*      m_next;
+            };
+
+            //pointer must point to memory of at least 16 bytes
+            void push_(stack_element* pointer) throw()
+            {
+                stack_element* element = reinterpret_cast<stack_element*>  (pointer);
+                element->m_next = m_top;
+                m_top = element;
+                m_counter++;
+            }
+
+            stack_element* pop_() throw()
+            {
+                stack_element* element = m_top;
+
+                if (element == nullptr)
+                {
+                    return 0;
+                }
+
+                m_counter--;
+                m_top = element->m_next;
+                return element;
+            }
+
+            private:
+            stack_element*      m_top;
+            uint32_t            m_counter;
+            uint8_t             m_pad[ 64 - sizeof(stack_element*) - sizeof(uint32_t) ];
+        };
 
 
         inline uint64_t chunk_size(uint64_t chunk_count ) 
@@ -707,17 +786,18 @@ namespace mem
             , m_size( chunk_size ( std::max<uint64_t>( initial_chunk_count, 1LL ) ) )
             , m_reserve_size(reserve_size)
             {
-                m_start = reinterpret_cast<uintptr_t> ( ::VirtualAlloc( 0, reserve_size, MEM_RESERVE, PAGE_READWRITE ) ) ;
+                m_pool_start = reinterpret_cast<uintptr_t> ( ::VirtualAlloc( 0, reserve_size, MEM_RESERVE, PAGE_READWRITE ) ) ;
 
-                if (m_start == 0)
+                if (m_pool_start == 0)
                 {
                    //todo: throw exception
                 }
 
                 //align to chunk size the beginning
-                m_start = ( m_start / chunk_size() + 1 ) * chunk_size() ;
+                m_start = detail::round_up ( m_pool_start, chunk_size() ); 
+                const uint64_t size = detail::round_up( m_size, chunk_size() );
 
-                void* start = reinterpret_cast<void*> ( ::VirtualAlloc ( reinterpret_cast<void*> (m_start), m_size, MEM_COMMIT, PAGE_READWRITE ) );
+                void* start = reinterpret_cast<void*> ( ::VirtualAlloc ( reinterpret_cast<void*> (m_start), size, MEM_COMMIT, PAGE_READWRITE ) );
 
                 if (start == nullptr)
                 {
@@ -725,7 +805,6 @@ namespace mem
                 }
 
                 m_start += m_size;
-
 
                 m_end = m_start + m_size;
 
@@ -739,7 +818,7 @@ namespace mem
 
             ~global_pool()
             {
-                ::VirtualFree( reinterpret_cast<void*> ( m_start ), m_reserve_size, MEM_RELEASE );
+                ::VirtualFree( reinterpret_cast<void*> ( m_pool_start ), 0, MEM_RELEASE );
             }
 
             memory_chunk* allocate_chunk() throw()
@@ -773,7 +852,7 @@ namespace mem
                     }
                 }
 
-                return new ( reinterpret_cast<void*> ( result ) ) memory_chunk();
+                return new ( reinterpret_cast<void*> ( result ) ) memory_chunk( result + sizeof ( memory_chunk ) );
             }
 
             void    free_chunk( memory_chunk* chunk) throw()
@@ -786,15 +865,23 @@ namespace mem
             global_pool ();
 
             sys::spinlock_fas       m_lock;
+            concurrent_stack        m_free;
 
+            uintptr_t               m_pool_start;           //virtual memory begin
             uintptr_t               m_start;                //pool begin
             uintptr_t               m_end;                  //pool end of commited chunk memory
             std::atomic<uintptr_t>  m_clean;                //pool begin of uncommited chunk memory
 
-            concurrent_stack        m_free;
-
             uint64_t                m_reserve_size;         //pool size : 4GB, 8GB, 16GB, etc..
             uint64_t                m_size;                 //current commited pages
+        };
+
+        //remote frees are buffered here before atomic operations. buffering remote frees reduces contention
+        class remote_free_buffer
+        {
+            memory_chunk*   m_memory_chunk;
+            stack           m_remote_frees;
+            uint32_t        count;
         };
 
         class private_heap : private detail::noncopyable
@@ -802,7 +889,8 @@ namespace mem
             public:
 
             explicit private_heap( global_pool* global_pool ) : 
-                m_global_pool(global_pool)
+                m_dummy_chunk(0)
+                , m_global_pool(global_pool)
             {
                 for ( uint32_t i = 0; i < size_classes; ++i)
                 {
@@ -814,14 +902,22 @@ namespace mem
             void  free(void* pointer) throw();
 
             private:
-            memory_chunk                m_dummy_chunk;
-        
-            memory_chunk*               m_foreground_chunks[size_classes];
-            global_pool*                m_global_pool;
+            memory_chunk                    m_dummy_chunk;
+            concurrent_stack                m_remote_free_chunks[size_classes];
+                    
+            memory_chunk*                   m_foreground_chunks[size_classes];
+            global_pool*                    m_global_pool;
 
-            list<memory_chunk*>         m_background_chunks_list[size_classes];
-            list<memory_chunk*>         m_local_free_chunks;
+            list<memory_chunk>              m_background_chunks[size_classes];
 
+            list<memory_chunk>              m_local_free_chunks;
+
+            inline bool is_dummy_chunk( const memory_chunk* chunk ) const
+            {
+                return (chunk == &m_dummy_chunk);
+            }
+
+            memory_chunk* private_heap::get_new_chunk(size_class cls ) throw();
         };
 
         class heap : private detail::noncopyable

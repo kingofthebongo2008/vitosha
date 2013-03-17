@@ -13,11 +13,11 @@ namespace gx
 
     struct draw_call_info
     {
-		static const uint16_t invalid_entity = 0xffff;
+        static const uint16_t invalid_entity = 0xffff;
 
         draw_call_key       m_key;
         uint16_t            m_entity_index;
-		uint16_t			m_entity_draw_call_index;
+        uint16_t            m_entity_draw_call_index;
     };
 
 
@@ -31,17 +31,17 @@ namespace gx
         void begin();
         void end();
 
-		void add_draw_call( draw_call_key key)
-		{
-			add_draw_call(key, draw_call_info::invalid_entity, draw_call_info::invalid_entity ) ;
-		}
+        void add_draw_call( draw_call_key key)
+        {
+            add_draw_call(key, draw_call_info::invalid_entity, draw_call_info::invalid_entity ) ;
+        }
 
-		void add_draw_call( draw_call_key key, uint32_t entity_index )
-		{
-			add_draw_call(key, entity_index, 0 ) ;
-		}
+        void add_draw_call( draw_call_key key, uint32_t entity_index )
+        {
+            add_draw_call(key, entity_index, 0 ) ;
+        }
 
-		void add_draw_call( draw_call_key key, uint32_t entity_index, uint32_t entity_draw_call_index ) ;
+        void add_draw_call( draw_call_key key, uint32_t entity_index, uint32_t entity_draw_call_index ) ;
 
         private:
         std::vector<  draw_call_info >* m_draw_calls;

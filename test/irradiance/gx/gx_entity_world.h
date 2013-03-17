@@ -11,28 +11,28 @@
 
 namespace gx
 {
-	//acts as a storage for entites
-	class entity_world : public fnd::world
-	{
-		public:
+    //acts as a storage for entites
+    class entity_world : public fnd::world
+    {
+        public:
 
-		entity_world()
-		{
-			m_entities.reserve(4096);
-		}
+        entity_world()
+        {
+            m_entities.reserve(4096);
+        }
 
-		void add_entity( std::shared_ptr< gx::entity> entity)
-		{
-			m_entities.push_back(entity);
-		}
+        void add_entity( std::shared_ptr< gx::entity> entity)
+        {
+            m_entities.push_back(entity);
+        }
 
-		void remove_entity( std::shared_ptr< gx::entity> entity )
-		{
-			m_entities.erase( std::remove( std::begin(m_entities), std::end(m_entities), entity) );
-		}
+        void remove_entity( std::shared_ptr< gx::entity> entity )
+        {
+            m_entities.erase( std::remove( std::begin(m_entities), std::end(m_entities), entity) );
+        }
 
-		std::vector < std::shared_ptr< gx::entity> > m_entities;
-	};
+        std::vector < std::shared_ptr< gx::entity> > m_entities;
+    };
 }
 
 #endif

@@ -28,7 +28,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120_CTP_Nov2012</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -588,9 +588,11 @@
     <ClInclude Include="math\math_quaternion.h" />
     <ClInclude Include="math\math_vector.h" />
     <ClInclude Include="mem\mem_alloc.h" />
+    <ClInclude Include="mem\mem_alloc_aligned.h" />
     <ClInclude Include="mem\mem_ref_counter.h" />
     <ClInclude Include="mem\mem_ssmalloc.h" />
     <ClInclude Include="mem\mem_streamflow.h" />
+    <ClInclude Include="mem\mem_streamflow_algorithm.h" />
     <ClInclude Include="mem\mem_streamflow_allocator.h" />
     <ClInclude Include="precompiled.h" />
     <ClInclude Include="gx\gx_view.h" />
@@ -685,7 +687,7 @@
     </ClCompile>
     <ClCompile Include="math\math_functions.cpp" />
     <ClCompile Include="math\math_half.cpp" />
-    <ClCompile Include="mem\mem_streamflow.cpp">
+    <ClCompile Include="mem\mem_streamflow_algorithm.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>

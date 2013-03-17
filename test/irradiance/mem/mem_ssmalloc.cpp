@@ -112,25 +112,72 @@ namespace mem
         }
 
         //---------------------------------------------------------------------------------------
+        memory_chunk* private_heap::get_new_chunk(size_class cls ) throw()
+        {
+            auto result = m_background_chunks[cls].front();
+
+            if (result != nullptr)
+            {
+                m_background_chunks[cls].remove(result);
+            }
+            else
+            {
+                //concurrent stack
+                result = m_remote_free_chunks[cls].pop<memory_chunk>();
+
+                if ( result!= nullptr)
+                {
+                    result->garbage_collect();
+                }
+                else
+                {
+                    result = m_local_free_chunks.front();
+
+                    if (result != nullptr)
+                    {
+                        m_local_free_chunks.remove(result);
+                        result->reset( compute_size(cls), 0);
+                    } 
+                    else
+                    {
+                        result = m_global_pool->allocate_chunk();
+
+                        if (result)
+                        {
+                            result->reset( compute_size(cls), 0);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        //---------------------------------------------------------------------------------------
         void* private_heap::allocate( size_t size ) throw()
         {
             size_class cls = compute_size_class(size);
 
-            if ( cls != large_size_class)
+            retry:
+            memory_chunk* chunk = m_foreground_chunks[cls];
+
+            auto result = chunk->allocate();
+
+            if (chunk->full())
             {
-
+                //swap chunk
+                m_foreground_chunks[cls] = get_new_chunk( cls );
+                if ( is_dummy_chunk( chunk ) )
+                {
+                    chunk->reset(8, 0 );
+                    goto retry;
+                }
             }
-            else
-            {
 
-
-            }
-            
-            return 0;
-
+            return result;
         }
         //---------------------------------------------------------------------------------------
-        void  private_heap::free(void* pointer) throw()
+        void  private_heap::free(void* ) throw()
         {
 
         }
@@ -138,23 +185,6 @@ namespace mem
         //---------------------------------------------------------------------------------------
         MEM_SSMALLOC_DLL void test_ssmalloc()
         {
-            uint32_t k = compute_size(38);
-            uint64_t  size = 16i64 * 1024i64 * 1024i64 * 1024i64;
-            global_pool pool ( size,  0 );
-            memory_chunk* t0 = pool.allocate_chunk();
-            memory_chunk* t1 = pool.allocate_chunk();
-            memory_chunk* t2 = pool.allocate_chunk();
-            memory_chunk* t3 = pool.allocate_chunk();
-
-            uintptr_t        kh =  t3->get_memory()  + 5;
-
-            memory_chunk* tk = locate_chunk ( t3 );
-            memory_chunk* tk1 = locate_chunk(kh);
-
-            pool.free_chunk( t3 );
-
-            memory_chunk* t4 = pool.allocate_chunk();
-            memory_chunk* t5 = pool.allocate_chunk();
         }
 
     }

@@ -73,9 +73,10 @@ void point_lights_entity::update_instance_stream(ID3D11DeviceContext* device_con
 	}
 }
 
-void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
+void point_lights_entity::on_execute_draw_calls(gx::draw_call_context*)
 {
 	return;
+    /*
     gx::profile p(L"point_lights_entity");
 	ID3D11DeviceContext* device_context = context->m_device_context;
 
@@ -94,6 +95,7 @@ void point_lights_entity::on_execute_draw_calls(gx::draw_call_context* context)
     d3d11::ps_set_shader(device_context, m_debug_pixel_shader );
     
 	m_draw_call.draw_instanced( device_context, static_cast<uint32_t> ( m_lights.size() ) );
+    */
 }
 
 std::shared_ptr<point_lights_entity> create_point_lights_entity(ID3D11Device* device)

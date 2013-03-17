@@ -166,7 +166,7 @@ namespace console
 		info->m_pointer->register_message(m);
 	}
 
-	void	writeln(const wchar_t* string)
+	void	writeln(const wchar_t* )
 	{
 
 	}

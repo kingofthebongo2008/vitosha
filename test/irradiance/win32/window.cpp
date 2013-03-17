@@ -51,7 +51,7 @@ namespace wnd
 		m_main_camera.set_aspect_ratio(16.0f / 9.0f);
 		m_main_camera.set_fov(3.1415f / 4.0f );
 		m_main_camera.set_near(1.0f);
-		m_main_camera.set_far(200.f); //meters
+		m_main_camera.set_far(400.f); //meters
 
 
 		m_d2d_factory = d2d::create_d2d_factory();

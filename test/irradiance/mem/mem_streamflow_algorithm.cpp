@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include <mem/mem_streamflow.h>
+#include <mem/mem_streamflow_algorithm.h>
 
 
 namespace mem
@@ -728,7 +728,7 @@ namespace mem
             return reinterpret_cast<internal_heap*> ( m_implementation ) ->free(pointer);
         }
 
-        void*   heap::reallocate(void* pointer, size_t size) throw()
+        void*   heap::reallocate(void*, size_t) throw()
         {
             //todo: not implemented
             return nullptr;

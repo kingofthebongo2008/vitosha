@@ -17,9 +17,9 @@ namespace gx
         public:
 
         entity()
-		{
+        {
 
-		}
+        }
 
         virtual ~entity();
 

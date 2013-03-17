@@ -350,6 +350,12 @@
     <ClInclude Include="mem\mem_ssmalloc.h">
       <Filter>mem</Filter>
     </ClInclude>
+    <ClInclude Include="mem\mem_streamflow_algorithm.h">
+      <Filter>mem</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\mem_alloc_aligned.h">
+      <Filter>mem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -570,9 +576,6 @@
     <ClCompile Include="tools\libmesh\src\mesh_utils.cpp">
       <Filter>tools\libmesh\src</Filter>
     </ClCompile>
-    <ClCompile Include="mem\mem_streamflow.cpp">
-      <Filter>mem</Filter>
-    </ClCompile>
     <ClCompile Include="gx\gx_shader_database.cpp">
       <Filter>gx</Filter>
     </ClCompile>
@@ -589,6 +592,9 @@
       <Filter>gx</Filter>
     </ClCompile>
     <ClCompile Include="mem\mem_streamflow_utils.cpp">
+      <Filter>mem</Filter>
+    </ClCompile>
+    <ClCompile Include="mem\mem_streamflow_algorithm.cpp">
       <Filter>mem</Filter>
     </ClCompile>
   </ItemGroup>

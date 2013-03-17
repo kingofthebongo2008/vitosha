@@ -11,19 +11,19 @@
 
 namespace gx
 {
-	class blinn_phong_pixel_shader final
+    class blinn_phong_pixel_shader final
     {
-		public:
-		explicit blinn_phong_pixel_shader ( ID3D11Device* device );
+        public:
+        explicit blinn_phong_pixel_shader ( ID3D11Device* device );
 
-		operator const ID3D11PixelShader*() const
-		{
-			return m_shader.get();
-		}
+        operator const ID3D11PixelShader*() const
+        {
+            return m_shader.get();
+        }
 
-		d3d11::ipixelshader_ptr	m_shader;
-		const void*					m_code;
-		uint32_t					m_code_size;
+        d3d11::ipixelshader_ptr m_shader;
+        const void*             m_code;
+        uint32_t                m_code_size;
     };
 }
 

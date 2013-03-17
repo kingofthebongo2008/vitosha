@@ -17,11 +17,11 @@ namespace gx
         }
 
         view(math::float4x4 view, math::float4x4 projection, view_port view_port, float zf, float zn) : 
-		  m_view_matrix(view) 
-		, m_projection_matrix(projection)
-		, m_view_port(view_port)
-		, m_zf(zf)
-		, m_zn(zn)
+          m_view_matrix(view) 
+        , m_projection_matrix(projection)
+        , m_view_port(view_port)
+        , m_zf(zf)
+        , m_zn(zn)
         {
 
         }
@@ -36,28 +36,28 @@ namespace gx
             return m_projection_matrix;
         }
 
-		view_port get_view_port() const
-		{
-			return m_view_port;
-		}
+        view_port get_view_port() const
+        {
+            return m_view_port;
+        }
 
-		float get_zn() const
-		{
-			return m_zn;
-		}
+        float get_zn() const
+        {
+            return m_zn;
+        }
 
-		float get_zf() const
-		{
-			return m_zf;
-		}
+        float get_zf() const
+        {
+            return m_zf;
+        }
 
         private:
 
         math::float4x4  m_view_matrix;
         math::float4x4  m_projection_matrix;
-		view_port		m_view_port;
-		float			m_zn;
-		float			m_zf;
+        view_port		m_view_port;
+        float			m_zn;
+        float			m_zf;
     };
 }
 
