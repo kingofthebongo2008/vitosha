@@ -127,8 +127,9 @@ namespace mem
                 m_previous = previous;
             }
 
-            T*      m_previous;
-            T*      m_next;
+            uint8_t	m_opaque_data[8]; //buddy order and tag go here
+            T*		m_previous;
+            T*		m_next;
         };
 
         //---------------------------------------------------------------------------------------
@@ -375,14 +376,15 @@ namespace mem
 
                     }
 
+                    std::uint8_t                m_opaque_data[8];   //buddy data goes here
                     concurrent_stack_element*   m_next;
-                    uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*) ];
+                    uint8_t m_pad[ 64 - sizeof(concurrent_stack_element*)  - 8 * sizeof(std::uint8_t) ];
                 };
 
 
                 void push_(concurrent_stack_element* pointer) throw()
                 {
-                    auto    top = m_top.load();
+                    auto    top = std::atomic_load(&m_top);
 
                     pointer->m_next = reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(top));
                     
@@ -399,7 +401,7 @@ namespace mem
 
                 concurrent_stack_element* pop_() throw()
                 {
-                    auto versioned_top = m_top.load();
+                    auto versioned_top = std::atomic_load(&m_top);
                     auto top =  reinterpret_cast<concurrent_stack_element*> (details1::decode_pointer(versioned_top));
 
                     if (top == nullptr)
@@ -433,8 +435,8 @@ namespace mem
                     return value * value;
                 }
 
-                std::atomic<concurrent_stack_element*>  m_top;
-                uint8_t                                 m_pad[ 64 - sizeof(std::atomic<concurrent_stack_element*>) ];
+                std::atomic<concurrent_stack_element*>	m_top;
+                uint8_t									m_pad[ 64 - sizeof(std::atomic<concurrent_stack_element*>) ];
             };
         }
 
@@ -487,8 +489,9 @@ namespace mem
 
                 }
 
+                std::uint8_t        m_opaque_data[8];   //buddy data goes here
                 stack_element*      m_next;
-                uint8_t             m_pad[ 64 - sizeof(stack_element*) ];
+                uint8_t             m_pad[ 64 - sizeof(stack_element*)  - 8 * sizeof(std::uint8_t) ];
             };
 
 
@@ -704,7 +707,7 @@ namespace mem
                   return m_block_info.get_thread_id( m_block_info.m_memory_reference.load() );
               }
 
-              bool  try_set_thread(thread_id thread_id) throw()
+              bool	try_set_thread(thread_id thread_id) throw()
               {
                   auto reference = m_block_info.m_memory_reference.load();	
                   auto new_reference = remote_page_block_info::set_thread_id(reference, thread_id);
@@ -750,8 +753,6 @@ namespace mem
                 auto count = remote_page_block_info::get_count( queue );
                 auto next = remote_page_block_info::get_next ( queue );
 
-                // reset?
-
                 m_free_offset = next;
                 m_free_objects += count;
             }
@@ -771,7 +772,7 @@ namespace mem
             
             remote_page_block_info  m_block_info;   //frees from other threads go here
 
-            uint16_t    m_unallocated_offset;       //can support offsets in pages up to 256kb
+            uint16_t    m_unallocated_offset;   //can support offsets in pages up to 256kb
             uint16_t    m_free_offset;
             uint32_t    m_size_class;
 
@@ -857,7 +858,6 @@ namespace mem
                     update_largest_free_order();
 
                     buddy->set_order(order);
-                    
                     //convert the buddy to page_block
                     return new (buddy) page_block(this, memory_base, memory_size);
                 }
@@ -1573,8 +1573,8 @@ namespace mem
 
             super_page_manager              m_super_page_manager;
 
-            concurrent_stack                m_page_blocks_orphaned[size_classes];                       //freed on thread finalize, partially free
-            concurrent_stack                m_page_blocks_free[page_block_size_classes];                //global cache of free page blocks goes here up to 1
+            concurrent_stack                m_page_blocks_orphaned[size_classes];						//freed on thread finalize, partially free
+            concurrent_stack                m_page_blocks_free[page_block_size_classes];				//global cache of free page blocks goes here up to 1
 
             uint32_t                        m_index;                                                    //index of the heap in thread local storage
 
