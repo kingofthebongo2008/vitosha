@@ -1,18 +1,18 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "precompiled.h"
 
-#include <mem/mem_streamflow.h>
+#include <mem/mem_streamflow_algorithm.h>
 
-BOOL APIENTRY DllMain( HMODULE hModule,
+BOOL APIENTRY DllMain( HMODULE,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
-					 )
+                     )
 {
     using namespace mem::streamflow;
 
-	switch (ul_reason_for_call)
-	{
-	    case DLL_PROCESS_ATTACH:
+    switch (ul_reason_for_call)
+    {
+        case DLL_PROCESS_ATTACH:
         {
             if ( initialize() == initialization_code::success)
             {
@@ -24,12 +24,12 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             }
         }
 
-	    case DLL_THREAD_ATTACH:
+        case DLL_THREAD_ATTACH:
         {
             return ( thread_initialize() == initialization_code::success) ? TRUE : FALSE;
         }
 
-	    case DLL_THREAD_DETACH:
+        case DLL_THREAD_DETACH:
         {
             if ( lpReserved == nullptr)
             {
@@ -37,7 +37,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             }
             break;
         }
-	    case DLL_PROCESS_DETACH:
+        case DLL_PROCESS_DETACH:
         {
             if ( lpReserved == nullptr)
             {
@@ -45,8 +45,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             }
             break;
         }
-		break;
-	}
-	return TRUE;
+        break;
+    }
+    return TRUE;
 }
 
