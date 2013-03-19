@@ -262,21 +262,21 @@ namespace gx
         return key;
     }
 
-    inline draw_call_key create_deepth_draw_call( uint32_t material_id, float depth, const draw_call& draw_call )
+    inline draw_call_key create_depth_draw_call( float depth, const draw_call& draw_call )
     {
         draw_call_key key = create_gbuffer_draw_call( 0, depth, draw_call);
 
         //setup some default values
-        key.m_data.m_header.m_command = command::debug_draw_call;
+        key.m_data.m_header.m_command = command::depth_draw_call;
         return key;
     }
 
-    inline draw_call_key create_deepth_draw_call( uint32_t material_id, float depth, draw_call&& draw_call )
+    inline draw_call_key create_depth_draw_call( float depth, draw_call&& draw_call )
     {
         draw_call_key key = create_gbuffer_draw_call( 0, depth, draw_call);
 
         //setup some default values
-        key.m_data.m_header.m_command = command::debug_draw_call;
+        key.m_data.m_header.m_command = command::depth_draw_call;
         return key;
     }
 

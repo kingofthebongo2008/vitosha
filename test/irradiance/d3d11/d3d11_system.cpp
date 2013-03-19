@@ -19,7 +19,7 @@ namespace d3d11
 
             mode.RefreshRate.Numerator = 60;
             mode.RefreshRate.Denominator = 1;
-            mode.Format = DXGI_FORMAT_R10G10B10A2_UNORM;//DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;//DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM; //DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//DXGI_FORMAT_R8G8B8A8_UNORM;//DXGI_FORMAT_R10G10B10A2_UNORM; //DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            mode.Format = DXGI_FORMAT_R10G10B10A2_UNORM;//DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM; //DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
             desc.BufferDesc = mode;
             desc.Windowed = (hwnd !=0);
@@ -35,7 +35,7 @@ namespace d3d11
     }
     system_context create_system_context(HWND hwnd)
     {
-        auto flags					= D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+        auto flags					= D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
         auto level					= D3D_FEATURE_LEVEL_11_0;
         auto desc					= create_default_swap_chain_desc(hwnd);

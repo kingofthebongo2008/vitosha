@@ -28,6 +28,8 @@
 
 #include <d2d/d2d_helpers.h>
 
+#include "runtime_diagnostics.h"
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -51,6 +53,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
+    //RuntimeDiagnostics::CheckPauseOnStartupOption();
+
     try
     {
         io::console::runner runner;

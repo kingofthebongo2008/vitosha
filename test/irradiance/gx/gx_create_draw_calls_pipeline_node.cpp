@@ -27,6 +27,9 @@ namespace gx
 
         collector.begin();
 
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::depth_initialize ) );
+        collector.add_draw_call( gx::create_command_draw_call( gx::command::depth_finalize ) );
+
         collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_initialize ) );
         collector.add_draw_call( gx::create_command_draw_call( gx::command::gbuffer_finalize ) );
 

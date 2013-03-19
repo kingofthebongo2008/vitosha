@@ -69,9 +69,9 @@ namespace gx
             return m_shader.get();
         }
 
-        d3d11::ivertexshader_ptr	m_shader;
-        const void*						m_code;
-        uint32_t						m_code_size;
+        d3d11::ivertexshader_ptr    m_shader;
+        const void*                 m_code;
+        uint32_t                    m_code_size;
     };
 
     class transform_position_input_layout
@@ -93,6 +93,7 @@ namespace gx
         d3d11::iinputlayout_ptr	m_input_layout;
     };
 
+    typedef std::tuple < transform_position_vertex_shader, transform_position_vertex_shader_constant_buffer,  transform_position_input_layout  > transform_position_vertex_pipeline;
 }
 
 #endif

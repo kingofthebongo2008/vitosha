@@ -18,24 +18,6 @@ namespace gx
         UNUSED_PARAMETER(collector);
     }
 
-    void entity::on_create_shadow_draw_calls( draw_call_collector_context* context, draw_call_collector* collector)
-    {
-        UNUSED_PARAMETER(context);
-        UNUSED_PARAMETER(collector);
-    }
-
-    void entity::on_create_visibility_draw_calls( draw_call_collector_context* context, draw_call_collector* collector)
-    {
-        UNUSED_PARAMETER(context);
-        UNUSED_PARAMETER(collector);
-    }
-
-    void entity::on_create_depth_draw_calls(draw_call_collector_context* context,  draw_call_collector* collector)
-    {
-        UNUSED_PARAMETER(context);
-        UNUSED_PARAMETER(collector);
-    }
-
     void entity::on_execute_draw_calls(draw_call_context* context)
     {
         UNUSED_PARAMETER(context);

@@ -356,6 +356,9 @@
     <ClInclude Include="mem\mem_alloc_aligned.h">
       <Filter>mem</Filter>
     </ClInclude>
+    <ClInclude Include="gx\gx_depth_prepass_material.h">
+      <Filter>gx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -596,6 +599,9 @@
     </ClCompile>
     <ClCompile Include="mem\mem_streamflow_algorithm.cpp">
       <Filter>mem</Filter>
+    </ClCompile>
+    <ClCompile Include="gx\gx_depth_prepass_material.cpp">
+      <Filter>gx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -14,16 +14,16 @@ namespace gx
     class execute_draw_calls_pipeline_node : public pipeline_node
     {
         public:
-		
-		explicit execute_draw_calls_pipeline_node(render_context* render_context) : m_render_context (render_context)
-		{
+        
+        explicit execute_draw_calls_pipeline_node(render_context* render_context) : m_render_context (render_context)
+        {
 
-		}
-		
+        }
+        
         private:
         render_context*	m_render_context;
         void*			do_process(void* input);
-		void*			do_process1(void* input);
+        void*			do_process1(void* input);
     };
 }
 

@@ -59,6 +59,18 @@ namespace gx
         {
             switch (command)
             {
+                case gx::command::depth_initialize:
+                {
+                    render_context->select_depth_pass(device_context, create_per_view_data(in_params));
+                    break;
+                }
+
+                case gx::command::depth_finalize:
+                {
+                    render_context->end_depth_pass(device_context, create_per_view_data(in_params));
+                    break;
+                }
+
                 case gx::command::gbuffer_initialize:
                 {
                     render_context->select_gbuffer(device_context, create_per_view_data(in_params));
@@ -127,8 +139,6 @@ namespace gx
             {
                 draw_call_context.m_wvp_matrix = &in_params->m_wvp_matrices->at(index);
                 draw_call_context.m_world_matrix = &in_params->m_world_matrices->at(index);
-
-                draw_call_context.m_entity_draw_call_index = info.m_entity_draw_call_index;
 
                 gx::draw_call& call = info.m_key.get_draw_call();
                 call(&draw_call_context);
