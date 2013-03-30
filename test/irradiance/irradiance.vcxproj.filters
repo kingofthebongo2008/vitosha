@@ -9,17 +9,18 @@
     <None Include="irradiance.ico" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
-    <None Include="util\util_iterator.h" />
     <None Include="gx\gx_debug_draw.h">
       <Filter>gx</Filter>
     </None>
     <None Include="mem\mem_ssmalloc.cpp">
       <Filter>mem</Filter>
     </None>
+    <None Include="util\util_iterator.h">
+      <Filter>utils</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="precompiled.h" />
-    <ClInclude Include="util\util_bits.h" />
     <ClInclude Include="win32/resource.h" />
     <ClInclude Include="win32/targetver.h" />
     <ClInclude Include="win32/window.h" />
@@ -359,6 +360,15 @@
     <ClInclude Include="gx\gx_depth_prepass_material.h">
       <Filter>gx</Filter>
     </ClInclude>
+    <ClInclude Include="gxu\gxu_text_drawing.h">
+      <Filter>gxu</Filter>
+    </ClInclude>
+    <ClInclude Include="os\windows\com_initializer.h">
+      <Filter>os\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="util\util_bits.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />
@@ -603,6 +613,12 @@
     <ClCompile Include="gx\gx_depth_prepass_material.cpp">
       <Filter>gx</Filter>
     </ClCompile>
+    <ClCompile Include="gxu\gxu_text_drawing.cpp">
+      <Filter>gxu</Filter>
+    </ClCompile>
+    <ClCompile Include="gxu\gxu_text_debug_font.cpp">
+      <Filter>gxu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win32/irradiance.rc" />
@@ -652,6 +668,15 @@
     </Filter>
     <Filter Include="tools\libmesh\src">
       <UniqueIdentifier>{805927ec-e392-494c-ada4-feb56b675790}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="os">
+      <UniqueIdentifier>{0f21f423-44ba-4405-bff8-64a3fcc2835f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="os\windows">
+      <UniqueIdentifier>{cba04031-182d-41c5-83e1-3f621daa1214}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{78cf24e9-faf0-4069-ad9c-073c5fa53ed0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
