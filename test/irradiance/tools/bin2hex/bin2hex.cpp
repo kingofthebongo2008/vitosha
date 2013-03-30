@@ -25,6 +25,8 @@ int bin2hex(FILE* in, FILE* out)
                 {
                         int a = (buffer[i]>>4)&0x0F;
                         int b = buffer[i]     &0x0F;
+                        fputc('0', out);
+                        fputc('x', out);
                         fputc(table[a], out);
                         fputc(table[b], out);
                         fputc(stable1[i&0x0F], out);
