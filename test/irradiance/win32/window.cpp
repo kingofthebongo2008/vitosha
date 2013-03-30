@@ -27,8 +27,6 @@
 
 #include <win32/application.h>
 
-#include <math/xnamath.h>
-
 namespace wnd
 {
     window::window(HWND hwnd, application& application, dxgi::iswapchain_ptr swap_chain, gx::render_context* render_context, gx::target_render_resource d2d_resource  ) : 
