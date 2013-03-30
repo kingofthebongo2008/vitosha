@@ -21,7 +21,6 @@
 #include <math/math_functions.h>
 #include <math/math_half.h>
 #include <math/math_quaternion.h>
-#include <math/xnamath.h>
 #include <iostream>
 #include <io/io_console.h>
 #include <io/io_std_console_notifier.h>
