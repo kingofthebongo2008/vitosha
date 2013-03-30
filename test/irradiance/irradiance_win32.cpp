@@ -5,6 +5,7 @@
 #include <windowsx.h>
 
 #include <sys/sys_base.h>
+#include <os/windows/com_initializer.h>
 
 #include <d3d11/d3d11_system.h>
 #include <fnd/fnd_universe.h>
@@ -21,12 +22,142 @@
 #include <math/math_functions.h>
 #include <math/math_half.h>
 #include <math/math_quaternion.h>
-#include <math/xnamath.h>
 #include <iostream>
 #include <io/io_console.h>
 #include <io/io_std_console_notifier.h>
 
 #include <d2d/d2d_helpers.h>
+
+#include <gxu/gxu_text_drawing.h>
+
+// example
+/*
+class drawable 
+{
+    public:
+
+    virtual ~drawable()
+    {
+
+    }
+
+    void draw()
+    {
+        on_draw();
+    }
+
+    private:
+    virtual void on_draw() = 0;
+};
+
+class box : public drawable
+{
+
+    private:
+    void on_draw() override
+    {
+
+    }
+};
+
+
+class shape : public drawable
+{
+
+    private:
+
+    void on_draw() override
+    {
+
+    }
+};
+
+std::vector< std::shared_ptr < drawable > > m_objects;
+
+
+class drawable_type
+{
+    public:
+    virtual ~drawable_type()
+    {
+
+    }
+
+    void draw()
+    {
+        on_draw();
+    }
+
+    private:
+
+    virtual void on_draw() = 0;
+};
+
+std::vector< std::shared_ptr < drawable_type > > m_object_types;
+
+
+template <typename t> class drawable_typed : public drawable_type
+{
+
+    public:
+
+    drawable_typed() 
+    {
+        m_objects.reserve(1000);
+    }
+
+
+    std::vector< std::shared_ptr < t > > m_objects;
+
+    virtual void on_draw()
+    {
+
+        for ( auto& item : m_objects )
+        {
+            item->draw();
+        }
+    }
+};
+
+class box2 
+{
+    public:
+    void draw()
+    {
+
+    }
+};
+
+class shape2
+{
+    public:
+    void draw()
+    {
+
+    }
+};
+
+
+void test()
+{
+    auto boxes  = std::make_shared<  drawable_typed< box2 > > ();
+    auto shapes = std::make_shared<  drawable_typed< shape2 > > ();
+
+    boxes->m_objects.push_back ( std::make_shared<box2>() );
+    boxes->m_objects.push_back ( std::make_shared<box2>() );
+
+    shapes->m_objects.push_back ( std::make_shared<shape2>() );
+    shapes->m_objects.push_back ( std::make_shared<shape2>() );
+
+    for ( auto& object_type : m_object_types )
+    {
+        object_type->draw();
+    }
+
+}
+
+*/
+
 
 #define MAX_LOADSTRING 100
 
@@ -45,20 +176,20 @@ using namespace wnd;
 
 extern std::shared_ptr<gx::scene> universe_bootstrap(  gx::render_context* render_context, d3d11::system_context context, std::shared_ptr<fnd::universe> universe );
 
-
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-    //RuntimeDiagnostics::CheckPauseOnStartupOption();
-
     try
     {
+        //Initialize windows com system. Used for loading bitmaps and installed image codecs, like jpeg2000
+        os::windows::com_initializer    com;
+        
+        //simple console, that submits the message in a list to be processed from another thread
         io::console::runner runner;
         io::console::register_thread_info_helper helper_i;
         io::console::register_notifier_helper helper_n ( std::make_shared<io::console::std_notifier>( ) );
-
         io::console::write(L"test");
 
         UNUSED_PARAMETER(hInstance);
@@ -89,27 +220,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         gx::initializer			initializer;
 
         //2. Create a default view port
-        gx::view_port			view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
+        gx::view_port			                    view_port( r.left, r.top, r.right - r.left, r.bottom - r.top );
         //3. Create direct3d11 structures
-        d3d11::system_context	context = d3d11::create_system_context(hwnd);
+        d3d11::system_context	                    context = d3d11::create_system_context(hwnd);
 
-        std::shared_ptr<gx::shader_database>		shader_database = std::make_shared<gx::shader_database>( context.m_device.get() );
+        std::shared_ptr<gx::shader_database>        shader_database = std::make_shared<gx::shader_database>( context.m_device.get() );
+
+        // initialize the text system
+        gxu::text::initializer                      initializer_text( context.m_device.get(), shader_database.get() );
+
         //4. Create render contexts
-        gx::render_context		render_context(context, shader_database, 3, view_port);
-        //5. Create application with a window and worlds with data
-        application				application;
+        gx::render_context                          render_context(context, shader_database, 3, view_port);
 
-        std::shared_ptr<fnd::universe> universe = std::make_shared<fnd::universe>();
-        std::shared_ptr<gx::scene> scene = universe_bootstrap( &render_context, context, universe );
+        //5. Create application with a window and worlds with data
+        application                                 application;
+
+        std::shared_ptr<fnd::universe>              universe = std::make_shared<fnd::universe>();
+        std::shared_ptr<gx::scene>                  scene = universe_bootstrap( &render_context, context, universe );
 
         application.set_universe(universe);
         application.set_scene(scene);
 
-        gx::target_render_resource d2d_resource	= gx::create_target_render_resource( context.m_device.get(), view_port.get_width(), view_port.get_height(), DXGI_FORMAT_B8G8R8A8_UNORM );
+        gx::target_render_resource                  d2d_resource = gx::create_target_render_resource( context.m_device.get(), view_port.get_width(), view_port.get_height(), DXGI_FORMAT_B8G8R8A8_UNORM );
 
-        window* wnd = new window( hwnd, application, context.m_swap_chain, &render_context, d2d_resource );
+        window*                                     wnd = new window( hwnd, application, context.m_swap_chain, &render_context, d2d_resource );
+
         application.new_window(wnd);
         wnd->set_scene(scene);
+
         ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wnd) );
 
         HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IRRADIANCE));
@@ -157,16 +295,16 @@ static ATOM MyRegisterClass(HINSTANCE hInstance, LPCTSTR szWindowClass)
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style			= CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc	= WndProc;
-    wcex.cbWndExtra		= 0;
-    wcex.cbClsExtra		= 0;
-    wcex.hInstance		= hInstance;
-    wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_IRRADIANCE));
-    wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_IRRADIANCE);
-    wcex.lpszClassName	= szWindowClass;
+    wcex.style          = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc    = WndProc;
+    wcex.cbWndExtra     = 0;
+    wcex.cbClsExtra     = 0;
+    wcex.hInstance      = hInstance;
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_IRRADIANCE));
+    wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.lpszMenuName   = MAKEINTRESOURCE(IDC_IRRADIANCE);
+    wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassEx(&wcex);
@@ -490,6 +628,7 @@ static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
     {
+
     case WM_INITDIALOG:
         return (INT_PTR)TRUE;
 
