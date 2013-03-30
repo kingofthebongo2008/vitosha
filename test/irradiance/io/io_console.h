@@ -18,8 +18,8 @@ namespace io
     {
         struct message
         {
-            std::chrono::system_clock::time_point	m_time;
-            std::wstring							m_text;
+            std::chrono::system_clock::time_point   m_time;
+            std::wstring                            m_text;
         };
 
         inline bool operator<(const message& l, const message& r)
@@ -78,13 +78,13 @@ namespace io
                 return m_messages.cend();
             }
 
-            void	register_message( const message& m )
+            void    register_message( const message& m )
             {
                 m_messages.push_back(m);
             }
 
 
-            void	reset()
+            void    reset()
             {
                 m_messages.clear();
             }
@@ -96,7 +96,7 @@ namespace io
 
         struct thread_info : private boost::noncopyable
         {
-            buffer*					m_pointer;
+            buffer*                 m_pointer;
             std::shared_ptr<buffer> m_buffers[2];
 
             thread_info(std::shared_ptr<buffer> buffer_0, std::shared_ptr<buffer> buffer_1 ) : m_pointer (buffer_0.get())
@@ -115,23 +115,23 @@ namespace io
 
             }
 
-            void	register_thread_info(std::shared_ptr<thread_info> info);
-            void	unregister_thread_info(std::shared_ptr<thread_info> info);
+            void    register_thread_info(std::shared_ptr<thread_info> info);
+            void    unregister_thread_info(std::shared_ptr<thread_info> info);
 
-            void	register_notifier(std::shared_ptr<notifier> notifier);
-            void	unregister_notifier(std::shared_ptr<notifier> notifier);
+            void    register_notifier(std::shared_ptr<notifier> notifier);
+            void    unregister_notifier(std::shared_ptr<notifier> notifier);
 
-            void	update();
+            void    update();
 
             private:
 
-            std::mutex														m_lock;
-            std::unordered_set< std::shared_ptr<notifier> >					m_notifiers;
-            std::unordered_set< std::shared_ptr<thread_info> >				m_infos;
-            std::uint32_t													m_buffer_index;
-    
-            void															sort();
-            void															swap();
+            std::mutex                                              m_lock;
+            std::unordered_set< std::shared_ptr<notifier> >         m_notifiers;
+            std::unordered_set< std::shared_ptr<thread_info> >      m_infos;
+            std::uint32_t                                           m_buffer_index;
+
+            void                                                    sort();
+            void                                                    swap();
         };
 
 
@@ -147,21 +147,21 @@ namespace io
             private:
 
             void stop();
-            volatile bool				m_stop_thread;
-            std::thread					m_thread;
+            volatile bool       m_stop_thread;
+            std::thread         m_thread;
         };
 
 
         std::shared_ptr<thread_info>	make_thread_info();
 
-        void	register_thread_info( std::shared_ptr<thread_info>	info);
-        void	unregister_thread_info(std::shared_ptr<thread_info> info);
+        void    register_thread_info( std::shared_ptr<thread_info>	info);
+        void    unregister_thread_info(std::shared_ptr<thread_info> info);
 
-        void	register_notifier( std::shared_ptr<notifier>	n);
-        void	unregister_notifier( std::shared_ptr<notifier> n) ;
+        void    register_notifier( std::shared_ptr<notifier>	n);
+        void    unregister_notifier( std::shared_ptr<notifier> n) ;
 
-        void	write(const wchar_t* string);
-        void	writeln(const wchar_t* string);
+        void    write(const wchar_t* string);
+        void    writeln(const wchar_t* string);
 
 
         class register_thread_info_helper : private boost::noncopyable

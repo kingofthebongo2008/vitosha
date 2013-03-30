@@ -141,7 +141,7 @@ namespace gx
                 draw_call_context.m_world_matrix = &in_params->m_world_matrices->at(index);
 
                 gx::draw_call& call = info.m_key.get_draw_call();
-                call(&draw_call_context);
+                call(&draw_call_context, info.m_key.get_user_data() );
             }
             else
             {

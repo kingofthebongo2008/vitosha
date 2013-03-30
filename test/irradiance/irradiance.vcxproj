@@ -521,6 +521,7 @@
     <ClInclude Include="gxu\gxu_pinhole_camera_dispatcher.h" />
     <ClInclude Include="gxu\gxu_static_mesh_entity.h" />
     <ClInclude Include="gxu\gxu_texture_loading.h" />
+    <ClInclude Include="gxu\gxu_text_drawing.h" />
     <ClInclude Include="gx\gx_blinn_phong_material.h" />
     <ClInclude Include="gx\gx_blinn_phong_pixel_shader.h" />
     <ClInclude Include="gx\gx_blinn_phong_shift_invariant_material.h" />
@@ -595,6 +596,7 @@
     <ClInclude Include="mem\mem_streamflow.h" />
     <ClInclude Include="mem\mem_streamflow_algorithm.h" />
     <ClInclude Include="mem\mem_streamflow_allocator.h" />
+    <ClInclude Include="os\windows\com_initializer.h" />
     <ClInclude Include="precompiled.h" />
     <ClInclude Include="gx\gx_view.h" />
     <ClInclude Include="gx\gx_view_port.h" />
@@ -604,6 +606,7 @@
     <ClInclude Include="sys\sys_spsc_queue.h" />
     <ClInclude Include="tools\libmesh\include\mesh_utils.h" />
     <ClInclude Include="util\util_bits.h" />
+    <ClInclude Include="util\util_utf8_conv.h" />
     <ClInclude Include="win32/irradiance.h" />
     <ClInclude Include="win32/resource.h" />
     <ClInclude Include="win32/application.h" />
@@ -627,6 +630,8 @@
     <ClCompile Include="gxu\gxu_entity_factory.cpp" />
     <ClCompile Include="gxu\gxu_pinhole_camera_dispatcher.cpp" />
     <ClCompile Include="gxu\gxu_static_mesh_entity.cpp" />
+    <ClCompile Include="gxu\gxu_text_debug_font.cpp" />
+    <ClCompile Include="gxu\gxu_text_drawing.cpp" />
     <ClCompile Include="gx\gx_blinn_phong_material.cpp" />
     <ClCompile Include="gx\gx_blinn_phong_pixel_shader.cpp" />
     <ClCompile Include="gx\gx_blinn_phong_shift_invariant_material.cpp" />

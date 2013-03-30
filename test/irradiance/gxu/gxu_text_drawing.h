@@ -69,7 +69,7 @@ namespace gxu
         }
 
         //async
-        inline std::future< std::unique_ptr<font> > load_font(ID3D11Device* device, const wchar_t* )
+        inline std::future< std::unique_ptr<font> > load_font(ID3D11Device*, const wchar_t* )
         {
            return std::async( [=] 
            {

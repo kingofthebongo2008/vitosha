@@ -369,6 +369,9 @@
     <ClInclude Include="util\util_bits.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="util\util_utf8_conv.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />

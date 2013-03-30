@@ -116,19 +116,29 @@ namespace gx
     };
 
     struct draw_call_context;
-    typedef std::function<void(draw_call_context* g)> draw_call;
+    typedef std::function<void(draw_call_context* g, void* user_data)> draw_call;
             
     class draw_call_key
     {
         public:
-
-        draw_call_key()
+        draw_call_key() : m_user_data(nullptr)
         {
             m_data.m_key[0] = 0;
             m_data.m_key[1] = 0;
+
+            m_user_data = nullptr;
         }
 
-        draw_call_key(opaque_key_data opaque, const draw_call& draw_call) : m_draw_call(draw_call)
+        draw_call_key(opaque_key_data opaque, const draw_call& draw_call) : m_draw_call(draw_call), m_user_data(nullptr)
+        {
+            m_data.m_key[0] = 0;
+            m_data.m_key[1] = 0;
+
+            m_data.m_opaque = opaque;
+            
+        }
+
+        draw_call_key(opaque_key_data opaque, draw_call&& draw_call) : m_draw_call( std::move( draw_call ) ), m_user_data(nullptr)
         {
             m_data.m_key[0] = 0;
             m_data.m_key[1] = 0;
@@ -136,15 +146,7 @@ namespace gx
             m_data.m_opaque = opaque;
         }
 
-        draw_call_key(opaque_key_data opaque, draw_call&& draw_call) : m_draw_call( std::move( draw_call ) )
-        {
-            m_data.m_key[0] = 0;
-            m_data.m_key[1] = 0;
-
-            m_data.m_opaque = opaque;
-        }
-
-        draw_call_key(command_key_data command, const draw_call& draw_call) : m_draw_call(draw_call)
+        draw_call_key(command_key_data command, const draw_call& draw_call) : m_draw_call(draw_call), m_user_data(nullptr)
         {
             m_data.m_key[0] = 0;
             m_data.m_key[1] = 0;
@@ -152,7 +154,40 @@ namespace gx
             m_data.m_command = command;
         }
 
-        draw_call_key(command_key_data command, draw_call&& draw_call) : m_draw_call(std::move( draw_call ) )
+        draw_call_key(command_key_data command, draw_call&& draw_call) : m_draw_call(std::move( draw_call ) ), m_user_data(nullptr)
+        {
+            m_data.m_key[0] = 0;
+            m_data.m_key[1] = 0;
+
+            m_data.m_command = command;
+        }
+
+        draw_call_key(opaque_key_data opaque, const draw_call& draw_call, void* user_data) : m_draw_call(draw_call), m_user_data(user_data)
+        {
+            m_data.m_key[0] = 0;
+            m_data.m_key[1] = 0;
+
+            m_data.m_opaque = opaque;
+            
+        }
+
+        draw_call_key(opaque_key_data opaque, draw_call&& draw_call, void* user_data) : m_draw_call( std::move( draw_call ) ), m_user_data(user_data)
+        {
+            m_data.m_key[0] = 0;
+            m_data.m_key[1] = 0;
+
+            m_data.m_opaque = opaque;
+        }
+
+        draw_call_key(command_key_data command, const draw_call& draw_call, void* user_data) : m_draw_call(draw_call), m_user_data(user_data)
+        {
+            m_data.m_key[0] = 0;
+            m_data.m_key[1] = 0;
+
+            m_data.m_command = command;
+        }
+
+        draw_call_key(command_key_data command, draw_call&& draw_call, void* user_data) : m_draw_call(std::move( draw_call ) ), m_user_data(user_data)
         {
             m_data.m_key[0] = 0;
             m_data.m_key[1] = 0;
@@ -190,6 +225,11 @@ namespace gx
             return m_draw_call;
         }
 
+        void*      get_user_data()
+        {
+            return m_user_data;
+        }
+
         union 
         {
             uint16_t                m_key[8];
@@ -200,6 +240,7 @@ namespace gx
         } m_data;
 
         draw_call                   m_draw_call;
+        void*                       m_user_data;
     };
 
     inline bool operator<(const draw_call_key key1, const draw_call_key key2)
