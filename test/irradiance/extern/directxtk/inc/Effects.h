@@ -17,9 +17,13 @@
 #include <DirectXMath.h>
 #include <memory>
 
+#pragma warning(push)
+#pragma warning(disable : 4481)
+// VS 2010 considers 'override' to be a extension, but it's part of C++11 as of VS 2012
 
 namespace DirectX
 {
+    //----------------------------------------------------------------------------------
     // Abstract interface representing any effect which can be applied onto a D3D device context.
     class IEffect
     {
@@ -79,6 +83,7 @@ namespace DirectX
 
 
 
+    //----------------------------------------------------------------------------------
     // Built-in shader supports optional texture mapping, vertex coloring, directional lighting, and fog.
     class BasicEffect : public IEffect, public IEffectMatrices, public IEffectLights, public IEffectFog
     {
@@ -89,14 +94,14 @@ namespace DirectX
         virtual ~BasicEffect();
 
         // IEffect methods.
-        void Apply(_In_ ID3D11DeviceContext* deviceContext);
+        void Apply(_In_ ID3D11DeviceContext* deviceContext) override;
 
-        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength);
+        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value);
-        void SetView(CXMMATRIX value);
-        void SetProjection(CXMMATRIX value);
+        void SetWorld(CXMMATRIX value) override;
+        void SetView(CXMMATRIX value) override;
+        void SetProjection(CXMMATRIX value) override;
 
         // Material settings.
         void SetDiffuseColor(FXMVECTOR value);
@@ -106,22 +111,22 @@ namespace DirectX
         void SetAlpha(float value);
         
         // Light settings.
-        void SetLightingEnabled(bool value);
-        void SetPerPixelLighting(bool value);
-        void SetAmbientLightColor(FXMVECTOR value);
+        void SetLightingEnabled(bool value) override;
+        void SetPerPixelLighting(bool value) override;
+        void SetAmbientLightColor(FXMVECTOR value) override;
 
-        void SetLightEnabled(int whichLight, bool value);
-        void SetLightDirection(int whichLight, FXMVECTOR value);
-        void SetLightDiffuseColor(int whichLight, FXMVECTOR value);
-        void SetLightSpecularColor(int whichLight, FXMVECTOR value);
+        void SetLightEnabled(int whichLight, bool value) override;
+        void SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
+        void SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
 
-        void EnableDefaultLighting();
+        void EnableDefaultLighting() override;
 
         // Fog settings.
-        void SetFogEnabled(bool value);
-        void SetFogStart(float value);
-        void SetFogEnd(float value);
-        void SetFogColor(FXMVECTOR value);
+        void SetFogEnabled(bool value) override;
+        void SetFogStart(float value) override;
+        void SetFogEnd(float value) override;
+        void SetFogColor(FXMVECTOR value) override;
 
         // Vertex color setting.
         void SetVertexColorEnabled(bool value);
@@ -153,24 +158,24 @@ namespace DirectX
         virtual ~AlphaTestEffect();
 
         // IEffect methods.
-        void Apply(_In_ ID3D11DeviceContext* deviceContext);
+        void Apply(_In_ ID3D11DeviceContext* deviceContext) override;
 
-        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength);
+        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value);
-        void SetView(CXMMATRIX value);
-        void SetProjection(CXMMATRIX value);
+        void SetWorld(CXMMATRIX value) override;
+        void SetView(CXMMATRIX value) override;
+        void SetProjection(CXMMATRIX value) override;
 
         // Material settings.
         void SetDiffuseColor(FXMVECTOR value);
         void SetAlpha(float value);
         
         // Fog settings.
-        void SetFogEnabled(bool value);
-        void SetFogStart(float value);
-        void SetFogEnd(float value);
-        void SetFogColor(FXMVECTOR value);
+        void SetFogEnabled(bool value) override;
+        void SetFogStart(float value) override;
+        void SetFogEnd(float value) override;
+        void SetFogColor(FXMVECTOR value) override;
 
         // Vertex color setting.
         void SetVertexColorEnabled(bool value);
@@ -205,24 +210,24 @@ namespace DirectX
         ~DualTextureEffect();
 
         // IEffect methods.
-        void Apply(_In_ ID3D11DeviceContext* deviceContext);
+        void Apply(_In_ ID3D11DeviceContext* deviceContext) override;
 
-        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength);
+        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value);
-        void SetView(CXMMATRIX value);
-        void SetProjection(CXMMATRIX value);
+        void SetWorld(CXMMATRIX value) override;
+        void SetView(CXMMATRIX value) override;
+        void SetProjection(CXMMATRIX value) override;
 
         // Material settings.
         void SetDiffuseColor(FXMVECTOR value);
         void SetAlpha(float value);
         
         // Fog settings.
-        void SetFogEnabled(bool value);
-        void SetFogStart(float value);
-        void SetFogEnd(float value);
-        void SetFogColor(FXMVECTOR value);
+        void SetFogEnabled(bool value) override;
+        void SetFogStart(float value) override;
+        void SetFogEnd(float value) override;
+        void SetFogColor(FXMVECTOR value) override;
 
         // Vertex color setting.
         void SetVertexColorEnabled(bool value);
@@ -254,14 +259,14 @@ namespace DirectX
         virtual ~EnvironmentMapEffect();
 
         // IEffect methods.
-        void Apply(_In_ ID3D11DeviceContext* deviceContext);
+        void Apply(_In_ ID3D11DeviceContext* deviceContext) override;
 
-        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength);
+        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value);
-        void SetView(CXMMATRIX value);
-        void SetProjection(CXMMATRIX value);
+        void SetWorld(CXMMATRIX value) override;
+        void SetView(CXMMATRIX value) override;
+        void SetProjection(CXMMATRIX value) override;
 
         // Material settings.
         void SetDiffuseColor(FXMVECTOR value);
@@ -269,19 +274,19 @@ namespace DirectX
         void SetAlpha(float value);
         
         // Light settings.
-        void SetAmbientLightColor(FXMVECTOR value);
+        void SetAmbientLightColor(FXMVECTOR value) override;
 
-        void SetLightEnabled(int whichLight, bool value);
-        void SetLightDirection(int whichLight, FXMVECTOR value);
-        void SetLightDiffuseColor(int whichLight, FXMVECTOR value);
+        void SetLightEnabled(int whichLight, bool value) override;
+        void SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
 
-        void EnableDefaultLighting();
+        void EnableDefaultLighting() override;
 
         // Fog settings.
-        void SetFogEnabled(bool value);
-        void SetFogStart(float value);
-        void SetFogEnd(float value);
-        void SetFogColor(FXMVECTOR value);
+        void SetFogEnabled(bool value) override;
+        void SetFogStart(float value) override;
+        void SetFogEnd(float value) override;
+        void SetFogColor(FXMVECTOR value) override;
 
         // Texture setting.
         void SetTexture(_In_opt_ ID3D11ShaderResourceView* value);
@@ -299,9 +304,9 @@ namespace DirectX
         std::unique_ptr<Impl> pImpl;
 
         // Unsupported interface methods.
-        void SetLightingEnabled(bool value);
-        void SetPerPixelLighting(bool value);
-        void SetLightSpecularColor(int whichLight, FXMVECTOR value);
+        void SetLightingEnabled(bool value) override;
+        void SetPerPixelLighting(bool value) override;
+        void SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
 
         // Prevent copying.
         EnvironmentMapEffect(EnvironmentMapEffect const&);
@@ -320,14 +325,14 @@ namespace DirectX
         virtual ~SkinnedEffect();
 
         // IEffect methods.
-        void Apply(_In_ ID3D11DeviceContext* deviceContext);
+        void Apply(_In_ ID3D11DeviceContext* deviceContext) override;
 
-        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength);
+        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value);
-        void SetView(CXMMATRIX value);
-        void SetProjection(CXMMATRIX value);
+        void SetWorld(CXMMATRIX value) override;
+        void SetView(CXMMATRIX value) override;
+        void SetProjection(CXMMATRIX value) override;
 
         // Material settings.
         void SetDiffuseColor(FXMVECTOR value);
@@ -337,21 +342,21 @@ namespace DirectX
         void SetAlpha(float value);
         
         // Light settings.
-        void SetPerPixelLighting(bool value);
-        void SetAmbientLightColor(FXMVECTOR value);
+        void SetPerPixelLighting(bool value) override;
+        void SetAmbientLightColor(FXMVECTOR value) override;
 
-        void SetLightEnabled(int whichLight, bool value);
-        void SetLightDirection(int whichLight, FXMVECTOR value);
-        void SetLightDiffuseColor(int whichLight, FXMVECTOR value);
-        void SetLightSpecularColor(int whichLight, FXMVECTOR value);
+        void SetLightEnabled(int whichLight, bool value) override;
+        void SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
+        void SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
 
-        void EnableDefaultLighting();
+        void EnableDefaultLighting() override;
 
         // Fog settings.
-        void SetFogEnabled(bool value);
-        void SetFogStart(float value);
-        void SetFogEnd(float value);
-        void SetFogColor(FXMVECTOR value);
+        void SetFogEnabled(bool value) override;
+        void SetFogStart(float value) override;
+        void SetFogEnd(float value) override;
+        void SetFogColor(FXMVECTOR value) override;
 
         // Texture setting.
         void SetTexture(_In_opt_ ID3D11ShaderResourceView* value);
@@ -369,10 +374,70 @@ namespace DirectX
         std::unique_ptr<Impl> pImpl;
 
         // Unsupported interface method.
-        void SetLightingEnabled(bool value);
+        void SetLightingEnabled(bool value) override;
 
         // Prevent copying.
         SkinnedEffect(SkinnedEffect const&);
         SkinnedEffect& operator= (SkinnedEffect const&);
     };
+
+
+
+    //----------------------------------------------------------------------------------
+    // Abstract interface to factory for sharing effects and texture resources
+    class IEffectFactory
+    {
+    public:
+        virtual ~IEffectFactory() {}
+
+        struct EffectInfo
+        {
+            const WCHAR*        name;
+            bool                perVertexColor;
+            float               specularPower;
+            float               alpha;
+            DirectX::XMFLOAT3   ambientColor;
+            DirectX::XMFLOAT3   diffuseColor;
+            DirectX::XMFLOAT3   specularColor;
+            DirectX::XMFLOAT3   emissiveColor;
+            const WCHAR*        texture;
+
+            EffectInfo() { memset( this, 0, sizeof(EffectInfo) ); };
+        };
+
+        virtual std::shared_ptr<IEffect> CreateEffect( _In_ const EffectInfo& info, _In_opt_ ID3D11DeviceContext* deviceContext ) = 0;
+
+        virtual void CreateTexture( _In_z_ const WCHAR* name, _In_opt_ ID3D11DeviceContext* deviceContext, _Outptr_ ID3D11ShaderResourceView** textureView ) = 0;
+    };
+
+
+    // Factory for sharing effects and texture resources
+    class EffectFactory : public IEffectFactory
+    {
+    public:
+        explicit EffectFactory(_In_ ID3D11Device* device);
+        EffectFactory(EffectFactory&& moveFrom);
+        EffectFactory& operator= (EffectFactory&& moveFrom);
+        virtual ~EffectFactory();
+
+        virtual std::shared_ptr<IEffect> CreateEffect( _In_ const EffectInfo& info, _In_opt_ ID3D11DeviceContext* deviceContext ) override;
+
+        virtual void CreateTexture( _In_z_ const WCHAR* name, _In_opt_ ID3D11DeviceContext* deviceContext, _Outptr_ ID3D11ShaderResourceView** textureView ) override;
+
+        void ReleaseCache();
+
+        void SetSharing( bool enabled );
+
+    private:
+        // Private implementation.
+        class Impl;
+
+        std::shared_ptr<Impl> pImpl;
+
+        // Prevent copying.
+        EffectFactory(EffectFactory const&);
+        EffectFactory& operator= (EffectFactory const&);
+    };
 }
+
+#pragma warning(pop)
