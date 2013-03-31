@@ -33,9 +33,17 @@ namespace gxu
 
                 }
 
-                draw_string_info( math::float4 position, std::wstring&& string, const font* font) :
+                 draw_string_info( math::float4 position, const std::wstring& string, const font* font) :
                     m_position_ps(position)
                     , m_string(string)
+                    , m_font(font)
+                {
+
+                }
+
+                draw_string_info( math::float4 position, std::wstring&& string, const font* font) :
+                    m_position_ps(position)
+                    , m_string(std::move(string) )
                     , m_font(font)
                 {
 
@@ -74,9 +82,31 @@ namespace gxu
             get_string_info().emplace_back( draw_string_info( position_ps, std::wstring( text ) , f ) ) ;
         }
 
+        void draw_string ( const font* f, const std::wstring& text, math::float4 position_ps )
+        {
+            sys::lock<sys::spinlock_fas> lock( g_string_info_lock );
+            get_string_info().emplace_back( draw_string_info( position_ps, text, f ) ) ;
+        }
+
+        void draw_string ( const font* f, std::wstring&& text, math::float4 position_ps )
+        {
+            sys::lock<sys::spinlock_fas> lock( g_string_info_lock );
+            get_string_info().emplace_back( draw_string_info( position_ps, std::move(text), f ) ) ;
+        }
+
         void draw_debug_string( const wchar_t* text, math::float4 position_ps )
         {
             draw_string( g_debug_font.get(), text, position_ps);
+        }
+
+        void draw_debug_string( const std::wstring& text, math::float4 position_ps )
+        {
+            draw_string( g_debug_font.get(), text, position_ps);
+        }
+
+        void draw_debug_string( std::wstring&& text, math::float4 position_ps )
+        {
+            draw_string( g_debug_font.get(), std::move(text), position_ps);
         }
 
         namespace

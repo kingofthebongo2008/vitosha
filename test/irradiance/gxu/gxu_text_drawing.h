@@ -85,7 +85,12 @@ namespace gxu
         }
 
         void draw_string ( const font* f, const wchar_t* text, math::float4 position_ps );
+        void draw_string ( const font* f, const std::wstring& text, math::float4 position_ps );
+        void draw_string ( const font* f, std::wstring&& text, math::float4 position_ps );
+
         void draw_debug_string( const wchar_t* text, math::float4 position_ps );
+        void draw_debug_string( const std::wstring& text, math::float4 position_ps );
+        void draw_debug_string( std::wstring&& text, math::float4 position_ps );
 
 
         void initialize(ID3D11Device* device, gx::shader_database* shader_database );

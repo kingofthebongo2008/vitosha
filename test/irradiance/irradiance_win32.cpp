@@ -274,8 +274,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     application.update();
                     application.render();
 
-                    std::wstring t = L"Elapsed time " + std::to_wstring(timer.milliseconds()) + L" ms ";
-                    gxu::text::draw_debug_string(t.c_str(), math::set(0.0f, 0.5f, 0.0f, 1.0f )  );
+                    gxu::text::draw_debug_string
+                        (
+                            L"Elapsed time " + std::to_wstring(timer.milliseconds()) + L" ms ",
+                            math::set(0.0f, 0.5f, 0.0f, 1.0f )
+                        );
                 }
             }
             else
@@ -284,8 +287,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     application.process_user_input();
                     application.update();
                     application.render();
-                    std::wstring t = L"Elapsed time " + std::to_wstring(timer.milliseconds()) + L" ms ";
-                    gxu::text::draw_debug_string(t.c_str(), math::set(0.0f, 0.5f, 0.0f, 1.0f )  );
+
+                    gxu::text::draw_debug_string
+                        (
+                            L"Elapsed time " + std::to_wstring(timer.milliseconds()) + L" ms ", 
+                            math::set(0.0f, 0.5f, 0.0f, 1.0f )
+                        );
             }
         }
 
