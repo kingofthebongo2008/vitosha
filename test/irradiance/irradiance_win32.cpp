@@ -5,6 +5,7 @@
 #include <windowsx.h>
 
 #include <sys/sys_base.h>
+#include <sys/sys_profile_timer.h>
 #include <os/windows/com_initializer.h>
 
 #include <d3d11/d3d11_system.h>
@@ -229,6 +230,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         // initialize the text system
         gxu::text::initializer                      initializer_text( context.m_device.get(), shader_database.get() );
 
+        
         //4. Create render contexts
         gx::render_context                          render_context(context, shader_database, 3, view_port);
 
@@ -267,16 +269,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                 }
                 else
                 {
+                    sys::profile_timer timer;
                     application.process_user_input();
                     application.update();
                     application.render();
+
+                    std::wstring t = L"Elapsed time " + std::to_wstring(timer.milliseconds()) + L" ms ";
+                    gxu::text::draw_debug_string(t.c_str(), math::set(0.0f, 0.5f, 0.0f, 1.0f )  );
                 }
             }
             else
             {
+                    sys::profile_timer timer;
                     application.process_user_input();
                     application.update();
                     application.render();
+                    std::wstring t = L"Elapsed time " + std::to_wstring(timer.milliseconds()) + L" ms ";
+                    gxu::text::draw_debug_string(t.c_str(), math::set(0.0f, 0.5f, 0.0f, 1.0f )  );
             }
         }
 

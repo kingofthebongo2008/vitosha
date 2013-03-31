@@ -1,5 +1,5 @@
-#ifndef __SYS_BASE_H__
-#define __SYS_BASE_H__
+#ifndef __SYS_PROFILE_TIMER_H__
+#define __SYS_PROFILE_TIMER_H__
 
 #include <cstdint>
 #include <windows.h>

@@ -41,6 +41,8 @@ namespace gx
         collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_initialize ) );
         collector.add_draw_call( gx::create_command_draw_call( gx::command::debug_finalize ) );
 
+        on_create_draw_calls( &context, &collector );
+
         for(auto i = static_cast<uint32_t> (0) ; i < in_params->m_data->size(); ++i)
         {
             context.m_wvp = &in_params->m_wvp_matrices->at(i);
@@ -71,6 +73,12 @@ namespace gx
         };
 
         delete in_params;
+
         return new draw_calls_pipeline_params(out_params);
+    }
+
+    void create_draw_calls_pipeline_node::on_create_draw_calls( const draw_call_collector_context* context, draw_call_collector* collector )
+    {
+
     }
 }

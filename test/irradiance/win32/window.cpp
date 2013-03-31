@@ -3,6 +3,7 @@
 #include <win32/window.h>
 
 #include <memory>
+#include <functional>
 
 #include <dx/dxgi_pointers.h>
 #include <d3d11/dxgi_helpers.h>
@@ -23,7 +24,9 @@
 #include <gx/gx_view.h>
 #include <gx/gx_view_pipeline_node.h>
 
+#include <gxu/gxu_create_draw_calls_pipeline_node.h>
 #include <gxu/gxu_pinhole_camera_dispatcher.h>
+#include <gxu/gxu_text_drawing.h>
 
 #include <win32/application.h>
 
@@ -113,10 +116,20 @@ namespace wnd
         pipeline.add_node( std::make_shared< gx::scene_pipeline_node>(m_scene.get()) );
 
         pipeline.add_node( std::make_shared< gx::view_pipeline_node>(&view) );
-        pipeline.add_node( std::make_shared< gx::create_draw_calls_pipeline_node>() );
+
+        pipeline.add_node( gxu::create_collector_pipeline_node
+            (
+                [=](const gx::draw_call_collector_context*, gx::draw_call_collector* collector) 
+                {
+                    gxu::text::create_debug_text_draw_calls(collector);
+                }
+            )
+            );
+
         pipeline.add_node( std::make_shared< gx::execute_draw_calls_pipeline_node>(m_render_context) );
 
         pipeline.add_node( std::make_shared< gx::final_pipeline_node>() );
+
         pipeline.process();
 
 

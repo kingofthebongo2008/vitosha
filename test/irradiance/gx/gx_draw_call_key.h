@@ -271,7 +271,17 @@ namespace gx
     inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, uint32_t material_pass, float depth, draw_call&& draw_call )
     {
         uint32_t integer_depth = static_cast<uint32_t> ( depth * ( ( 1 << 24 ) - 1) );
-        return create_gbuffer_draw_call( material_id, material_pass, integer_depth, draw_call);
+
+        opaque_key_data opaque_key = {};
+
+        //setup some default values
+        opaque_key.m_header.m_command = command::gbuffer_opaque_draw_call;
+
+        opaque_key.m_material_id = static_cast<uint16_t>(material_id);
+        opaque_key.m_material_pass = static_cast<uint8_t> (material_pass);
+        opaque_key.m_depth = integer_depth;
+
+        return draw_call_key ( opaque_key, std::move(draw_call) );
     }
 
     inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, float depth, const draw_call& draw_call )
@@ -281,10 +291,9 @@ namespace gx
 
     inline draw_call_key create_gbuffer_draw_call ( uint32_t material_id, float depth, draw_call&& draw_call )
     {
-        return create_gbuffer_draw_call( material_id, 0, depth, draw_call);
+        return create_gbuffer_draw_call( material_id, 0, depth, std::move(draw_call));
     }
 
-    
     inline draw_call_key create_debug_draw_call( uint32_t material_id, float depth, const draw_call& draw_call )
     {
         draw_call_key key = create_gbuffer_draw_call( material_id, depth, draw_call);
@@ -296,7 +305,7 @@ namespace gx
 
     inline draw_call_key create_debug_draw_call( uint32_t material_id, float depth, draw_call&& draw_call )
     {
-        draw_call_key key = create_gbuffer_draw_call( material_id, depth, draw_call);
+        draw_call_key key = create_gbuffer_draw_call( material_id, depth, std::move(draw_call) );
 
         //setup some default values
         key.m_data.m_header.m_command = command::debug_draw_call;
@@ -314,7 +323,7 @@ namespace gx
 
     inline draw_call_key create_depth_draw_call( float depth, draw_call&& draw_call )
     {
-        draw_call_key key = create_gbuffer_draw_call( 0, depth, draw_call);
+        draw_call_key key = create_gbuffer_draw_call( 0, depth, std::move(draw_call));
 
         //setup some default values
         key.m_data.m_header.m_command = command::depth_draw_call;
@@ -332,7 +341,7 @@ namespace gx
     {
         command_key_data light_key = {};
         light_key.m_header.m_command = command::light_buffer_draw_call;
-        return draw_call_key(light_key, draw_call);
+        return draw_call_key(light_key, std::move(draw_call));
     }
 
     inline draw_call_key create_shadow_draw_call(const draw_call& draw_call)

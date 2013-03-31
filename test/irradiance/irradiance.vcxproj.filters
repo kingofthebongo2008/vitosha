@@ -372,6 +372,9 @@
     <ClInclude Include="util\util_utf8_conv.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="gxu\gxu_create_draw_calls_pipeline_node.h">
+      <Filter>gxu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp" />

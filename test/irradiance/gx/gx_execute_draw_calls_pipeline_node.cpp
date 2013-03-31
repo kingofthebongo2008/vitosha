@@ -146,7 +146,16 @@ namespace gx
             else
             {
                 gx::command::type command = info.m_key.get_command();
-                process_command( m_render_context, device_context, command, *in_params);
+
+                if (command == gx::command::debug_draw_call)
+                {
+                    gx::draw_call& call = info.m_key.get_draw_call();
+                    call(&draw_call_context, info.m_key.get_user_data() );
+                }
+                else
+                {
+                    process_command( m_render_context, device_context, command, *in_params);
+                }
             }
         }
 

@@ -517,6 +517,7 @@
     <ClInclude Include="fnd\fnd_updater.h" />
     <ClInclude Include="fnd\fnd_world.h" />
     <ClInclude Include="gxu\gxu_camera_command.h" />
+    <ClInclude Include="gxu\gxu_create_draw_calls_pipeline_node.h" />
     <ClInclude Include="gxu\gxu_entity_factory.h" />
     <ClInclude Include="gxu\gxu_pinhole_camera_dispatcher.h" />
     <ClInclude Include="gxu\gxu_static_mesh_entity.h" />

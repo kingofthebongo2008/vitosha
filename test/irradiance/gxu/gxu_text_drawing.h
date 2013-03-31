@@ -11,6 +11,7 @@
 
 namespace gx
 {
+    class draw_call_collector;
     class shader_database;    
 }
 
@@ -43,6 +44,10 @@ namespace gxu
                 delete m_font;
             }
 
+            DirectX::SpriteFont*    get_font() const
+            {
+                return m_font;
+            }
 
             private:
 
@@ -102,10 +107,8 @@ namespace gxu
         };
 
 
-        inline void create_debug_text_draw_calls( )
-        {
-
-        }
+        //must be called once in a while to flush the draw calls
+        void create_debug_text_draw_calls( gx::draw_call_collector* collector);
     }
 }
 
