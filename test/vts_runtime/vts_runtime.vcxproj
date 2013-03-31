@@ -66,7 +66,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>Disabled</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;VTS_RUNTIME_EXPORTS;MEM_STREAMFLOW_DLL_EXPORT;MEM_SSMALLOC_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>

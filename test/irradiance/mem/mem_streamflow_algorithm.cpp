@@ -116,7 +116,7 @@ namespace mem
             std::size_t bin = size / (cache_line_size);
             std::size_t position = (size - 1) % cache_line_size;
 
-            if (size %  cache_line_size  == 0)
+            if ( size %  cache_line_size  == 0 )
             {
                 bin = (size - 1) / cache_line_size;
                 position = (size - 2) % cache_line_size;
@@ -509,7 +509,7 @@ namespace mem
             if (!m_super_page_manager.is_large_object(pointer) )
             {            
                 page_block* block = m_super_page_manager.decode_pointer(pointer);
-                thread_id   tid = block->get_owning_thread_id();
+                thread_id   tid = block->get_owning_thread_id_cached();
             
                 thread_local_info* local_heap_info = t_thread_local_heap_info->get_thread_local_info( get_index() );
                 size_class         c = compute_size_class(block->get_size_class());

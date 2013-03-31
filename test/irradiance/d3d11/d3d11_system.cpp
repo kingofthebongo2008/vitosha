@@ -24,7 +24,7 @@ namespace d3d11
             desc.BufferDesc = mode;
             desc.Windowed = (hwnd !=0);
             desc.OutputWindow = hwnd;
-            desc.BufferCount = 1;
+            desc.BufferCount = 2;
             desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
             desc.SampleDesc.Count = 1;
             desc.SampleDesc.Quality = 0;

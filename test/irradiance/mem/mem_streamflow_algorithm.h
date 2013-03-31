@@ -704,6 +704,14 @@ namespace mem
                   return m_block_info.get_thread_id( m_block_info.m_memory_reference.load() );
               }
 
+              thread_id		 get_owning_thread_id_cached() const throw()
+              {
+                    //temp fix until microsoft fixes the implementation.
+                    //see https://connect.microsoft.com/VisualStudio/feedback/details/770885/std-atomic-load-implementation-is-absurdly-slow
+                    return m_block_info.get_thread_id( * (reinterpret_cast<const uint64_t*> (&m_block_info.m_memory_reference )) );
+                    //return m_block_info.get_thread_id( m_block_info.m_memory_reference.load( std::memory_order_relaxed));
+              }
+
               bool  try_set_thread(thread_id thread_id) throw()
               {
                   auto reference = m_block_info.m_memory_reference.load();	
@@ -1409,8 +1417,15 @@ namespace mem
                 const uintptr_t i_2 = (start >> leaf_bits ) & (interior_length - 1 ); 
                 const uintptr_t i_3 = start & ( leaf_length - 1 );
 
-                node* n = reinterpret_cast<node*> (  m_root->m_pointers[i_1].load() ) ;
-                leaf* l = reinterpret_cast<leaf*> (  n->m_pointers[i_2].load() );
+                //temp fix until microsoft fixes the implementation.
+                //see https://connect.microsoft.com/VisualStudio/feedback/details/770885/std-atomic-load-implementation-is-absurdly-slow
+                //return m_block_info.get_thread_id( * (reinterpret_cast<const uint64_t*> (&m_block_info.m_memory_reference )) );
+
+                //node* n = reinterpret_cast<node*> (  m_root->m_pointers[i_1].load(std::memory_order_relaxed) ) ;
+                //leaf* l = reinterpret_cast<leaf*> (  n->m_pointers[i_2].load(std::memory_order_relaxed) );
+
+                node* n = reinterpret_cast<node*> (  * (reinterpret_cast<const uintptr_t*> (&m_root->m_pointers[i_1]))) ;
+                leaf* l = reinterpret_cast<leaf*> (  * (reinterpret_cast<const uintptr_t*> (&n->m_pointers[i_2] )));
 
                 return l->m_data[i_3];
             }
