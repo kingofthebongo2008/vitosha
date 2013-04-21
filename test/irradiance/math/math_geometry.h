@@ -200,7 +200,7 @@ namespace math
     struct aabb
     {
             float4 m_center;
-            float4 m_diagonal;
+            float4 m_diagonal;  //must be positive
     };
 
     struct frustum
@@ -221,9 +221,10 @@ namespace math
         };
 
         typedef float4 plane;
+
+        //plane normals are expected to point inside the frustum
         plane   m_planes[6];
     };
-
 
     enum frustum_cull_result : uint8_t
     {
@@ -231,6 +232,88 @@ namespace math
         intersect = 1,
         outside = 2
     };
+
+    //converts aabb to aabb4 for frustum culling. box_count should be divisible by 4, since we will process aabb's by 4
+    void convert_aabb_2_aabb4( const aabb* const __restrict b, aabb4* __restrict aabb4, uint32_t box_count )
+    {
+        uint32_t j = 0;
+
+        for (uint32_t i = 0; i < box_count; i +=4 )
+        {
+            const aabb* const __restrict b1 = &b[i];
+            const aabb* const __restrict b2 = &b[i+1];
+            const aabb* const __restrict b3 = &b[i+2];
+            const aabb* const __restrict b4 = &b[i+3];
+
+            float4 b1_min = sub ( b1->m_center, b1->m_diagonal);
+            float4 b1_max = add ( b1->m_center, b1->m_diagonal);
+
+            float4 b2_min = sub ( b2->m_center, b2->m_diagonal);
+            float4 b2_max = add ( b2->m_center, b2->m_diagonal);
+
+            float4 b3_min = sub ( b3->m_center, b3->m_diagonal);
+            float4 b3_max = add ( b3->m_center, b3->m_diagonal);
+
+            float4 b4_min = sub ( b4->m_center, b4->m_diagonal);
+            float4 b4_max = add ( b4->m_center, b4->m_diagonal);
+
+            float4 b4_1 = 
+                            swizzle <x,z,y,w> (
+                            shuffle <x,y,x,y> (
+                            swizzle <x,z,x,x> ( shuffle< x, x, x, x> ( b1_min, b2_min ) ),
+                            swizzle <x,z,x,x> ( shuffle< x, x, x, x> ( b1_max, b2_max ) )
+                                             )
+                                             );
+            stream ( &aabb4->m_x12, b4_1);
+
+            float4 b4_2 = 
+                            swizzle <x,z,y,w> (
+                            shuffle <x,y,x,y> (
+                            swizzle <x,z,x,x> ( shuffle< y, y, y, y> ( b1_min, b2_min ) ),
+                            swizzle <x,z,x,x> ( shuffle< y, y, y, y> ( b1_max, b2_max ) )
+                                             )
+                                             );
+
+            stream ( &aabb4->m_y12, b4_2);
+
+            float4 b4_3 = 
+                            swizzle <x,z,y,w> (
+                            shuffle <x,y,x,y> (
+                            swizzle <x,z,x,x> ( shuffle< z, z, z, z> ( b1_min, b2_min ) ),
+                            swizzle <x,z,x,x> ( shuffle< z, z, z, z> ( b1_max, b2_max ) )
+                                             )
+                                             );
+            stream ( &aabb4->m_z12, b4_3);
+
+            float4 b4_4 = 
+                            swizzle <x,z,y,w> (
+                            shuffle <x,y,x,y> (
+                            swizzle <x,z,x,x> ( shuffle< x, x, x, x> ( b3_min, b4_min ) ),
+                            swizzle <x,z,x,x> ( shuffle< x, x, x, x> ( b3_max, b4_max ) )
+                                             )
+                                             );
+            stream ( &aabb4->m_x34, b4_4);
+
+            float4 b4_5 = 
+                            swizzle <x,z,y,w> (
+                            shuffle <x,y,x,y> (
+                            swizzle <x,z,x,x> ( shuffle< y, y, y, y> ( b3_min, b4_min ) ),
+                            swizzle <x,z,x,x> ( shuffle< y, y, y, y> ( b3_max, b4_max ) )
+                                             )
+                                             );
+            stream ( &aabb4->m_y34, b4_5);
+
+            float4 b4_6 = 
+                            swizzle <x,z,y,w> (
+                            shuffle <x,y,x,y> (
+                            swizzle <x,z,x,x> ( shuffle< z, z, z, z> ( b3_min, b4_min ) ),
+                            swizzle <x,z,x,x> ( shuffle< z, z, z, z> ( b3_max, b4_max ) )
+                                             )
+                                             );
+            stream ( &aabb4->m_z34, b4_6);
+            ++j;
+        }
+    }
 
     //sphere approximation for the aabb, approximate test, might report intersection, when the object is outside
     frustum_cull_result frustum_cull ( const frustum* const __restrict f, const aabb* const __restrict b )
