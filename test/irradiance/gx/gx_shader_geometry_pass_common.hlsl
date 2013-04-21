@@ -14,7 +14,9 @@ cbuffer per_pass : register(SLOT_PER_PASS)
 float4 project_vertex( float4 v_os, float4x4 world, float4x4 view, float4x4 perspective)
 {
     float4x4 wvp = mul ( world, mul ( view, perspective ) );
-    return  mul ( v_os, wvp );
+    float4 result = mul ( mul ( mul ( v_os, world ), view ), perspective );
+
+    return result;
 }
 
 float reconstruct_z_vs( float depth_buffer_z, float4 rational_transform)
