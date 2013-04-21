@@ -77,7 +77,7 @@ namespace gx
         return new draw_calls_pipeline_params(out_params);
     }
 
-    void create_draw_calls_pipeline_node::on_create_draw_calls( const draw_call_collector_context* context, draw_call_collector* collector )
+    void create_draw_calls_pipeline_node::on_create_draw_calls( const draw_call_collector_context*, draw_call_collector*  )
     {
 
     }
