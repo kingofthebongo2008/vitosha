@@ -82,9 +82,9 @@ namespace mem
             }
         }
         //---------------------------------------------------------------------------------------
-        static inline std::uint32_t compute_size(size_class size_class)
+        static inline uint32_t compute_size(size_class size_class)
         {
-            static  std::uint16_t reverse[] =
+            static  uint16_t reverse[] =
             {	
                 8 - 1,  12 - 1, 16 - 1, 20 - 1, 24 - 1, 28 - 1, 32 - 1, 36 - 1, 40 - 1, 
                 44 - 1, 48 - 1, 52 - 1, 56 - 1, 60 - 1, 64 - 1, 80 - 1, 96 - 1, 112 - 1, 128 - 1, 
@@ -95,24 +95,23 @@ namespace mem
 
             return reverse[size_class] + 1;
         }
-
-        static uintptr_t align_chunk( uintptr_t address )
+        //---------------------------------------------------------------------------------------
+        static inline uintptr_t align_chunk( uintptr_t address )
         {
             return address - ( address % chunk_size() ) ;
         }
-
-        static memory_chunk* locate_chunk( uintptr_t address )
+        //---------------------------------------------------------------------------------------
+        static inline memory_chunk* locate_chunk( uintptr_t address )
         {
             return reinterpret_cast<memory_chunk*> ( align_chunk ( address ) );
         }
-
-        static memory_chunk* locate_chunk( void* address )
+        //---------------------------------------------------------------------------------------
+        static inline memory_chunk* locate_chunk( void* address )
         {
             return reinterpret_cast<memory_chunk*> ( align_chunk ( reinterpret_cast<uintptr_t> ( address ) ) );
         }
-
         //---------------------------------------------------------------------------------------
-        memory_chunk* private_heap::get_new_chunk(size_class cls ) throw()
+        memory_chunk* private_heap::get_new_chunk( size_class cls ) throw()
         {
             auto result = m_background_chunks[cls].front();
 
@@ -125,7 +124,7 @@ namespace mem
                 //concurrent stack
                 result = m_remote_free_chunks[cls].pop<memory_chunk>();
 
-                if ( result!= nullptr)
+                if ( result != nullptr)
                 {
                     result->garbage_collect();
                 }
@@ -142,7 +141,7 @@ namespace mem
                     {
                         result = m_global_pool->allocate_chunk();
 
-                        if (result)
+                        if (result != nullptr)
                         {
                             result->reset( compute_size(cls), 0);
                         }

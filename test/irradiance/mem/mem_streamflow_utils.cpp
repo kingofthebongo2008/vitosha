@@ -1,6 +1,6 @@
 #include "precompiled.h"
 
-#include <mem/mem_streamflow_algorithm.h>
+#include <mem/mem_streamflow.h>
 #include <memory>
 
 //comment this, if you do not want c++ allocations to go through streamflow

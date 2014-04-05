@@ -2,6 +2,7 @@
 #define __GX_LIGHTING_H__
 
 #include <cstdint>
+#include <algorithm>
 #include <math.h>
 
 #include <dxgiformat.h>

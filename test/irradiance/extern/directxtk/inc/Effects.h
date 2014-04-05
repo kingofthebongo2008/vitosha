@@ -13,7 +13,12 @@
 
 #pragma once
 
-#include <d3d11.h>
+#if defined(_XBOX_ONE) && defined(_TITLE) && MONOLITHIC
+#include <d3d11_x.h>
+#else
+#include <d3d11_1.h>
+#endif
+
 #include <DirectXMath.h>
 #include <memory>
 
@@ -23,6 +28,12 @@
 
 namespace DirectX
 {
+    #if (DIRECTXMATH_VERSION < 305) && !defined(XM_CALLCONV)
+    #define XM_CALLCONV __fastcall
+    typedef const XMVECTOR& HXMVECTOR;
+    typedef const XMMATRIX& FXMMATRIX;
+    #endif
+
     //----------------------------------------------------------------------------------
     // Abstract interface representing any effect which can be applied onto a D3D device context.
     class IEffect
@@ -42,9 +53,9 @@ namespace DirectX
     public:
         virtual ~IEffectMatrices() { }
 
-        virtual void SetWorld(CXMMATRIX value) = 0;
-        virtual void SetView(CXMMATRIX value) = 0;
-        virtual void SetProjection(CXMMATRIX value) = 0;
+        virtual void XM_CALLCONV SetWorld(FXMMATRIX value) = 0;
+        virtual void XM_CALLCONV SetView(FXMMATRIX value) = 0;
+        virtual void XM_CALLCONV SetProjection(FXMMATRIX value) = 0;
     };
 
 
@@ -56,12 +67,12 @@ namespace DirectX
 
         virtual void SetLightingEnabled(bool value) = 0;
         virtual void SetPerPixelLighting(bool value) = 0;
-        virtual void SetAmbientLightColor(FXMVECTOR value) = 0;
+        virtual void XM_CALLCONV SetAmbientLightColor(FXMVECTOR value) = 0;
 
         virtual void SetLightEnabled(int whichLight, bool value) = 0;
-        virtual void SetLightDirection(int whichLight, FXMVECTOR value) = 0;
-        virtual void SetLightDiffuseColor(int whichLight, FXMVECTOR value) = 0;
-        virtual void SetLightSpecularColor(int whichLight, FXMVECTOR value) = 0;
+        virtual void XM_CALLCONV SetLightDirection(int whichLight, FXMVECTOR value) = 0;
+        virtual void XM_CALLCONV SetLightDiffuseColor(int whichLight, FXMVECTOR value) = 0;
+        virtual void XM_CALLCONV SetLightSpecularColor(int whichLight, FXMVECTOR value) = 0;
 
         virtual void EnableDefaultLighting() = 0;
 
@@ -78,9 +89,22 @@ namespace DirectX
         virtual void SetFogEnabled(bool value) = 0;
         virtual void SetFogStart(float value) = 0;
         virtual void SetFogEnd(float value) = 0;
-        virtual void SetFogColor(FXMVECTOR value) = 0;
+        virtual void XM_CALLCONV SetFogColor(FXMVECTOR value) = 0;
     };
 
+
+    // Abstract interface for effects which support skinning
+    class IEffectSkinning
+    {
+    public:
+        virtual ~IEffectSkinning() { } 
+
+        virtual void SetWeightsPerVertex(int value) = 0;
+        virtual void SetBoneTransforms(_In_reads_(count) XMMATRIX const* value, size_t count) = 0;
+        virtual void ResetBoneTransforms() = 0;
+
+        static const int MaxBones = 72;
+    };
 
 
     //----------------------------------------------------------------------------------
@@ -99,26 +123,27 @@ namespace DirectX
         void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value) override;
-        void SetView(CXMMATRIX value) override;
-        void SetProjection(CXMMATRIX value) override;
+        void XM_CALLCONV SetWorld(FXMMATRIX value) override;
+        void XM_CALLCONV SetView(FXMMATRIX value) override;
+        void XM_CALLCONV SetProjection(FXMMATRIX value) override;
 
         // Material settings.
-        void SetDiffuseColor(FXMVECTOR value);
-        void SetEmissiveColor(FXMVECTOR value);
-        void SetSpecularColor(FXMVECTOR value);
+        void XM_CALLCONV SetDiffuseColor(FXMVECTOR value);
+        void XM_CALLCONV SetEmissiveColor(FXMVECTOR value);
+        void XM_CALLCONV SetSpecularColor(FXMVECTOR value);
         void SetSpecularPower(float value);
+        void DisableSpecular();
         void SetAlpha(float value);
         
         // Light settings.
         void SetLightingEnabled(bool value) override;
         void SetPerPixelLighting(bool value) override;
-        void SetAmbientLightColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetAmbientLightColor(FXMVECTOR value) override;
 
         void SetLightEnabled(int whichLight, bool value) override;
-        void SetLightDirection(int whichLight, FXMVECTOR value) override;
-        void SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
-        void SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
 
         void EnableDefaultLighting() override;
 
@@ -126,7 +151,7 @@ namespace DirectX
         void SetFogEnabled(bool value) override;
         void SetFogStart(float value) override;
         void SetFogEnd(float value) override;
-        void SetFogColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetFogColor(FXMVECTOR value) override;
 
         // Vertex color setting.
         void SetVertexColorEnabled(bool value);
@@ -163,19 +188,19 @@ namespace DirectX
         void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value) override;
-        void SetView(CXMMATRIX value) override;
-        void SetProjection(CXMMATRIX value) override;
+        void XM_CALLCONV SetWorld(FXMMATRIX value) override;
+        void XM_CALLCONV SetView(FXMMATRIX value) override;
+        void XM_CALLCONV SetProjection(FXMMATRIX value) override;
 
         // Material settings.
-        void SetDiffuseColor(FXMVECTOR value);
+        void XM_CALLCONV SetDiffuseColor(FXMVECTOR value);
         void SetAlpha(float value);
         
         // Fog settings.
         void SetFogEnabled(bool value) override;
         void SetFogStart(float value) override;
         void SetFogEnd(float value) override;
-        void SetFogColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetFogColor(FXMVECTOR value) override;
 
         // Vertex color setting.
         void SetVertexColorEnabled(bool value);
@@ -215,19 +240,19 @@ namespace DirectX
         void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value) override;
-        void SetView(CXMMATRIX value) override;
-        void SetProjection(CXMMATRIX value) override;
+        void XM_CALLCONV SetWorld(FXMMATRIX value) override;
+        void XM_CALLCONV SetView(FXMMATRIX value) override;
+        void XM_CALLCONV SetProjection(FXMMATRIX value) override;
 
         // Material settings.
-        void SetDiffuseColor(FXMVECTOR value);
+        void XM_CALLCONV SetDiffuseColor(FXMVECTOR value);
         void SetAlpha(float value);
         
         // Fog settings.
         void SetFogEnabled(bool value) override;
         void SetFogStart(float value) override;
         void SetFogEnd(float value) override;
-        void SetFogColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetFogColor(FXMVECTOR value) override;
 
         // Vertex color setting.
         void SetVertexColorEnabled(bool value);
@@ -264,21 +289,21 @@ namespace DirectX
         void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value) override;
-        void SetView(CXMMATRIX value) override;
-        void SetProjection(CXMMATRIX value) override;
+        void XM_CALLCONV SetWorld(FXMMATRIX value) override;
+        void XM_CALLCONV SetView(FXMMATRIX value) override;
+        void XM_CALLCONV SetProjection(FXMMATRIX value) override;
 
         // Material settings.
-        void SetDiffuseColor(FXMVECTOR value);
-        void SetEmissiveColor(FXMVECTOR value);
+        void XM_CALLCONV SetDiffuseColor(FXMVECTOR value);
+        void XM_CALLCONV SetEmissiveColor(FXMVECTOR value);
         void SetAlpha(float value);
         
         // Light settings.
-        void SetAmbientLightColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetAmbientLightColor(FXMVECTOR value) override;
 
         void SetLightEnabled(int whichLight, bool value) override;
-        void SetLightDirection(int whichLight, FXMVECTOR value) override;
-        void SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
 
         void EnableDefaultLighting() override;
 
@@ -286,7 +311,7 @@ namespace DirectX
         void SetFogEnabled(bool value) override;
         void SetFogStart(float value) override;
         void SetFogEnd(float value) override;
-        void SetFogColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetFogColor(FXMVECTOR value) override;
 
         // Texture setting.
         void SetTexture(_In_opt_ ID3D11ShaderResourceView* value);
@@ -294,7 +319,7 @@ namespace DirectX
         // Environment map settings.
         void SetEnvironmentMap(_In_opt_ ID3D11ShaderResourceView* value);
         void SetEnvironmentMapAmount(float value);
-        void SetEnvironmentMapSpecular(FXMVECTOR value);
+        void XM_CALLCONV SetEnvironmentMapSpecular(FXMVECTOR value);
         void SetFresnelFactor(float value);
         
     private:
@@ -306,7 +331,7 @@ namespace DirectX
         // Unsupported interface methods.
         void SetLightingEnabled(bool value) override;
         void SetPerPixelLighting(bool value) override;
-        void SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
 
         // Prevent copying.
         EnvironmentMapEffect(EnvironmentMapEffect const&);
@@ -316,7 +341,7 @@ namespace DirectX
 
 
     // Built-in shader supports skinned animation.
-    class SkinnedEffect : public IEffect, public IEffectMatrices, public IEffectLights, public IEffectFog
+    class SkinnedEffect : public IEffect, public IEffectMatrices, public IEffectLights, public IEffectFog, public IEffectSkinning
     {
     public:
         explicit SkinnedEffect(_In_ ID3D11Device* device);
@@ -330,25 +355,26 @@ namespace DirectX
         void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
 
         // Camera settings.
-        void SetWorld(CXMMATRIX value) override;
-        void SetView(CXMMATRIX value) override;
-        void SetProjection(CXMMATRIX value) override;
+        void XM_CALLCONV SetWorld(FXMMATRIX value) override;
+        void XM_CALLCONV SetView(FXMMATRIX value) override;
+        void XM_CALLCONV SetProjection(FXMMATRIX value) override;
 
         // Material settings.
-        void SetDiffuseColor(FXMVECTOR value);
-        void SetEmissiveColor(FXMVECTOR value);
-        void SetSpecularColor(FXMVECTOR value);
+        void XM_CALLCONV SetDiffuseColor(FXMVECTOR value);
+        void XM_CALLCONV SetEmissiveColor(FXMVECTOR value);
+        void XM_CALLCONV SetSpecularColor(FXMVECTOR value);
         void SetSpecularPower(float value);
+        void DisableSpecular();
         void SetAlpha(float value);
         
         // Light settings.
         void SetPerPixelLighting(bool value) override;
-        void SetAmbientLightColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetAmbientLightColor(FXMVECTOR value) override;
 
         void SetLightEnabled(int whichLight, bool value) override;
-        void SetLightDirection(int whichLight, FXMVECTOR value) override;
-        void SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
-        void SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
 
         void EnableDefaultLighting() override;
 
@@ -356,16 +382,15 @@ namespace DirectX
         void SetFogEnabled(bool value) override;
         void SetFogStart(float value) override;
         void SetFogEnd(float value) override;
-        void SetFogColor(FXMVECTOR value) override;
+        void XM_CALLCONV SetFogColor(FXMVECTOR value) override;
 
         // Texture setting.
         void SetTexture(_In_opt_ ID3D11ShaderResourceView* value);
         
         // Animation settings.
-        void SetWeightsPerVertex(int value);
-        void SetBoneTransforms(_In_reads_(count) XMMATRIX const* value, size_t count);
-
-        static const int MaxBones = 72;
+        void SetWeightsPerVertex(int value) override;
+        void SetBoneTransforms(_In_reads_(count) XMMATRIX const* value, size_t count) override;
+        void ResetBoneTransforms() override;
 
     private:
         // Private implementation.
@@ -381,6 +406,86 @@ namespace DirectX
         SkinnedEffect& operator= (SkinnedEffect const&);
     };
 
+    
+
+    //----------------------------------------------------------------------------------
+    // Built-in effect for Visual Studio Shader Designer (DGSL) shaders
+    class DGSLEffect : public IEffect, public IEffectMatrices, public IEffectLights, public IEffectSkinning
+    {
+    public:
+        explicit DGSLEffect( _In_ ID3D11Device* device, _In_opt_ ID3D11PixelShader* pixelShader = nullptr,
+                             _In_ bool enableSkinning = false );
+        DGSLEffect(DGSLEffect&& moveFrom);
+        DGSLEffect& operator= (DGSLEffect&& moveFrom);
+        virtual ~DGSLEffect();
+
+        // IEffect methods.
+        void Apply(_In_ ID3D11DeviceContext* deviceContext) override;
+
+        void GetVertexShaderBytecode(_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength) override;
+
+        // Camera settings.
+        void XM_CALLCONV SetWorld(FXMMATRIX value) override;
+        void XM_CALLCONV SetView(FXMMATRIX value) override;
+        void XM_CALLCONV SetProjection(FXMMATRIX value) override;
+
+        // Material settings.
+        void XM_CALLCONV SetAmbientColor(FXMVECTOR value);
+        void XM_CALLCONV SetDiffuseColor(FXMVECTOR value);
+        void XM_CALLCONV SetEmissiveColor(FXMVECTOR value);
+        void XM_CALLCONV SetSpecularColor(FXMVECTOR value);
+        void SetSpecularPower(float value);
+        void DisableSpecular();
+        void SetAlpha(float value);
+
+        // Additional settings.
+        void XM_CALLCONV SetUVTransform(FXMMATRIX value);
+        void SetViewport( float width, float height );
+        void SetTime( float time );
+        void SetAlphaDiscardEnable(bool value);
+
+        // Light settings.
+        void SetLightingEnabled(bool value) override;
+        void XM_CALLCONV SetAmbientLightColor(FXMVECTOR value) override;
+
+        void SetLightEnabled(int whichLight, bool value) override;
+        void XM_CALLCONV SetLightDirection(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightDiffuseColor(int whichLight, FXMVECTOR value) override;
+        void XM_CALLCONV SetLightSpecularColor(int whichLight, FXMVECTOR value) override;
+
+        void EnableDefaultLighting() override;
+
+        static const int MaxDirectionalLights = 4;
+
+        // Vertex color setting.
+        void SetVertexColorEnabled(bool value);
+
+        // Texture settings.
+        void SetTextureEnabled(bool value);
+        void SetTexture(_In_opt_ ID3D11ShaderResourceView* value);
+        void SetTexture(int whichTexture, _In_opt_ ID3D11ShaderResourceView* value);
+
+        static const int MaxTextures = 8;
+
+        // Animation setting.
+        void SetWeightsPerVertex(int value) override;
+        void SetBoneTransforms(_In_reads_(count) XMMATRIX const* value, size_t count) override;
+        void ResetBoneTransforms() override;
+
+    private:
+        // Private implementation.
+        class Impl;
+
+        std::unique_ptr<Impl> pImpl;
+
+        // Unsupported interface methods.
+        void SetPerPixelLighting(bool value) override;
+
+        // Prevent copying.
+        DGSLEffect(DGSLEffect const&);
+        DGSLEffect& operator= (DGSLEffect const&);
+    };
+
 
 
     //----------------------------------------------------------------------------------
@@ -394,6 +499,7 @@ namespace DirectX
         {
             const WCHAR*        name;
             bool                perVertexColor;
+            bool                enableSkinning;
             float               specularPower;
             float               alpha;
             DirectX::XMFLOAT3   ambientColor;
@@ -420,13 +526,16 @@ namespace DirectX
         EffectFactory& operator= (EffectFactory&& moveFrom);
         virtual ~EffectFactory();
 
+        // IEffectFactory methods.
         virtual std::shared_ptr<IEffect> CreateEffect( _In_ const EffectInfo& info, _In_opt_ ID3D11DeviceContext* deviceContext ) override;
-
         virtual void CreateTexture( _In_z_ const WCHAR* name, _In_opt_ ID3D11DeviceContext* deviceContext, _Outptr_ ID3D11ShaderResourceView** textureView ) override;
 
+        // Settings.
         void ReleaseCache();
 
         void SetSharing( bool enabled );
+
+        void SetDirectory( _In_opt_z_ const WCHAR* path );
 
     private:
         // Private implementation.
@@ -438,6 +547,52 @@ namespace DirectX
         EffectFactory(EffectFactory const&);
         EffectFactory& operator= (EffectFactory const&);
     };
+
+
+    // Factory for sharing Visual Studio Shader Designer (DGSL) shaders and texture resources
+    class DGSLEffectFactory : public IEffectFactory
+    {
+    public:
+        explicit DGSLEffectFactory(_In_ ID3D11Device* device);
+        DGSLEffectFactory(DGSLEffectFactory&& moveFrom);
+        DGSLEffectFactory& operator= (DGSLEffectFactory&& moveFrom);
+        virtual ~DGSLEffectFactory();
+
+        // IEffectFactory methods.
+        virtual std::shared_ptr<IEffect> CreateEffect( _In_ const EffectInfo& info, _In_opt_ ID3D11DeviceContext* deviceContext ) override;
+        virtual void CreateTexture( _In_z_ const WCHAR* name, _In_opt_ ID3D11DeviceContext* deviceContext, _Outptr_ ID3D11ShaderResourceView** textureView ) override;
+
+        // DGSL methods.
+        struct DGSLEffectInfo : public EffectInfo
+        {
+            const WCHAR*        textures[7];
+            const WCHAR*        pixelShader;
+
+            DGSLEffectInfo() { memset( this, 0, sizeof(DGSLEffectInfo) ); };
+        };
+
+        virtual std::shared_ptr<IEffect> CreateDGSLEffect( _In_ const DGSLEffectInfo& info, _In_opt_ ID3D11DeviceContext* deviceContext );
+
+        virtual void CreatePixelShader( _In_z_ const WCHAR* shader, _Outptr_ ID3D11PixelShader** pixelShader );
+
+        // Settings.
+        void ReleaseCache();
+
+        void SetSharing( bool enabled );
+
+        void SetDirectory( _In_opt_z_ const WCHAR* path );
+
+    private:
+        // Private implementation.
+        class Impl;
+
+        std::shared_ptr<Impl> pImpl;
+
+        // Prevent copying.
+        DGSLEffectFactory(DGSLEffectFactory const&);
+        DGSLEffectFactory& operator= (DGSLEffectFactory const&);
+    };
+
 }
 
 #pragma warning(pop)

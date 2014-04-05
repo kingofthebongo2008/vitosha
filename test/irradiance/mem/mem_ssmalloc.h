@@ -296,7 +296,7 @@ namespace mem
 
 
         //---------------------------------------------------------------------------------------
-        //page_block are the basic elements for allocations 
+        //memory_chunk are the basic elements for allocations 
         class ALIGNAS(128) memory_chunk : public list_element<memory_chunk>
         {
 

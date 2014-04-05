@@ -29,6 +29,11 @@ namespace gx
 
 		 reprojection_params m_reprojection_params;
 	 };
+
+	inline reprojection_params create_reprojection_params ( float zn, float zf )
+	{
+		return  { 0.0f, 1.0f, 1.0f / zn - 1.0f / zf , 1.0f / zn };
+	}
 }
 
 #endif
