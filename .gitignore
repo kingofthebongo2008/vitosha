@@ -1,0 +1,15 @@
+*.ipch
+*.idb
+*.tlog
+*.opensdf
+*.sdf
+*.pdf
+*.chm
+*.ppt
+*.compressed
+*.deps
+*.exp
+*.xml
+*.lastbuildstate
+*.lastcodeanalysissucceeded
+*.pchast

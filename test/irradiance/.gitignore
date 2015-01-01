@@ -23,6 +23,17 @@ build/
 [Tt]est[Rr]esult
 [Bb]uild[Ll]og.*
 
+*.ipch
+*.idb
+*.tlog
+*.opensdf
+*.sdf
+*.pdf
+*.chm
+*.ppt
+*.compressed
+*.deps
+*.exp
 *_i.c
 *_p.c
 *.ilk

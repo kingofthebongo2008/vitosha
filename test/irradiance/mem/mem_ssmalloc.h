@@ -40,7 +40,6 @@ namespace mem
             {
                 unsigned long result;
                 _BitScanReverse(&result, x);
-                return static_cast<uint32_t>(result);
             }
 
             template<uint32_t x> struct log2_c

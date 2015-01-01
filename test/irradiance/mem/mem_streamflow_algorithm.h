@@ -46,7 +46,7 @@ namespace mem
         {
             inline uint32_t log2(uint32_t x) throw()
             {
-                unsigned long result;
+                unsigned long result = 0;
                 _BitScanReverse(&result, x);
                 return static_cast<uint32_t>(result);
             }
